@@ -1,0 +1,4 @@
+@import "@altr/ui-kit/globals.css";
+
+/* Scan this app for Tailwind classes */
+@source "../";

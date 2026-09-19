@@ -1,0 +1,10 @@
+{
+  "name": "@altr/pocketbase",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Optional PocketBase service placeholder for altr.lab",
+  "scripts": {
+    "dev": "echo \"PocketBase not configured yet — see README.md\"",
+    "typecheck": "echo \"No TypeScript sources in @altr/pocketbase\""
+  }
+}
