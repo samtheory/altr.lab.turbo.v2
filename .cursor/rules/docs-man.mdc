@@ -1,0 +1,18 @@
+---
+description: Route update_docs / document it to docs_man vault workflow
+alwaysApply: true
+---
+
+# docs_man routing
+
+When the user says **`update_docs`**, **`document it`**, **`docs_man`**, or clearly asks to document / refresh Docs after a change:
+
+1. Load and follow `.cursor/skills/docs-man/SKILL.md` and `Docs/agents/docs_man/instructions/00-workflow.md`
+2. Open `Docs/brain/00-Docs-Brain.md` first
+3. Place notes in the correct folder (`idea` → `feature_list` → `plan` → `tech_space` → `report` → refresh `brain`)
+4. Use YAML frontmatter (`title`, `description`, `created`, `updated`, `tags`) per `Docs/agents/templates/structured-note.md`
+5. Prefer code truth over stale report/plan text
+6. For PDFs, use `.agents/skills/pdf/`; for large new specs, use `.agents/skills/doc-coauthoring/`
+7. Summarize which Docs files changed
+
+Do not invent parallel doc trees. Prefer updating indexes over new top-level folders.

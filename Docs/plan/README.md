@@ -1,5 +1,17 @@
+---
+title: "plan — next steps"
+description: "Plans derived from feature_list and tech_space"
+created: 2026-09-19
+updated: 2026-09-19
+tags:
+  - plan
+  - readme
+---
+
 # plan
 
-Implementation plans derived from **feature_list** + **tech_space**.
+Checkbox / next-step plans built from `feature_list/` + existing `tech_space/`.
 
-Each plan should list scope, packages touched, risks, and a short checklist. After shipping, move status into `Docs/report/` and keep the plan as historical context or archive it.
+Map: [[../brain/00-Docs-Brain]] · Status overlay: [[../report/STATUS]]
+
+After shipping, move narrative to `tech_space/` and refresh `report/` — do not leave permanent sprint folders outside `plan/`.

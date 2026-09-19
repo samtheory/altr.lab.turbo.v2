@@ -1,3 +1,13 @@
+---
+title: "Monorepo structure"
+description: "altr.lab apps / cloud / elements layout and package scope"
+created: 2026-09-19
+updated: 2026-09-19
+tags:
+  - altr-lab
+  - structure
+---
+
 # Monorepo structure
 
 ```
@@ -13,7 +23,7 @@ altr.lab.turbo.v2/
 ├── elements/
 │   ├── ui-kit/           # @altr/ui-kit — Tailwind v4 + shadcn + theme
 │   └── base/             # @altr/base — db, env, errors, auth, query, ai stubs
-├── Docs/                 # Obsidian second brain (this tree)
+├── Docs/                 # Obsidian second brain
 ├── package.json          # pnpm workspaces root
 ├── pnpm-workspace.yaml
 ├── turbo.json
@@ -22,8 +32,6 @@ altr.lab.turbo.v2/
 
 ## Workspaces
 
-Root `package.json` / `pnpm-workspace.yaml`:
-
 ```yaml
 packages:
   - "apps/*"
@@ -31,14 +39,4 @@ packages:
   - "elements/*"
 ```
 
-## Package scope
-
-All packages use the `@altr/*` scope (e.g. `@altr/web`, `@altr/ui-kit`, `@altr/base`).
-
-## Shared TypeScript
-
-`tsconfig.base.json` at the repo root. Packages extend it via `"extends": "../../tsconfig.base.json"`.
-
-## UI sharing
-
-Apps depend on `@altr/ui-kit`, import `@altr/ui-kit/globals.css`, wrap with `ThemeProvider`, and set `transpilePackages: ["@altr/ui-kit"]` in Next config.
+All packages use `@altr/*`. Apps depend on `@altr/ui-kit` (globals.css + ThemeProvider).

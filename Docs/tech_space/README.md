@@ -1,11 +1,15 @@
+---
+title: "tech_space — as-built docs"
+description: "Technical implementation notes that grow with the codebase"
+created: 2026-09-19
+updated: 2026-09-19
+tags:
+  - tech-space
+  - readme
+---
+
 # tech_space
 
-Technical implementation documentation — architecture notes, ADRs, module how-tos, API contracts.
+As-built technical docs. Edit when behaviour or schema ships.
 
-## How to add docs
-
-1. Create a markdown file named after the area (`auth.md`, `turso-schema.md`, `hono-routes.md`, …).
-2. Link related packages (`@altr/...`) and source paths.
-3. After implementation, update `Docs/report/STATUS.md`.
-
-Grows with the project; keep docs close to reality (prefer updating over leaving stale guides).
+Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they disagree; then update this folder.

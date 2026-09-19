@@ -1,5 +1,17 @@
+---
+title: "feature_list — product intent"
+description: "Raw feature instructions awaiting implementation"
+created: 2026-09-19
+updated: 2026-09-19
+tags:
+  - feature
+  - readme
+---
+
 # feature_list
 
-Raw feature instructions awaiting implementation.
+Raw feature briefs for altr.lab. Intent lives here; as-built lives in `tech_space/`.
 
-Drop short, imperative feature briefs here (what / why / acceptance). Planning happens in `Docs/plan/` using these briefs plus `Docs/tech_space/`.
+Map: [[../brain/00-Docs-Brain]] · Template: [[../agents/templates/structured-note]]
+
+Promote from `idea/` → write a dated note here → plan in `plan/` → implement → `tech_space`.

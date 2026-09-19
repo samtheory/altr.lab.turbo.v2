@@ -1,38 +1,30 @@
-# Stack decisions
+---
+title: "Stack decisions"
+description: "Turso/libSQL primary DB; when to use PocketBase, Postgres, Mongo"
+created: 2026-09-19
+updated: 2026-09-19
+tags:
+  - altr-lab
+  - stack
+---
 
-## Defaults
+# Stack
 
 | Layer | Choice |
 |-------|--------|
-| Monorepo | Turborepo + **pnpm** workspaces |
-| Language | TypeScript everywhere |
-| Frontend | React / Next.js (App Router) |
-| UI | Tailwind **v4** + shadcn-style components in `@altr/ui-kit` |
-| Theme | CSS variables + `next-themes` (`ThemeProvider` / `ThemeToggle`) |
+| Frontends | React / Next.js (`apps/*`) + Tailwind + shadcn via `@altr/ui-kit` |
 | API | Hono + Bun (`cloud/hono-server`) |
-| Primary DB | **Turso (libSQL)** — stub in `@altr/base/db` |
+| Primary DB | **Turso (libSQL)** — SQLite-compatible, local file for zero-infra dev |
+| Optional | PocketBase for quick admin UI + auth (e.g. Stashly-style apps) |
+| Later | Postgres only if FTS at scale, JSONB, or pgvector SLAs; Mongo only if needed |
 
-## Databases
+## Why Turso / libSQL
 
-### Turso (primary)
+- Local file for side-project speed
+- One Turso dashboard across projects
+- Same driver on VPS via libsql-server
+- Relational fit for trading bots (positions, orders, signals)
+- Vector via sqlite-vec / sqlite-vss when needed
+- AI tooling (LangChain, LlamaIndex, Vercel AI SDK) has SQLite adapters
 
-Use Turso / libSQL for app persistence. Env placeholders:
-
-- `TURSO_DATABASE_URL`
-- `TURSO_AUTH_TOKEN`
-
-See `elements/base/src/db/`.
-
-### PocketBase (optional)
-
-Optional service under `cloud/pocketbase`. Good for quick admin UI, files, or experiments — **not** the default production store.
-
-### Postgres / MongoDB (layer later)
-
-Documented as future layers only. Do not make them the default in new features unless a plan in `Docs/plan/` explicitly adopts them. Prefer Turso first; add Postgres/Mongo when you need relational reporting, existing vendor lock-in, or document workloads that Turso does not fit.
-
-## AI
-
-- Shared stubs: `@altr/base/ai`
-- Service placeholder: `cloud/ai-bot-agent`
-- Agent definitions: `Docs/agents/`
+Shared stubs: `elements/base` (`db`, `env`, `errors`, `auth`, `query`, `ai`).

@@ -1,24 +1,38 @@
-# Prompts & alternate workflows
+---
+title: "Prompts — run modes and AI workflows"
+description: "Copy-paste prompts for altr.lab repo and Docs agents"
+created: 2026-09-19
+updated: 2026-09-19
+tags:
+  - altr-lab
+  - prompts
+---
 
-Reusable prompts / commands for running altr.lab differently or with AI help.
+# Prompts
 
-## Local product surfaces
+## Docs (docs_man)
 
-- Marketing only: `pnpm dev:web`
-- Admin only: `pnpm dev:dashboard`
-- Trading only: `pnpm dev:trading-ui`
-- API only: `pnpm dev:api` (Bun required)
+```
+update_docs
+```
 
-## UI kit work
+```
+document it
+```
 
-When adding shadcn components, target **elements/ui-kit** (`components.json` lives there). Apps should import from `@altr/ui-kit`, not copy components.
+Full handoff: [[../agents/docs_man/prompts/00-update-docs]]
 
-## AI agent prompts (starter)
+## Repo orientation
 
-Paste into Cursor / agents when scaffolding features:
+```
+Read Docs/brain/00-Docs-Brain.md and Docs/Altr.lab/structure.md.
+Follow stack in Docs/Altr.lab/stack.md (Turso primary).
+Prefer @altr/ui-kit for UI; do not invent a second design system.
+```
 
-1. **Feature from idea** — “Read `Docs/idea/` and `Docs/feature_list/`, draft a plan under `Docs/plan/`, then implement only what the plan lists. Update `Docs/tech_space/` and `Docs/report/STATUS.md`.”
-2. **UI consistency** — “Use `@altr/ui-kit` tokens and components; do not add a second theme system in the app.”
-3. **Data access** — “Prefer `@altr/base/db` (Turso). Do not introduce Postgres/Mongo unless the plan says so. PocketBase only if the task is explicitly optional-PB.”
+## Implement a feature
 
-Add more prompt files under `Docs/agents/prompts/` as patterns stabilize.
+```
+Promote from Docs/feature_list → Docs/plan, implement in apps/cloud/elements,
+then document in Docs/tech_space and refresh Docs/report/STATUS.md via docs_man.
+```
