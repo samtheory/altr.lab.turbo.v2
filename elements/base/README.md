@@ -1,20 +1,28 @@
 # @altr/base
 
-Shared foundation modules for altr.lab: database, env, errors, auth, query, and AI stubs.
+Shared framework utilities for all altr.lab apps and cloud services.
 
 ## Modules
 
-| Export | Path | Status |
-|--------|------|--------|
-| `@altr/base/db` | `src/db` | Stub — Turso / libSQL client placeholder |
-| `@altr/base/env` | `src/env` | Stub — typed env helpers |
-| `@altr/base/errors` | `src/errors` | Minimal shared error types |
-| `@altr/base/auth` | `src/auth` | Stub |
-| `@altr/base/query` | `src/query` | Stub |
-| `@altr/base/ai` | `src/ai` | Stub |
+| Export | Path | Role |
+|--------|------|------|
+| `@altr/base` | `src/index.ts` | Barrel |
+| `@altr/base/utils` | `src/utils` | `sleep`, `assert`, `slugify`, `Result` |
+| `@altr/base/content` | `src/content` | Markdown-as-data (gray-matter) |
+| `@altr/base/env` | `src/env` | Env helpers (Turso keys) |
+| `@altr/base/errors` | `src/errors` | `AltrError`, `NotFoundError`, … |
+| `@altr/base/db` | `src/db` | Turso/libSQL client stub |
+| `@altr/base/auth` | `src/auth` | Auth stub |
+| `@altr/base/query` | `src/query` | Query stub |
+| `@altr/base/ai` | `src/ai` | AI stub |
 
-## Primary database
+## Markdown content
 
-**Turso (libSQL)** is the primary database for this monorepo. Wire `@libsql/client` when ready; see `src/db/index.ts` and `Docs/Altr.lab/stack.md`.
+```ts
+import { listMarkdownDocuments, getMarkdownBySlug } from "@altr/base/content";
 
-PocketBase remains an optional service under `cloud/pocketbase`. Postgres / MongoDB are documented as later layers only — not defaults.
+const pages = await listMarkdownDocuments({ dir: "./content" });
+const home = await getMarkdownBySlug("./content", "home");
+```
+
+Frontmatter + body become the content DB for apps like `@altr/hub`.

@@ -2,7 +2,7 @@
 title: "Commands — install run build"
 description: "How to install, develop, and build altr.lab with pnpm and turbo"
 created: 2026-09-19
-updated: 2026-09-19
+updated: 2026-09-20
 tags:
   - altr-lab
   - commands
@@ -19,9 +19,10 @@ pnpm build
 pnpm typecheck
 pnpm lint
 
-pnpm dev:web             # @altr/web :3000
+pnpm dev:hub             # @altr/hub :3000  (landing + markdown content)
 pnpm dev:dashboard       # @altr/dashboard :3001
 pnpm dev:trading-ui      # @altr/trading-ui :3002
+pnpm dev:web             # @altr/web :3003
 pnpm dev:api             # @altr/hono-server :8787 (needs Bun)
 ```
 

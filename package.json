@@ -8,6 +8,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "dev:hub": "turbo run dev --filter=@altr/hub",
     "dev:web": "turbo run dev --filter=@altr/web",
     "dev:dashboard": "turbo run dev --filter=@altr/dashboard",
     "dev:trading-ui": "turbo run dev --filter=@altr/trading-ui",

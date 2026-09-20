@@ -189,6 +189,8 @@
   },
   "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
+    "tech_space/01-hub-ui-kit-base.md",
+    "feature_list/01-hub-ui-kit-base.md",
     "report/STATUS.md",
     "feature_list/README.md",
     "Altr.lab/prompts.md",
@@ -223,8 +225,6 @@
     "brain/00-Docs-Hub.md",
     "brain/00-Docs-Brain.md",
     "Altr.lab/stack.md",
-    "Altr.lab/structure.md",
-    "Altr.lab/README.md",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }

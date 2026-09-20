@@ -1,8 +1,8 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot of altr.lab scaffold: implemented, remaining, planned"
+description: "Audited snapshot of altr.lab: hub, ui-kit, base, docs scaffold"
 created: 2026-09-19
-updated: 2026-09-19
+updated: 2026-09-20
 tags:
   - report
   - status
@@ -10,24 +10,26 @@ tags:
 
 # Status
 
-Last updated: 2026-09-19 · Living map: [[../brain/00-Docs-Brain]]
+Last updated: 2026-09-20 · Living map: [[../brain/00-Docs-Brain]]
 
-## Implemented (scaffold)
+## Implemented
 
-- Turborepo + pnpm workspaces
-- Apps: `@altr/web`, `@altr/dashboard`, `@altr/trading-ui`
+- Turborepo + pnpm workspaces (`apps/*`, `cloud/*`, `elements/*`)
+- **`@altr/hub`** — landing Next.js (:3000), markdown content DB (`content/*.md`)
+- `@altr/web` (:3003), `@altr/dashboard` (:3001), `@altr/trading-ui` (:3002) scaffolds
 - Cloud: `@altr/hono-server` (health), PocketBase + AI agent placeholders
-- Elements: `@altr/ui-kit` (Button, Card, ThemeProvider, ThemeToggle), `@altr/base` stubs
-- Docs second-brain folders + `brain/` living map
-- **docs_man** agent (instructions, prompts, Cursor skill/rule, pdf + doc-coauthoring skills)
+- **`@altr/ui-kit`** — Tailwind v4, shadcn-style Button/Card/Badge, ThemeProvider/Toggle, Motion `FadeIn`
+- **`@altr/base`** — utils, content (gray-matter), env, errors, db/auth/query/ai stubs
+- Docs vault + `brain/` + **docs_man**
+
+As-built: [[../tech_space/01-hub-ui-kit-base]] · Intent: [[../feature_list/01-hub-ui-kit-base]]
 
 ## Remaining
 
-- Real Turso / `@libsql/client` wiring
+- Wire Turso / `@libsql/client` in `@altr/base/db`
 - Auth implementation
-- Expand shadcn component set
+- Expand shadcn set; optional MDX / `[slug]` routes for hub content
 - CI pipeline
-- Optional global `npx skills add` when network allows (vendored under `.agents/skills/`)
 
 ## Planned
 

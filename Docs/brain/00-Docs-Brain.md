@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-09-19
+updated: 2026-09-20
 tags:
   - brain
   - index
@@ -99,14 +99,15 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 
 | Surface | Path | Docs |
 |---------|------|------|
-| Marketing / public site | `apps/web` | Altr.lab + future tech_space |
+| Landing hub | `apps/hub` | [[../tech_space/01-hub-ui-kit-base]] · [[../feature_list/01-hub-ui-kit-base]] |
+| Extra Next scaffold | `apps/web` | Altr.lab/structure |
 | Admin dashboard | `apps/dashboard` | Altr.lab + future tech_space |
 | Trading UI | `apps/trading-ui` | Altr.lab + future tech_space |
 | Hono API | `cloud/hono-server` | Altr.lab/stack · tech_space |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | AI bot agent | `cloud/ai-bot-agent` | Altr.lab · agents |
-| Design system | `elements/ui-kit` | Altr.lab/structure · ui-kit README |
-| Shared libs (db/env/…) | `elements/base` | Altr.lab/stack · base README |
+| Design system | `elements/ui-kit` | [[../tech_space/01-hub-ui-kit-base]] · ui-kit README |
+| Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
 Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
 
@@ -119,8 +120,8 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 | `idea/` | Raw R&D before promotion | Edit when exploring |
 | `feature_list/` | Intent / what to build | Edit when product intent changes |
 | `plan/` | Checkbox overlay + next steps | Edit when planning a sprint |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-09-19) |
-| `tech_space/` | Implementation narrative | Edit when behaviour/schema ships |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-09-20) |
+| `tech_space/` | Implementation narrative | Latest: [[../tech_space/01-hub-ui-kit-base]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |
