@@ -1,6 +1,6 @@
 # @altr/ui-kit
 
-Shared design system for altr.lab apps: **Tailwind v4**, **shadcn-style** components, **light/dark** tokens, **Motion**.
+Shared design system for altr.lab apps: **Tailwind v4**, **shadcn-style** components, **light/dark** tokens, **Motion**, **Storybook**.
 
 ## Use in a Next.js app
 
@@ -18,6 +18,29 @@ transpilePackages: ["@altr/ui-kit"]
 @import "@altr/ui-kit/globals.css";
 @source "../";
 ```
+
+## Storybook
+
+From the repo root:
+
+```bash
+pnpm storybook:ui-kit
+```
+
+Opens **http://localhost:6006** — stories for Button, Card, Badge, ThemeToggle, FadeIn. Use the toolbar theme switch (light/dark).
+
+```bash
+pnpm build:storybook:ui-kit   # static build → elements/ui-kit/storybook-static
+```
+
+Or from this package:
+
+```bash
+pnpm --filter @altr/ui-kit storybook
+pnpm --filter @altr/ui-kit build-storybook
+```
+
+Add new stories next to components: `src/**/*.stories.tsx`.
 
 ## Exports
 

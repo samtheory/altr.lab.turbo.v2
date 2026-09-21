@@ -28,7 +28,7 @@ Docs/          # Obsidian second brain
 
 - **Landing:** `@altr/hub` — content from `apps/hub/content/*.md`
 - **DB:** Turso (libSQL) primary — stub in `@altr/base/db`
-- **UI:** Tailwind v4 + shadcn + Motion in `@altr/ui-kit`
+- **UI:** Tailwind v4 + shadcn + Motion in `@altr/ui-kit` — Storybook: `pnpm storybook:ui-kit` (:6006)
 - **API:** Hono + Bun (`@altr/hono-server`) — requires Bun
 - **Optional:** PocketBase under `cloud/pocketbase`
 

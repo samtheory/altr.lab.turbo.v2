@@ -13,6 +13,8 @@
     "dev:dashboard": "turbo run dev --filter=@altr/dashboard",
     "dev:trading-ui": "turbo run dev --filter=@altr/trading-ui",
     "dev:api": "turbo run dev --filter=@altr/hono-server",
+    "storybook:ui-kit": "pnpm --filter @altr/ui-kit storybook",
+    "build:storybook:ui-kit": "pnpm --filter @altr/ui-kit build-storybook",
     "clean": "turbo run clean"
   },
   "devDependencies": {

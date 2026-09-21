@@ -38,3 +38,5 @@ coverage
 *.local
 .vercel
 .cache
+storybook-static
+*storybook.log

@@ -2,7 +2,7 @@
 title: "feature_list — product intent"
 description: "Raw feature instructions awaiting implementation"
 created: 2026-09-19
-updated: 2026-09-20
+updated: 2026-09-21
 tags:
   - feature
   - readme
@@ -19,3 +19,4 @@ Promote from `idea/` → write a dated note here → plan in `plan/` → impleme
 ## Features
 
 - [[01-hub-ui-kit-base]] — hub landing + ui-kit + base (shipped)
+- [[02-ui-kit-storybook]] — Storybook for ui-kit (shipped)

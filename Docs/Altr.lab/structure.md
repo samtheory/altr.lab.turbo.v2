@@ -2,7 +2,7 @@
 title: "Monorepo structure"
 description: "altr.lab apps / cloud / elements layout and package scope"
 created: 2026-09-19
-updated: 2026-09-20
+updated: 2026-09-21
 tags:
   - altr-lab
   - structure
@@ -22,7 +22,7 @@ altr.lab.turbo.v2/
 │   ├── pocketbase/       # @altr/pocketbase — optional PB placeholder
 │   └── ai-bot-agent/     # @altr/ai-bot-agent — AI agent placeholder
 ├── elements/
-│   ├── ui-kit/           # @altr/ui-kit — Tailwind v4 + shadcn + Motion + theme
+│   ├── ui-kit/           # @altr/ui-kit — Tailwind + shadcn + Motion + Storybook (:6006)
 │   └── base/             # @altr/base — utils, content, db, env, errors, …
 ├── Docs/                 # Obsidian second brain
 ├── package.json
@@ -42,4 +42,6 @@ packages:
 
 All packages use `@altr/*`. Apps depend on `@altr/ui-kit` (globals.css + ThemeProvider). Hub also uses `@altr/base/content` for markdown.
 
-As-built detail: [[../tech_space/01-hub-ui-kit-base]]
+As-built detail: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]]
+
+Storybook: `pnpm storybook:ui-kit` — see [[commands]].

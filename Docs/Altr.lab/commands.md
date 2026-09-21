@@ -2,7 +2,7 @@
 title: "Commands — install run build"
 description: "How to install, develop, and build altr.lab with pnpm and turbo"
 created: 2026-09-19
-updated: 2026-09-20
+updated: 2026-09-21
 tags:
   - altr-lab
   - commands
@@ -26,4 +26,24 @@ pnpm dev:web             # @altr/web :3003
 pnpm dev:api             # @altr/hono-server :8787 (needs Bun)
 ```
 
-Turbo pipelines: `dev`, `build`, `lint`, `typecheck`, `clean` — see root `turbo.json`.
+## Storybook (`@altr/ui-kit`)
+
+Component workshop for the shared design system (Storybook 9 + Vite + Tailwind v4).
+
+```bash
+pnpm storybook:ui-kit          # http://localhost:6006
+pnpm build:storybook:ui-kit    # static → elements/ui-kit/storybook-static
+```
+
+Equivalent package filters:
+
+```bash
+pnpm --filter @altr/ui-kit storybook
+pnpm --filter @altr/ui-kit build-storybook
+```
+
+Toolbar includes **light / dark** theme toggle (`@storybook/addon-themes`). Stories live under `elements/ui-kit/src/**/*.stories.tsx`.
+
+See [[structure]] and [[../tech_space/02-ui-kit-storybook]].
+
+Turbo pipelines: `dev`, `build`, `lint`, `typecheck`, `storybook`, `build-storybook`, `clean` — see root `turbo.json`.
