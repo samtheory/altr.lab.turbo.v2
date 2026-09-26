@@ -28,7 +28,16 @@
   },
   "appIcons": {},
   "tabIcons": {},
-  "fileIcons": {},
+  "fileIcons": {
+    "Altr.lab": {
+      "icon": "lucide-test-tube-diagonal",
+      "color": "purple"
+    },
+    "agents": {
+      "icon": "lucide-bot",
+      "color": "red"
+    }
+  },
   "bookmarkIcons": {},
   "tagIcons": {},
   "propertyIcons": {},

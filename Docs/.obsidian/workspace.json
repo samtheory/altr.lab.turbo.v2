@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "agents/instructions/README.md",
                 "mode": "source",
                 "source": false
               },
@@ -187,8 +187,10 @@
       "webpage-html-export:Export as HTML": false
     }
   },
-  "active": "0d0147ae7713d13c",
+  "active": "a5d76a024d2c65c1",
   "lastOpenFiles": [
+    "Altr.lab/structure.md",
+    "README.md",
     "feature_list/02-ui-kit-storybook.md",
     "tech_space/02-ui-kit-storybook.md",
     "tech_space/01-hub-ui-kit-base.md",
@@ -200,7 +202,6 @@
     "agents/templates/structured-note.md",
     "agents/README.md",
     "agents/instructions/README.md",
-    "README.md",
     "agents/skills/docs-man-SKILL.md",
     "agents/prompts/README.md",
     "agents/prompts",
@@ -224,7 +225,6 @@
     "agents/docs_man/instructions/00-workflow.md",
     "agents/docs_man/00-index.md",
     "brain/README.md",
-    "brain/00-Docs-Hub.md",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }
