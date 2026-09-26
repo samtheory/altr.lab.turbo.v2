@@ -2,7 +2,7 @@
 title: "Docs — altr.lab second brain"
 description: "Vault index; open brain first for the living map"
 created: 2026-09-19
-updated: 2026-09-19
+updated: 2026-09-26
 tags:
   - index
   - altr-lab
@@ -45,4 +45,4 @@ idea (R&D)
 - **clickup/** — track tasks while work moves through the pipeline
 - **agents/docs_man** — documents in the correct order with frontmatter + tags
 
-Repo how-tos: [Altr.lab/README.md](Altr.lab/README.md)
+Repo how-tos: [Altr.lab/README.md](Altr.lab/README.md) · Skills: [Altr.lab/agent-skills.md](Altr.lab/agent-skills.md) · Graft: [Altr.lab/graft.md](Altr.lab/graft.md)

@@ -12,3 +12,10 @@ For Docs vault work (`update_docs`, `document it`, brain/report/tech_space updat
 Pipeline: `idea` → `feature_list` → `plan` → code → `tech_space` → `report` → refresh `brain`.
 
 Truth order: **code** > **tech_space** > **report/plan** > **feature_list**.
+
+## Agent skills + Graft
+
+- How to use project skills: `Docs/Altr.lab/agent-skills.md`
+- Graft (codebase graph): `Docs/Altr.lab/graft.md` · skill `.agents/skills/graft/` · rule `.cursor/rules/graft.mdc`
+- Installed skills live under `.agents/skills/` (lockfile: `skills-lock.json`)
+- MCP (Context7 + Graft): `.cursor/mcp.json`

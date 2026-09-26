@@ -1,0 +1,16 @@
+---
+description: Prefer Graft for codebase orientation before blind grep/read when graft CLI works
+alwaysApply: true
+---
+
+# Graft routing
+
+This repo is set up for **Graft** (codebase knowledge graph). Skill: `.agents/skills/graft/SKILL.md`. How-to: `Docs/Altr.lab/graft.md`.
+
+When Graft CLI is available (`npx @nanonets/graft` or `graft` on PATH) and `graft/` exists or can be built:
+
+1. Prefer `graft ask`, `graft map`, `graft grep`, `graft skeleton`, `graft callers` over blind repo greps for orientation
+2. Follow the scenarios table in the graft skill
+3. If MCP `graft` is connected, use `graft_find_code` / `graft_repo_map` / etc. equivalently
+
+If Graft is not installed or native modules failed (common on Windows without VS C++ Build Tools), fall back to normal search and point the user at `Docs/Altr.lab/graft.md`.

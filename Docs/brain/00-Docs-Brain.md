@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-09-21
+updated: 2026-09-26
 tags:
   - brain
   - index
@@ -26,6 +26,7 @@ tags:
 |----------|---------|
 | Every docs folder explained | [[00-Docs-Hub]] |
 | Monorepo structure / commands / stack | [[../Altr.lab/README]] · [[../Altr.lab/structure]] · [[../Altr.lab/commands]] · [[../Altr.lab/stack]] |
+| Agent skills / Graft | [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
 | Raw R&D ideas | [[../idea/README]] |
 | Product intent (what to build) | [[../feature_list/README]] |
 | Build plans (next steps) | [[../plan/README]] |
@@ -133,22 +134,26 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 
 ## Companion skills
 
+How-to: [[../Altr.lab/agent-skills]] · Graft: [[../Altr.lab/graft]] · MCP: `.cursor/mcp.json`
+
 | Skill | Location | Use |
 |-------|----------|-----|
 | `docs-man` | `.agents/skills/docs-man/` · `.cursor/skills/docs-man/` | Vault update order, frontmatter, wikilinks |
 | `docs-brain` | `.cursor/skills/docs-brain/` | Keep this living map honest |
 | `pdf` | `.agents/skills/pdf/` | Read/create/merge PDFs |
 | `doc-coauthoring` | `.agents/skills/doc-coauthoring/` | Large new specs with guided loop |
+| `graft` | `.agents/skills/graft/` | Codebase graph before blind grep |
+| `design-taste-frontend` | `.agents/skills/design-taste-frontend/` | Anti-slop frontend taste |
+| `impeccable` | `.agents/skills/impeccable/` | Critique / polish / design commands |
+| `playwright-cli` | `.agents/skills/playwright-cli/` | Browser automation via Playwright CLI |
+| `context7-*` / `find-docs` | `.agents/skills/` | Up-to-date library docs |
+| `ui-skills-*` / `baseline-ui` | `.agents/skills/` | UI routing + polish / a11y |
+| `img2threejs` | `.agents/skills/img2threejs/` | Image → procedural Three.js |
+| Strix pack | `.agents/skills/*strix*` / security skills | Authorized AppSec only |
+| awesome-design aesthetics | `.agents/skills/<aesthetic>/` | One named visual language |
 | `find-skills` | user skills | Find and install more from skills.sh |
 
-Install (when network works):
-
-```bash
-npx skills add anthropics/skills@pdf -g -y
-npx skills add anthropics/skills@doc-coauthoring -g -y
-npx skills add mattpocock/skills@writing-for-agents -g -y
-npx skills add mattpocock/skills@obsidian-vault -g -y
-```
+Project installs: `npx skills list` · lockfile: `skills-lock.json`.
 
 Vendored copies live under `.agents/skills/` so the repo stays portable without a global install.
 

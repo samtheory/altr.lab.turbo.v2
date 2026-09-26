@@ -2,7 +2,7 @@
 title: "Docs Hub — folder index"
 description: "Canonical index of every Docs/ folder in the altr.lab vault"
 created: 2026-09-19
-updated: 2026-09-20
+updated: 2026-09-26
 tags:
   - brain
   - hub
@@ -16,7 +16,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 | Folder | Purpose | Entry |
 |--------|---------|-------|
 | `brain/` | Living map + hub (open first) | [[00-Docs-Brain]] · this file |
-| `Altr.lab/` | Root turbo project docs (structure, commands, stack, prompts) | [[../Altr.lab/README]] |
+| `Altr.lab/` | Root turbo project docs (structure, commands, stack, prompts, agent skills, Graft) | [[../Altr.lab/README]] · [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
 | `idea/` | Raw R&D ideas before promotion | [[../idea/README]] |
 | `feature_list/` | Raw feature instructions to implement | [[../feature_list/README]] |
 | `plan/` | Next-step plans from feature_list + tech_space | [[../plan/README]] |
