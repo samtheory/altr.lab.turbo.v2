@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Altr.lab/agent-skills.md",
+                "file": "agents/skills/docs-man-SKILL.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "agent-skills"
+              "title": "docs-man-SKILL"
             }
           }
         ]
@@ -189,14 +189,17 @@
   },
   "active": "a5d76a024d2c65c1",
   "lastOpenFiles": [
-    "Altr.lab/commands.md",
+    "agents/instructions/README.md",
+    "agents/skills/docs-man-SKILL.md",
+    "plan/README.md",
+    "idea/README.md",
     "Altr.lab/agent-skills.md",
+    "Altr.lab/commands.md",
     "Altr.lab/graft.md",
     "Altr.lab/prompts.md",
     "Altr.lab/README.md",
     "Altr.lab/stack.md",
     "Altr.lab/structure.md",
-    "agents/instructions/README.md",
     "README.md",
     "feature_list/02-ui-kit-storybook.md",
     "tech_space/02-ui-kit-storybook.md",
@@ -206,7 +209,6 @@
     "feature_list/README.md",
     "agents/templates/structured-note.md",
     "agents/README.md",
-    "agents/skills/docs-man-SKILL.md",
     "agents/prompts/README.md",
     "agents/prompts",
     "agents/skills/README.md",
@@ -218,10 +220,8 @@
     "report",
     "tech_space/README.md",
     "tech_space",
-    "plan/README.md",
     "plan",
     "feature_list",
-    "idea/README.md",
     "idea",
     "agents/templates",
     "agents/docs_man/skills/README.md",

@@ -2,7 +2,7 @@
 name: docs-man
 description: >-
   Documentation steward for the altr.lab Docs vault. Use when the user says
-  update_docs, document it, docs_man, or asks to update brain, feature_list,
+  update_docs, update docs ,  document it, docs_man, or asks to update brain, feature_list,
   plan, tech_space, report, clickup, idea, or Altr.lab docs. Enforces vault
   order, YAML frontmatter, wikilinks, and truth order (code > tech_space >
   report/plan > feature_list). Also handles PDF ingest via the pdf skill and
