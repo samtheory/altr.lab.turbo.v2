@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "agents/skills/docs-man-SKILL.md",
+                "file": "idea/2026-09-27-altr-lab-project-brief.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "docs-man-SKILL"
+              "title": "2026-09-27-altr-lab-project-brief"
             }
           }
         ]
@@ -187,10 +187,11 @@
       "webpage-html-export:Export as HTML": false
     }
   },
-  "active": "a5d76a024d2c65c1",
+  "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
-    "agents/instructions/README.md",
     "agents/skills/docs-man-SKILL.md",
+    "idea/2026-09-27-altr-lab-project-brief.md",
+    "agents/instructions/README.md",
     "plan/README.md",
     "idea/README.md",
     "Altr.lab/agent-skills.md",
@@ -224,7 +225,6 @@
     "feature_list",
     "idea",
     "agents/templates",
-    "agents/docs_man/skills/README.md",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }
