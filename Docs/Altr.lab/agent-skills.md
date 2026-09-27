@@ -23,13 +23,13 @@ tags:
 
 ## Where skills live
 
-| Location | Role |
-|----------|------|
-| `.agents/skills/<name>/` | Project installs (committed; portable) |
-| `skills-lock.json` | Pin / restore with `npx skills experimental_install` |
-| `.cursor/skills/` | Cursor-specific mirrors (e.g. docs-brain, docs-man) |
-| `.cursor/mcp.json` | Context7 + Graft MCP servers |
-| `npx skills list` | Inspect what is installed |
+| Location                 | Role                                                 |
+| ------------------------ | ---------------------------------------------------- |
+| `.agents/skills/<name>/` | Project installs (committed; portable)               |
+| `skills-lock.json`       | Pin / restore with `npx skills experimental_install` |
+| `.cursor/skills/`        | Cursor-specific mirrors (e.g. docs-brain, docs-man)  |
+| `.cursor/mcp.json`       | Context7 + Graft MCP servers                         |
+| `npx skills list`        | Inspect what is installed                            |
 
 Install more:
 

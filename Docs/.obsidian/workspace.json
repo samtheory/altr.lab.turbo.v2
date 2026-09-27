@@ -189,10 +189,14 @@
   },
   "active": "a5d76a024d2c65c1",
   "lastOpenFiles": [
-    "agents/instructions/README.md",
+    "Altr.lab/commands.md",
     "Altr.lab/agent-skills.md",
     "Altr.lab/graft.md",
+    "Altr.lab/prompts.md",
+    "Altr.lab/README.md",
+    "Altr.lab/stack.md",
     "Altr.lab/structure.md",
+    "agents/instructions/README.md",
     "README.md",
     "feature_list/02-ui-kit-storybook.md",
     "tech_space/02-ui-kit-storybook.md",
@@ -200,8 +204,6 @@
     "feature_list/01-hub-ui-kit-base.md",
     "report/STATUS.md",
     "feature_list/README.md",
-    "Altr.lab/prompts.md",
-    "Altr.lab/commands.md",
     "agents/templates/structured-note.md",
     "agents/README.md",
     "agents/skills/docs-man-SKILL.md",
@@ -223,8 +225,6 @@
     "idea",
     "agents/templates",
     "agents/docs_man/skills/README.md",
-    "agents/docs_man/prompts/00-update-docs.md",
-    "agents/docs_man/instructions/00-workflow.md",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }
