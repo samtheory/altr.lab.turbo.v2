@@ -187,13 +187,14 @@
       "webpage-html-export:Export as HTML": false
     }
   },
-  "active": "0d0147ae7713d13c",
+  "active": "a5d76a024d2c65c1",
   "lastOpenFiles": [
-    "agents/skills/docs-man-SKILL.md",
+    "idea/README.md",
+    "feature_list/01-hub-ui-kit-base.md",
     "idea/2026-09-27-altr-lab-project-brief.md",
+    "agents/skills/docs-man-SKILL.md",
     "agents/instructions/README.md",
     "plan/README.md",
-    "idea/README.md",
     "Altr.lab/agent-skills.md",
     "Altr.lab/commands.md",
     "Altr.lab/graft.md",
@@ -205,7 +206,6 @@
     "feature_list/02-ui-kit-storybook.md",
     "tech_space/02-ui-kit-storybook.md",
     "tech_space/01-hub-ui-kit-base.md",
-    "feature_list/01-hub-ui-kit-base.md",
     "report/STATUS.md",
     "feature_list/README.md",
     "agents/templates/structured-note.md",
