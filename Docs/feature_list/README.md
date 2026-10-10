@@ -2,7 +2,7 @@
 title: "feature_list — product intent"
 description: "Raw feature instructions awaiting implementation"
 created: 2026-09-19
-updated: 2026-09-21
+updated: 2026-10-10
 tags:
   - feature
   - readme
@@ -16,7 +16,15 @@ Map: [[../brain/00-Docs-Brain]] · Template: [[../agents/templates/structured-no
 
 Promote from `idea/` → write a dated note here → plan in `plan/` → implement → `tech_space`.
 
-## Features
+App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Sprint task cards go in `plan/<app>/` only while actively building; durable intent stays here.
+
+## Tracks
+
+| Track | Index | Intent |
+|-------|-------|--------|
+| **Helix UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — CLI, docs app, own primitives, tokens, motion, charts |
+
+## Legacy / shipped features
 
 - [[01-hub-ui-kit-base]] — hub landing + ui-kit + base (shipped)
 - [[02-ui-kit-storybook]] — Storybook for ui-kit (shipped)

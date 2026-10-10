@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "idea/2026-09-27-altr-lab-project-brief.md",
+                "file": "plan/README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-09-27-altr-lab-project-brief"
+              "title": "README"
             }
           }
         ]
@@ -187,12 +187,20 @@
       "webpage-html-export:Export as HTML": false
     }
   },
-  "active": "a5d76a024d2c65c1",
+  "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
+    "feature_list/ui-kit/00-intent.md",
+    "feature_list/ui-kit/README.md",
+    "feature_list/ui-kit",
+    "idea/ui-kit/2026-10-10-helix-portable-ui-kit.md",
+    "idea/ui-kit/README.md",
+    "idea/ui-kit",
+    "agents/skills/docs-man-SKILL.md",
+    "brain/00-Docs-Hub.md",
+    "brain/00-Docs-Brain.md",
+    "idea/2026-09-27-altr-lab-project-brief.md",
     "idea/README.md",
     "feature_list/01-hub-ui-kit-base.md",
-    "idea/2026-09-27-altr-lab-project-brief.md",
-    "agents/skills/docs-man-SKILL.md",
     "agents/instructions/README.md",
     "plan/README.md",
     "Altr.lab/agent-skills.md",
@@ -209,22 +217,14 @@
     "report/STATUS.md",
     "feature_list/README.md",
     "agents/templates/structured-note.md",
-    "agents/README.md",
-    "agents/prompts/README.md",
     "agents/prompts",
-    "agents/skills/README.md",
     "agents/skills",
     "agents/instructions",
-    "clickup/README.md",
     "clickup",
-    "report/README.md",
     "report",
-    "tech_space/README.md",
     "tech_space",
     "plan",
     "feature_list",
-    "idea",
-    "agents/templates",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }

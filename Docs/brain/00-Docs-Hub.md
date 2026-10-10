@@ -2,7 +2,7 @@
 title: "Docs Hub — folder index"
 description: "Canonical index of every Docs/ folder in the altr.lab vault"
 created: 2026-09-19
-updated: 2026-09-26
+updated: 2026-10-10
 tags:
   - brain
   - hub
@@ -28,6 +28,8 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 ## Promotion path
 
 `idea` → `feature_list` → `plan` (+ `clickup`) → **code** → `tech_space` → `report` → refresh [[00-Docs-Brain]]
+
+App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`. Example: **Helix** UI kit — [[../idea/ui-kit/README]] · [[../feature_list/ui-kit/README]].
 
 ## Agent of record
 
