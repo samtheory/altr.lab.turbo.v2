@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-10
+updated: 2026-10-11
 tags:
   - brain
   - index
@@ -107,7 +107,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Hono API | `cloud/hono-server` | Altr.lab/stack · tech_space |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | AI bot agent | `cloud/ai-bot-agent` | Altr.lab · agents |
-| Design system (**Helix**) | `elements/ui-kit` · future `apps/helix` + CLI | Intent: [[../feature_list/ui-kit/00-intent]] · Idea: [[../idea/ui-kit/README]] · As-built v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
+| Design system (**Apolyx**) | `elements/ui-kit` · future `apps/apolyx` + CLI | Intent: [[../feature_list/ui-kit/00-intent]] · Idea: [[../idea/ui-kit/README]] · As-built v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
 Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
@@ -118,9 +118,9 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 
 | Layer | Role | Freshness |
 |-------|------|-----------|
-| `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Helix) |
+| `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
 | `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/00-intent]] |
-| `plan/` | Checkbox overlay + next steps | App folders `plan/<app>/` while sprinting; Helix plan not opened yet |
+| `plan/` | Checkbox overlay + next steps | App folders `plan/<app>/` while sprinting; Apolyx plan not opened yet |
 | `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-09-21) |
 | `tech_space/` | Implementation narrative | Latest: [[../tech_space/02-ui-kit-storybook]] |
 | `clickup/` | External task sync notes | Edit when extracting work |

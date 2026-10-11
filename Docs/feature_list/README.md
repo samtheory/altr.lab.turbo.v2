@@ -2,7 +2,7 @@
 title: "feature_list — product intent"
 description: "Raw feature instructions awaiting implementation"
 created: 2026-09-19
-updated: 2026-10-10
+updated: 2026-10-11
 tags:
   - feature
   - readme
@@ -22,7 +22,7 @@ App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Spr
 
 | Track | Index | Intent |
 |-------|-------|--------|
-| **Helix UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — CLI, docs app, own primitives, tokens, motion, charts |
+| **Apolyx UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — CLI, docs app, own primitives, tokens, motion, charts |
 
 ## Legacy / shipped features
 

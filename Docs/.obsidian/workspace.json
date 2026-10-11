@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "plan/README.md",
+                "file": "idea/ui-kit/2026-10-11-naming-and-domains.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "2026-10-11-naming-and-domains"
             }
           }
         ]
@@ -187,22 +187,24 @@
       "webpage-html-export:Export as HTML": false
     }
   },
-  "active": "0d0147ae7713d13c",
+  "active": "a5d76a024d2c65c1",
   "lastOpenFiles": [
     "feature_list/ui-kit/00-intent.md",
+    "idea/ui-kit/2026-10-11-naming-and-domains.md",
+    "idea/ui-kit/2026-10-10-apolyx-portable-ui-kit.md",
+    "idea/ui-kit/2026-10-10-helix-portable-ui-kit.md",
+    "idea/2026-09-27-altr-lab-project-brief.md",
+    "plan/README.md",
     "feature_list/ui-kit/README.md",
     "feature_list/ui-kit",
-    "idea/ui-kit/2026-10-10-helix-portable-ui-kit.md",
     "idea/ui-kit/README.md",
     "idea/ui-kit",
     "agents/skills/docs-man-SKILL.md",
     "brain/00-Docs-Hub.md",
     "brain/00-Docs-Brain.md",
-    "idea/2026-09-27-altr-lab-project-brief.md",
     "idea/README.md",
     "feature_list/01-hub-ui-kit-base.md",
     "agents/instructions/README.md",
-    "plan/README.md",
     "Altr.lab/agent-skills.md",
     "Altr.lab/commands.md",
     "Altr.lab/graft.md",
@@ -215,8 +217,6 @@
     "tech_space/02-ui-kit-storybook.md",
     "tech_space/01-hub-ui-kit-base.md",
     "report/STATUS.md",
-    "feature_list/README.md",
-    "agents/templates/structured-note.md",
     "agents/prompts",
     "agents/skills",
     "agents/instructions",

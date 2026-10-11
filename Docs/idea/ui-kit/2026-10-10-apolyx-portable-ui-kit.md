@@ -1,17 +1,17 @@
 ---
-title: "Helix — portable UI kit like shadcn / Smooth UI"
+title: "Apolyx — portable UI kit like shadcn / Smooth UI"
 description: "Idea: own-primitives design system in elements/ui-kit with CLI install, MDX docs app, custom tokens, motion, charts"
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-11
 tags:
   - idea
   - ui-kit
-  - helix
+  - apolyx
   - cli
   - design-system
 ---
 
-# Helix — portable UI kit like shadcn / Smooth UI
+# Apolyx — portable UI kit like shadcn / Smooth UI
 
 > Exploratory note. Durable product intent lives in [[../../feature_list/ui-kit/00-intent]].
 
@@ -23,16 +23,16 @@ Today `@altr/ui-kit` is a small monorepo package (Button / Card / Badge, Storybo
 
 ## Working product name
 
-**Helix** — the design helix: tokens → primitives → patterns → motion/charts.
+**Apolyx** — from *Apollo*, the Greek god of music, poetry, art and light, with a crisp *-yx* ending. Chosen 2026-10-11 to replace the first working name "Helix", which another UI kit already uses. See [[2026-10-11-naming-and-domains]].
 
 | Surface | Path / name |
 |---------|-------------|
 | Source of truth | `elements/ui-kit` (`@altr/ui-kit`) |
-| Docs / marketing app | `apps/helix` (MDX, shadcn-clean docs UX) |
+| Docs / marketing app | `apps/apolyx` (MDX, shadcn-clean docs UX) |
 | Workshop | Storybook on `elements/ui-kit` (keep) |
-| CLI (future publish) | e.g. `npx helix add button` / `@altr/helix` |
+| CLI (future publish) | e.g. `npx apolyx add button` |
 
-Name is provisional until we ship the docs shell; package path stays `elements/ui-kit`.
+Source path stays `elements/ui-kit`; Apolyx is the public brand for the docs, CLI and npm package.
 
 ## Why not stay “just a package”?
 
@@ -42,7 +42,7 @@ Name is provisional until we ship the docs shell; package path stays `elements/u
 
 ## Hard preferences (idea constraints)
 
-1. **No Radix UI, no Base UI** — build Helix’s own accessible primitives (starting thin; grow carefully).
+1. **No Radix UI, no Base UI** — build Apolyx’s own accessible primitives (starting thin; grow carefully).
 2. **Tailwind v4 + custom CSS tokens** — our token set, not a default shadcn palette clone.
 3. **Light / dark + named theme variants** (e.g. trading, editorial).
 4. **Motion** (`motion`) first-class — primitives + recipes, reduced-motion respected.
@@ -56,15 +56,15 @@ Name is provisional until we ship the docs shell; package path stays `elements/u
 - ThemeProvider / ThemeToggle, FadeIn
 - Documented in [[../../feature_list/01-hub-ui-kit-base]] · [[../../feature_list/02-ui-kit-storybook]]
 
-Helix **extends and eventually replaces** that “thin shadcn package” model with a registry-first kit.
+Apolyx **extends and eventually replaces** that “thin shadcn package” model with a registry-first kit.
 
 ## Open questions (for later plan / tech_space)
 
 - Publish: npm registry vs private shadcn-style registry URL vs both?
 - Monorepo apps: keep workspace import, or migrate hub/dashboard to CLI copies?
 - Primitive a11y strategy without Radix (how far before we need focus traps, roving tabindex helpers)?
-- Chart rendering: pure SVG/canvas primitives vs a thin open-source engine wrapped in Helix API?
-- Exact CLI package name when publishing (`helix` vs `@altr/cli`).
+- Chart rendering: pure SVG/canvas primitives vs a thin open-source engine wrapped in Apolyx API?
+- Exact CLI package name when publishing (`apolyx` vs `@altr/cli`).
 
 ## Next docs step
 
