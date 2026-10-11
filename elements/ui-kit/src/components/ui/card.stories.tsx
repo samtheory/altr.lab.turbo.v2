@@ -24,7 +24,7 @@ export const Basic: Story = {
     <Card className="w-[360px]">
       <CardHeader>
         <CardTitle>Card title</CardTitle>
-        <CardDescription>Shared card from @altr/ui-kit</CardDescription>
+        <CardDescription>Shared card from @altr/apolyx</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">

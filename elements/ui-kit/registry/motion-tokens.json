@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "motion-tokens",
+  "type": "motion",
+  "title": "Motion tokens",
+  "description": "Durations and easings",
+  "files": [
+    {
+      "path": "src/motion/tokens.ts",
+      "target": "tokens.ts"
+    }
+  ],
+  "docs": "motion"
+}

@@ -1,0 +1,57 @@
+<ComponentPreview name="dialog-demo" />
+
+## Installation
+
+<InstallTabs name="dialog" exports="Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose" />
+
+## Usage
+
+```tsx
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Title</DialogTitle>
+      <DialogDescription>Description</DialogDescription>
+    </DialogHeader>
+    …
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button>Done</Button>
+      </DialogClose>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+For destructive confirmations use `AlertDialog` and its parts (`AlertDialogAction`, `AlertDialogCancel`, …). It ignores outside clicks so the user must choose.
+
+## Anatomy
+
+`Dialog` → `DialogTrigger` + `DialogContent` (`DialogHeader` → `DialogTitle`, `DialogDescription`; body; `DialogFooter` → `DialogClose`).
+
+## Built from
+
+Portal, Presence, FocusScope, DismissableLayer, and scroll lock. Content scales and fades in with Motion; under reduced motion it only fades.
+
+## Accessibility
+
+- `role="dialog"` (or `alertdialog`) with `aria-modal`, labelled by the title and described by the description.
+- Focus moves inside on open, Tab is trapped, and focus returns to the trigger on close.
+- Escape closes. Outside click closes a Dialog but not an AlertDialog.
+- Background scroll is locked while open.
+- Nested layers (a menu inside a dialog) close one at a time.
+
+## Props
+
+<PropsTable title="Dialog / AlertDialog" rows={[
+  { prop: "open", type: "boolean", description: "Controlled open state." },
+  { prop: "defaultOpen", type: "boolean", default: "false", description: "Initial state when uncontrolled." },
+  { prop: "onOpenChange", type: "(open: boolean) => void", description: "Called when the dialog opens or closes." },
+]} />
+
+<PropsTable title="DialogTrigger / DialogClose" rows={[
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element." },
+]} />

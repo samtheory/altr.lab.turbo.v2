@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardHeader, CardTitle, ThemeToggle } from "@altr/ui-kit";
+import { Card, CardDescription, CardHeader, CardTitle, ThemeToggle } from "@altr/apolyx";
 
 export default function DashboardHomePage() {
   return (
@@ -11,7 +11,7 @@ export default function DashboardHomePage() {
         <CardHeader>
           <CardTitle>@altr/dashboard</CardTitle>
           <CardDescription>
-            Thin scaffold — extend with admin routes. Uses @altr/ui-kit theme.
+            Thin scaffold — extend with admin routes. Uses @altr/apolyx theme.
           </CardDescription>
         </CardHeader>
       </Card>

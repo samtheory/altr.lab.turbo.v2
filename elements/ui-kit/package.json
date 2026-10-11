@@ -1,6 +1,11 @@
 {
-  "name": "@altr/ui-kit",
+  "name": "@altr/apolyx",
   "version": "0.0.1",
+  "description": "Apolyx — altr.lab UI kit",
+  "keywords": [
+    "ui-kit",
+    "design-system"
+  ],
   "private": true,
   "type": "module",
   "sideEffects": [
@@ -11,13 +16,18 @@
     "./globals.css": "./src/styles/globals.css",
     "./theme": "./src/theme/index.ts",
     "./utils": "./src/lib/utils.ts",
+    "./primitives": "./src/primitives/index.ts",
+    "./motion": "./src/motion/index.ts",
+    "./charts": "./src/charts/index.ts",
     "./components/*": "./src/components/*.tsx"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build",
+    "build": "tsx scripts/build-registry.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"No lint configured for @altr/ui-kit yet\"",
+    "test": "vitest run",
+    "lint": "echo \"No lint configured for @altr/apolyx yet\"",
     "clean": "rimraf dist .turbo storybook-static"
   },
   "peerDependencies": {
@@ -25,7 +35,9 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.3",
+    "@visx/curve": "^4.0.0",
+    "@visx/scale": "^4.0.0",
+    "@visx/shape": "^4.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.525.0",
@@ -40,14 +52,19 @@
     "@storybook/react": "^9.1.20",
     "@storybook/react-vite": "^9.1.20",
     "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^26.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "storybook": "^9.1.20",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.2",
-    "vite": "^6.4.3"
+    "vite": "^6.4.3",
+    "vitest": "^3.2.4"
   }
 }

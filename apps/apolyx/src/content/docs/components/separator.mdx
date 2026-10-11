@@ -1,0 +1,23 @@
+<ComponentPreview name="separator-demo" />
+
+## Installation
+
+<InstallTabs name="separator" exports="Separator" />
+
+## Usage
+
+```tsx
+<Separator />
+<Separator orientation="vertical" />
+```
+
+## Accessibility
+
+Decorative by default (`role="none"`). Set `decorative={false}` when the rule separates meaningful sections; it then becomes `role="separator"` with `aria-orientation`.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "orientation", type: "\"horizontal\" | \"vertical\"", default: "\"horizontal\"", description: "Direction of the rule." },
+  { prop: "decorative", type: "boolean", default: "true", description: "Hide from assistive technology." },
+]} />

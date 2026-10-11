@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "use-controllable-state",
+  "type": "primitive",
+  "title": "useControllableState",
+  "description": "Controlled / uncontrolled state hook",
+  "files": [
+    {
+      "path": "src/primitives/use-controllable-state.ts",
+      "target": "use-controllable-state.ts"
+    }
+  ],
+  "docs": "primitives"
+}

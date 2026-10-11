@@ -1,0 +1,30 @@
+{
+  "$schema": "./schema.json",
+  "name": "dropdown-menu",
+  "type": "ui",
+  "title": "Dropdown Menu",
+  "description": "Menu button with items, checkbox, radio",
+  "files": [
+    {
+      "path": "src/components/ui/dropdown-menu.tsx",
+      "target": "dropdown-menu.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "dismissable-layer",
+    "portal",
+    "position",
+    "presence",
+    "slot",
+    "use-controllable-state",
+    "use-floating",
+    "use-id",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/dropdown-menu"
+}

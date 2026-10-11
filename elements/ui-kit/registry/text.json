@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "text",
+  "type": "ui",
+  "title": "Text / Heading",
+  "description": "Typography scale",
+  "files": [
+    {
+      "path": "src/components/ui/text.tsx",
+      "target": "text.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/text"
+}

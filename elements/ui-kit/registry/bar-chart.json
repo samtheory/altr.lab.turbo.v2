@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "bar-chart",
+  "type": "chart",
+  "title": "Bar Chart",
+  "description": "SVG grouped / stacked bar chart (visx scales)",
+  "files": [
+    {
+      "path": "src/charts/bar-chart.tsx",
+      "target": "bar-chart.tsx"
+    }
+  ],
+  "dependencies": {
+    "@visx/scale": "^4.0.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "chart",
+    "use-reduced-motion"
+  ],
+  "docs": "charts/bar-chart"
+}

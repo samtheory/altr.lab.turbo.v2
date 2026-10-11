@@ -48,11 +48,11 @@ Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Primit
 
 ## Tasks
 
-- [ ] Components 1–14 per the table, each with story
-- [ ] Unit tests for Checkbox and Switch (keyboard + controlled / uncontrolled + form value)
-- [ ] `Foundations/Overview` story: a composed sample screen (form card with label, inputs, checkbox, switch, buttons, badge, alert) used for visual review under all 6 palettes
-- [ ] Update `apps/hub/src/app/docs-preview/page.tsx` to show the new set (cheap live check inside Next)
-- [ ] Taste review pass with `impeccable` (critique mode) on the Overview story; fix findings
+- [x] Components 1–14 per the table, each with story
+- [x] Unit tests for Checkbox and Switch (keyboard + controlled / uncontrolled + form value)
+- [x] `Foundations/Overview` story: a composed sample screen (form card with label, inputs, checkbox, switch, buttons, badge, alert) used for visual review under all 6 palettes
+- [x] Update `apps/hub/src/app/docs-preview/page.tsx` to show the new set (cheap live check inside Next)
+- [x] Taste review pass with `impeccable` (critique mode) on the Overview story; fix findings
 
 ## Verify
 

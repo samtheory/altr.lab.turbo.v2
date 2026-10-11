@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "alert",
+  "type": "ui",
+  "title": "Alert",
+  "description": "Inline status message",
+  "files": [
+    {
+      "path": "src/components/ui/alert.tsx",
+      "target": "alert.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/alert"
+}

@@ -1,0 +1,539 @@
+[
+  {
+    "name": "alert",
+    "type": "ui",
+    "title": "Alert",
+    "description": "Inline status message",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/alert"
+  },
+  {
+    "name": "avatar",
+    "type": "ui",
+    "title": "Avatar",
+    "description": "Image with fallback initials",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/avatar"
+  },
+  {
+    "name": "badge",
+    "type": "ui",
+    "title": "Badge",
+    "description": "Status label with semantic variants",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/badge"
+  },
+  {
+    "name": "bar-chart",
+    "type": "chart",
+    "title": "Bar Chart",
+    "description": "SVG grouped / stacked bar chart (visx scales)",
+    "registryDependencies": [
+      "chart",
+      "use-reduced-motion"
+    ],
+    "docs": "charts/bar-chart"
+  },
+  {
+    "name": "button",
+    "type": "ui",
+    "title": "Button",
+    "description": "Variants, sizes, loading, asChild",
+    "registryDependencies": [
+      "slot",
+      "utils"
+    ],
+    "docs": "components/button"
+  },
+  {
+    "name": "card",
+    "type": "ui",
+    "title": "Card",
+    "description": "Surface with header, content, footer",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/card"
+  },
+  {
+    "name": "chart",
+    "type": "chart",
+    "title": "Chart base",
+    "description": "ChartContainer, legend, tooltip, config types",
+    "registryDependencies": [
+      "skeleton",
+      "utils"
+    ],
+    "docs": "charts"
+  },
+  {
+    "name": "checkbox",
+    "type": "ui",
+    "title": "Checkbox",
+    "description": "Tri-state checkbox",
+    "registryDependencies": [
+      "use-controllable-state",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/checkbox"
+  },
+  {
+    "name": "compose-refs",
+    "type": "primitive",
+    "title": "Compose refs",
+    "description": "Merge multiple refs into one callback",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "dialog",
+    "type": "ui",
+    "title": "Dialog",
+    "description": "Modal dialog + AlertDialog",
+    "registryDependencies": [
+      "dismissable-layer",
+      "focus-scope",
+      "portal",
+      "presence",
+      "scroll-lock",
+      "slot",
+      "use-controllable-state",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/dialog"
+  },
+  {
+    "name": "dismissable-layer",
+    "type": "primitive",
+    "title": "DismissableLayer",
+    "description": "Escape / outside-click dismissal with nested layer stack",
+    "registryDependencies": [
+      "compose-refs"
+    ],
+    "docs": "primitives"
+  },
+  {
+    "name": "dropdown-menu",
+    "type": "ui",
+    "title": "Dropdown Menu",
+    "description": "Menu button with items, checkbox, radio",
+    "registryDependencies": [
+      "dismissable-layer",
+      "portal",
+      "position",
+      "presence",
+      "slot",
+      "use-controllable-state",
+      "use-floating",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/dropdown-menu"
+  },
+  {
+    "name": "fade-in",
+    "type": "motion",
+    "title": "FadeIn",
+    "description": "Opacity + rise entrance",
+    "registryDependencies": [
+      "motion-tokens",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "motion/fade-in"
+  },
+  {
+    "name": "focus-scope",
+    "type": "primitive",
+    "title": "FocusScope",
+    "description": "Trap and restore focus",
+    "registryDependencies": [
+      "compose-refs"
+    ],
+    "docs": "primitives"
+  },
+  {
+    "name": "hover-lift",
+    "type": "motion",
+    "title": "HoverLift",
+    "description": "Lift on hover",
+    "registryDependencies": [
+      "motion-tokens",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "motion/hover-lift"
+  },
+  {
+    "name": "input",
+    "type": "ui",
+    "title": "Input",
+    "description": "Text input",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/input"
+  },
+  {
+    "name": "kbd",
+    "type": "ui",
+    "title": "Kbd",
+    "description": "Keyboard key hint",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/kbd"
+  },
+  {
+    "name": "label",
+    "type": "ui",
+    "title": "Label",
+    "description": "Form label",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/label"
+  },
+  {
+    "name": "line-chart",
+    "type": "chart",
+    "title": "Line Chart",
+    "description": "SVG line / area chart (visx scales)",
+    "registryDependencies": [
+      "chart",
+      "use-reduced-motion"
+    ],
+    "docs": "charts/line-chart"
+  },
+  {
+    "name": "motion-tokens",
+    "type": "motion",
+    "title": "Motion tokens",
+    "description": "Durations and easings",
+    "registryDependencies": [],
+    "docs": "motion"
+  },
+  {
+    "name": "portal",
+    "type": "primitive",
+    "title": "Portal",
+    "description": "Render into document.body (or a container)",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "position",
+    "type": "primitive",
+    "title": "computePosition",
+    "description": "Side / align positioning with flip",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "presence",
+    "type": "primitive",
+    "title": "Presence",
+    "description": "Keep content mounted while exit animations run",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "pressable",
+    "type": "motion",
+    "title": "Pressable",
+    "description": "Press scale feedback",
+    "registryDependencies": [
+      "slot",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "motion/pressable"
+  },
+  {
+    "name": "roving-focus",
+    "type": "primitive",
+    "title": "RovingFocusGroup",
+    "description": "Arrow-key roving tabindex with typeahead",
+    "registryDependencies": [
+      "compose-refs",
+      "use-controllable-state"
+    ],
+    "docs": "primitives"
+  },
+  {
+    "name": "scroll-lock",
+    "type": "primitive",
+    "title": "lockScroll",
+    "description": "Body scroll lock with scrollbar compensation",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "separator",
+    "type": "ui",
+    "title": "Separator",
+    "description": "Horizontal / vertical rule",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/separator"
+  },
+  {
+    "name": "skeleton",
+    "type": "ui",
+    "title": "Skeleton",
+    "description": "Loading placeholder",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/skeleton"
+  },
+  {
+    "name": "slot",
+    "type": "primitive",
+    "title": "Slot",
+    "description": "asChild prop merging onto a single child",
+    "registryDependencies": [
+      "compose-refs"
+    ],
+    "docs": "primitives"
+  },
+  {
+    "name": "spinner",
+    "type": "ui",
+    "title": "Spinner",
+    "description": "Loading indicator with SR label",
+    "registryDependencies": [
+      "utils",
+      "visually-hidden"
+    ],
+    "docs": "components/spinner"
+  },
+  {
+    "name": "stagger",
+    "type": "motion",
+    "title": "Stagger",
+    "description": "Staggered children entrance",
+    "registryDependencies": [
+      "motion-tokens",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "motion/stagger"
+  },
+  {
+    "name": "switch",
+    "type": "ui",
+    "title": "Switch",
+    "description": "On / off toggle",
+    "registryDependencies": [
+      "use-controllable-state",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/switch"
+  },
+  {
+    "name": "tabs",
+    "type": "ui",
+    "title": "Tabs",
+    "description": "Tablist with automatic / manual activation",
+    "registryDependencies": [
+      "roving-focus",
+      "use-controllable-state",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/tabs"
+  },
+  {
+    "name": "text",
+    "type": "ui",
+    "title": "Text / Heading",
+    "description": "Typography scale",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/text"
+  },
+  {
+    "name": "textarea",
+    "type": "ui",
+    "title": "Textarea",
+    "description": "Multi-line input",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/textarea"
+  },
+  {
+    "name": "theme-base",
+    "type": "theme",
+    "title": "Token mapping",
+    "description": "Tailwind v4 @theme inline mapping, dark variant, reduced motion, base layer",
+    "registryDependencies": [],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-config",
+    "type": "lib",
+    "title": "Theme config",
+    "description": "Theme families, modes, token list, storage key",
+    "registryDependencies": [],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-default",
+    "type": "theme",
+    "title": "Theme: default",
+    "description": "OKLCH palette (light + dark) for the default family",
+    "registryDependencies": [
+      "theme-base"
+    ],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-family-switcher",
+    "type": "ui",
+    "title": "ThemeFamilySwitcher",
+    "description": "Radio group for default / power-blue / power-green",
+    "registryDependencies": [
+      "theme-config",
+      "theme-provider",
+      "utils"
+    ],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-power-blue",
+    "type": "theme",
+    "title": "Theme: power-blue",
+    "description": "OKLCH palette (light + dark) for the power-blue family",
+    "registryDependencies": [
+      "theme-base"
+    ],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-power-green",
+    "type": "theme",
+    "title": "Theme: power-green",
+    "description": "OKLCH palette (light + dark) for the power-green family",
+    "registryDependencies": [
+      "theme-base"
+    ],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-provider",
+    "type": "ui",
+    "title": "ApolyxProvider",
+    "description": "next-themes mode + Apolyx family provider and no-flash script",
+    "registryDependencies": [
+      "theme-config"
+    ],
+    "docs": "theming"
+  },
+  {
+    "name": "theme-toggle",
+    "type": "ui",
+    "title": "ThemeToggle",
+    "description": "Light / dark toggle button",
+    "registryDependencies": [
+      "button"
+    ],
+    "docs": "theming"
+  },
+  {
+    "name": "toast",
+    "type": "ui",
+    "title": "Toast",
+    "description": "toast() API + Toaster live region",
+    "registryDependencies": [
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/toast"
+  },
+  {
+    "name": "tooltip",
+    "type": "ui",
+    "title": "Tooltip",
+    "description": "Hover / focus hint with delay group",
+    "registryDependencies": [
+      "dismissable-layer",
+      "portal",
+      "position",
+      "presence",
+      "slot",
+      "use-controllable-state",
+      "use-floating",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/tooltip"
+  },
+  {
+    "name": "use-controllable-state",
+    "type": "primitive",
+    "title": "useControllableState",
+    "description": "Controlled / uncontrolled state hook",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "use-floating",
+    "type": "primitive",
+    "title": "useFloating",
+    "description": "Fixed-position floating content anchored to an element",
+    "registryDependencies": [
+      "position"
+    ],
+    "docs": "primitives"
+  },
+  {
+    "name": "use-id",
+    "type": "primitive",
+    "title": "useId",
+    "description": "SSR-safe id with optional override",
+    "registryDependencies": [],
+    "docs": "primitives"
+  },
+  {
+    "name": "use-reduced-motion",
+    "type": "motion",
+    "title": "useReducedMotion",
+    "description": "Reduced-motion preference hook",
+    "registryDependencies": [],
+    "docs": "motion"
+  },
+  {
+    "name": "utils",
+    "type": "lib",
+    "title": "cn utility",
+    "description": "clsx + tailwind-merge class combiner",
+    "registryDependencies": [],
+    "docs": "installation"
+  },
+  {
+    "name": "visually-hidden",
+    "type": "primitive",
+    "title": "VisuallyHidden",
+    "description": "Screen-reader-only content",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "primitives"
+  }
+]

@@ -1,0 +1,31 @@
+<ComponentPreview name="line-chart-demo" />
+
+## Installation
+
+<InstallTabs name="line-chart" exports="ChartContainer, LineChart, type ChartConfig" />
+
+## Usage
+
+```tsx
+<ChartContainer config={config}>
+  <LineChart data={data} x="month" series={["desktop", "mobile"]} curve="monotone" area />
+</ChartContainer>
+```
+
+## Tokens used
+
+`--chart-1` … `--chart-5` for series, `--chart-grid` for grid lines, `--chart-axis` for labels.
+
+## Accessibility
+
+Lines draw in with Motion; under reduced motion they appear immediately. Name the chart with `aria-label` on `ChartContainer`.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "data", type: "T[]", description: "Rows of data." },
+  { prop: "x", type: "keyof T", description: "Key for the x axis (categorical)." },
+  { prop: "series", type: "(keyof T)[]", description: "Keys to plot; each must exist in the container config." },
+  { prop: "curve", type: "\"linear\" | \"monotone\" | \"step\"", default: "\"linear\"", description: "Line interpolation." },
+  { prop: "area", type: "boolean", default: "false", description: "Fill the area under each line." },
+]} />

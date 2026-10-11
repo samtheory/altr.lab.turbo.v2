@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ThemeProvider } from "../theme-provider";
-import { ThemeToggle } from "../theme-toggle";
+import { ThemeProvider } from "./theme-provider";
+import { ThemeToggle } from "./theme-toggle";
 
 const meta = {
   title: "Theme/ThemeToggle",

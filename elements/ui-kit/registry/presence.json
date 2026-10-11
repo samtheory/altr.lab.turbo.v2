@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "presence",
+  "type": "primitive",
+  "title": "Presence",
+  "description": "Keep content mounted while exit animations run",
+  "files": [
+    {
+      "path": "src/primitives/presence.tsx",
+      "target": "presence.tsx"
+    }
+  ],
+  "docs": "primitives"
+}

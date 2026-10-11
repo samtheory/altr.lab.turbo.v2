@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "portal",
+  "type": "primitive",
+  "title": "Portal",
+  "description": "Render into document.body (or a container)",
+  "files": [
+    {
+      "path": "src/primitives/portal.tsx",
+      "target": "portal.tsx"
+    }
+  ],
+  "docs": "primitives"
+}

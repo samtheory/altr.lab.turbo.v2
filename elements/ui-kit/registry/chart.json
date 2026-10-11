@@ -1,0 +1,34 @@
+{
+  "$schema": "./schema.json",
+  "name": "chart",
+  "type": "chart",
+  "title": "Chart base",
+  "description": "ChartContainer, legend, tooltip, config types",
+  "files": [
+    {
+      "path": "src/charts/types.ts",
+      "target": "types.ts"
+    },
+    {
+      "path": "src/charts/use-resize-observer.ts",
+      "target": "use-resize-observer.ts"
+    },
+    {
+      "path": "src/charts/chart-container.tsx",
+      "target": "chart-container.tsx"
+    },
+    {
+      "path": "src/charts/chart-legend.tsx",
+      "target": "chart-legend.tsx"
+    },
+    {
+      "path": "src/charts/chart-tooltip.tsx",
+      "target": "chart-tooltip.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "skeleton",
+    "utils"
+  ],
+  "docs": "charts"
+}

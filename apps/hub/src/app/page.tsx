@@ -10,7 +10,7 @@ import {
   CardTitle,
   FadeIn,
   ThemeToggle,
-} from "@altr/ui-kit";
+} from "@altr/apolyx";
 
 import { getHubPage, listHubPages } from "@/lib/content";
 
@@ -23,11 +23,11 @@ export default async function HubHomePage() {
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--muted))_0%,_transparent_55%)] opacity-80 dark:opacity-40"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--muted)_0%,_transparent_55%)] opacity-80 dark:opacity-40"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-24 size-[28rem] rounded-full bg-[radial-gradient(circle,_hsl(var(--accent))_0%,_transparent_70%)] opacity-60 blur-2xl"
+        className="pointer-events-none absolute -right-24 top-24 size-[28rem] rounded-full bg-[radial-gradient(circle,_var(--accent)_0%,_transparent_70%)] opacity-60 blur-2xl"
       />
 
       <header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">

@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "scroll-lock",
+  "type": "primitive",
+  "title": "lockScroll",
+  "description": "Body scroll lock with scrollbar compensation",
+  "files": [
+    {
+      "path": "src/primitives/scroll-lock.ts",
+      "target": "scroll-lock.ts"
+    }
+  ],
+  "docs": "primitives"
+}

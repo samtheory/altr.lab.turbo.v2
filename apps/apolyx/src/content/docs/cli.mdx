@@ -1,0 +1,60 @@
+The `apolyx` CLI copies registry items into your project. Source lives in `elements/apolyx-cli`; the registry is built from `elements/ui-kit/registry/*.json`.
+
+## init
+
+```bash
+npx apolyx init [--theme default|power-blue|power-green] [--css app/globals.css] [--registry <dir|url>] [--yes]
+```
+
+- Writes `apolyx.json` (aliases, CSS file, theme, registry source).
+- Installs `utils`, `theme-config`, the token mapping, `theme-default`, and the chosen family.
+- Adds `@import` lines for the theme CSS right after `@import "tailwindcss"`.
+- Warns when your CSS file defines its own `--background` / `--foreground` on `:root`.
+
+## add
+
+```bash
+npx apolyx add <names...> [--overwrite] [--yes] [--skip-install]
+```
+
+- Resolves `registryDependencies` depth-first and installs them before the item (no duplicates).
+- Rewrites every relative kit import to your aliases using the import map recorded at registry build time.
+- Keeps existing files unless you confirm or pass `--overwrite`.
+- Installs missing npm packages with the package manager detected from your lockfile.
+
+## list
+
+```bash
+npx apolyx list [--type ui|primitive|motion|chart|lib|theme]
+```
+
+## apolyx.json
+
+```json
+{
+  "aliases": {
+    "ui": "@/components/ui",
+    "primitives": "@/components/apolyx/primitives",
+    "lib": "@/lib",
+    "motion": "@/components/apolyx/motion",
+    "charts": "@/components/apolyx/charts"
+  },
+  "css": "app/globals.css",
+  "theme": "default",
+  "registry": "./path/to/registry"
+}
+```
+
+`@/` is resolved through the `@/*` path in your `tsconfig.json`, so projects with and without a `src/` directory both work.
+
+## Registry source
+
+The CLI looks for the registry in this order: `--registry` flag, `apolyx.json`, the `APOLYX_REGISTRY` environment variable, then `elements/ui-kit/dist/r` relative to the current directory. A source can be a directory or an `https://` URL; this docs site serves the registry at [/r/index.json](/r/index.json).
+
+## Registry items
+
+Each item is a JSON manifest with `name`, `type`, `files`, `dependencies`, and `registryDependencies`. The build (`pnpm --filter @altr/apolyx build`) fails when:
+
+- a relative import points to a file that no item ships, or to an item that is not a declared dependency;
+- a bare import is missing from `dependencies`;
+- a file imports `@altr/*`, `@radix-ui/*`, or `@base-ui/*`.

@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-config",
+  "type": "lib",
+  "title": "Theme config",
+  "description": "Theme families, modes, token list, storage key",
+  "files": [
+    {
+      "path": "src/theme/index.ts",
+      "target": "apolyx-theme.ts"
+    }
+  ],
+  "docs": "theming"
+}

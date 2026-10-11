@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@altr/ui-kit";
+import { ApolyxProvider, ApolyxThemeScript } from "@altr/apolyx";
 
 import "./globals.css";
 
@@ -26,10 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ApolyxThemeScript />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ApolyxProvider defaultTheme="default" defaultMode="system">
           {children}
-        </ThemeProvider>
+        </ApolyxProvider>
       </body>
     </html>
   );

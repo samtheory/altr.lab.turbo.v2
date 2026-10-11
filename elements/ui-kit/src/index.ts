@@ -9,12 +9,121 @@ export {
   CardContent,
 } from "./components/ui/card";
 export { Badge, badgeVariants, type BadgeProps } from "./components/ui/badge";
-export { ThemeProvider, type ThemeProviderProps } from "./components/theme-provider";
+export { Text, Heading, type TextProps, type HeadingProps } from "./components/ui/text";
+export { Label, type LabelProps } from "./components/ui/label";
+export { Input, type InputProps } from "./components/ui/input";
+export { Textarea, type TextareaProps } from "./components/ui/textarea";
+export { Checkbox, type CheckboxProps } from "./components/ui/checkbox";
+export { Switch, type SwitchProps } from "./components/ui/switch";
+export {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "./components/ui/avatar";
+export { Separator, type SeparatorProps } from "./components/ui/separator";
+export { Spinner, type SpinnerProps } from "./components/ui/spinner";
+export { Skeleton, type SkeletonProps } from "./components/ui/skeleton";
+export {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  type AlertProps,
+} from "./components/ui/alert";
+export { Kbd, KbdGroup } from "./components/ui/kbd";
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+  type DialogProps,
+} from "./components/ui/dialog";
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  type TabsProps,
+} from "./components/ui/tabs";
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  type DropdownMenuProps,
+  type DropdownMenuContentProps,
+} from "./components/ui/dropdown-menu";
+export {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+  type TooltipProps,
+  type TooltipProviderProps,
+  type TooltipContentProps,
+} from "./components/ui/tooltip";
+export {
+  Toaster,
+  toast,
+  useToasts,
+  type ToasterProps,
+  type ToastData,
+  type ToastOptions,
+  type ToastVariant,
+} from "./components/ui/toast";
+export {
+  ApolyxProvider,
+  ApolyxThemeScript,
+  ThemeProvider,
+  useApolyxTheme,
+  type ApolyxProviderProps,
+  type ThemeProviderProps,
+} from "./components/theme-provider";
 export { ThemeToggle } from "./components/theme-toggle";
+export { ThemeFamilySwitcher } from "./components/theme-family-switcher";
 export { FadeIn, motion } from "./components/motion";
 export {
+  durations,
+  easings,
+  useReducedMotion,
+  Stagger,
+  StaggerItem,
+  Pressable,
+  HoverLift,
+} from "./motion";
+export {
+  ChartContainer,
+  ChartLegend,
+  ChartTooltip,
+  LineChart,
+  BarChart,
+  type ChartConfig,
+} from "./charts";
+export {
+  themeFamilies,
   themeModes,
   cssVariableTokens,
+  APOLYX_THEME_STORAGE_KEY,
+  type ThemeFamily,
   type ThemeMode,
   type CssVariableToken,
 } from "./theme";
+export * from "./primitives";

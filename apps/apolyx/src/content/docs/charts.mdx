@@ -1,0 +1,40 @@
+Apolyx charts are SVG drawn with React on [visx](https://airbnb.io/visx) scales and shapes — no canvas, no chart library runtime. Colors come from chart tokens, so they follow the active theme.
+
+<InstallTabs name="chart" exports="ChartContainer, ChartLegend, ChartTooltip, type ChartConfig" />
+
+## ChartContainer
+
+Measures its width, keeps an aspect ratio, maps your config to CSS variables, and handles loading and empty states. Every chart renders inside one.
+
+```tsx
+const config: ChartConfig = {
+  revenue: { label: "Revenue", color: "chart-1" },
+  cost: { label: "Cost", color: "chart-2" },
+};
+
+<ChartContainer config={config} aria-label="Revenue and cost by month">
+  <LineChart data={data} x="month" series={["revenue", "cost"]} />
+</ChartContainer>;
+```
+
+<PropsTable title="ChartContainer" rows={[
+  { prop: "config", type: "ChartConfig", description: "Series key → label and chart color token." },
+  { prop: "aspectRatio", type: "number", default: "16 / 9", description: "Width / height." },
+  { prop: "loading", type: "boolean", description: "Shows a skeleton." },
+  { prop: "empty", type: "boolean", description: "Shows the empty message." },
+  { prop: "emptyMessage", type: "string", default: "\"No data\"", description: "Text for the empty state." },
+  { prop: "aria-label", type: "string", default: "\"Chart\"", description: "Accessible name for the figure." },
+]} />
+
+## Legend and tooltip
+
+The legend toggles series on and off (buttons with `aria-pressed`). The tooltip follows the pointer and lists the values for the hovered point.
+
+## Accessibility
+
+Each chart is a labelled figure. Provide a meaningful `aria-label`, and for data that matters offer a table or summary next to the chart.
+
+## Charts
+
+- [Line Chart](/docs/charts/line-chart)
+- [Bar Chart](/docs/charts/bar-chart)

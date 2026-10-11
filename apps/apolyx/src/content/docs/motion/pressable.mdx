@@ -1,0 +1,28 @@
+<ComponentPreview name="pressable-demo" />
+
+## Installation
+
+<InstallTabs name="pressable" exports="Pressable" />
+
+## Usage
+
+```tsx
+<Pressable className="rounded-xl border p-4" onClick={open}>
+  Open project
+</Pressable>
+```
+
+Use it for custom clickable surfaces. `Button` already has its own press styles.
+
+## Accessibility
+
+Renders a native `<button>` (or your element via `asChild`). The scale effect is skipped under reduced motion.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element instead of rendering a button." },
+  { prop: "onClick", type: "MouseEventHandler", description: "Click handler." },
+  { prop: "disabled", type: "boolean", description: "Disables the button." },
+  { prop: "type", type: "\"button\" | \"submit\" | \"reset\"", default: "\"button\"", description: "Native button type." },
+]} />

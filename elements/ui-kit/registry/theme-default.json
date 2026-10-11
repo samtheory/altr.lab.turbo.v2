@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-default",
+  "type": "theme",
+  "title": "Theme: default",
+  "description": "OKLCH palette (light + dark) for the default family",
+  "files": [
+    {
+      "path": "src/styles/themes/default.css",
+      "target": "theme-default.css"
+    }
+  ],
+  "registryDependencies": [
+    "theme-base"
+  ],
+  "docs": "theming"
+}

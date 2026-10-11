@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "position",
+  "type": "primitive",
+  "title": "computePosition",
+  "description": "Side / align positioning with flip",
+  "files": [
+    {
+      "path": "src/primitives/position.ts",
+      "target": "position.ts"
+    }
+  ],
+  "docs": "primitives"
+}

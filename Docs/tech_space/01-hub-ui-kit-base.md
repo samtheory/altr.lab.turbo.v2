@@ -12,6 +12,8 @@ tags:
 
 # Hub + ui-kit + base (as-built)
 
+> **Renamed 2026-10-11:** package `@altr/ui-kit` → `@altr/apolyx` (folder still `elements/ui-kit`). See [[ui-kit/README]] for current as-built.
+
 > How it was coded. Prefer this over plan text when behaviour differs. Code still wins if they disagree.
 
 Intent: [[../feature_list/01-hub-ui-kit-base]]

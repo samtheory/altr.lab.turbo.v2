@@ -1,0 +1,26 @@
+Apolyx is the altr.lab design system: semantic tokens, accessible primitives, components, motion recipes, and SVG charts. Inside this monorepo you import it from the workspace; anywhere else the `apolyx` CLI copies the source into your project so you own every line.
+
+## What ships
+
+- **Tokens** — OKLCH colors, radius, shadows, and motion durations for three families (`default`, `power-blue`, `power-green`), each in light and dark.
+- **Primitives** — Slot, Portal, Presence, FocusScope, DismissableLayer, RovingFocus, positioning, and state hooks. Components are built only from these: no Radix, no Base UI.
+- **Components** — 20 components across forms, feedback, layout, and overlays (Dialog, Dropdown Menu, Tabs, Tooltip, Toast).
+- **Motion** — FadeIn, Stagger, Pressable, and HoverLift on Motion, all reduced-motion aware.
+- **Charts** — Line and bar charts drawn as SVG on visx scales, colored by chart tokens.
+
+## Two ways to use it
+
+| | Monorepo apps | Any other React app |
+|---|---|---|
+| How | `import { Button } from "@altr/apolyx"` | `npx apolyx add button` |
+| Updates | Change the kit once, every app follows | You own the copy; re-run `add --overwrite` to pull changes |
+| Styles | `@import "@altr/apolyx/globals.css"` | `apolyx init` wires theme CSS into your entry file |
+
+Start with [Installation](/docs/installation), then read [Theming](/docs/theming).
+
+## Principles
+
+- **Semantic tokens only.** Components never use raw palette colors, so a theme switch restyles everything.
+- **Accessibility is behavior.** Keyboard support, focus management, and ARIA follow the WAI-ARIA Authoring Practices, and are covered by tests.
+- **Motion is optional.** Every animation has a reduced-motion path (opacity only, or nothing).
+- **Composition over configuration.** Parts (`DialogTrigger`, `DialogContent`, …) and `asChild` instead of prop explosions.

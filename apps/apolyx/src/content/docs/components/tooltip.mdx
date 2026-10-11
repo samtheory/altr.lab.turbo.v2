@@ -1,0 +1,41 @@
+<ComponentPreview name="tooltip-demo" />
+
+## Installation
+
+<InstallTabs name="tooltip" exports="TooltipProvider, Tooltip, TooltipTrigger, TooltipContent" />
+
+## Usage
+
+```tsx
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button size="icon" aria-label="Bold">
+        <Bold />
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>Bold</TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+```
+
+Put one `TooltipProvider` near the root. After one tooltip closes, the next opens without the delay for a short window, so scanning a toolbar feels instant.
+
+## Accessibility
+
+- Opens on hover after the delay and immediately on keyboard focus; closes on leave, blur, pointer down, and Escape.
+- The trigger gets `aria-describedby` pointing at `role="tooltip"` content.
+- Tooltips are hints — never put information or actions only in a tooltip, and do not open them on touch.
+
+## Props
+
+<PropsTable title="TooltipProvider" rows={[
+  { prop: "delayDuration", type: "number", default: "500", description: "Hover delay in ms." },
+  { prop: "skipDelayDuration", type: "number", default: "300", description: "Window in ms where the next tooltip opens instantly." },
+]} />
+
+<PropsTable title="TooltipContent" rows={[
+  { prop: "side", type: "\"top\" | \"right\" | \"bottom\" | \"left\"", default: "\"top\"", description: "Preferred side; flips when there is no room." },
+  { prop: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"center\"", description: "Alignment against the trigger." },
+  { prop: "sideOffset", type: "number", default: "6", description: "Gap in pixels." },
+]} />

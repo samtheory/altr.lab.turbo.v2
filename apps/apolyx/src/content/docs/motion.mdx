@@ -1,0 +1,26 @@
+Apolyx motion is built on [Motion](https://motion.dev) and shares duration and easing tokens with the CSS themes.
+
+<InstallTabs name="motion-tokens use-reduced-motion" exports="durations, easings, useReducedMotion" />
+
+## Tokens
+
+| Token | Value | Use |
+|---|---|---|
+| `durations.fast` | 120 ms | Hover, press, small state changes |
+| `durations.base` | 200 ms | Overlays, list items |
+| `durations.slow` | 400 ms | Page-level entrances |
+| `easings.out` | `[0.16, 1, 0.3, 1]` | Entrances |
+| `easings.inOut` | `[0.45, 0, 0.55, 1]` | Moves between two states |
+
+The same values exist as CSS variables (`--duration-fast`, `--ease-out`, …) for Tailwind transitions.
+
+## Reduced motion
+
+`useReducedMotion()` returns `true` when the user prefers reduced motion. Every recipe and overlay then uses opacity only (or nothing), and CSS durations drop to `0ms`.
+
+## Recipes
+
+- [FadeIn](/docs/motion/fade-in) — entrance for a block of content.
+- [Stagger](/docs/motion/stagger) — entrance for a list.
+- [Pressable](/docs/motion/pressable) — press feedback for custom controls.
+- [HoverLift](/docs/motion/hover-lift) — lift interactive cards on hover.

@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "compose-refs",
+  "type": "primitive",
+  "title": "Compose refs",
+  "description": "Merge multiple refs into one callback",
+  "files": [
+    {
+      "path": "src/primitives/compose-refs.ts",
+      "target": "compose-refs.ts"
+    }
+  ],
+  "docs": "primitives"
+}

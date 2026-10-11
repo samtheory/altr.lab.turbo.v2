@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "checkbox",
+  "type": "ui",
+  "title": "Checkbox",
+  "description": "Tri-state checkbox",
+  "files": [
+    {
+      "path": "src/components/ui/checkbox.tsx",
+      "target": "checkbox.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "use-controllable-state",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/checkbox"
+}

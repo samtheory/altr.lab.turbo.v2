@@ -32,14 +32,14 @@ Follow the WAI-ARIA Authoring Practices pattern named in each row.
 
 ## Tasks
 
-- [ ] Dialog + AlertDialog with tests (focus trap, Esc, outside click, focus restore)
-- [ ] Dropdown Menu with tests (open keys, arrow nav, typeahead, checkbox / radio state)
-- [ ] Tabs with tests (arrow nav, activation modes, controlled)
-- [ ] Tooltip with tests (delay, focus show, Esc)
-- [ ] Toast store (framework-free module + `useSyncExternalStore`) and `Toaster` with tests (queue, dismiss, promise states)
-- [ ] Enter / exit animations with Motion via `Presence`; under reduced motion use opacity only
-- [ ] Stories for each, including nested case: Dropdown inside Dialog, Tooltip on a Dialog trigger
-- [ ] Add `Toaster` to the Overview story
+- [x] Dialog + AlertDialog with tests (focus trap, Esc, outside click, focus restore)
+- [x] Dropdown Menu with tests (open keys, arrow nav, typeahead, checkbox / radio state)
+- [x] Tabs with tests (arrow nav, activation modes, controlled)
+- [x] Tooltip with tests (delay, focus show, Esc)
+- [x] Toast store (framework-free module + `useSyncExternalStore`) and `Toaster` with tests (queue, dismiss, promise states)
+- [x] Enter / exit animations with Motion via `Presence`; under reduced motion use opacity only
+- [x] Stories for each, including nested case: Dropdown inside Dialog, Tooltip on a Dialog trigger
+- [x] Add `Toaster` to the Overview story
 
 ## Verify
 

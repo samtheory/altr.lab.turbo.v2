@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "slot",
+  "type": "primitive",
+  "title": "Slot",
+  "description": "asChild prop merging onto a single child",
+  "files": [
+    {
+      "path": "src/primitives/slot.tsx",
+      "target": "slot.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "compose-refs"
+  ],
+  "docs": "primitives"
+}

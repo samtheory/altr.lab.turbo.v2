@@ -38,10 +38,10 @@ One file per item: `elements/ui-kit/registry/<name>.json`.
 
 ### Tasks
 
-- [ ] JSON schema `registry/schema.json` + manifests for: `utils`, `theme-default`, `theme-power-blue`, `theme-power-green`, every primitive, every shipped component / recipe / chart
-- [ ] `scripts/build-registry.ts` (run with `tsx`): validate manifests against schema, read file contents, output `dist/r/<name>.json` (manifest + inlined file contents) and `dist/r/index.json` (list)
-- [ ] Check in the build: every relative import inside an item's files resolves to a file in that item or in a `registryDependencies` item — fail otherwise
-- [ ] Kit script `"build": "tsx scripts/build-registry.ts"` (turbo `build` already outputs `dist/**`)
+- [x] JSON schema `registry/schema.json` + manifests for: `utils`, `theme-default`, `theme-power-blue`, `theme-power-green`, every primitive, every shipped component / recipe / chart
+- [x] `scripts/build-registry.ts` (run with `tsx`): validate manifests against schema, read file contents, output `dist/r/<name>.json` (manifest + inlined file contents) and `dist/r/index.json` (list)
+- [x] Check in the build: every relative import inside an item's files resolves to a file in that item or in a `registryDependencies` item — fail otherwise
+- [x] Kit script `"build": "tsx scripts/build-registry.ts"` (turbo `build` already outputs `dist/**`)
 
 ## CLI (`elements/apolyx-cli`, npm name `apolyx`)
 
@@ -59,13 +59,13 @@ One file per item: `elements/ui-kit/registry/<name>.json`.
 
 ### Tasks
 
-- [ ] Package scaffold: `package.json` (`name: "apolyx"`, `bin: { apolyx: "dist/index.js" }`, `type: module`, Node ≥ 20), `tsup.config.ts`, `src/index.ts`
-- [ ] `apolyx init`: detect package manager (lockfile), detect Next / Vite + `tsconfig` paths, prompt for aliases + theme, write `apolyx.json`, install `utils` + chosen theme CSS, inject `@import` into the CSS file, install base deps
-- [ ] `apolyx add <name...>`: resolve `registryDependencies` (topological, de-duplicated), rewrite kit-relative imports to consumer aliases, write files (prompt before overwrite; `--overwrite`, `--yes`), install npm deps with the detected package manager, print summary
-- [ ] `apolyx list`: names + descriptions from `index.json`
-- [ ] Registry source resolution: `--registry <path>` flag › `apolyx.json` › env `APOLYX_REGISTRY` › default (monorepo path during dev)
-- [ ] Vitest: import rewrite, dependency resolution order, overwrite guard, config read / write (temp dirs)
-- [ ] Root script `"cli:apolyx": "pnpm --filter apolyx"` for local runs
+- [x] Package scaffold: `package.json` (`name: "apolyx"`, `bin: { apolyx: "dist/index.js" }`, `type: module`, Node ≥ 20), `tsup.config.ts`, `src/index.ts`
+- [x] `apolyx init`: detect package manager (lockfile), detect Next / Vite + `tsconfig` paths, prompt for aliases + theme, write `apolyx.json`, install `utils` + chosen theme CSS, inject `@import` into the CSS file, install base deps
+- [x] `apolyx add <name...>`: resolve `registryDependencies` (topological, de-duplicated), rewrite kit-relative imports to consumer aliases, write files (prompt before overwrite; `--overwrite`, `--yes`), install npm deps with the detected package manager, print summary
+- [x] `apolyx list`: names + descriptions from `index.json`
+- [x] Registry source resolution: `--registry <path>` flag › `apolyx.json` › env `APOLYX_REGISTRY` › default (monorepo path during dev)
+- [x] Vitest: import rewrite, dependency resolution order, overwrite guard, config read / write (temp dirs)
+- [x] Root script `"cli:apolyx": "pnpm --filter apolyx"` for local runs
 
 ## Verify
 
@@ -82,6 +82,10 @@ npm run build
 
 ## Done when
 
-- `init` + `add button` work end-to-end in a fresh Next app, and the app builds
-- Added files contain no `@altr/*` imports and no Radix
-- **Handoff:** run `update_docs` → docs_man adds the registry + CLI as-built note
+- [x] `init` + `add button` work end-to-end in a fresh Next app, and the app builds
+- [x] Added files contain no `@altr/*` imports and no Radix
+- [x] **Handoff:** run `update_docs` → docs_man adds the registry + CLI as-built note
+
+### Smoke record (Apolyx-S0001)
+
+`%TEMP%\apolyx-smoke` (create-next-app, no `src/`, Tailwind v4): `init --yes` → `add button dialog line-chart` (+ overlays / `theme-provider` / `power-blue` on re-run) → `npm run build` OK. Details: [[../../tech_space/ui-kit/04-registry-and-cli]].

@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "use-reduced-motion",
+  "type": "motion",
+  "title": "useReducedMotion",
+  "description": "Reduced-motion preference hook",
+  "files": [
+    {
+      "path": "src/motion/use-reduced-motion.ts",
+      "target": "use-reduced-motion.ts"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "docs": "motion"
+}

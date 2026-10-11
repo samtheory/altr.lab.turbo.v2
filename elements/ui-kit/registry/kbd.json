@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "kbd",
+  "type": "ui",
+  "title": "Kbd",
+  "description": "Keyboard key hint",
+  "files": [
+    {
+      "path": "src/components/ui/kbd.tsx",
+      "target": "kbd.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/kbd"
+}

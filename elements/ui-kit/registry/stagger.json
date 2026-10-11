@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "stagger",
+  "type": "motion",
+  "title": "Stagger",
+  "description": "Staggered children entrance",
+  "files": [
+    {
+      "path": "src/motion/stagger.tsx",
+      "target": "stagger.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "motion-tokens",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "motion/stagger"
+}

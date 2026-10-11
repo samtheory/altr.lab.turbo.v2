@@ -1,0 +1,23 @@
+{
+  "name": "slot",
+  "type": "primitive",
+  "title": "Slot",
+  "description": "asChild prop merging onto a single child",
+  "files": [
+    {
+      "path": "src/primitives/slot.tsx",
+      "target": "slot.tsx",
+      "content": "\"use client\";\r\n\r\nimport * as React from \"react\";\r\n\r\nimport { composeRefs } from \"./compose-refs\";\r\n\r\ntype AnyProps = Record<string, unknown>;\r\n\r\nfunction mergeProps(slotProps: AnyProps, childProps: AnyProps) {\r\n  const override: AnyProps = { ...childProps };\r\n\r\n  for (const propName of Object.keys(slotProps)) {\r\n    const slotValue = slotProps[propName];\r\n    const childValue = childProps[propName];\r\n\r\n    if (propName === \"style\") {\r\n      override.style = {\r\n        ...(slotValue as React.CSSProperties | undefined),\r\n        ...(childValue as React.CSSProperties | undefined),\r\n      };\r\n      continue;\r\n    }\r\n\r\n    if (propName === \"className\") {\r\n      override.className = [slotValue, childValue].filter(Boolean).join(\" \");\r\n      continue;\r\n    }\r\n\r\n    if (/^on[A-Z]/.test(propName)) {\r\n      override[propName] = (...args: unknown[]) => {\r\n        if (typeof childValue === \"function\") {\r\n          (childValue as (...a: unknown[]) => void)(...args);\r\n        }\r\n        const event = args[0] as { defaultPrevented?: boolean } | undefined;\r\n        if (event?.defaultPrevented) return;\r\n        if (typeof slotValue === \"function\") {\r\n          (slotValue as (...a: unknown[]) => void)(...args);\r\n        }\r\n      };\r\n      continue;\r\n    }\r\n\r\n    if (childValue === undefined) {\r\n      override[propName] = slotValue;\r\n    }\r\n  }\r\n\r\n  return override;\r\n}\r\n\r\nexport type SlotProps = React.HTMLAttributes<HTMLElement> & {\r\n  children?: React.ReactNode;\r\n  ref?: React.Ref<HTMLElement>;\r\n};\r\n\r\nexport function Slot({ children, ref, ...props }: SlotProps) {\r\n  if (React.isValidElement(children)) {\r\n    const child = children as React.ReactElement & {\r\n      ref?: React.Ref<HTMLElement>;\r\n    };\r\n    return React.cloneElement(child, {\r\n      ...mergeProps(props as AnyProps, child.props as AnyProps),\r\n      ref: composeRefs(ref, child.ref),\r\n    } as never);\r\n  }\r\n\r\n  if (React.Children.count(children) > 1) {\r\n    throw new Error(\"Apolyx Slot expects a single React element child.\");\r\n  }\r\n\r\n  return null;\r\n}\r\n\r\nexport function Slottable({ children }: { children: React.ReactNode }) {\r\n  return <>{children}</>;\r\n}\r\n",
+      "imports": [
+        {
+          "specifier": "./compose-refs",
+          "path": "src/primitives/compose-refs.ts"
+        }
+      ]
+    }
+  ],
+  "registryDependencies": [
+    "compose-refs"
+  ],
+  "docs": "primitives"
+}

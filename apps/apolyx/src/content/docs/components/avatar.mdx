@@ -1,0 +1,28 @@
+<ComponentPreview name="avatar-demo" />
+
+## Installation
+
+<InstallTabs name="avatar" exports="Avatar, AvatarImage, AvatarFallback" />
+
+## Usage
+
+```tsx
+<Avatar>
+  <AvatarImage src={user.image} alt={user.name} />
+  <AvatarFallback>{initials(user.name)}</AvatarFallback>
+</Avatar>
+```
+
+## Anatomy
+
+`Avatar` → `AvatarImage` + `AvatarFallback`. The fallback shows until the image loads, and stays if it fails.
+
+## Accessibility
+
+Always give `AvatarImage` an `alt`. If the avatar sits next to the person's name, use `alt=""` so the name is not read twice.
+
+## Props
+
+<PropsTable title="AvatarFallback" rows={[
+  { prop: "delayMs", type: "number", description: "Wait before showing the fallback, to avoid a flash on fast loads." },
+]} />

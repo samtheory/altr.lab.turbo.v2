@@ -1,0 +1,36 @@
+{
+  "name": "@altr/apolyx-docs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "prebuild": "node ./scripts/copy-registry.mjs",
+    "dev": "next dev --port 3004",
+    "build": "next build",
+    "start": "next start --port 3004",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf .next .turbo public/r"
+  },
+  "dependencies": {
+    "@altr/apolyx": "workspace:*",
+    "@mdx-js/loader": "3.1.0",
+    "@mdx-js/react": "3.1.0",
+    "@next/mdx": "15.5.0",
+    "@shikijs/rehype": "3.13.0",
+    "lucide-react": "0.525.0",
+    "next": "^15.4.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remark-gfm": "4.0.1",
+    "shiki": "3.13.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/mdx": "2.0.13",
+    "@types/node": "^22.16.5",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2"
+  }
+}

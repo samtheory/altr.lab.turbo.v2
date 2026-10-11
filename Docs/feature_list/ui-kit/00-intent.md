@@ -343,13 +343,13 @@ This feature_list note is enough to open a sprint when we can check:
 
 Use these when implementing; verify in code + tech_space:
 
-- [ ] Apolyx `Slot` (or equivalent) — zero Radix / Base UI deps in ui-kit
-- [ ] Token file(s) for `default` / `power-blue` / `power-green` × light/dark; docs + Storybook switch both axes
-- [ ] Registry manifest + `apolyx add` for at least Button (and deps)
-- [ ] `apps/apolyx` serves MDX page for Button (and index of wave-1 components)
-- [ ] Storybook still runs for the same components
-- [ ] Motion recipe + one chart installable / documented
-- [ ] Customization story documented: tokens + variants + CLI-owned edits
+- [x] Apolyx `Slot` (or equivalent) — zero Radix / Base UI deps in ui-kit — **Apolyx-S0001**
+- [x] Token file(s) for `default` / `power-blue` / `power-green` × light/dark; docs + Storybook switch both axes — **Apolyx-S0001**
+- [x] Registry manifest + `apolyx add` for at least Button (and deps) — **Apolyx-S0001** (51 items; external smoke)
+- [x] `apps/apolyx` serves MDX page for Button (and index of wave-1 components) — **Apolyx-S0001**
+- [x] Storybook still runs for the same components — **Apolyx-S0001**
+- [x] Motion recipe + one chart installable / documented — **Apolyx-S0001**
+- [x] Customization story documented: tokens + variants + CLI-owned edits — **Apolyx-S0001** (`/docs/theming`)
 
 ## Packages touched (when we build)
 

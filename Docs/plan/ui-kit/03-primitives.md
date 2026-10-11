@@ -27,8 +27,8 @@ New folder `elements/ui-kit/src/primitives/`, one file per primitive, exported f
 
 ### Test setup
 
-- [ ] Add `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` as kit devDependencies; `vitest.config.ts`; script `"test": "vitest run"`
-- [ ] Add `test` task to `turbo.json`
+- [x] Add `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` as kit devDependencies; `vitest.config.ts`; script `"test": "vitest run"`
+- [x] Add `test` task to `turbo.json`
 
 ### Primitives
 
@@ -47,13 +47,13 @@ New folder `elements/ui-kit/src/primitives/`, one file per primitive, exported f
 | `visually-hidden.tsx` | Screen-reader-only content | — |
 | `position.ts` | Anchor positioning for floating content: side / align / offset, flip on collision, update on scroll + resize | flip logic (pure function) |
 
-- [ ] Implement each file above with its tests
-- [ ] `position.ts`: implement in-house (small, pure math + `ResizeObserver`); revisit only if overlays in phase 7 prove it insufficient — do **not** add Radix / Base UI / Floating UI React wrappers without a note in this card
+- [x] Implement each file above with its tests
+- [x] `position.ts`: implement in-house (small, pure math + `ResizeObserver`); revisit only if overlays in phase 7 prove it insufficient — do **not** add Radix / Base UI / Floating UI React wrappers without a note in this card
 
 ### Radix removal
 
-- [ ] `Button`: import Apolyx `Slot`; keep `asChild`
-- [ ] Remove `@radix-ui/react-slot` from `package.json`; `pnpm install`
+- [x] `Button`: import Apolyx `Slot`; keep `asChild`
+- [x] Remove `@radix-ui/react-slot` from `package.json`; `pnpm install`
 
 ## Verify
 

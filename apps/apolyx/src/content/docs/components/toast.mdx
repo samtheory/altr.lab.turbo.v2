@@ -1,0 +1,46 @@
+<ComponentPreview name="toast-demo" />
+
+## Installation
+
+<InstallTabs name="toast" exports="Toaster, toast" />
+
+## Usage
+
+Render one `Toaster` near the root, then call `toast` from anywhere — no provider or hook needed.
+
+```tsx
+// layout.tsx
+<Toaster />
+
+// anywhere
+toast.success("Saved");
+toast.error("Upload failed", { description: "File is larger than 10 MB" });
+toast.promise(save(), { loading: "Saving…", success: "Saved", error: "Could not save" });
+toast.dismiss(id);
+```
+
+## API
+
+| Call | Result |
+|---|---|
+| `toast(title, options?)` | Neutral toast; returns its id |
+| `toast.success` / `.error` / `.warning` / `.info` | Variant with an icon |
+| `toast.loading(title)` | Stays until updated or dismissed |
+| `toast.promise(promise, messages)` | Loading, then success or error in place |
+| `toast.dismiss(id?)` | Dismiss one, or all |
+
+Options: `id` (update an existing toast), `description`, `duration` in ms (`Infinity` to persist; default 4000).
+
+## Accessibility
+
+- The Toaster is a labelled region; press **F8** to move focus to it.
+- Toasts use `role="status"` with polite announcements; errors use `role="alert"` (assertive).
+- Timers pause while the pointer is over the region or focus is inside it.
+- Swipe right to dismiss on touch. Under reduced motion toasts only fade.
+
+## Props
+
+<PropsTable title="Toaster" rows={[
+  { prop: "max", type: "number", default: "3", description: "Visible toasts; the rest wait in the queue." },
+  { prop: "className", type: "string", description: "Position or width overrides." },
+]} />

@@ -1,21 +1,21 @@
-# @altr/ui-kit
+# Apolyx UI kit
 
-Shared design system for altr.lab apps: **Tailwind v4**, **shadcn-style** components, **light/dark** tokens, **Motion**, **Storybook**.
+Package `@altr/apolyx` — shared design system for altr.lab apps: **Tailwind v4**, **Apolyx** components, **theme families × light/dark**, **Motion**, **Storybook**.
 
 ## Use in a Next.js app
 
 ```tsx
 // app/layout.tsx
-import { ThemeProvider } from "@altr/ui-kit";
-import "@altr/ui-kit/globals.css";
+import { ThemeProvider } from "@altr/apolyx";
+import "@altr/apolyx/globals.css";
 
 // next.config.ts
-transpilePackages: ["@altr/ui-kit"]
+transpilePackages: ["@altr/apolyx"]
 ```
 
 ```css
 /* app/globals.css */
-@import "@altr/ui-kit/globals.css";
+@import "@altr/apolyx/globals.css";
 @source "../";
 ```
 
@@ -36,8 +36,8 @@ pnpm build:storybook:ui-kit   # static build → elements/ui-kit/storybook-stati
 Or from this package:
 
 ```bash
-pnpm --filter @altr/ui-kit storybook
-pnpm --filter @altr/ui-kit build-storybook
+pnpm --filter @altr/apolyx storybook
+pnpm --filter @altr/apolyx build-storybook
 ```
 
 Add new stories next to components: `src/**/*.stories.tsx`.

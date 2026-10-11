@@ -1,0 +1,43 @@
+<ComponentPreview name="tabs-demo" />
+
+## Installation
+
+<InstallTabs name="tabs" exports="Tabs, TabsList, TabsTrigger, TabsContent" />
+
+## Usage
+
+```tsx
+<Tabs defaultValue="overview">
+  <TabsList aria-label="Project">
+    <TabsTrigger value="overview">Overview</TabsTrigger>
+    <TabsTrigger value="settings">Settings</TabsTrigger>
+  </TabsList>
+  <TabsContent value="overview">…</TabsContent>
+  <TabsContent value="settings">…</TabsContent>
+</Tabs>
+```
+
+## Anatomy
+
+`Tabs` → `TabsList` (`TabsTrigger`…) + `TabsContent`…. The active indicator slides between triggers with a Motion shared layout.
+
+## Accessibility
+
+Follows the WAI-ARIA tabs pattern: `tablist`, `tab` (with `aria-selected` and `aria-controls`), and `tabpanel` (labelled by its tab).
+
+| Key | Action |
+|---|---|
+| Tab | Into the tablist (active tab), then into the panel |
+| ArrowLeft / ArrowRight | Previous / next tab (Up / Down when vertical) |
+| Home / End | First / last tab |
+| Enter / Space | Activate the focused tab (manual mode) |
+
+## Props
+
+<PropsTable rows={[
+  { prop: "value", type: "string", description: "Controlled active tab." },
+  { prop: "defaultValue", type: "string", description: "Initial tab when uncontrolled." },
+  { prop: "onValueChange", type: "(value: string) => void", description: "Called when the active tab changes." },
+  { prop: "activationMode", type: "\"automatic\" | \"manual\"", default: "\"automatic\"", description: "Automatic selects on focus; manual waits for Enter / Space." },
+  { prop: "orientation", type: "\"horizontal\" | \"vertical\"", default: "\"horizontal\"", description: "Arrow-key axis and layout." },
+]} />

@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "toast",
+  "type": "ui",
+  "title": "Toast",
+  "description": "toast() API + Toaster live region",
+  "files": [
+    {
+      "path": "src/components/ui/toast.tsx",
+      "target": "toast.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/toast"
+}

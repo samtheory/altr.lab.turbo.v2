@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@altr/ui-kit";
+import { ApolyxProvider, ApolyxThemeScript } from "@altr/apolyx";
 
 import "./globals.css";
 
@@ -15,10 +15,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ApolyxThemeScript />
+      </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ApolyxProvider defaultTheme="default" defaultMode="system">
           {children}
-        </ThemeProvider>
+        </ApolyxProvider>
       </body>
     </html>
   );

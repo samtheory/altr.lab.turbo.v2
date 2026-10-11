@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-provider",
+  "type": "ui",
+  "title": "ApolyxProvider",
+  "description": "next-themes mode + Apolyx family provider and no-flash script",
+  "files": [
+    {
+      "path": "src/components/theme-provider.tsx",
+      "target": "theme-provider.tsx"
+    }
+  ],
+  "dependencies": {
+    "next-themes": "^0.4.6"
+  },
+  "registryDependencies": [
+    "theme-config"
+  ],
+  "docs": "theming"
+}

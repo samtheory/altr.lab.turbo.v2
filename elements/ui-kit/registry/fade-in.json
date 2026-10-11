@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "fade-in",
+  "type": "motion",
+  "title": "FadeIn",
+  "description": "Opacity + rise entrance",
+  "files": [
+    {
+      "path": "src/motion/fade-in.tsx",
+      "target": "fade-in.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "motion-tokens",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "motion/fade-in"
+}

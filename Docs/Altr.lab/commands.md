@@ -2,7 +2,7 @@
 title: "Commands — install run build"
 description: "How to install, develop, and build altr.lab with pnpm and turbo"
 created: 2026-09-19
-updated: 2026-09-21
+updated: 2026-10-11
 tags:
   - altr-lab
   - commands
@@ -23,12 +23,13 @@ pnpm dev:hub             # @altr/hub :3000  (landing + markdown content)
 pnpm dev:dashboard       # @altr/dashboard :3001
 pnpm dev:trading-ui      # @altr/trading-ui :3002
 pnpm dev:web             # @altr/web :3003
+pnpm dev:apolyx          # @altr/apolyx-docs :3004
 pnpm dev:api             # @altr/hono-server :8787 (needs Bun)
 ```
 
-## Storybook (`@altr/ui-kit`)
+## Storybook (`@altr/apolyx`)
 
-Component workshop for the shared design system (Storybook 9 + Vite + Tailwind v4).
+Component workshop for the Apolyx design system (Storybook 9 + Vite + Tailwind v4). Root script names stay `storybook:ui-kit` / `build:storybook:ui-kit`.
 
 ```bash
 pnpm storybook:ui-kit          # http://localhost:6006
@@ -38,8 +39,18 @@ pnpm build:storybook:ui-kit    # static → elements/ui-kit/storybook-static
 Equivalent package filters:
 
 ```bash
-pnpm --filter @altr/ui-kit storybook
-pnpm --filter @altr/ui-kit build-storybook
+pnpm --filter @altr/apolyx storybook
+pnpm --filter @altr/apolyx build-storybook
+pnpm --filter @altr/apolyx test
+pnpm --filter @altr/apolyx build   # registry → elements/ui-kit/dist/r
+```
+
+## Apolyx CLI
+
+```bash
+pnpm --filter apolyx build
+pnpm cli:apolyx -- init --registry ./elements/ui-kit/dist/r --yes
+pnpm cli:apolyx -- add button --registry ./elements/ui-kit/dist/r --yes
 ```
 
 Toolbar includes **light / dark** theme toggle (`@storybook/addon-themes`). Stories live under `elements/ui-kit/src/**/*.stories.tsx`.

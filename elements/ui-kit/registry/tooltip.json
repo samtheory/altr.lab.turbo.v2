@@ -1,0 +1,25 @@
+{
+  "$schema": "./schema.json",
+  "name": "tooltip",
+  "type": "ui",
+  "title": "Tooltip",
+  "description": "Hover / focus hint with delay group",
+  "files": [
+    {
+      "path": "src/components/ui/tooltip.tsx",
+      "target": "tooltip.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "dismissable-layer",
+    "portal",
+    "position",
+    "presence",
+    "slot",
+    "use-controllable-state",
+    "use-floating",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/tooltip"
+}

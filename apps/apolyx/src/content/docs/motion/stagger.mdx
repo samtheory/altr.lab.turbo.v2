@@ -1,0 +1,32 @@
+<ComponentPreview name="stagger-demo" />
+
+## Installation
+
+<InstallTabs name="stagger" exports="Stagger, StaggerItem" />
+
+## Usage
+
+```tsx
+<Stagger as="ul">
+  {items.map((item) => (
+    <StaggerItem key={item.id} as="li">
+      {item.label}
+    </StaggerItem>
+  ))}
+</Stagger>
+```
+
+## Accessibility
+
+Under reduced motion items appear together with an opacity fade.
+
+## Props
+
+<PropsTable title="Stagger" rows={[
+  { prop: "as", type: "\"div\" | \"ul\"", default: "\"div\"", description: "Rendered element." },
+  { prop: "staggerChildren", type: "number", default: "0.06", description: "Seconds between items." },
+]} />
+
+<PropsTable title="StaggerItem" rows={[
+  { prop: "as", type: "\"div\" | \"li\"", default: "\"div\"", description: "Rendered element." },
+]} />

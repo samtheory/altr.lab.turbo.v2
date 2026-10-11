@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "visually-hidden",
+  "type": "primitive",
+  "title": "VisuallyHidden",
+  "description": "Screen-reader-only content",
+  "files": [
+    {
+      "path": "src/primitives/visually-hidden.tsx",
+      "target": "visually-hidden.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "primitives"
+}

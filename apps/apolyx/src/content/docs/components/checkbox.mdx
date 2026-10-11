@@ -1,0 +1,27 @@
+<ComponentPreview name="checkbox-demo" />
+
+## Installation
+
+<InstallTabs name="checkbox" exports="Checkbox" />
+
+## Usage
+
+```tsx
+<Checkbox id="terms" checked={accepted} onCheckedChange={(v) => setAccepted(v === true)} />
+<Label htmlFor="terms">Accept terms</Label>
+```
+
+## Accessibility
+
+- `role="checkbox"` with `aria-checked` of `true`, `false`, or `mixed` for indeterminate.
+- Space toggles. Pair with a `Label` (or `aria-label`).
+- Clicking an indeterminate checkbox makes it checked.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "checked", type: "boolean | \"indeterminate\"", description: "Controlled state." },
+  { prop: "defaultChecked", type: "boolean | \"indeterminate\"", default: "false", description: "Initial state when uncontrolled." },
+  { prop: "onCheckedChange", type: "(checked: boolean | \"indeterminate\") => void", description: "Called when the state changes." },
+  { prop: "disabled", type: "boolean", description: "Prevents interaction." },
+]} />

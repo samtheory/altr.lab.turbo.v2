@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "card",
+  "type": "ui",
+  "title": "Card",
+  "description": "Surface with header, content, footer",
+  "files": [
+    {
+      "path": "src/components/ui/card.tsx",
+      "target": "card.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/card"
+}

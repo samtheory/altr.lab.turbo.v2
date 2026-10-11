@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "use-id",
+  "type": "primitive",
+  "title": "useId",
+  "description": "SSR-safe id with optional override",
+  "files": [
+    {
+      "path": "src/primitives/use-id.ts",
+      "target": "use-id.ts"
+    }
+  ],
+  "docs": "primitives"
+}

@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardHeader, CardTitle, ThemeToggle } from "@altr/ui-kit";
+import { Card, CardDescription, CardHeader, CardTitle, ThemeToggle } from "@altr/apolyx";
 
 export default function TradingHomePage() {
   return (
@@ -11,7 +11,7 @@ export default function TradingHomePage() {
         <CardHeader>
           <CardTitle>@altr/trading-ui</CardTitle>
           <CardDescription>
-            Thin scaffold for trading surfaces. Uses @altr/ui-kit theme.
+            Thin scaffold for trading surfaces. Uses @altr/apolyx theme.
           </CardDescription>
         </CardHeader>
       </Card>

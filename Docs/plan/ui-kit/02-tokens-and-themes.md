@@ -39,32 +39,32 @@ Same token names in every family × mode. Components never reference a family.
 
 ### CSS
 
-- [ ] Split `src/styles/` into `globals.css` (entry: `@import "tailwindcss"`, `@source`, `@theme inline`, base layer) and `themes/default.css`, `themes/power-blue.css`, `themes/power-green.css`
-- [ ] Convert all values to OKLCH; variables hold full colors; `@theme inline` maps `--color-*: var(--*)`
-- [ ] Selectors: `:root, [data-theme="default"]` (light), `.dark, [data-theme="default"].dark` (dark), `[data-theme="power-blue"]`, `[data-theme="power-blue"].dark`, same for `power-green`
-- [ ] Contrast: every `*-foreground` on its surface ≥ 4.5:1 (text) and `ring` ≥ 3:1 against `background`, in all 6 palettes — record the numbers in a comment table at the top of each theme file
-- [ ] Taste pass: pick the Apolyx neutral (not pure gray — slight hue), radius, and font stack for `default`; PowerBlue / PowerGreen change accent, ring, chart ramp and tint the neutrals
-- [ ] Add `@custom-variant dark (&:where(.dark, .dark *));` so `dark:` utilities follow the class
-- [ ] Respect `prefers-reduced-motion` at token level: reduced durations set to `0ms` in a media query
+- [x] Split `src/styles/` into `globals.css` (entry: `@import "tailwindcss"`, `@source`, `@theme inline`, base layer) and `themes/default.css`, `themes/power-blue.css`, `themes/power-green.css`
+- [x] Convert all values to OKLCH; variables hold full colors; `@theme inline` maps `--color-*: var(--*)`
+- [x] Selectors: `:root, [data-theme="default"]` (light), `.dark, [data-theme="default"].dark` (dark), `[data-theme="power-blue"]`, `[data-theme="power-blue"].dark`, same for `power-green`
+- [x] Contrast: every `*-foreground` on its surface ≥ 4.5:1 (text) and `ring` ≥ 3:1 against `background`, in all 6 palettes — record the numbers in a comment table at the top of each theme file
+- [x] Taste pass: pick the Apolyx neutral (not pure gray — slight hue), radius, and font stack for `default`; PowerBlue / PowerGreen change accent, ring, chart ramp and tint the neutrals
+- [x] Add `@custom-variant dark (&:where(.dark, .dark *));` so `dark:` utilities follow the class
+- [x] Respect `prefers-reduced-motion` at token level: reduced durations set to `0ms` in a media query
 
 ### TypeScript
 
-- [ ] `src/theme/index.ts`: export `themeFamilies = ["default", "power-blue", "power-green"]`, `themeModes = ["light", "dark", "system"]`, `cssVariableTokens` (full list above), and their types
-- [ ] `src/components/theme-provider.tsx` → `ApolyxProvider` with props `theme`, `defaultTheme`, `mode`, `defaultMode`, `storageKey`; wraps `next-themes` for mode, owns family state, sets `data-theme` on `<html>`
-- [ ] `useApolyxTheme()` hook → `{ theme, setTheme, mode, setMode, resolvedMode }`
-- [ ] `ApolyxThemeScript` (inline `<script>`) that applies stored family before paint; document usage in `<head>` for Next
-- [ ] Keep `ThemeProvider` export as a deprecated alias for one release so apps don't break mid-sprint
-- [ ] `ThemeToggle` (mode) stays; add `ThemeFamilySwitcher` (3-option segmented control, keyboard accessible)
+- [x] `src/theme/index.ts`: export `themeFamilies = ["default", "power-blue", "power-green"]`, `themeModes = ["light", "dark", "system"]`, `cssVariableTokens` (full list above), and their types
+- [x] `src/components/theme-provider.tsx` → `ApolyxProvider` with props `theme`, `defaultTheme`, `mode`, `defaultMode`, `storageKey`; wraps `next-themes` for mode, owns family state, sets `data-theme` on `<html>`
+- [x] `useApolyxTheme()` hook → `{ theme, setTheme, mode, setMode, resolvedMode }`
+- [x] `ApolyxThemeScript` (inline `<script>`) that applies stored family before paint; document usage in `<head>` for Next
+- [x] Keep `ThemeProvider` export as a deprecated alias for one release so apps don't break mid-sprint
+- [x] `ThemeToggle` (mode) stays; add `ThemeFamilySwitcher` (3-option segmented control, keyboard accessible)
 
 ### Storybook
 
-- [ ] Replace `withThemeByClassName` with a custom decorator driven by two toolbar globals: `theme` (3 families) and `mode` (light / dark)
-- [ ] Add `Foundations/Tokens` story: swatch grid of every color token, radius scale, type scale, shadows — for the active family × mode
+- [x] Replace `withThemeByClassName` with a custom decorator driven by two toolbar globals: `theme` (3 families) and `mode` (light / dark)
+- [x] Add `Foundations/Tokens` story: swatch grid of every color token, radius scale, type scale, shadows — for the active family × mode
 
 ### Apps
 
-- [ ] Fix `apps/hub/src/app/page.tsx`: `hsl(var(--muted))` → `var(--muted)`, `hsl(var(--accent))` → `var(--accent)`
-- [ ] Swap `ThemeProvider` for `ApolyxProvider` in app layouts (`hub`, `web`, `dashboard`, `trading-ui`)
+- [x] Fix `apps/hub/src/app/page.tsx`: `hsl(var(--muted))` → `var(--muted)`, `hsl(var(--accent))` → `var(--accent)`
+- [x] Swap `ThemeProvider` for `ApolyxProvider` in app layouts (`hub`, `web`, `dashboard`, `trading-ui`)
 
 ## Verify
 

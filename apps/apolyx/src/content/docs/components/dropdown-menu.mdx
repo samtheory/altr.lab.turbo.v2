@@ -1,0 +1,61 @@
+<ComponentPreview name="dropdown-menu-demo" />
+
+## Installation
+
+<InstallTabs name="dropdown-menu" exports="DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem" />
+
+## Usage
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline">Options</Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="end">
+    <DropdownMenuItem onSelect={duplicate}>Duplicate</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem onSelect={remove}>Delete</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+Call `event.preventDefault()` in `onSelect` to keep the menu open.
+
+## Anatomy
+
+`DropdownMenu` → `DropdownMenuTrigger` + `DropdownMenuContent` (`DropdownMenuLabel`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup` → `DropdownMenuRadioItem`, `DropdownMenuSeparator`, `DropdownMenuShortcut`).
+
+## Accessibility
+
+Follows the WAI-ARIA menu button pattern.
+
+| Key | Action |
+|---|---|
+| Enter / Space / ArrowDown | Open and focus the first item |
+| ArrowUp (on trigger) | Open and focus the last item |
+| ArrowDown / ArrowUp | Move between items (wraps, skips disabled) |
+| Home / End | First / last item |
+| Letters | Typeahead to the next matching item |
+| Enter / Space | Select the focused item |
+| Escape / Tab | Close and return focus to the trigger |
+
+Submenus are not part of this release.
+
+## Props
+
+<PropsTable title="DropdownMenuContent" rows={[
+  { prop: "side", type: "\"top\" | \"right\" | \"bottom\" | \"left\"", default: "\"bottom\"", description: "Preferred side; flips when there is no room." },
+  { prop: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"start\"", description: "Alignment against the trigger." },
+  { prop: "sideOffset", type: "number", default: "6", description: "Gap from the trigger in pixels." },
+]} />
+
+<PropsTable title="DropdownMenuItem" rows={[
+  { prop: "onSelect", type: "(event: Event) => void", description: "Called on click or Enter / Space." },
+  { prop: "disabled", type: "boolean", description: "Skipped by keyboard navigation." },
+  { prop: "inset", type: "boolean", description: "Indent to align with checkbox / radio items." },
+]} />
+
+<PropsTable title="DropdownMenuCheckboxItem" rows={[
+  { prop: "checked", type: "boolean", description: "Controlled state." },
+  { prop: "onCheckedChange", type: "(checked: boolean) => void", description: "Called when toggled." },
+]} />

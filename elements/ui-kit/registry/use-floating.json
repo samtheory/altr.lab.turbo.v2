@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "use-floating",
+  "type": "primitive",
+  "title": "useFloating",
+  "description": "Fixed-position floating content anchored to an element",
+  "files": [
+    {
+      "path": "src/primitives/use-floating.ts",
+      "target": "use-floating.ts"
+    }
+  ],
+  "registryDependencies": [
+    "position"
+  ],
+  "docs": "primitives"
+}

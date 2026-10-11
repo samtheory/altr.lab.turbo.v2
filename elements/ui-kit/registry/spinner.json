@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "spinner",
+  "type": "ui",
+  "title": "Spinner",
+  "description": "Loading indicator with SR label",
+  "files": [
+    {
+      "path": "src/components/ui/spinner.tsx",
+      "target": "spinner.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "utils",
+    "visually-hidden"
+  ],
+  "docs": "components/spinner"
+}

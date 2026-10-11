@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-base",
+  "type": "theme",
+  "title": "Token mapping",
+  "description": "Tailwind v4 @theme inline mapping, dark variant, reduced motion, base layer",
+  "files": [
+    {
+      "path": "src/styles/tokens.css",
+      "target": "apolyx-tokens.css"
+    }
+  ],
+  "docs": "theming"
+}

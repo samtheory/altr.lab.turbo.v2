@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pressable",
+  "type": "motion",
+  "title": "Pressable",
+  "description": "Press scale feedback",
+  "files": [
+    {
+      "path": "src/motion/pressable.tsx",
+      "target": "pressable.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "slot",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "motion/pressable"
+}

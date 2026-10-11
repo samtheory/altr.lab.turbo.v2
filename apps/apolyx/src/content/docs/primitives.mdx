@@ -1,0 +1,55 @@
+Primitives are the behavior layer every component is built from. They are unstyled and exported from `@altr/apolyx` (or installed individually with the CLI).
+
+<InstallTabs name="dismissable-layer focus-scope portal presence" exports="DismissableLayer, FocusScope, Portal, Presence" />
+
+## Slot
+
+Merges its props, event handlers, `className`, `style`, and `ref` onto a single child. Components use it for `asChild`.
+
+```tsx
+<Button asChild>
+  <a href="/docs">Docs</a>
+</Button>
+```
+
+## Portal
+
+Renders children into `document.body` (or a `container`). Used by every overlay.
+
+## Presence
+
+Keeps content mounted while it animates out. Pass a function child to receive `present` and drive Motion.
+
+```tsx
+<Presence present={open}>
+  {({ present }) => <motion.div animate={{ opacity: present ? 1 : 0 }} />}
+</Presence>
+```
+
+## FocusScope
+
+Moves focus into its content on mount, traps Tab / Shift+Tab, and returns focus to the previously focused element on unmount.
+
+## DismissableLayer
+
+Handles Escape and outside pointer-down for layered surfaces. Layers form a stack by nesting depth (which crosses portals), so only the top layer reacts.
+
+- `disableOutsideDismiss` — Escape still works, outside clicks do not (AlertDialog).
+- `passive` — closes on any outside pointer-down without blocking the layer below (Tooltip).
+- `ignoreRefs` — elements treated as inside, such as the trigger.
+
+## RovingFocusGroup
+
+One tab stop for a group; arrows, Home / End, and typeahead move focus. Used by Tabs.
+
+## Positioning
+
+`computePosition` places floating content on a side with alignment and flips when it would overflow. `useFloating` keeps it anchored on scroll and resize.
+
+## State hooks
+
+- `useControllableState` — one hook for controlled and uncontrolled props.
+- `useId` — SSR-safe ids with an optional override.
+- `composeRefs` / `useComposedRefs` — merge refs.
+- `lockScroll` — locks body scroll and compensates for the scrollbar.
+- `VisuallyHidden` — content for screen readers only.

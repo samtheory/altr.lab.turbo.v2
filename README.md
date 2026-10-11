@@ -28,7 +28,7 @@ Docs/          # Obsidian second brain
 
 - **Landing:** `@altr/hub` — content from `apps/hub/content/*.md`
 - **DB:** Turso (libSQL) primary — stub in `@altr/base/db`
-- **UI:** Tailwind v4 + shadcn + Motion in `@altr/ui-kit` — Storybook: `pnpm storybook:ui-kit` (:6006)
+- **UI:** Tailwind v4 + shadcn + Motion in `@altr/apolyx` — Storybook: `pnpm storybook:ui-kit` (:6006)
 - **API:** Hono + Bun (`@altr/hono-server`) — requires Bun
 - **Optional:** PocketBase under `cloud/pocketbase`
 
@@ -37,8 +37,8 @@ Full decisions: [Docs/Altr.lab/stack.md](Docs/Altr.lab/stack.md) · As-built: [D
 ## Theme in apps
 
 ```tsx
-import "@altr/ui-kit/globals.css";
-import { ThemeProvider, ThemeToggle, FadeIn } from "@altr/ui-kit";
+import "@altr/apolyx/globals.css";
+import { ThemeProvider, ThemeToggle, FadeIn } from "@altr/apolyx";
 ```
 
 Wrap with `ThemeProvider` (`attribute="class"`). Details: `elements/ui-kit/README.md`.

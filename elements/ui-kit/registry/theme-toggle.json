@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-toggle",
+  "type": "ui",
+  "title": "ThemeToggle",
+  "description": "Light / dark toggle button",
+  "files": [
+    {
+      "path": "src/components/theme-toggle.tsx",
+      "target": "theme-toggle.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "next-themes": "^0.4.6"
+  },
+  "registryDependencies": [
+    "button"
+  ],
+  "docs": "theming"
+}

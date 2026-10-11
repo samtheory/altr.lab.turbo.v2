@@ -1,0 +1,29 @@
+<ComponentPreview name="text-demo" />
+
+## Installation
+
+<InstallTabs name="text" exports="Text, Heading" />
+
+## Usage
+
+```tsx
+<Heading as="h2" size="md">Billing</Heading>
+<Text tone="muted" size="sm">Invoices are sent on the 1st.</Text>
+```
+
+## Accessibility
+
+Choose `as` for document structure and `size` for appearance — they are independent, so the outline stays correct.
+
+## Props
+
+<PropsTable title="Text" rows={[
+  { prop: "as", type: "\"p\" | \"span\" | \"div\"", default: "\"p\"", description: "Rendered element." },
+  { prop: "size", type: "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\"", default: "\"md\"", description: "Font size." },
+  { prop: "tone", type: "\"default\" | \"muted\"", default: "\"default\"", description: "Text color." },
+]} />
+
+<PropsTable title="Heading" rows={[
+  { prop: "as", type: "\"h1\" … \"h6\"", description: "Heading level." },
+  { prop: "size", type: "\"sm\" | \"md\" | \"lg\" | \"xl\"", description: "Visual size." },
+]} />

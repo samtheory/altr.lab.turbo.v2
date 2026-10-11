@@ -20,16 +20,16 @@ Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Motion
 
 ## Tasks
 
-- [ ] `src/motion/tokens.ts`: `durations` (`fast` 0.12s, `base` 0.2s, `slow` 0.4s) and `easings` (`out`, `inOut`, `spring` config) mirroring the CSS motion tokens from phase 2 — one source of numbers, documented in both places
-- [ ] `src/motion/use-reduced-motion.ts`: re-export / wrap Motion's `useReducedMotion`
-- [ ] Move `src/components/motion.tsx` → `src/motion/fade-in.tsx`; use tokens; under reduced motion render final state with opacity only (no `y`)
-- [ ] `Stagger` + `StaggerItem`: parent orchestrates children with `staggerChildren`; `as` prop for `ul` / `div`
-- [ ] `Pressable`: scale-down on press (`whileTap`), keyboard press parity (Space / Enter), works with `asChild` via Apolyx `Slot`
-- [ ] `HoverLift`: subtle translate + shadow token change on hover / focus-visible; disabled for coarse pointers
-- [ ] Only animate `transform` and `opacity` (no layout-thrashing properties)
-- [ ] Export from `@altr/apolyx` and a `@altr/apolyx/motion` subpath; keep `motion` re-export for apps
-- [ ] Stories: each recipe, plus a toggle that forces reduced motion
-- [ ] Use `Pressable` behavior inside `Button` only if it stays subtle — decide in review, note the decision here
+- [x] `src/motion/tokens.ts`: `durations` (`fast` 0.12s, `base` 0.2s, `slow` 0.4s) and `easings` (`out`, `inOut`, `spring` config) mirroring the CSS motion tokens from phase 2 — one source of numbers, documented in both places
+- [x] `src/motion/use-reduced-motion.ts`: re-export / wrap Motion's `useReducedMotion`
+- [x] Move `src/components/motion.tsx` → `src/motion/fade-in.tsx`; use tokens; under reduced motion render final state with opacity only (no `y`)
+- [x] `Stagger` + `StaggerItem`: parent orchestrates children with `staggerChildren`; `as` prop for `ul` / `div`
+- [x] `Pressable`: scale-down on press (`whileTap`), keyboard press parity (Space / Enter), works with `asChild` via Apolyx `Slot`
+- [x] `HoverLift`: subtle translate + shadow token change on hover / focus-visible; disabled for coarse pointers
+- [x] Only animate `transform` and `opacity` (no layout-thrashing properties)
+- [x] Export from `@altr/apolyx` and a `@altr/apolyx/motion` subpath; keep `motion` re-export for apps
+- [x] Stories: each recipe, plus a toggle that forces reduced motion
+- [x] Use `Pressable` behavior inside `Button` only if it stays subtle — decide in review, note the decision here
 
 ## Verify
 

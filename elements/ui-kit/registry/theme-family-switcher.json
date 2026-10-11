@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-family-switcher",
+  "type": "ui",
+  "title": "ThemeFamilySwitcher",
+  "description": "Radio group for default / power-blue / power-green",
+  "files": [
+    {
+      "path": "src/components/theme-family-switcher.tsx",
+      "target": "theme-family-switcher.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "theme-config",
+    "theme-provider",
+    "utils"
+  ],
+  "docs": "theming"
+}

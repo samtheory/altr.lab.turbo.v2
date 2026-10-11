@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "button",
+  "type": "ui",
+  "title": "Button",
+  "description": "Variants, sizes, loading, asChild",
+  "files": [
+    {
+      "path": "src/components/ui/button.tsx",
+      "target": "button.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "slot",
+    "utils"
+  ],
+  "docs": "components/button"
+}

@@ -1,0 +1,45 @@
+<ComponentPreview name="button-demo" />
+
+## Installation
+
+<InstallTabs name="button" exports="Button, buttonVariants" />
+
+## Usage
+
+```tsx
+<Button variant="outline" size="sm" onClick={save}>
+  Save
+</Button>
+```
+
+Render a link that looks like a button with `asChild`:
+
+```tsx
+<Button asChild>
+  <Link href="/docs">Read the docs</Link>
+</Button>
+```
+
+## Variants
+
+`default`, `secondary`, `outline`, `ghost`, `destructive`, and `link`; sizes `sm`, `md`, `lg`, and `icon`. Use `buttonVariants()` to style other elements the same way.
+
+## Tokens used
+
+`primary`, `secondary`, `destructive`, `accent`, `input`, `ring`, `radius`.
+
+## Accessibility
+
+- Native `<button type="button">` by default; Enter and Space activate it.
+- `loading` sets `aria-busy` and disables the button while showing a spinner.
+- Icon-only buttons need an `aria-label`.
+- Focus ring uses the `ring` token and is only shown for keyboard focus.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "variant", type: "\"default\" | \"secondary\" | \"outline\" | \"ghost\" | \"destructive\" | \"link\"", default: "\"default\"", description: "Visual style." },
+  { prop: "size", type: "\"sm\" | \"md\" | \"lg\" | \"icon\"", default: "\"md\"", description: "Height and padding." },
+  { prop: "loading", type: "boolean", default: "false", description: "Shows a spinner, disables the button, sets aria-busy." },
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge props onto the single child instead of rendering a button." },
+]} />

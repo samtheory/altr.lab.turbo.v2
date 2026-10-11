@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "input",
+  "type": "ui",
+  "title": "Input",
+  "description": "Text input",
+  "files": [
+    {
+      "path": "src/components/ui/input.tsx",
+      "target": "input.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/input"
+}

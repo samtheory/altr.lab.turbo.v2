@@ -1,0 +1,21 @@
+<ComponentPreview name="spinner-demo" />
+
+## Installation
+
+<InstallTabs name="spinner" exports="Spinner" />
+
+## Usage
+
+```tsx
+<Spinner label="Loading results" />
+```
+
+## Accessibility
+
+`role="status"` with a visually hidden label, so screen readers announce it once. Inside a button, prefer `Button`'s `loading` prop.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "label", type: "string", default: "\"Loading\"", description: "Screen-reader text." },
+]} />

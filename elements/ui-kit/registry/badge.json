@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "badge",
+  "type": "ui",
+  "title": "Badge",
+  "description": "Status label with semantic variants",
+  "files": [
+    {
+      "path": "src/components/ui/badge.tsx",
+      "target": "badge.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/badge"
+}

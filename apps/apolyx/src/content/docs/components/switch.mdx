@@ -1,0 +1,25 @@
+<ComponentPreview name="switch-demo" />
+
+## Installation
+
+<InstallTabs name="switch" exports="Switch" />
+
+## Usage
+
+```tsx
+<Switch id="sync" checked={sync} onCheckedChange={setSync} />
+<Label htmlFor="sync">Background sync</Label>
+```
+
+## Accessibility
+
+`role="switch"` with `aria-checked`. Space and Enter toggle. Use a switch for settings that apply immediately; use a checkbox inside forms that are submitted.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "checked", type: "boolean", description: "Controlled state." },
+  { prop: "defaultChecked", type: "boolean", default: "false", description: "Initial state when uncontrolled." },
+  { prop: "onCheckedChange", type: "(checked: boolean) => void", description: "Called when toggled." },
+  { prop: "disabled", type: "boolean", description: "Prevents interaction." },
+]} />

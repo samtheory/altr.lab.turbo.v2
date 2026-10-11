@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "switch",
+  "type": "ui",
+  "title": "Switch",
+  "description": "On / off toggle",
+  "files": [
+    {
+      "path": "src/components/ui/switch.tsx",
+      "target": "switch.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "use-controllable-state",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/switch"
+}

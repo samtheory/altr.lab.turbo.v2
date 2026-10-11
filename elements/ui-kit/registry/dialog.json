@@ -1,0 +1,29 @@
+{
+  "$schema": "./schema.json",
+  "name": "dialog",
+  "type": "ui",
+  "title": "Dialog",
+  "description": "Modal dialog + AlertDialog",
+  "files": [
+    {
+      "path": "src/components/ui/dialog.tsx",
+      "target": "dialog.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "dismissable-layer",
+    "focus-scope",
+    "portal",
+    "presence",
+    "scroll-lock",
+    "slot",
+    "use-controllable-state",
+    "use-id",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/dialog"
+}

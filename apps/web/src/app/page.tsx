@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
   ThemeToggle,
-} from "@altr/ui-kit";
+} from "@altr/apolyx";
 
 export default function HomePage() {
   return (
@@ -24,7 +24,7 @@ export default function HomePage() {
           <CardTitle>UI kit wired</CardTitle>
           <CardDescription>
             Shared Tailwind tokens and shadcn-style components from{" "}
-            <code className="text-foreground">@altr/ui-kit</code>. Toggle
+            <code className="text-foreground">@altr/apolyx</code>. Toggle
             light/dark with the button above.
           </CardDescription>
         </CardHeader>

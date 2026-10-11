@@ -1,0 +1,24 @@
+{
+  "$schema": "./schema.json",
+  "name": "line-chart",
+  "type": "chart",
+  "title": "Line Chart",
+  "description": "SVG line / area chart (visx scales)",
+  "files": [
+    {
+      "path": "src/charts/line-chart.tsx",
+      "target": "line-chart.tsx"
+    }
+  ],
+  "dependencies": {
+    "@visx/scale": "^4.0.0",
+    "@visx/shape": "^4.0.0",
+    "@visx/curve": "^4.0.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "chart",
+    "use-reduced-motion"
+  ],
+  "docs": "charts/line-chart"
+}

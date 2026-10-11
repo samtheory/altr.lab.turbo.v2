@@ -1,0 +1,30 @@
+@import "@altr/apolyx/globals.css";
+@source "../";
+
+/* Shiki dual themes: light colors inline, dark via --shiki-dark vars. */
+.code-block pre,
+pre.code-block,
+pre.shiki {
+  background-color: color-mix(in oklch, var(--muted) 55%, transparent) !important;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+.code-block pre {
+  margin: 0;
+}
+
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

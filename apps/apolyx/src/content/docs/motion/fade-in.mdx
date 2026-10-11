@@ -1,0 +1,25 @@
+<ComponentPreview name="fade-in-demo" />
+
+## Installation
+
+<InstallTabs name="fade-in" exports="FadeIn" />
+
+## Usage
+
+```tsx
+<FadeIn delay={0.1}>
+  <Card>…</Card>
+</FadeIn>
+```
+
+## Accessibility
+
+Under reduced motion the content only fades; there is no movement.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "delay", type: "number", default: "0", description: "Seconds before the entrance starts." },
+  { prop: "y", type: "number", default: "16", description: "Starting vertical offset in pixels." },
+  { prop: "...props", type: "HTMLMotionProps<\"div\">", description: "Any motion.div prop." },
+]} />

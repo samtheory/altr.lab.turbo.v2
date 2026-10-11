@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "avatar",
+  "type": "ui",
+  "title": "Avatar",
+  "description": "Image with fallback initials",
+  "files": [
+    {
+      "path": "src/components/ui/avatar.tsx",
+      "target": "avatar.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/avatar"
+}

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Button } from "../components/ui/button";
+import { Button } from "./button";
 
 const meta = {
   title: "UI/Button",
@@ -20,7 +20,7 @@ const meta = {
     },
     size: {
       control: "select",
-      options: ["default", "sm", "lg", "icon"],
+      options: ["default", "sm", "md", "lg", "icon"],
     },
   },
 } satisfies Meta<typeof Button>;

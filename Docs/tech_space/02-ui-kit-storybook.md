@@ -11,7 +11,9 @@ tags:
 
 # ui-kit Storybook (as-built)
 
-> Component workshop for `@altr/ui-kit`. Run steps: [[../Altr.lab/commands]].
+> **Renamed 2026-10-11:** package `@altr/ui-kit` → `@altr/apolyx`. Storybook filter is now `pnpm --filter @altr/apolyx storybook`. Run steps: [[../Altr.lab/commands]].
+
+> Component workshop for `@altr/apolyx`. Run steps: [[../Altr.lab/commands]].
 
 ## Stack
 

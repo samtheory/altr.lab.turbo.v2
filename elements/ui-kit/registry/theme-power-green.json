@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-power-green",
+  "type": "theme",
+  "title": "Theme: power-green",
+  "description": "OKLCH palette (light + dark) for the power-green family",
+  "files": [
+    {
+      "path": "src/styles/themes/power-green.css",
+      "target": "theme-power-green.css"
+    }
+  ],
+  "registryDependencies": [
+    "theme-base"
+  ],
+  "docs": "theming"
+}

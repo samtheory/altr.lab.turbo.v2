@@ -1,0 +1,48 @@
+Apolyx has three theme **families** — `default`, `power-blue`, and `power-green` — and two **modes**, light and dark. The family is a `data-theme` attribute on `<html>`; the mode is the `dark` class managed by next-themes. Use the switcher in the header and watch the table below update.
+
+## Color tokens
+
+<TokenTable />
+
+Components use these through Tailwind utilities such as `bg-primary`, `text-muted-foreground`, and `border-border`. Charts read `chart-1` … `chart-5`, `chart-grid`, and `chart-axis`.
+
+## Radius, type, motion, and shadow
+
+<TokenTable kind="other" />
+
+Durations collapse to `0ms` under `prefers-reduced-motion: reduce`.
+
+## Switching themes
+
+```tsx
+"use client";
+
+import { useApolyxTheme } from "@altr/apolyx";
+
+export function ThemeControls() {
+  const { theme, setTheme, mode, setMode } = useApolyxTheme();
+  return (
+    <>
+      <button onClick={() => setTheme("power-green")}>Family: {theme}</button>
+      <button onClick={() => setMode(mode === "dark" ? "light" : "dark")}>Mode: {mode}</button>
+    </>
+  );
+}
+```
+
+Ready-made controls ship as components: `ThemeFamilySwitcher` (a radio group) and `ThemeToggle` (light / dark). Install them with `npx apolyx add theme-provider theme-toggle theme-family-switcher`.
+
+The family is stored in `localStorage` under `apolyx-theme`. `ApolyxThemeScript` applies it before paint, so there is no flash on reload.
+
+## Customization ladder
+
+Reach for the lowest rung that solves the problem:
+
+1. **Tokens** — override CSS variables for a family, e.g. `[data-theme="power-blue"] { --radius: 0.25rem; }`.
+2. **Variants** — add a `cva` variant to the component when the change is a reusable style.
+3. **className** — every part accepts `className`; `cn` resolves conflicts so yours wins.
+4. **Own the copy** — with the CLI the source is yours. Edit it; re-run `add --overwrite` only when you want upstream changes.
+
+## Adding a family
+
+Copy `theme-default.css`, rename the selectors to `[data-theme="your-family"]` and `.dark[data-theme="your-family"]`, and keep the contrast table comments up to date. Every foreground / background pair must meet WCAG AA (4.5:1 for text).

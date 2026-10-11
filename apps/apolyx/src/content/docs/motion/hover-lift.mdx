@@ -1,0 +1,23 @@
+<ComponentPreview name="hover-lift-demo" />
+
+## Installation
+
+<InstallTabs name="hover-lift" exports="HoverLift" />
+
+## Usage
+
+```tsx
+<HoverLift className="rounded-xl border p-5">
+  <ProjectSummary />
+</HoverLift>
+```
+
+## Accessibility
+
+The lift only runs for fine pointers that can hover, and never under reduced motion. It also lifts on keyboard focus so mouse and keyboard users get the same cue.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "...props", type: "HTMLMotionProps<\"div\">", description: "Any motion.div prop." },
+]} />

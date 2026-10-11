@@ -21,4 +21,4 @@ pnpm install
 pnpm dev:hub
 ```
 
-Uses `@altr/ui-kit` (theme, Button, Card, FadeIn/Motion) and `@altr/base`.
+Uses `@altr/apolyx` (theme, Button, Card, FadeIn/Motion) and `@altr/base`.

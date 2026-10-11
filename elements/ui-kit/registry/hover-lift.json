@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "hover-lift",
+  "type": "motion",
+  "title": "HoverLift",
+  "description": "Lift on hover",
+  "files": [
+    {
+      "path": "src/motion/hover-lift.tsx",
+      "target": "hover-lift.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "motion-tokens",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "motion/hover-lift"
+}

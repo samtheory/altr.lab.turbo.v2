@@ -1,0 +1,22 @@
+<ComponentPreview name="input-demo" />
+
+## Installation
+
+<InstallTabs name="input" exports="Input" />
+
+## Usage
+
+```tsx
+<Label htmlFor="email">Email</Label>
+<Input id="email" type="email" autoComplete="email" />
+```
+
+## Accessibility
+
+- Always pair with a `Label` (or `aria-label`).
+- Set `aria-invalid` and `aria-describedby` for errors; the border switches to the `destructive` token.
+- Use the right `type` and `autoComplete` so mobile keyboards and password managers help.
+
+## Props
+
+Accepts every native `<input>` attribute.

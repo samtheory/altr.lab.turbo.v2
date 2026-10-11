@@ -1,0 +1,32 @@
+<ComponentPreview name="card-demo" />
+
+## Installation
+
+<InstallTabs name="card" exports="Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter" />
+
+## Usage
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Usage</CardTitle>
+    <CardDescription>Last 30 days</CardDescription>
+  </CardHeader>
+  <CardContent>…</CardContent>
+  <CardFooter>…</CardFooter>
+</Card>
+```
+
+## Anatomy
+
+`Card` → `CardHeader` (`CardTitle`, `CardDescription`) → `CardContent` → `CardFooter`.
+
+## Accessibility
+
+`CardTitle` renders an `h3` by default. Set `as` so headings follow the page outline.
+
+## Props
+
+<PropsTable title="CardTitle" rows={[
+  { prop: "as", type: "\"h1\" … \"h6\"", default: "\"h3\"", description: "Heading level." },
+]} />

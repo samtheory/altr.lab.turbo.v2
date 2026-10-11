@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-power-blue",
+  "type": "theme",
+  "title": "Theme: power-blue",
+  "description": "OKLCH palette (light + dark) for the power-blue family",
+  "files": [
+    {
+      "path": "src/styles/themes/power-blue.css",
+      "target": "theme-power-blue.css"
+    }
+  ],
+  "registryDependencies": [
+    "theme-base"
+  ],
+  "docs": "theming"
+}

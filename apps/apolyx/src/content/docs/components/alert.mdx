@@ -1,0 +1,32 @@
+<ComponentPreview name="alert-demo" />
+
+## Installation
+
+<InstallTabs name="alert" exports="Alert, AlertTitle, AlertDescription" />
+
+## Usage
+
+```tsx
+<Alert variant="warning">
+  <AlertTitle>Storage almost full</AlertTitle>
+  <AlertDescription>Free up space to keep syncing.</AlertDescription>
+</Alert>
+```
+
+## Anatomy
+
+`Alert` → `AlertTitle` + `AlertDescription`.
+
+## Variants
+
+`default`, `success`, `warning`, `info`, `destructive`.
+
+## Accessibility
+
+The `destructive` variant uses `role="alert"` (announced immediately); every other variant uses `role="status"` (announced politely). For transient messages use [Toast](/docs/components/toast).
+
+## Props
+
+<PropsTable rows={[
+  { prop: "variant", type: "\"default\" | \"success\" | \"warning\" | \"info\" | \"destructive\"", default: "\"default\"", description: "Semantic color." },
+]} />

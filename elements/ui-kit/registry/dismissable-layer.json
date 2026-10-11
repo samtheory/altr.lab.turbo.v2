@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "dismissable-layer",
+  "type": "primitive",
+  "title": "DismissableLayer",
+  "description": "Escape / outside-click dismissal with nested layer stack",
+  "files": [
+    {
+      "path": "src/primitives/dismissable-layer.tsx",
+      "target": "dismissable-layer.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "compose-refs"
+  ],
+  "docs": "primitives"
+}

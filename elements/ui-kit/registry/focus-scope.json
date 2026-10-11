@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "name": "focus-scope",
+  "type": "primitive",
+  "title": "FocusScope",
+  "description": "Trap and restore focus",
+  "files": [
+    {
+      "path": "src/primitives/focus-scope.tsx",
+      "target": "focus-scope.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "compose-refs"
+  ],
+  "docs": "primitives"
+}

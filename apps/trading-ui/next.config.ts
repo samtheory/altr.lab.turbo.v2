@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@altr/ui-kit"],
+  transpilePackages: ["@altr/apolyx"],
 };
 
 export default nextConfig;
