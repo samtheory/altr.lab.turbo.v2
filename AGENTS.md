@@ -13,6 +13,15 @@ Pipeline: `idea` → `feature_list` → `plan` → code → `tech_space` → `re
 
 Truth order: **code** > **tech_space** > **report/plan** > **feature_list**.
 
+## Apolyx UI kit (apollo)
+
+For building the design system (`apollo`, `build apolyx`, `elements/ui-kit`, `apps/apolyx`, CLI):
+
+- Follow **apollo**: `Docs/agents/apollo/00-index.md`
+- Intent: `Docs/feature_list/ui-kit/00-intent.md`
+- Skills: `.agents/skills/apollo/` · companion list in `Docs/agents/apollo/skills/README.md`
+- Rule: `.cursor/rules/apollo.mdc` · Cursor skill: `.cursor/skills/apollo/`
+
 ## Agent skills + Graft
 
 - How to use project skills: `Docs/Altr.lab/agent-skills.md`

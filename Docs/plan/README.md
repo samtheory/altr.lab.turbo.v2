@@ -20,4 +20,6 @@ After shipping, move narrative to `tech_space/` and refresh `report/` — do not
 
 ## Active plans
 
-_(none — Apolyx intent is in [[../feature_list/ui-kit/00-intent]]; open `plan/ui-kit/` when the build sprint starts)_
+| Plan | Track | Opened | Owner | Status |
+|------|-------|--------|-------|--------|
+| [[ui-kit/README]] | Apolyx v1 — rename, tokens, primitives, wave 1 / 1b, motion, charts, registry + CLI, docs app | 2026-10-11 | apollo | active |

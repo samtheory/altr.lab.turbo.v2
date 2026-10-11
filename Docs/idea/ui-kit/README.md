@@ -24,4 +24,6 @@ Map: [[../../brain/00-Docs-Brain]] · Intent: [[../../feature_list/ui-kit/README
 
 ## Promotion
 
+**Promoted 2026-10-11:** both notes above are now intent in [[../../feature_list/ui-kit/00-intent]], planned in [[../../plan/ui-kit/README]]. Keep new R&D here; do not edit decided points in this folder.
+
 When an idea is firm enough to build against, promote into `Docs/feature_list/ui-kit/`. Sprint task cards go in `Docs/plan/ui-kit/` only while actively planning — durable intent stays in feature_list.

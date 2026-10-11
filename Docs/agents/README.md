@@ -2,7 +2,7 @@
 title: "agents — AI sub-agents"
 description: "Index of altr.lab AI sub-agents, skills, and prompts"
 created: 2026-09-19
-updated: 2026-09-26
+updated: 2026-10-11
 tags:
   - agents
   - index
@@ -17,6 +17,7 @@ AI sub-agents for altr.lab: instructions, skills, and prompts.
 | Agent | Role | Entry |
 |-------|------|-------|
 | **docs_man** | Vault documentation steward (`update_docs` / `document it`) | [[docs_man/00-index]] |
+| **apollo** | Apolyx UI kit builder (`apollo` / `build apolyx`) | [[apollo/00-index]] |
 
 ## Layout
 
@@ -24,6 +25,7 @@ AI sub-agents for altr.lab: instructions, skills, and prompts.
 agents/
 ├── README.md
 ├── docs_man/          # documentation sub-agent (portable pack)
+├── apollo/            # Apolyx UI kit sub-agent (portable pack)
 ├── templates/         # structured MD frontmatter template
 ├── instructions/      # shared / legacy standing instructions
 ├── skills/            # skill mirrors / notes

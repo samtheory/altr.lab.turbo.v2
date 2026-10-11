@@ -7,6 +7,18 @@
       "skillPath": "skills/agentic/SKILL.md",
       "computedHash": "df638ad01ddfa40fcd8b3fd20ea78a9443a620e850b98cef391396d1a9be6729"
     },
+    "animate": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/animate/SKILL.md",
+      "computedHash": "fb0a18403891238d4ce4fc80f891689678766c29092de1e3aadc0c917133ee5d"
+    },
+    "animation-vocabulary": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/animation-vocabulary/SKILL.md",
+      "computedHash": "9aaad861dd54dab7c9bb3fb5bd4c539078d8d06c14530d92d49cdb1509bfa937"
+    },
     "ant": {
       "source": "bergside/awesome-design-skills",
       "sourceType": "github",
@@ -163,6 +175,12 @@
       "skillPath": "skills/taste-skill-v1/SKILL.md",
       "computedHash": "0a226c13d69639553cf8a7c40aa5527b026820f8ddaf7a6b263988e32ab44a27"
     },
+    "design-tokens": {
+      "source": "julianoczkowski/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-tokens/SKILL.md",
+      "computedHash": "62060ba605b6339760f50670171041568c470ae2489ebfc076d1fbb26ba564b3"
+    },
     "dithered": {
       "source": "bergside/awesome-design-skills",
       "sourceType": "github",
@@ -186,6 +204,12 @@
       "sourceType": "github",
       "skillPath": "skills/editorial/SKILL.md",
       "computedHash": "17b3eb04bceb366b2e1032da6c1cc6a9fa47aee655ed010b30931720c63a6a31"
+    },
+    "emil-design-eng": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "77853cec799207f80868c611374c6ed5fdf34a55355c5ab544b59e791c63ad98"
     },
     "enterprise": {
       "source": "bergside/awesome-design-skills",
@@ -264,6 +288,12 @@
       "sourceType": "github",
       "skillPath": "skills/friendly/SKILL.md",
       "computedHash": "9c17f298f1b24d194afdb16b64eb41eb2b39d620c251dbfb3b847bbf9dea0916"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "106acf230014cbb43ca34e6410371321b56ca742f9ee0442e8ec05bf02eb0384"
     },
     "full-output-enforcement": {
       "source": "Leonxlnx/taste-skill",
@@ -348,6 +378,12 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
       "computedHash": "d55800186ff7651be356015b103047b9dd84f83172cc257042a322491df3502e"
+    },
+    "improve-animations": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/improve-animations/SKILL.md",
+      "computedHash": "b913ec7ef2b1aa900060eb6e5dbdccc94b6ea631059ec3474c4b61e2ffefeeb4"
     },
     "improve-ui": {
       "source": "ibelick/ui-skills",
@@ -511,6 +547,12 @@
       "skillPath": "skills/retro/SKILL.md",
       "computedHash": "436302f45cef6424d783ccbe5580dc849c30279849aae7604926635de3423cbf"
     },
+    "review-animations": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/review-animations/SKILL.md",
+      "computedHash": "8c2befeb28bb484bf2de7b2fc228774857e266d32a65d76895e78651a536d8cf"
+    },
     "riso": {
       "source": "bergside/awesome-design-skills",
       "sourceType": "github",
@@ -583,6 +625,18 @@
       "skillPath": "skills/storytelling/SKILL.md",
       "computedHash": "77e83b66372f1c4e4c0aa9b3886694771df4f95d6abb621bc64ecd87be1e0fc0"
     },
+    "tailwind-4-docs": {
+      "source": "lombiq/tailwind-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tailwind-4-docs/SKILL.md",
+      "computedHash": "4900f575f24641b1af459cda37cbb8438ecf3f8f1a63148384197cb730895093"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md",
+      "computedHash": "9e60f9fad6a645b173f076102b76f67d2dc4a1c0867e26c4bff9b9c7dd7f99cd"
+    },
     "terracotta": {
       "source": "bergside/awesome-design-skills",
       "sourceType": "github",
@@ -601,6 +655,24 @@
       "skillPath": "skills/ui-skills-root/SKILL.md",
       "computedHash": "76a520772c9532b141562d2b2e659f4e6636cf04d2f2c9b9cf5828702f0ad048"
     },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "7ac62d931e52dbc7c309ed8ee067101969db2454709339b02daa583e80e98d5f"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "computedHash": "10eb4ec94577b79ae98c63ce3e7f35f8a6a06436a4011bff083b397de6960eeb"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "6b526d013e28073246a36f99b529bc43745d30832ecfa8217b359c34f260ca6b"
+    },
     "vibrant": {
       "source": "bergside/awesome-design-skills",
       "sourceType": "github",
@@ -618,6 +690,12 @@
       "sourceType": "github",
       "skillPath": "skills/web-app-penetration-testing/SKILL.md",
       "computedHash": "4a26881a2e8d289611e12557aea27f729facfa4aef777ddcb43a6b6f7d6fe2ee"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "d8e7d3afe37dcc8a97b99ffb5afdb4d0919ae0092ea8b68f44eb201f035e33ac"
     }
   }
 }

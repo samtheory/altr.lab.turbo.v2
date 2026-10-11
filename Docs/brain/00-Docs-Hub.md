@@ -23,14 +23,17 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 | `tech_space/` | As-built technical implementation docs | [[../tech_space/README]] |
 | `report/` | Implemented / remaining / planned sum-up | [[../report/README]] · [[../report/STATUS]] |
 | `clickup/` | ClickUp task / project management notes | [[../clickup/README]] |
-| `agents/` | AI sub-agents, skills, prompts | [[../agents/README]] · [[../agents/docs_man/00-index]] |
+| `agents/` | AI sub-agents, skills, prompts | [[../agents/README]] · [[../agents/docs_man/00-index]] · [[../agents/apollo/00-index]] |
 
 ## Promotion path
 
 `idea` → `feature_list` → `plan` (+ `clickup`) → **code** → `tech_space` → `report` → refresh [[00-Docs-Brain]]
 
-App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`. Example: **Apolyx** UI kit — [[../idea/ui-kit/README]] · [[../feature_list/ui-kit/README]].
+App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`. Example: **Apolyx** UI kit — [[../idea/ui-kit/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (active sprint).
 
 ## Agent of record
 
-Documentation changes are owned by **docs_man**. Triggers: `update_docs`, `document it`.
+| Agent | Owns | Triggers |
+|-------|------|----------|
+| **docs_man** | Docs vault | `update_docs`, `document it` |
+| **apollo** | Apolyx UI kit implementation | `apollo`, `build apolyx` |

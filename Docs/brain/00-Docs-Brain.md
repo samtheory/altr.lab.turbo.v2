@@ -14,9 +14,9 @@ tags:
 
 > Open this file first. It is the shared map for people in Obsidian and agents in Cursor.
 
-**Agent:** [[../agents/docs_man/00-index|docs_man]] · **Skill:** `.agents/skills/docs-man/` · **Cursor skill:** `.cursor/skills/docs-man/` · **Folder hub:** [[00-Docs-Hub]]
+**Agents:** [[../agents/docs_man/00-index|docs_man]] · [[../agents/apollo/00-index|apollo]] · **Folder hub:** [[00-Docs-Hub]]
 
-**Triggers:** say `update_docs` or `document it` → docs_man runs this vault workflow.
+**Triggers:** `update_docs` / `document it` → **docs_man**. `apollo` / `build apolyx` → **apollo** (Apolyx UI kit).
 
 ---
 
@@ -33,7 +33,7 @@ tags:
 | Complete vs remaining | [[../report/README]] · [[../report/STATUS]] |
 | As-built notes (how it was coded) | [[../tech_space/README]] |
 | ClickUp / task cards | [[../clickup/README]] |
-| AI sub-agents | [[../agents/README]] · [[../agents/docs_man/00-index]] |
+| AI sub-agents | [[../agents/README]] · [[../agents/docs_man/00-index]] · [[../agents/apollo/00-index]] |
 | AI run prompts for the repo | [[../Altr.lab/prompts]] |
 
 ```mermaid
@@ -107,7 +107,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Hono API | `cloud/hono-server` | Altr.lab/stack · tech_space |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | AI bot agent | `cloud/ai-bot-agent` | Altr.lab · agents |
-| Design system (**Apolyx**) | `elements/ui-kit` · future `apps/apolyx` + CLI | Intent: [[../feature_list/ui-kit/00-intent]] · Idea: [[../idea/ui-kit/README]] · As-built v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
+| Design system (**Apolyx**) | `elements/ui-kit` · future `apps/apolyx` + `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Plan: [[../plan/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/ui-kit/README]] · As-built v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
 Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
@@ -120,7 +120,7 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
 | `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/00-intent]] |
-| `plan/` | Checkbox overlay + next steps | App folders `plan/<app>/` while sprinting; Apolyx plan not opened yet |
+| `plan/` | Checkbox overlay + next steps | Active: [[../plan/ui-kit/README]] (Apolyx v1, opened 2026-10-11) |
 | `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-09-21) |
 | `tech_space/` | Implementation narrative | Latest: [[../tech_space/02-ui-kit-storybook]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
@@ -139,6 +139,7 @@ How-to: [[../Altr.lab/agent-skills]] · Graft: [[../Altr.lab/graft]] · MCP: `.c
 | Skill | Location | Use |
 |-------|----------|-----|
 | `docs-man` | `.agents/skills/docs-man/` · `.cursor/skills/docs-man/` | Vault update order, frontmatter, wikilinks |
+| `apollo` | `.agents/skills/apollo/` · `.cursor/skills/apollo/` · [[../agents/apollo/00-index]] | Build Apolyx UI kit |
 | `docs-brain` | `.cursor/skills/docs-brain/` | Keep this living map honest |
 | `pdf` | `.agents/skills/pdf/` | Read/create/merge PDFs |
 | `doc-coauthoring` | `.agents/skills/doc-coauthoring/` | Large new specs with guided loop |

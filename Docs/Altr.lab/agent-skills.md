@@ -2,7 +2,7 @@
 title: "Agent skills — how to use them well"
 description: "Best practices for the project skills installed under .agents/skills/"
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-10-11
 tags:
   - altr-lab
   - agents
@@ -69,6 +69,8 @@ npx skills add <owner/repo> --skill '*' --agent cursor -y   # whole pack
 2. New marketing surface → **design-taste-frontend** (or one awesome style).
 3. Product polish → **impeccable** (`critique` then `polish`) or **baseline-ui**.
 4. Accessibility pass → **fixing-accessibility**.
+
+**Apolyx kit builder:** use the **apollo** sub-agent (`Docs/agents/apollo/`) — say `apollo` or `build apolyx`. Companion skills (React, Tailwind v4, Motion/animation, UX, tokens) are listed in [[../agents/apollo/skills/README]]. Do not stack competing aesthetics; repo intent in [[../feature_list/ui-kit/00-intent]] wins over generic skill defaults (no Radix).
 
 ### Browser & 3D
 

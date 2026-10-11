@@ -2,7 +2,7 @@
 title: "Status — complete vs remaining"
 description: "Audited snapshot of altr.lab: hub, ui-kit Storybook, base, docs"
 created: 2026-09-19
-updated: 2026-09-21
+updated: 2026-10-11
 tags:
   - report
   - status
@@ -10,7 +10,7 @@ tags:
 
 # Status
 
-Last updated: 2026-09-21 · Living map: [[../brain/00-Docs-Brain]]
+Last updated: 2026-10-11 (planned section) · Last code audit: 2026-09-21 · Living map: [[../brain/00-Docs-Brain]]
 
 ## Implemented
 
@@ -34,4 +34,4 @@ As-built: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-stor
 
 ## Planned
 
-- (add items from `Docs/plan/` as they are accepted)
+- **Apolyx v1** (design system on `elements/ui-kit`) — sprint opened 2026-10-11, owner apollo: [[../plan/ui-kit/README]]. Intent: [[../feature_list/ui-kit/00-intent]]. Nothing shipped yet; kit code is still the v0 set listed under Implemented.

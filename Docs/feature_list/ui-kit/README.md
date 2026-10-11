@@ -14,7 +14,7 @@ tags:
 
 Intent for **Apolyx** — portable design system for altr.lab and future publish.
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Plan (sprint only): `Docs/plan/ui-kit/` when active · As-built later: `Docs/tech_space/ui-kit/`
+Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Builder agent: [[../../agents/apollo/00-index]] · Plan (active sprint): [[../../plan/ui-kit/README]] · As-built later: `Docs/tech_space/ui-kit/`
 
 ## Truth for this track
 
@@ -30,7 +30,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Plan
 
 | Note | Status |
 |------|--------|
-| [[00-intent]] | Intent — infrastructure, tech, first components (not coded as Apolyx yet) |
+| [[00-intent]] | Intent ready — planned in [[../../plan/ui-kit/README]] (v1 sprint, 10 phases); not coded as Apolyx yet |
 
 ## Related shipped foundation (pre-Apolyx)
 
