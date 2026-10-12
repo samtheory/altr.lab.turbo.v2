@@ -15,7 +15,7 @@ tags:
 
 > Who: apollo. These are the behavior building blocks every interactive component uses. They are headless: no styles, no tokens.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Migration note from current code]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Migration note from current code]]
 
 **Depends on:** phase 1 (can run in parallel with phase 2) · **Skills:** `vercel-composition-patterns` + `fixing-accessibility`
 

@@ -1,0 +1,47 @@
+<ComponentPreview name="sheet-demo" />
+
+## Installation
+
+<InstallTabs name="sheet" exports="Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose" />
+
+## Usage
+
+```tsx
+<Sheet>
+  <SheetTrigger asChild>
+    <Button variant="outline">Open menu</Button>
+  </SheetTrigger>
+  <SheetContent side="left">
+    <SheetHeader>
+      <SheetTitle>Workspace</SheetTitle>
+      <SheetDescription>Jump to a section.</SheetDescription>
+    </SheetHeader>
+    <NavList>…</NavList>
+  </SheetContent>
+</Sheet>
+```
+
+Use `side="left"` for a navigation sidebar and `side="right"` for detail or settings panels.
+
+## Built from
+
+Sheet shares Dialog's state, so it gets the same Portal, FocusScope, DismissableLayer, and scroll lock. The panel slides in from its edge on a spring; under reduced motion it only fades.
+
+## Accessibility
+
+- `role="dialog"` with `aria-modal`, labelled by `SheetTitle`.
+- Focus is trapped while open and returns to the trigger on close.
+- Escape and outside click close it. The built-in close button is labelled "Close".
+
+## Props
+
+<PropsTable title="Sheet" rows={[
+  { prop: "open", type: "boolean", description: "Controlled open state." },
+  { prop: "defaultOpen", type: "boolean", default: "false", description: "Initial state when uncontrolled." },
+  { prop: "onOpenChange", type: "(open: boolean) => void", description: "Called when the sheet opens or closes." },
+]} />
+
+<PropsTable title="SheetContent" rows={[
+  { prop: "side", type: '"left" | "right" | "top" | "bottom"', default: '"right"', description: "Edge the panel slides from." },
+  { prop: "showClose", type: "boolean", default: "true", description: "Render the built-in close button." },
+]} />

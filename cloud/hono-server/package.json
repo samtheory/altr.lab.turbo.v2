@@ -1,5 +1,5 @@
 {
-  "name": "@altr/hono-server",
+  "name": "@service/hono-server",
   "version": "0.0.1",
   "private": true,
   "type": "module",

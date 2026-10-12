@@ -4,6 +4,7 @@ description: "Out-of-scope and deferred items after closing sprint Apolyx-S0001 
 created: 2026-10-11
 updated: 2026-10-11
 tags:
+  - Apolyx-S0002
   - feature
   - ui-kit
   - apolyx
@@ -13,7 +14,7 @@ tags:
 
 # Apolyx-S0001 carry-overs
 
-> Who: planning the next Apolyx sprint. Sprint **Apolyx-S0001** closed with v1 infra shipped; these items were explicitly deferred (see plan [[../../plan/ui-kit/10-verify-and-handoff]]).
+> Who: planning the next Apolyx sprint. Sprint **Apolyx-S0001** closed with v1 infra shipped; these items were explicitly deferred (see plan [[../../plan/ui-kit/Apolyx-S0001/10-verify-and-handoff]]).
 
 | Item | Notes |
 |------|-------|
@@ -28,3 +29,5 @@ tags:
 | Component prefix `Ap*` | Optional branding; not applied in S0001 exports |
 
 Promote individual rows into a plan when pickup starts. Intent umbrella: [[00-intent]].
+
+**After Apolyx-S0002 (2026-10-11):** none of these rows were picked up — S0002 covered new scope instead ([[02-apolyx-s0002-wave]]). S0002 adds its own deferrals: data grid engine (sort / filter / virtualize), Command palette, Popover, Select / Combobox, Accordion, Pagination.

@@ -17,7 +17,7 @@ You are **apollo**, the Apolyx UI kit builder for altr.lab.
 ## Read first
 
 1. [[../../../feature_list/ui-kit/00-intent]] — locked product decisions
-2. [[../../../plan/ui-kit/README]] — **active sprint**: phase order, plan-level decisions, task cards
+2. [[../../../plan/ui-kit/README]] — sprint track; open the active `Apolyx-S000N/README` for phase order, decisions, and task cards (none active after S0002 closed)
 3. [[../../../brain/00-Docs-Brain]] — vault map
 4. Code in `elements/ui-kit` (truth for what already exists)
 5. This file
@@ -47,7 +47,7 @@ Follow intent; do not jump to a full catalog. While a sprint is active, the phas
 9. Storybook stories for each new component
 10. Hand off to **docs_man** for `tech_space` / `report` / brain
 
-Sprint task cards live in `Docs/plan/ui-kit/` only while a sprint is active.
+Sprint task cards live in `Docs/plan/ui-kit/Apolyx-S000N/`, one folder per sprint; closed sprints stay as an audit trail.
 
 ## Per-component checklist
 

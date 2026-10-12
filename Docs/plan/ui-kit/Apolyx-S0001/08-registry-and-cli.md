@@ -15,7 +15,7 @@ tags:
 
 > Who: apollo. This makes Apolyx installable outside the monorepo: the kit describes itself as JSON, the CLI copies those files into another project.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#CLI location — decided: `elements/apolyx-cli`]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#CLI location — decided: `elements/apolyx-cli`]]
 
 **Depends on:** phase 4 (at minimum Button + its deps); add other items as their phases land · **Skills:** `find-docs` (commander / clack / tsup APIs) — keep to 1–2
 
@@ -88,4 +88,4 @@ npm run build
 
 ### Smoke record (Apolyx-S0001)
 
-`%TEMP%\apolyx-smoke` (create-next-app, no `src/`, Tailwind v4): `init --yes` → `add button dialog line-chart` (+ overlays / `theme-provider` / `power-blue` on re-run) → `npm run build` OK. Details: [[../../tech_space/ui-kit/04-registry-and-cli]].
+`%TEMP%\apolyx-smoke` (create-next-app, no `src/`, Tailwind v4): `init --yes` → `add button dialog line-chart` (+ overlays / `theme-provider` / `power-blue` on re-run) → `npm run build` OK. Details: [[../../../tech_space/ui-kit/04-registry-and-cli]].

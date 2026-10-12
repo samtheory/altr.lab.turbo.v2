@@ -1,0 +1,36 @@
+<ComponentPreview name="nav-list-demo" />
+
+## Installation
+
+<InstallTabs name="nav-list" exports="NavList, NavListGroup, NavListLabel, NavListItem" />
+
+## Usage
+
+```tsx
+<NavList>
+  <NavListGroup label="Workspace">
+    <NavListItem href="/" active><Home /> Overview</NavListItem>
+    <NavListItem href="/team"><Users /> Team</NavListItem>
+  </NavListGroup>
+</NavList>
+```
+
+Use it inside a fixed aside for a persistent sidebar, or inside a [Sheet](/docs/components/sheet) for a mobile drawer.
+
+## Accessibility
+
+- Rendered as `<nav>`; each group is a list labelled by its heading.
+- The active item uses `aria-current="page"` and shows a primary bar.
+- Disabled items use `aria-disabled` and cannot be focused.
+
+## Props
+
+<PropsTable title="NavListGroup" rows={[
+  { prop: "label", type: "ReactNode", description: "Group heading; labels the list." },
+]} />
+
+<PropsTable title="NavListItem" rows={[
+  { prop: "active", type: "boolean", description: "Marks the current page." },
+  { prop: "disabled", type: "boolean", description: "Prevents navigation." },
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element (e.g. a router link)." },
+]} />

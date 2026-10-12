@@ -1,0 +1,27 @@
+{
+  "$schema": "./schema.json",
+  "name": "navigation-menu",
+  "type": "ui",
+  "title": "Navigation Menu",
+  "description": "Horizontal disclosure navigation with hover-intent panels",
+  "files": [
+    {
+      "path": "src/components/ui/navigation-menu.tsx",
+      "target": "navigation-menu.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12",
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "dismissable-layer",
+    "presence",
+    "slot",
+    "use-controllable-state",
+    "use-id",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/navigation-menu"
+}

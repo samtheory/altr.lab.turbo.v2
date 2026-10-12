@@ -107,7 +107,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Hono API | `cloud/hono-server` | Altr.lab/stack · tech_space |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | AI bot agent | `cloud/ai-bot-agent` | Altr.lab · agents |
-| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Sprint **Apolyx-S0001**: [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/ui-kit/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
+| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Sprints **Apolyx-S0001** + **Apolyx-S0002** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/ui-kit/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
 Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
@@ -119,10 +119,10 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 | Layer | Role | Freshness |
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
-| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/00-intent]] |
-| `plan/` | Checkbox overlay + next steps | Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**); carry-overs in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-11, Apolyx-S0001 closed) |
-| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/README]] (Apolyx-S0001 closed) |
+| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] |
+| `plan/` | Checkbox overlay + next steps | Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**); carry-overs in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-11, Apolyx-S0002 closed) |
+| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] (Apolyx-S0002 closed) |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |

@@ -14,7 +14,7 @@ tags:
 
 # Apolyx registry and CLI
 
-> Who: anyone installing Apolyx outside the monorepo. Sprint **Apolyx-S0001** phase 8. Plan: [[../../plan/ui-kit/08-registry-and-cli]].
+> Who: anyone installing Apolyx outside the monorepo. Sprint **Apolyx-S0001** phase 8. Plan: [[../../plan/ui-kit/Apolyx-S0001/08-registry-and-cli]].
 
 ## Registry (`elements/ui-kit`)
 

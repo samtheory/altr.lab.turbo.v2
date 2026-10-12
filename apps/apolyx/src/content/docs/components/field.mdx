@@ -1,0 +1,48 @@
+<ComponentPreview name="field-demo" />
+
+## Installation
+
+<InstallTabs name="field" exports="Field, FieldInput, FieldTextarea, FieldDescription, FieldError" />
+
+## Usage
+
+```tsx
+<Field label="Email" layout="top" description="We never share it.">
+  <FieldInput type="email" />
+</Field>
+
+<Field label="Full name" layout="floating" required>
+  <FieldInput />
+</Field>
+
+<Field label="Host" layout="inline" error="Unreachable host">
+  <FieldInput />
+</Field>
+```
+
+## Layouts
+
+- **top** — label above the control.
+- **floating** — label sits inside the control and shrinks onto the border while focused or filled.
+- **inline** — label beside the control in a muted panel, separated by a border.
+
+Focus animates the border, a soft ring, and an accent bar along the bottom edge; blur eases out a little slower. Under reduced motion transitions are instant.
+
+## Accessibility
+
+- The label is a real `<label>` tied to the control by id.
+- `description` and `error` are linked with `aria-describedby`; an error sets `aria-invalid` and is announced with `role="alert"`.
+- `required` adds the native attribute and a visual marker.
+
+## Props
+
+<PropsTable title="Field" rows={[
+  { prop: "label", type: "ReactNode", description: "Field label." },
+  { prop: "layout", type: '"top" | "floating" | "inline"', default: '"top"', description: "Label placement." },
+  { prop: "description", type: "ReactNode", description: "Helper text under the control." },
+  { prop: "error", type: "ReactNode", description: "Error message; marks the field invalid." },
+  { prop: "required", type: "boolean", description: "Marks the control required." },
+  { prop: "disabled", type: "boolean", description: "Disables the control." },
+  { prop: "labelWidth", type: "string", description: "Inline layout label width (CSS length)." },
+  { prop: "controlClassName", type: "string", description: "Class for the control box." },
+]} />

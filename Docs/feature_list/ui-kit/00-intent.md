@@ -261,6 +261,10 @@ Ship small, useful, documentable. Order is suggested dependency order.
 | Tooltip | Delay + portal |
 | Toast / Sonner-like | Queue API |
 
+### Wave 2 — Apolyx-S0002
+
+Hover-contrast tokens, navigation (Sheet, Breadcrumb, NavigationMenu, NavList, Dialog sizes), physics Switch, `Field` layouts, and Table / List / Grid. Intent and acceptance: [[02-apolyx-s0002-wave]].
+
 ### Motion recipes (wave 1)
 
 | Recipe | Notes |
@@ -373,4 +377,5 @@ Use these when implementing; verify in code + tech_space:
 - Builder agent: [[../../agents/apollo/00-index]] · prompts: [[../../agents/apollo/prompts/00-build-apolyx]]
 - Prior foundation: [[../01-hub-ui-kit-base]] · [[../02-ui-kit-storybook]]
 - Code today: `elements/ui-kit`
-- Plan (active sprint): [[../../plan/ui-kit/README]]
+- Plan (sprint track): [[../../plan/ui-kit/README]]
+- Wave 2: [[02-apolyx-s0002-wave]]

@@ -15,7 +15,7 @@ tags:
 
 > Who: apollo. The public face of the kit: content-first, calm, clearly Apolyx — not a dashboard.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Docs app expectations (`apps/apolyx`)]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Docs app expectations (`apps/apolyx`)]]
 
 **Depends on:** phase 8 (CLI line + `/r/*.json`); can start the shell earlier · **Skills:** `frontend-design` (or `design-taste-frontend`) + `find-docs` (Next MDX)
 

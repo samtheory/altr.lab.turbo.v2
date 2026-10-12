@@ -35,6 +35,12 @@
   --border: oklch(0.9 0.01 95);
   --input: oklch(0.9 0.01 95);
   --ring: oklch(0.35 0.03 260);
+  --primary-hover: oklch(0.4 0.03 260);
+  --primary-glow: oklch(0.28 0.02 260 / 0.22);
+  --secondary-hover: oklch(0.9 0.012 95);
+  --destructive-hover: oklch(0.49 0.2 25);
+  --accent-hover: oklch(0.9 0.016 95);
+  --border-strong: oklch(0.74 0.02 260);
   --chart-1: oklch(0.45 0.08 260);
   --chart-2: oklch(0.55 0.1 200);
   --chart-3: oklch(0.6 0.12 150);
@@ -85,6 +91,12 @@
   --border: oklch(0.3 0.016 260);
   --input: oklch(0.3 0.016 260);
   --ring: oklch(0.78 0.03 260);
+  --primary-hover: oklch(1 0 0);
+  --primary-glow: oklch(0.94 0.01 95 / 0.3);
+  --secondary-hover: oklch(0.34 0.02 260);
+  --destructive-hover: oklch(0.67 0.19 25);
+  --accent-hover: oklch(0.35 0.024 260);
+  --border-strong: oklch(0.5 0.02 260);
   --chart-1: oklch(0.72 0.1 260);
   --chart-2: oklch(0.7 0.1 200);
   --chart-3: oklch(0.72 0.12 150);

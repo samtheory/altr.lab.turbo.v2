@@ -1,0 +1,29 @@
+<ComponentPreview name="grid-demo" />
+
+## Installation
+
+<InstallTabs name="grid" exports="Grid" />
+
+## Usage
+
+```tsx
+<Grid cols={{ base: 1, sm: 2, lg: 4 }} gap="md">
+  <Card>…</Card>
+  <Card>…</Card>
+</Grid>
+
+<Grid minItemWidth="14rem">
+  {items.map((item) => <Card key={item.id}>…</Card>)}
+</Grid>
+```
+
+`minItemWidth` uses `auto-fill` + `minmax`, so columns adjust to the container without breakpoints.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "cols", type: "1–6 | { base?, sm?, md?, lg?, xl? }", description: "Column count, fixed or per breakpoint." },
+  { prop: "gap", type: '"none" | "sm" | "md" | "lg" | "xl"', default: '"md"', description: "Gap between cells." },
+  { prop: "minItemWidth", type: "string", description: "Auto-fill columns at least this wide (CSS length). Overrides `cols`." },
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element (e.g. a `<ul>`)." },
+]} />

@@ -14,7 +14,7 @@ tags:
 
 # apps/apolyx — docs app
 
-> Who: anyone editing docs content or the docs shell. Sprint **Apolyx-S0001** phase 9. Plan: [[../../plan/ui-kit/09-docs-app]].
+> Who: anyone editing docs content or the docs shell. Sprint **Apolyx-S0001** phase 9. Plan: [[../../plan/ui-kit/Apolyx-S0001/09-docs-app]].
 
 ## Stack
 

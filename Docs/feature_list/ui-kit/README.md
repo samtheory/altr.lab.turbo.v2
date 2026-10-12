@@ -8,6 +8,7 @@ tags:
   - ui-kit
   - apolyx
   - Apolyx-S0001
+  - Apolyx-S0002
   - readme
 ---
 
@@ -15,7 +16,7 @@ tags:
 
 Intent for **Apolyx** — portable design system for altr.lab and future publish.
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Builder: [[../../agents/apollo/00-index]] · Sprint **Apolyx-S0001**: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]]
+Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Builder: [[../../agents/apollo/00-index]] · Sprints: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]]
 
 ## Truth for this track
 
@@ -23,8 +24,8 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Buil
 |-------|------|
 | `idea/ui-kit/` | Exploratory |
 | **`feature_list/ui-kit/`** | **Valid intent** |
-| `plan/ui-kit/` | Sprint **Apolyx-S0001** task cards |
-| `tech_space/ui-kit/` | As-built after **Apolyx-S0001** closed |
+| `plan/ui-kit/` | Sprint folders `Apolyx-S000N/` with task cards |
+| `tech_space/ui-kit/` | As-built after each sprint closes |
 | Code | `elements/ui-kit`, `apps/apolyx`, `elements/apolyx-cli` |
 
 ## Features
@@ -32,7 +33,8 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Buil
 | Note | Status |
 |------|--------|
 | [[00-intent]] | Intent locked — v1 acceptance boxes ticked (**Apolyx-S0001** closed) |
-| [[01-apolyx-s0001-carryovers]] | Deferred items for the next sprint |
+| [[01-apolyx-s0001-carryovers]] | Deferred items still open after S0001 and S0002 |
+| [[02-apolyx-s0002-wave]] | Hover contrast, navigation, physics Switch, Field, Table / List / Grid — acceptance ticked (**Apolyx-S0002** closed) |
 
 ## Related shipped foundation (pre-Apolyx)
 

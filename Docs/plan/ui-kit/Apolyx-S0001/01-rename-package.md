@@ -15,7 +15,7 @@ tags:
 
 > Who: apollo, first task of the sprint. One mechanical commit; no feature work mixed in.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Package name — decided: folder `ui-kit`, package `@altr/apolyx`]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Package name — decided: folder `ui-kit`, package `@altr/apolyx`]]
 
 **Depends on:** nothing · **Skills:** `graft` (optional, for orientation)
 

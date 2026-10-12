@@ -52,6 +52,12 @@ Portal, Presence, FocusScope, DismissableLayer, and scroll lock. Content scales 
   { prop: "onOpenChange", type: "(open: boolean) => void", description: "Called when the dialog opens or closes." },
 ]} />
 
+<PropsTable title="DialogContent" rows={[
+  { prop: "size", type: '"sm" | "md" | "lg" | "xl" | "full"', default: '"md"', description: "Max width preset. `full` fills the viewport with a scrollable body." },
+]} />
+
+For side panels and sidebars use [Sheet](/docs/components/sheet).
+
 <PropsTable title="DialogTrigger / DialogClose" rows={[
   { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element." },
 ]} />

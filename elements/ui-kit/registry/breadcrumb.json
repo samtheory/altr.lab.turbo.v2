@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "breadcrumb",
+  "type": "ui",
+  "title": "Breadcrumb",
+  "description": "Breadcrumb trail with links, current page, separator, ellipsis",
+  "files": [
+    {
+      "path": "src/components/ui/breadcrumb.tsx",
+      "target": "breadcrumb.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "slot",
+    "utils"
+  ],
+  "docs": "components/breadcrumb"
+}

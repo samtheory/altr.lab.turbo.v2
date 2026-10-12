@@ -14,7 +14,7 @@ tags:
 
 # Apolyx overlays (wave 1b)
 
-> Who: implementers and reviewers. Code truth for sprint **Apolyx-S0001** phase 7. Plan: [[../../plan/ui-kit/07-wave-1b-overlays]].
+> Who: implementers and reviewers. Code truth for sprint **Apolyx-S0001** phase 7. Plan: [[../../plan/ui-kit/Apolyx-S0001/07-wave-1b-overlays]].
 
 ## Layer stack
 
