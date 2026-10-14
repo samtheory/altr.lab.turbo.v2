@@ -2,7 +2,7 @@
 title: "Apolyx-S0002 as-built — contrast tokens, navigation, physics Switch, Field, data"
 description: "How sprint Apolyx-S0002 was implemented in elements/ui-kit and apps/apolyx"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - tech-space
   - ui-kit
@@ -48,6 +48,8 @@ All paths below are under `elements/ui-kit/` unless noted.
 
 ## Physics Switch
 
+> **Superseded by Apolyx-S0003 (2026-10-14).** The numbers below are the S0002 version. S0003 moved the geometry into a pure `switch-physics.ts`, capped stretch at 30% of the thumb, removed growth past the ends and into the current side, animated the press, and replaced the bouncy width spring with a single glide. Current behaviour: [[08-s0003-switch-inputs#Switch physics]].
+
 File: `src/components/ui/switch.tsx`.
 
 - Thumb `left` and `width` are Motion values (`useMotionValue<number>`); the track is a plain button with `role="switch"`.
@@ -61,6 +63,8 @@ File: `src/components/ui/switch.tsx`.
 Tests (`switch.test.tsx`): click toggles once, drag past midpoint commits, short drag snaps back. `vitest.setup.ts` adds a `PointerEvent` polyfill because jsdom lacks one (without it `clientX` is dropped and drag tests pass vacuously).
 
 ## Field
+
+> **Extended in Apolyx-S0003.** Field now draws its box through the shared `ControlBox` (also used by `InputGroup`). It also gained `labelAside`, `optional`, `orientation="horizontal"`, array `error`, `size` / `variant` / `shape`, `FieldCounter` and `FieldSet`. See [[08-s0003-switch-inputs#ControlBox: one box for Field and InputGroup]]. The S0002 layouts below are unchanged.
 
 Files: `src/components/ui/field.tsx`, plus polish in `input.tsx` / `textarea.tsx`.
 

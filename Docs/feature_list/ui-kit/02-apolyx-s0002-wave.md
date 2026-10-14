@@ -2,7 +2,7 @@
 title: "Apolyx-S0002 wave — contrast, navigation, physics Switch, Field, data"
 description: "Intent and acceptance for the second Apolyx wave: dark-mode hover contrast, navigation shells, tactile Switch, Field layouts, Table / List / Grid"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - feature
   - ui-kit
@@ -48,6 +48,8 @@ Hover is a **token per theme family × mode**, not an opacity. New semantic toke
 | Tabs, menu | Existing `Tabs`, `DropdownMenu` (hover contrast only) |
 
 ### 3. Physics Switch
+
+> **Follow-up:** in use, the S0002 stretch felt off: it grew too much, grew instantly on press, and grew past the ends. **Apolyx-S0003** reworked the motion and added the Switch family. Intent: [[04-apolyx-s0003-switch-inputs]] · As built: [[../../tech_space/ui-kit/08-s0003-switch-inputs#Switch physics]].
 
 - Drag the thumb to toggle; past the midpoint commits, otherwise it snaps back.
 - On press the thumb stretches toward the direction it will travel.

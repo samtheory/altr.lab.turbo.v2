@@ -16,7 +16,8 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
-- [[ui-kit/README]] — **Apolyx** (`@altr/apolyx`) as-built; sprints **Apolyx-S0001** (2026-10-11) and **Apolyx-S0002** closed
+- [[ui-kit/README]] — **Apolyx** (`@altr/apolyx`) as-built; sprints **Apolyx-S0001** (2026-10-11), **Apolyx-S0002** and **Apolyx-S0003** (2026-10-14) closed
+  - [[ui-kit/08-s0003-switch-inputs]] — S0003: Switch physics + family, `ControlBox` shared by Field / InputGroup, Password / Number / OTP / Mask inputs, Forms docs group and form patterns (2026-10-14)
   - [[ui-kit/07-timeline]] — Timeline component, added after S0002 (2026-10-14)
   - [[ui-kit/05-docs-app#Sidebar groups]] — docs sidebar: collapsible groups, depth guide line, open background (2026-10-14)
 - [[01-hub-ui-kit-base]] — `@altr/hub`, historical `@altr/ui-kit`, `@altr/base` (2026-09-20)
