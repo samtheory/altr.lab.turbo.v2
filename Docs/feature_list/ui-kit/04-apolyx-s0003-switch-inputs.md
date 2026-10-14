@@ -184,6 +184,8 @@ Ticked against code on 2026-10-14. As built: [[../../tech_space/ui-kit/08-s0003-
 
 Form recipes submit through `onSubmit` + `useActionState` rather than `<form action>`, because React 19's automatic form reset after an action desyncs uncontrolled and kit controls.
 
+**Follow-up polish (2026-10-14, not a new sprint):** default Field / Input / InputGroup surface is borderless (no bottom focus bar); Checkbox fill and clear animate. As built: [[../../tech_space/ui-kit/08-s0003-switch-inputs#ControlBox: one box for Field and InputGroup]].
+
 ## Links
 
 - Sprint: [[../../plan/ui-kit/Apolyx-S0003/README]]

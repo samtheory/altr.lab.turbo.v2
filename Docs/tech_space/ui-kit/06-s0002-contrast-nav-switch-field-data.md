@@ -64,12 +64,12 @@ Tests (`switch.test.tsx`): click toggles once, drag past midpoint commits, short
 
 ## Field
 
-> **Extended in Apolyx-S0003.** Field now draws its box through the shared `ControlBox` (also used by `InputGroup`). It also gained `labelAside`, `optional`, `orientation="horizontal"`, array `error`, `size` / `variant` / `shape`, `FieldCounter` and `FieldSet`. See [[08-s0003-switch-inputs#ControlBox: one box for Field and InputGroup]]. The S0002 layouts below are unchanged.
+> **Extended in Apolyx-S0003; focus chrome polished 2026-10-14.** Field draws its box through the shared `ControlBox` (also used by `InputGroup`). It also gained `labelAside`, `optional`, `orientation="horizontal"`, array `error`, `size` / `variant` / `shape`, `FieldCounter` and `FieldSet`. The S0002 focus recipe (border + ring + bottom accent bar) was replaced by a borderless muted pad with a soft ring bloom — see [[08-s0003-switch-inputs#ControlBox: one box for Field and InputGroup]]. The S0002 layouts below are unchanged.
 
 Files: `src/components/ui/field.tsx`, plus polish in `input.tsx` / `textarea.tsx`.
 
 - `Field` provides context (`id`, `describedBy`, `invalid`, `required`, `disabled`) consumed by `FieldInput` / `FieldTextarea`, which set `aria-describedby`, `aria-invalid`, `required`.
-- Control box is `group/control` with `data-filled` / `data-invalid`. Focus: border to `ring`, 3 px ring at 25 %, and an `after:` accent bar that scales in on X. Blur uses `--duration-slow`, focus `--duration-base`, so defocus eases out slower.
+- Control box is `group/control` with `data-filled` / `data-invalid`. **As shipped in S0002:** focus moved the border to `ring`, drew a 3 px ring at 25 %, and scaled an `after:` accent bar on X (blur slow / focus base). **Current:** that accent bar is gone; the default box is a borderless muted pad with a soft ring bloom ([[08-s0003-switch-inputs#ControlBox: one box for Field and InputGroup]]).
 - **Floating:** label is absolute with `bg-inherit`; on `focus-within` or `data-filled` it moves to `top-0` and scales to 0.82, sitting on the border. Filled state is tracked in JS (`useFilledSync`) rather than `:placeholder-shown`, so controlled values and autofill work.
 - **Inline:** label in a muted panel with `border-r`, width from `labelWidth`.
 - `FieldError` is `role="alert"` with the `apolyx-field-error` keyframe (motion-safe only).

@@ -29,7 +29,7 @@ Default, disabled and read-only. Read-only keeps the value selectable and focusa
 
 ### Variants
 
-`outline` (default), `filled`, `underline` and `ghost`. Add `shape="pill"` for search-style inputs. The underline variant grows its focus bar from the left.
+`outline` (default) is a soft **borderless** pad that blooms a ring on focus — the same surface Field and Input Group use. `filled` is a stronger muted fill; `underline` keeps a bottom rule with a centre-out focus bar; `ghost` is transparent until hover. Add `shape="pill"` for search-style inputs.
 
 <ComponentPreview name="input-variants-demo" />
 
@@ -47,7 +47,7 @@ File inputs get a styled selector button, colour inputs show a swatch, and range
 
 ## States and validation
 
-Set `aria-invalid` and point `aria-describedby` at the message. The border and ring switch to the `destructive` token.
+Set `aria-invalid` and point `aria-describedby` at the message. The pad tints and the focus ring switch to the `destructive` token.
 
 <ComponentPreview name="input-validation-demo" />
 
@@ -75,7 +75,7 @@ Accepts every native `<input>` attribute, plus:
 
 <PropsTable title="Input" rows={[
   { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Control height and text size." },
-  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Surface style." },
+  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Surface style. outline is the soft borderless default." },
   { prop: "shape", type: '"default" | "pill"', default: '"default"', description: "Corner radius." },
   { prop: "htmlSize", type: "number", description: "The native `size` attribute (visible character width)." },
 ]} />

@@ -7,12 +7,12 @@ import { cn } from "../../lib/utils";
 
 export const textareaVariants = cva(
   [
-    "flex w-full rounded-md border placeholder:text-muted-foreground",
+    "flex w-full rounded-md border border-transparent placeholder:text-muted-foreground",
     "transition-[border-color,box-shadow,background-color] duration-(--duration-slow) ease-(--ease-out) focus-visible:duration-(--duration-base)",
     "focus-visible:outline-none",
     "disabled:cursor-not-allowed disabled:opacity-50",
     "[&[readonly]]:bg-muted/50 [&[readonly]]:text-muted-foreground",
-    "aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive/25",
+    "aria-invalid:focus-visible:ring-destructive/30",
   ],
   {
     variants: {
@@ -23,13 +23,13 @@ export const textareaVariants = cva(
       },
       variant: {
         outline:
-          "border-input bg-background shadow-sm hover:border-border-strong focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25",
+          "bg-muted/55 shadow-none hover:bg-muted/80 focus-visible:bg-background focus-visible:ring-[3px] focus-visible:ring-ring/30 focus-visible:shadow-[0_0_0_1px_color-mix(in_oklch,var(--ring)_35%,transparent)] aria-invalid:bg-destructive/5",
         filled:
-          "border-transparent bg-muted hover:border-border focus-visible:border-ring focus-visible:bg-background focus-visible:ring-[3px] focus-visible:ring-ring/25",
+          "bg-muted hover:bg-muted/90 focus-visible:bg-background focus-visible:ring-[3px] focus-visible:ring-ring/30",
         underline:
           "rounded-none border-0 border-b border-input bg-transparent px-0.5 hover:border-border-strong focus-visible:border-ring",
         ghost:
-          "border-transparent bg-transparent hover:bg-accent-hover/60 focus-visible:border-ring focus-visible:bg-background focus-visible:ring-[3px] focus-visible:ring-ring/25",
+          "bg-transparent hover:bg-accent-hover/50 focus-visible:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-ring/25",
       },
     },
     defaultVariants: { size: "md", variant: "outline" },

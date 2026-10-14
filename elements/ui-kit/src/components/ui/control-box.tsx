@@ -4,44 +4,48 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 /**
- * The bordered box shared by Field and InputGroup: border, hover, focus ring,
- * the bottom accent bar, invalid and disabled. Invalid comes from `data-invalid`
- * or from any child control with `aria-invalid="true"`.
+ * The control surface shared by Field and InputGroup: soft fill, hover, focus
+ * bloom, invalid and disabled. Invalid comes from `data-invalid` or from any
+ * child control with `aria-invalid="true"`.
+ *
+ * Default (`outline`) is borderless — a muted pad that blooms a soft ring on
+ * focus. There is no bottom accent bar.
  */
 export const controlBoxVariants = cva(
   [
     "group/control relative flex w-full items-stretch",
-    "transition-[border-color,box-shadow,background-color] duration-(--duration-slow) ease-(--ease-out) focus-within:duration-(--duration-base)",
-    "after:pointer-events-none after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-(--duration-slow) after:ease-(--ease-out) focus-within:after:scale-x-100",
-    "data-[invalid]:border-destructive has-[[aria-invalid=true]]:border-destructive",
-    "data-[invalid]:after:bg-destructive has-[[aria-invalid=true]]:after:bg-destructive",
+    "transition-[border-color,box-shadow,background-color,color] duration-(--duration-slow) ease-(--ease-out) focus-within:duration-(--duration-base)",
+    "data-[invalid]:ring-destructive/30 has-[[aria-invalid=true]]:ring-destructive/30",
     "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 has-[input:disabled,textarea:disabled]:opacity-50",
   ],
   {
     variants: {
       variant: {
+        // Soft borderless pad — the default for every Field / InputGroup.
         outline: [
-          "rounded-md border border-input bg-background shadow-sm hover:border-border-strong",
-          "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/20",
-          "data-[invalid]:focus-within:ring-destructive/25 has-[[aria-invalid=true]]:focus-within:ring-destructive/25",
+          "rounded-md border border-transparent bg-muted/55 shadow-none",
+          "hover:bg-muted/80",
+          "focus-within:bg-background focus-within:ring-[3px] focus-within:ring-ring/30 focus-within:shadow-[0_0_0_1px_color-mix(in_oklch,var(--ring)_35%,transparent)]",
+          "data-[invalid]:bg-destructive/5 has-[[aria-invalid=true]]:bg-destructive/5",
+          "data-[invalid]:focus-within:ring-destructive/30 has-[[aria-invalid=true]]:focus-within:ring-destructive/30",
         ],
         filled: [
-          "rounded-md border border-transparent bg-muted hover:border-border",
-          "focus-within:border-ring focus-within:bg-background focus-within:ring-[3px] focus-within:ring-ring/20",
-          "data-[invalid]:focus-within:ring-destructive/25 has-[[aria-invalid=true]]:focus-within:ring-destructive/25",
+          "rounded-md border border-transparent bg-muted hover:bg-muted/90",
+          "focus-within:bg-background focus-within:ring-[3px] focus-within:ring-ring/30",
+          "data-[invalid]:focus-within:ring-destructive/30 has-[[aria-invalid=true]]:focus-within:ring-destructive/30",
         ],
         underline: [
           "rounded-none border-0 border-b border-input bg-transparent hover:border-border-strong",
-          "after:inset-x-0 focus-within:border-ring",
+          "focus-within:border-ring",
         ],
         ghost: [
-          "rounded-md border border-transparent bg-transparent hover:bg-accent-hover/60",
-          "focus-within:border-ring focus-within:bg-background focus-within:ring-[3px] focus-within:ring-ring/20",
+          "rounded-md border border-transparent bg-transparent hover:bg-accent-hover/50",
+          "focus-within:bg-muted/40 focus-within:ring-[3px] focus-within:ring-ring/25",
         ],
       },
       shape: {
         default: "",
-        pill: "rounded-full after:inset-x-5",
+        pill: "rounded-full",
       },
     },
     defaultVariants: { variant: "outline", shape: "default" },

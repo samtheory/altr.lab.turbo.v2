@@ -35,7 +35,7 @@ describe("InputGroup", () => {
       </InputGroup>,
     );
     const group = screen.getByRole("group", { name: "Email" });
-    expect(group.className).toContain("has-[[aria-invalid=true]]:border-destructive");
+    expect(group.className).toContain("has-[[aria-invalid=true]]:ring-destructive/30");
     expect(screen.getByRole("textbox").getAttribute("aria-invalid")).toBe("true");
   });
 

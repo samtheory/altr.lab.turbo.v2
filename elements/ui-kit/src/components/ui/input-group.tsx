@@ -23,7 +23,7 @@ export function useInInputGroup() {
   return React.useContext(InputGroupContext);
 }
 
-/** One bordered box holding a control plus addons (icons, text, buttons, toolbars). */
+/** Soft control box holding a control plus addons (icons, text, buttons, toolbars). */
 export function InputGroup({ className, ...props }: InputGroupProps) {
   return (
     <InputGroupContext.Provider value={true}>

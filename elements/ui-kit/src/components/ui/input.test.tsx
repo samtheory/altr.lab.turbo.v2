@@ -16,11 +16,12 @@ describe("Input", () => {
     expect(input.getAttribute("size")).toBe("12");
   });
 
-  it("defaults to the outline md look", () => {
+  it("defaults to the soft borderless md look", () => {
     render(<Input aria-label="Name" />);
     const input = screen.getByRole("textbox");
     expect(input.className).toContain("h-10");
-    expect(input.className).toContain("border-input");
+    expect(input.className).toContain("bg-muted/55");
+    expect(input.className).toContain("border-transparent");
   });
 
   it("gives underline a centre-out focus bar", () => {

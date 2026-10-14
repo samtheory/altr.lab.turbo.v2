@@ -23,7 +23,7 @@
 - **floating** — label sits inside the control and shrinks onto the border while focused or filled.
 - **inline** — label beside the control in a muted panel, separated by a border.
 
-Focus animates the border, a soft ring, and an accent bar along the bottom edge. Under reduced motion transitions are instant.
+The default box is borderless: a soft muted pad that blooms a ring on focus. There is no bottom accent bar. Under reduced motion transitions are instant.
 
 ### Sizes and variants
 
@@ -84,7 +84,7 @@ Fields also host [Input Group](/docs/components/input-group) addons directly.
   { prop: "required", type: "boolean", description: "Marks the control required." },
   { prop: "disabled", type: "boolean", description: "Disables the control." },
   { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Control height." },
-  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Box style." },
+  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Box style. outline is the soft borderless default." },
   { prop: "shape", type: '"default" | "pill"', default: '"default"', description: "Box corner radius." },
   { prop: "labelWidth", type: "string", description: "Label column width for inline and horizontal (CSS length)." },
   { prop: "controlClassName", type: "string", description: "Class for the control box." },

@@ -85,7 +85,9 @@ The docs Switch page has five categories: Basics, Appearance, Composition, Setti
 
 ## ControlBox: one box for Field and InputGroup
 
-`ControlBox` (`controlBoxVariants`) owns the border, hover, focus ring, accent bar, and invalid / disabled / read-only states. It also owns `size` (`sm` · `md` · `lg`), `variant` (`outline` · `filled` · `underline` · `ghost`) and `shape` (`pill`).
+`ControlBox` (`controlBoxVariants`) owns the soft surface, hover, focus bloom, and invalid / disabled / read-only states. It also owns `size` (`sm` · `md` · `lg`), `variant` (`outline` · `filled` · `underline` · `ghost`) and `shape` (`pill`).
+
+**Post-S0003 polish (2026-10-14):** the default `outline` surface is **borderless** — a muted pad (`bg-muted/55`) that lifts to `background` and blooms a soft `ring` + hairline shadow on focus. The old bottom `::after` accent bar (the black underline that grew on focus) was removed from `ControlBox` entirely. The same look is mirrored on standalone `Input` / `Textarea` `outline` variants so Field, InputGroup, Password, Number, Mask and bare inputs stay in sync. `underline` still offers an optional bottom rule with a centre-out focus bar.
 
 - `Field` draws a `ControlBox` around its control.
 - `InputGroup` is a `ControlBox` plus an "in group" context.
@@ -193,6 +195,10 @@ Screenshots (headless Edge, 1280 px) in `Docs/report/assets/apolyx-s0003/`:
 - `input-group-default-light.png`
 - `input-otp-default-light.png`
 - `form-patterns-dark.png` (shows the Forms sidebar group)
+
+## Checkbox motion (post-S0003 polish)
+
+`checkbox.tsx` keeps the check and dash marks mounted. Fill colour and border ease with `--duration-base` / `--ease-out`. On check / indeterminate the mark pops with `apolyx-check-in` (scale + opacity); on clear it scales and fades out. Press scales the box to `0.88`. Reduced motion turns transitions, the pop, and the press scale off.
 
 ## Deferred
 

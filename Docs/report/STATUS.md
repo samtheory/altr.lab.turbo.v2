@@ -25,6 +25,7 @@ Last updated: 2026-10-14 · Living map: [[../brain/00-Docs-Brain]] · Sprint: **
   - Foundations: OKLCH themes (3 families × light / dark) with hover-contrast tokens, `ApolyxProvider`, and its own primitives (no Radix / Base UI).
   - Components: wave 1 + overlays (Dialog with sizes, DropdownMenu, Tabs, Tooltip, Toast), navigation (Sheet, Breadcrumb, NavigationMenu, NavList), Table / List / Grid, Timeline.
   - **S0003:** Switch with pure, unit-tested physics, plus `lg`, tones, icons, track labels, `SwitchField`, `SwitchCard` and `FieldSet`. Field extras (`labelAside`, `optional`, horizontal, `FieldCounter`, multiple errors) sit on a `ControlBox` shared with `InputGroup`. `Input` variants and native types, `PasswordInput` + `PasswordStrength`, `NumberInput`, `InputOTP`, and `MaskedInput` / `useMask` with presets — [[../tech_space/ui-kit/08-s0003-switch-inputs]].
+  - **Post-S0003 polish (2026-10-14):** default inputs are borderless (muted pad + soft focus ring bloom; bottom accent bar removed in `ControlBox` / `Input` / `Textarea`). Checkbox fill / clear pops the mark with `apolyx-check-in` and respects reduced motion.
   - Motion recipes, Line / Bar charts (visx), Storybook 9 (33 story files).
   - **66 registry items** with an import-resolution build; **141 Vitest tests** in 30 files.
 - **`apolyx` CLI** (`elements/apolyx-cli`) — `init` / `add` / `list`. The external Next smoke app builds with button, dialog, line-chart + overlays, and since S0003 with input-group, password-input, number-input, input-otp, input-mask and switch.

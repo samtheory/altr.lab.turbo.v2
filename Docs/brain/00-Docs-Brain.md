@@ -122,7 +122,7 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 | `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest shipped: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] (S0003, acceptance ticked) · Earlier: [[../feature_list/ui-kit/03-timeline]] · [[../feature_list/ui-kit/02-apolyx-s0002-wave]] (kit intent: [[../feature_list/ui-kit/00-intent]]) · Next seeds: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
 | `plan/` | Checkbox overlay + next steps | No active sprint · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** — [[../plan/ui-kit/Apolyx-S0003/README]], closed 2026-10-14) |
 | `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, after Apolyx-S0003: 66 registry items, 141 tests, 48 MDX pages) |
-| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/08-s0003-switch-inputs]] (Apolyx-S0003: Switch physics + family, ControlBox, input catalog, Forms docs group) · [[../tech_space/ui-kit/05-docs-app]] (Forms group, category convention) · [[../tech_space/ui-kit/07-timeline]] · index [[../tech_space/ui-kit/README]] |
+| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/08-s0003-switch-inputs]] (Apolyx-S0003 + borderless focus / checkbox motion polish) · [[../tech_space/ui-kit/05-docs-app]] (Forms group, category convention) · [[../tech_space/ui-kit/07-timeline]] · index [[../tech_space/ui-kit/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |
