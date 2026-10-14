@@ -27,6 +27,6 @@ Button (loading, asChild via Apolyx Slot), Text/Heading, Label, Input, Textarea,
 
 Also started wave 1b: **Dialog**, **Tabs**.
 
-Added after the sprint: **Timeline** (2026-10-14) — see [[06-timeline]].
+Added after the sprint: **Timeline** (2026-10-14) — see [[07-timeline]].
 
 Stories under Foundations (Tokens, Overview) and UI/*. Hub `/docs-preview` smokes wave-1 controls + theme family switcher.

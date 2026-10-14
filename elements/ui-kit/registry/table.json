@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "table",
+  "type": "ui",
+  "title": "Table",
+  "description": "Semantic table with density, striped rows, sticky header",
+  "files": [
+    {
+      "path": "src/components/ui/table.tsx",
+      "target": "table.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/table"
+}

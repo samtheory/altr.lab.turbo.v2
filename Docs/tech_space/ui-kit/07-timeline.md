@@ -12,7 +12,7 @@ tags:
 
 # Apolyx Timeline — as-built
 
-> Who: anyone changing or extending the Timeline. Intent: [[../../feature_list/ui-kit/02-timeline]]. Code wins over this note if they disagree.
+> Who: anyone changing or extending the Timeline. Intent: [[../../feature_list/ui-kit/03-timeline]]. Code wins over this note if they disagree.
 
 ## Files
 

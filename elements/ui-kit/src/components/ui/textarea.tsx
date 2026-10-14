@@ -39,8 +39,10 @@ export function Textarea({
       data-slot="textarea"
       className={cn(
         "flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm",
+        "transition-[border-color,box-shadow] duration-(--duration-slow) ease-(--ease-out) focus-visible:duration-(--duration-base)",
         "placeholder:text-muted-foreground",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "hover:border-border-strong",
+        "focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "aria-invalid:border-destructive",
         className,

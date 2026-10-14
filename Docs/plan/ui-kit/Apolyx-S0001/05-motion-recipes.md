@@ -14,7 +14,7 @@ tags:
 
 > Who: apollo. Motion is first-class in Apolyx: small, consistent, and off when the user asks for reduced motion.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Motion recipes (wave 1)]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Motion recipes (wave 1)]]
 
 **Depends on:** phase 2 (motion tokens) · **Skills:** `animate` + `fixing-motion-performance` (+ `animation-vocabulary` when naming feels)
 

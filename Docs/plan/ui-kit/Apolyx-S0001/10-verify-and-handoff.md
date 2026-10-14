@@ -14,7 +14,7 @@ tags:
 
 > Who: apollo runs the sweep; docs_man writes the as-built docs and closes the sprint folder.
 
-Sprint index: [[README]] · Intent acceptance list: [[../../feature_list/ui-kit/00-intent#Acceptance criteria (later — when Apolyx v1 infra ships)]]
+Sprint index: [[README]] · Intent acceptance list: [[../../../feature_list/ui-kit/00-intent#Acceptance criteria (later — when Apolyx v1 infra ships)]]
 
 **Depends on:** all earlier phases · **Skills:** `playwright-cli` + `fixing-accessibility`
 
@@ -47,7 +47,7 @@ pnpm build:storybook:ui-kit
 
 - [x] `Docs/tech_space/ui-kit/` notes: tokens + theming, primitives, components, motion, charts, registry + CLI, docs app (as-built, code paths, decisions that changed vs this plan)
 - [x] `Docs/report/STATUS.md`: Apolyx v1 implemented / remaining / planned
-- [x] Tick the "later" acceptance boxes in [[../../feature_list/ui-kit/00-intent]]
+- [x] Tick the "later" acceptance boxes in [[../../../feature_list/ui-kit/00-intent]]
 - [x] `Docs/Altr.lab/` structure + commands: new packages, ports, scripts
 - [x] Brain + hub: point Apolyx row at `tech_space/ui-kit/`
 - [x] Close this sprint: mark [[README]] status `closed`, list carry-overs as a new feature_list note or the next plan

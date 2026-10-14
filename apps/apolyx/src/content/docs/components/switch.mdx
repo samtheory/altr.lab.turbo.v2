@@ -11,6 +11,15 @@
 <Label htmlFor="sync">Background sync</Label>
 ```
 
+## Physics
+
+- **Press** — the thumb stretches toward the side it is about to travel to.
+- **Drag** — grab the thumb and slide it; past the midpoint on release it commits, otherwise it snaps back. Pulling past a rail stretches it against the wall (rubber band).
+- **Release** — the thumb springs to the end, squashes a little on impact, and settles back to its normal width.
+- **Reduced motion** — no stretch or bounce; the thumb moves straight to its end.
+
+Click, Space, and Enter still toggle exactly once.
+
 ## Accessibility
 
 `role="switch"` with `aria-checked`. Space and Enter toggle. Use a switch for settings that apply immediately; use a checkbox inside forms that are submitted.
@@ -18,6 +27,7 @@
 ## Props
 
 <PropsTable rows={[
+  { prop: "size", type: '"sm" | "md"', default: '"md"', description: "Track and thumb size." },
   { prop: "checked", type: "boolean", description: "Controlled state." },
   { prop: "defaultChecked", type: "boolean", default: "false", description: "Initial state when uncontrolled." },
   { prop: "onCheckedChange", type: "(checked: boolean) => void", description: "Called when toggled." },

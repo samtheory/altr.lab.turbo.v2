@@ -1,5 +1,5 @@
 {
-  "name": "@altr/ai-bot-agent",
+  "name": "@service/ai-bot-agent",
   "version": "0.0.1",
   "private": true,
   "description": "AI agent/bot service placeholder for altr.lab",

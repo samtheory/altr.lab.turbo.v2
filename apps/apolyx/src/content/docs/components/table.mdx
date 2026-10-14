@@ -1,0 +1,47 @@
+<ComponentPreview name="table-demo" />
+
+## Installation
+
+<InstallTabs name="table" exports="Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption" />
+
+## Usage
+
+```tsx
+<Table striped stickyHeader>
+  <TableCaption>Recent invoices</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Invoice</TableHead>
+      <TableHead className="text-right">Amount</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow selected>
+      <TableCell>INV-0012</TableCell>
+      <TableCell className="text-right">$1,240</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+Table is presentational: sorting, filtering, and pagination stay in your data layer.
+
+## Accessibility
+
+- Native `<table>` semantics; header cells use `scope="col"`.
+- `TableCaption` names the table for screen readers.
+- Selected rows set `aria-selected` and `data-state="selected"`.
+- The scroll container keeps wide tables usable on small screens.
+
+## Props
+
+<PropsTable title="Table" rows={[
+  { prop: "density", type: '"compact" | "default"', default: '"default"', description: "Row padding." },
+  { prop: "striped", type: "boolean", default: "false", description: "Zebra-stripe body rows." },
+  { prop: "stickyHeader", type: "boolean", default: "false", description: "Keep the header visible while the container scrolls." },
+  { prop: "containerClassName", type: "string", description: "Class for the scroll container." },
+]} />
+
+<PropsTable title="TableRow" rows={[
+  { prop: "selected", type: "boolean", description: "Highlights the row." },
+]} />

@@ -16,7 +16,7 @@ tags:
 
 > Who: apollo. The hard-behavior components. Each one is a composition of phase 3 primitives plus phase 5 motion; if a primitive is missing a feature, fix the primitive, not the component.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Overlay / navigation (wave 1b — after focus helpers)]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Overlay / navigation (wave 1b — after focus helpers)]]
 
 **Depends on:** phases 3, 4, 5 · **Skills:** `fixing-accessibility` + `vercel-composition-patterns` (+ `animate`)
 

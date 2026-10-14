@@ -12,9 +12,9 @@ tags:
 
 # Phase 4 — wave 1 components
 
-> Who: apollo. The first real catalog. Each item follows the per-component checklist in [[../../agents/apollo/instructions/00-workflow#Per-component checklist]].
+> Who: apollo. The first real catalog. Each item follows the per-component checklist in [[../../../agents/apollo/instructions/00-workflow#Per-component checklist]].
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Primitives / UI (wave 1)]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Primitives / UI (wave 1)]]
 
 **Depends on:** phases 2 and 3 · **Skills:** `design-taste-frontend` (or `impeccable`) + `vercel-react-best-practices` + `fixing-accessibility`
 

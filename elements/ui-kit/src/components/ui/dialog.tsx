@@ -31,6 +31,23 @@ function useDialog() {
   return ctx;
 }
 
+export { useDialog as useDialogContext };
+
+const dialogSizes = {
+  sm: "max-w-sm",
+  md: "max-w-lg",
+  lg: "max-w-2xl",
+  xl: "max-w-4xl",
+  full: "max-w-[calc(100vw-2rem)] h-[calc(100dvh-2rem)]",
+} as const;
+
+export type DialogSize = keyof typeof dialogSizes;
+
+export type DialogContentProps = React.HTMLAttributes<HTMLDivElement> & {
+  /** Max width preset. `full` fills the viewport minus a small gutter. */
+  size?: DialogSize;
+};
+
 export type DialogProps = {
   open?: boolean;
   defaultOpen?: boolean;
@@ -99,8 +116,9 @@ export function DialogTrigger({ asChild, onClick, ...props }: TriggerProps) {
 export function DialogContent({
   className,
   children,
+  size = "md",
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: DialogContentProps) {
   const { open, setOpen, titleId, descriptionId, contentId, alert } =
     useDialog();
   const reduced = useReducedMotion();
@@ -131,10 +149,11 @@ export function DialogContent({
               onDismiss={() => setOpen(false)}
               disableOutsideDismiss={alert}
               disableOutsidePointerEvents
-              className="w-full max-w-lg"
+              className={cn("w-full", dialogSizes[size])}
             >
               <FocusScope>
                 <motion.div
+                  className={size === "full" ? "h-full" : undefined}
                   initial={hidden}
                   animate={present ? { opacity: 1, scale: 1, y: 0 } : hidden}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
@@ -147,8 +166,10 @@ export function DialogContent({
                     aria-describedby={descriptionId}
                     data-slot="dialog-content"
                     data-state={present ? "open" : "closed"}
+                    data-size={size}
                     className={cn(
                       "w-full rounded-xl border border-border bg-popover p-6 text-popover-foreground shadow-lg",
+                      size === "full" && "flex h-full flex-col overflow-auto",
                       className,
                     )}
                     {...props}

@@ -14,7 +14,7 @@ tags:
 
 # apps/apolyx — docs app
 
-> Who: anyone editing docs content or the docs shell. Sprint **Apolyx-S0001** phase 9. Plan: [[../../plan/ui-kit/09-docs-app]].
+> Who: anyone editing docs content or the docs shell. Sprint **Apolyx-S0001** phase 9. Plan: [[../../plan/ui-kit/Apolyx-S0001/09-docs-app]].
 
 ## Stack
 
@@ -41,11 +41,11 @@ tags:
 
 ## Content
 
-Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (38 static routes): introduction, installation, theming, CLI, primitives, 21 components, motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. The sprint closed with 37 routes and 20 components; Timeline was added on 2026-10-14 ([[06-timeline]]).
+Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (42 MDX pages): introduction, installation, theming, CLI, primitives, 28 components (incl. Navigation and Data groups), motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. S0001 closed with 37 routes and 20 components; S0002 added Field, Sheet, Breadcrumb, NavigationMenu, NavList, Table, List and Grid ([[06-s0002-contrast-nav-switch-field-data]]); Timeline was added on 2026-10-14 ([[07-timeline]]).
 
 A page can hold several previews: `components/timeline.mdx` renders nine `ComponentPreview`s (one per layout or state), each backed by its own `src/demos/timeline-*.tsx` file registered in `src/demos/index.ts`.
 
-Landing `/` shows a live Card + LineChart sample and the badge `Apolyx-S0001 · N components`, where N is counted from `docs-config.ts` (21 today).
+Landing `/` shows a live Card + LineChart sample and the badge `Apolyx-S0001 · N components`, where N is counted from `docs-config.ts` (28 today).
 
 ## Screenshots (verify)
 

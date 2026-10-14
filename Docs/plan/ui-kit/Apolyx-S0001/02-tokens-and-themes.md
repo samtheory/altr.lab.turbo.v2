@@ -15,7 +15,7 @@ tags:
 
 > Who: apollo. This is where Apolyx gets its own look. Every later component only reads the semantic tokens defined here.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Themes — decided: 3 families × light/dark]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Themes — decided: 3 families × light/dark]]
 
 **Depends on:** phase 1 · **Skills:** `design-tokens` + `tailwind-4-docs` (+ `design-taste-frontend` for the palette / type call)
 

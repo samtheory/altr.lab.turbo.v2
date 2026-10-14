@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "list",
+  "type": "ui",
+  "title": "List",
+  "description": "List rows with leading / content / trailing slots and interactive rows",
+  "files": [
+    {
+      "path": "src/components/ui/list.tsx",
+      "target": "list.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": [
+    "slot",
+    "utils"
+  ],
+  "docs": "components/list"
+}

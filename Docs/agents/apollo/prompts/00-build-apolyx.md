@@ -36,12 +36,12 @@ Follow wave-1 order; add Storybook + a11y; summarize files touched.
 ## Execute the sprint plan
 
 ```
-apollo: execute Docs/plan/ui-kit — start at the first phase not marked done.
+apollo: execute Docs/plan/ui-kit — open the active Apolyx-S000N sprint, start at the first phase not marked done.
 Read the sprint README (decisions + phase table) and that phase card.
 Tick boxes as tasks land, run the card's Verify block, set the phase status, then stop and summarize.
 ```
 
-One phase per run keeps reviews small. To run a specific phase: `apollo: execute Docs/plan/ui-kit/03-primitives.md`.
+One phase per run keeps reviews small. To run a specific phase: `apollo: execute Docs/plan/ui-kit/Apolyx-S0002/03-switch-physics.md`.
 
 ## Add one component
 

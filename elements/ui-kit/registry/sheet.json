@@ -1,0 +1,28 @@
+{
+  "$schema": "./schema.json",
+  "name": "sheet",
+  "type": "ui",
+  "title": "Sheet",
+  "description": "Edge drawer (left / right / top / bottom) built on Dialog",
+  "files": [
+    {
+      "path": "src/components/ui/sheet.tsx",
+      "target": "sheet.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12",
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "dialog",
+    "dismissable-layer",
+    "focus-scope",
+    "portal",
+    "presence",
+    "scroll-lock",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/sheet"
+}

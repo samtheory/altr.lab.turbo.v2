@@ -15,7 +15,7 @@ tags:
 
 > Who: apollo. Charts must look like Apolyx, not like a dashboard kit. visx does the math; every visible pixel is ours.
 
-Sprint index: [[README]] · Intent: [[../../feature_list/ui-kit/00-intent#Chart engine — decided: Apolyx SVG + visx (not pure-from-scratch, not Recharts)]]
+Sprint index: [[README]] · Intent: [[../../../feature_list/ui-kit/00-intent#Chart engine — decided: Apolyx SVG + visx (not pure-from-scratch, not Recharts)]]
 
 **Depends on:** phase 2 (chart tokens), phase 5 (motion) · **Skills:** `vercel-react-best-practices` + `animate` (+ `find-docs` for visx APIs)
 

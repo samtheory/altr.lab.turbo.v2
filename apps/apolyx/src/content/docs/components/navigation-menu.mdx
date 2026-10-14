@@ -1,0 +1,57 @@
+<ComponentPreview name="navigation-menu-demo" />
+
+## Installation
+
+<InstallTabs name="navigation-menu" exports="NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink, NavigationMenuPanelList" />
+
+## Usage
+
+```tsx
+<NavigationMenu>
+  <NavigationMenuList>
+    <NavigationMenuItem value="kit">
+      <NavigationMenuTrigger>Kit</NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <NavigationMenuPanelList>
+          <li><NavigationMenuLink href="/docs/components/button">Components</NavigationMenuLink></li>
+        </NavigationMenuPanelList>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+    <NavigationMenuItem>
+      <NavigationMenuLink href="/docs" active>Docs</NavigationMenuLink>
+    </NavigationMenuItem>
+  </NavigationMenuList>
+</NavigationMenu>
+```
+
+## Behaviour
+
+- Panels open on hover after `openDelay` and close after `closeDelay`, so moving the pointer diagonally into a panel does not flicker.
+- Click toggles a panel; only one panel is open at a time.
+- Panels render inline (not portaled) and fade and drop in with Motion.
+
+## Accessibility
+
+- Triggers expose `aria-expanded` and `aria-controls`.
+- ArrowDown on a trigger opens its panel; Left / Right move between top-level items.
+- Escape and outside click close the panel and return focus to its trigger.
+- Active links use `aria-current="page"`.
+
+## Props
+
+<PropsTable title="NavigationMenu" rows={[
+  { prop: "value", type: "string", description: "Controlled open item (empty string = closed)." },
+  { prop: "defaultValue", type: "string", description: "Initial open item." },
+  { prop: "onValueChange", type: "(value: string) => void", description: "Called when the open item changes." },
+  { prop: "openDelay", type: "number", default: "120", description: "Hover delay before opening, in ms." },
+  { prop: "closeDelay", type: "number", default: "220", description: "Delay before closing after the pointer leaves, in ms." },
+]} />
+
+<PropsTable title="NavigationMenuContent" rows={[
+  { prop: "align", type: '"start" | "center" | "end"', default: '"start"', description: "Panel alignment relative to its trigger." },
+]} />
+
+<PropsTable title="NavigationMenuLink" rows={[
+  { prop: "active", type: "boolean", description: "Marks the current page." },
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element." },
+]} />

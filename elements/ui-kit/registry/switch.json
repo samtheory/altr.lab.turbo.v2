@@ -3,16 +3,20 @@
   "name": "switch",
   "type": "ui",
   "title": "Switch",
-  "description": "On / off toggle",
+  "description": "On / off toggle with draggable, stretchy thumb physics",
   "files": [
     {
       "path": "src/components/ui/switch.tsx",
       "target": "switch.tsx"
     }
   ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
   "registryDependencies": [
     "use-controllable-state",
     "use-id",
+    "use-reduced-motion",
     "utils"
   ],
   "docs": "components/switch"

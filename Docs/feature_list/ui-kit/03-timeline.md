@@ -12,7 +12,7 @@ tags:
 
 # Apolyx Timeline — intent
 
-> Who: anyone extending the Apolyx catalog past wave 1. Reference: [ReUI Timeline](https://reui.io/docs/components/base/timeline). Code truth: [[../../tech_space/ui-kit/06-timeline]].
+> Who: anyone extending the Apolyx catalog past wave 1. Reference: [ReUI Timeline](https://reui.io/docs/components/base/timeline). Code truth: [[../../tech_space/ui-kit/07-timeline]].
 
 ## Why
 
@@ -54,4 +54,4 @@ Same part names as ReUI (`Timeline`, `TimelineItem`, `TimelineHeader`, `Timeline
 ## Links
 
 - Intent hub: [[README]] · Kit intent: [[00-intent]]
-- As-built: [[../../tech_space/ui-kit/06-timeline]]
+- As-built: [[../../tech_space/ui-kit/07-timeline]]

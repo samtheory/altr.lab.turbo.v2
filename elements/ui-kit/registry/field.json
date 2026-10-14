@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "field",
+  "type": "ui",
+  "title": "Field",
+  "description": "Labelled field with top / floating / inline layouts and focus motion",
+  "files": [
+    {
+      "path": "src/components/ui/field.tsx",
+      "target": "field.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/field"
+}

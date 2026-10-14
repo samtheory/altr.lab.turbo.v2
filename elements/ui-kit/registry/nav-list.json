@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "nav-list",
+  "type": "ui",
+  "title": "Nav List",
+  "description": "Vertical sidebar navigation list with groups and active item",
+  "files": [
+    {
+      "path": "src/components/ui/nav-list.tsx",
+      "target": "nav-list.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "slot",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/nav-list"
+}

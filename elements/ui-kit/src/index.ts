@@ -13,6 +13,17 @@ export { Text, Heading, type TextProps, type HeadingProps } from "./components/u
 export { Label, type LabelProps } from "./components/ui/label";
 export { Input, type InputProps } from "./components/ui/input";
 export { Textarea, type TextareaProps } from "./components/ui/textarea";
+export {
+  Field,
+  FieldInput,
+  FieldTextarea,
+  FieldDescription,
+  FieldError,
+  type FieldProps,
+  type FieldLayout,
+  type FieldInputProps,
+  type FieldTextareaProps,
+} from "./components/ui/field";
 export { Checkbox, type CheckboxProps } from "./components/ui/checkbox";
 export { Switch, type SwitchProps } from "./components/ui/switch";
 export {
@@ -30,6 +41,31 @@ export {
   type AlertProps,
 } from "./components/ui/alert";
 export { Kbd, KbdGroup } from "./components/ui/kbd";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  tableVariants,
+  type TableProps,
+} from "./components/ui/table";
+export {
+  List,
+  ListItem,
+  ListItemLeading,
+  ListItemContent,
+  ListItemTitle,
+  ListItemDescription,
+  ListItemTrailing,
+  listVariants,
+  type ListProps,
+  type ListItemProps,
+} from "./components/ui/list";
+export { Grid, type GridProps, type GridCols } from "./components/ui/grid";
 export {
   Dialog,
   DialogTrigger,
@@ -49,7 +85,50 @@ export {
   AlertDialogAction,
   AlertDialogCancel,
   type DialogProps,
+  type DialogContentProps,
+  type DialogSize,
 } from "./components/ui/dialog";
+export {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+  type SheetProps,
+  type SheetContentProps,
+  type SheetSide,
+} from "./components/ui/sheet";
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+  type BreadcrumbLinkProps,
+} from "./components/ui/breadcrumb";
+export {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+  NavigationMenuPanelList,
+  type NavigationMenuProps,
+  type NavigationMenuLinkProps,
+} from "./components/ui/navigation-menu";
+export {
+  NavList,
+  NavListGroup,
+  NavListLabel,
+  NavListItem,
+  type NavListItemProps,
+} from "./components/ui/nav-list";
 export {
   Tabs,
   TabsList,

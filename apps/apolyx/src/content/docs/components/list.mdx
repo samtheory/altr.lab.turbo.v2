@@ -1,0 +1,39 @@
+<ComponentPreview name="list-demo" />
+
+## Installation
+
+<InstallTabs name="list" exports="List, ListItem, ListItemLeading, ListItemContent, ListItemTitle, ListItemDescription, ListItemTrailing" />
+
+## Usage
+
+```tsx
+<List variant="divided">
+  <ListItem asChild>
+    <a href="/people/ada">
+      <ListItemLeading><Avatar>…</Avatar></ListItemLeading>
+      <ListItemContent>
+        <ListItemTitle>Ada Lovelace</ListItemTitle>
+        <ListItemDescription>Engineering</ListItemDescription>
+      </ListItemContent>
+      <ListItemTrailing><ChevronRight /></ListItemTrailing>
+    </a>
+  </ListItem>
+</List>
+```
+
+Rows are static by default. Use `asChild` with a link or button to make a row interactive; it then gets hover and focus styles.
+
+## Accessibility
+
+- Rendered as `<ul>` / `<li>`, so screen readers announce the item count.
+- Interactive rows keep their native link or button semantics.
+
+## Props
+
+<PropsTable title="List" rows={[
+  { prop: "variant", type: '"plain" | "divided" | "card"', default: '"plain"', description: "Row separation style." },
+]} />
+
+<PropsTable title="ListItem" rows={[
+  { prop: "asChild", type: "boolean", default: "false", description: "Render the row content inside the child element (link or button)." },
+]} />

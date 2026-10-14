@@ -1,0 +1,35 @@
+<ComponentPreview name="breadcrumb-demo" />
+
+## Installation
+
+<InstallTabs name="breadcrumb" exports="Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis" />
+
+## Usage
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/docs">Docs</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+Pass `asChild` to `BreadcrumbLink` to render your router's link (for example `next/link`).
+
+## Accessibility
+
+- Rendered as `<nav aria-label="Breadcrumb">` around an ordered list.
+- The current page uses `aria-current="page"`.
+- Separators and the ellipsis icon are hidden from assistive tech.
+
+## Props
+
+<PropsTable title="BreadcrumbLink" rows={[
+  { prop: "asChild", type: "boolean", default: "false", description: "Merge onto the child element." },
+]} />

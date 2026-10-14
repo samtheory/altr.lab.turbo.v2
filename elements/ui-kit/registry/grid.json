@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "grid",
+  "type": "ui",
+  "title": "Grid",
+  "description": "Responsive CSS grid layout helper",
+  "files": [
+    {
+      "path": "src/components/ui/grid.tsx",
+      "target": "grid.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "slot",
+    "utils"
+  ],
+  "docs": "components/grid"
+}

@@ -14,11 +14,11 @@ tags:
 
 # Apolyx registry and CLI
 
-> Who: anyone installing Apolyx outside the monorepo. Sprint **Apolyx-S0001** phase 8. Plan: [[../../plan/ui-kit/08-registry-and-cli]].
+> Who: anyone installing Apolyx outside the monorepo. Sprint **Apolyx-S0001** phase 8. Plan: [[../../plan/ui-kit/Apolyx-S0001/08-registry-and-cli]].
 
 ## Registry (`elements/ui-kit`)
 
-- **52 manifests** in `registry/*.json` — lib, theme, primitive, ui, motion, chart. The sprint closed with 51; `timeline` was added on 2026-10-14 ([[06-timeline]]) and installs with `apolyx add timeline`.
+- **60 manifests** in `registry/*.json` — lib, theme, primitive, ui, motion, chart. S0001 closed with 51; S0002 brought it to 59 ([[06-s0002-contrast-nav-switch-field-data]]); `timeline` was added on 2026-10-14 ([[07-timeline]]) and installs with `apolyx add timeline`.
 - Theme CSS is split: `src/styles/tokens.css` (`@theme inline`, dark variant, reduced motion, base) + three family files. Kit `globals.css` imports all of them plus `@source`.
 - `scripts/build-registry.ts` validates required fields, kebab-case names, type enum; resolves every relative import to a file owned by the item or a transitive `registryDependency`; requires bare imports in `dependencies` (except `react` / `react-dom`); forbids `@altr/*`, `@radix-ui/*`, `@base-ui/*`; emits `dist/r/<name>.json` with inlined content + `files[].imports`, and `dist/r/index.json`.
 - Kit script: `"build": "tsx scripts/build-registry.ts"`.
