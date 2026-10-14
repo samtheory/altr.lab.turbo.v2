@@ -22,6 +22,15 @@ import SwitchDemo from "./switch-demo";
 import TabsDemo from "./tabs-demo";
 import TextDemo from "./text-demo";
 import TextareaDemo from "./textarea-demo";
+import TimelineAlternateDemo from "./timeline-alternate-demo";
+import TimelineDemo from "./timeline-demo";
+import TimelineHorizontalDemo from "./timeline-horizontal-demo";
+import TimelineIconsDemo from "./timeline-icons-demo";
+import TimelinePipelineDemo from "./timeline-pipeline-demo";
+import TimelineProgressDemo from "./timeline-progress-demo";
+import TimelineRoadmapDemo from "./timeline-roadmap-demo";
+import TimelineSplitDemo from "./timeline-split-demo";
+import TimelineStatusDemo from "./timeline-status-demo";
 import ToastDemo from "./toast-demo";
 import TooltipDemo from "./tooltip-demo";
 
@@ -50,6 +59,15 @@ export const demos = {
   "tabs-demo": TabsDemo,
   "text-demo": TextDemo,
   "textarea-demo": TextareaDemo,
+  "timeline-alternate-demo": TimelineAlternateDemo,
+  "timeline-demo": TimelineDemo,
+  "timeline-horizontal-demo": TimelineHorizontalDemo,
+  "timeline-icons-demo": TimelineIconsDemo,
+  "timeline-pipeline-demo": TimelinePipelineDemo,
+  "timeline-progress-demo": TimelineProgressDemo,
+  "timeline-roadmap-demo": TimelineRoadmapDemo,
+  "timeline-split-demo": TimelineSplitDemo,
+  "timeline-status-demo": TimelineStatusDemo,
   "toast-demo": ToastDemo,
   "tooltip-demo": TooltipDemo,
 } as const;

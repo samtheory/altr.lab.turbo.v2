@@ -1,0 +1,127 @@
+<ComponentPreview name="timeline-demo" />
+
+## Installation
+
+<InstallTabs name="timeline" exports="Timeline, TimelineItem, TimelineHeader, TimelineDate, TimelineTitle, TimelineContent, TimelineIndicator, TimelineSeparator" />
+
+## Usage
+
+```tsx
+<Timeline defaultValue={2} aria-label="Release history">
+  <TimelineItem step={1}>
+    <TimelineSeparator />
+    <TimelineIndicator />
+    <TimelineHeader>
+      <TimelineDate>Mar 2026</TimelineDate>
+      <TimelineTitle>Project initialised</TimelineTitle>
+    </TimelineHeader>
+    <TimelineContent>Repository and CI are in place.</TimelineContent>
+  </TimelineItem>
+  {/* …more items */}
+</Timeline>
+```
+
+## Anatomy
+
+`Timeline` (an `<ol>`) → `TimelineItem` (an `<li>`) → `TimelineSeparator` + `TimelineIndicator` + `TimelineHeader` (`TimelineDate`, `TimelineTitle`) + `TimelineContent`.
+
+Indicator and separator are positioned from the item, so their order inside it does not matter. The rail geometry lives in CSS variables on the root (`--tl-indicator`, `--tl-gap`, `--tl-rail`, `--tl-offset`), which is why every layout below is a prop rather than a pile of class overrides.
+
+## Progress
+
+`value` is the **last reached step**. Each item derives its state from its `step`:
+
+| State | When | Indicator | Line to the next item |
+|---|---|---|---|
+| `completed` | `step < value` | Filled with the tone | Filled |
+| `current` | `step === value` | Filled + soft halo, `aria-current="step"` | Track only |
+| `upcoming` | `step > value` | Hollow | Track only |
+
+Items with `step <= value` also get `data-completed`, and every item exposes `data-state` for your own styling. `defaultValue` is `0` (nothing reached). The line fill animates when `value` changes and is instant under `prefers-reduced-motion`.
+
+<ComponentPreview name="timeline-progress-demo" />
+
+## Examples
+
+### Left-aligned dates
+
+`layout="split"` moves `TimelineDate` into a gutter on the start side of the rail.
+
+<ComponentPreview name="timeline-split-demo" />
+
+### With icons
+
+`size="lg"` gives the indicator room for an icon; SVG children are sized automatically.
+
+<ComponentPreview name="timeline-icons-demo" />
+
+### Alternating layout
+
+`layout="alternate"` centres the rail and places odd items after it and even items before it.
+
+<ComponentPreview name="timeline-alternate-demo" />
+
+### Horizontal
+
+`orientation="horizontal"` lays items out in a row with indicators on top. Split and alternate layouts only apply to vertical timelines.
+
+<ComponentPreview name="timeline-horizontal-demo" />
+
+### Compact roadmap with tones
+
+`size="sm"` renders small dots. `tone` on an item colours its indicator and the line leaving it.
+
+<ComponentPreview name="timeline-roadmap-demo" />
+
+### Status feed
+
+Use tones for outcomes such as a failed deploy. Set `value` to the item count so every entry reads as reached.
+
+<ComponentPreview name="timeline-status-demo" />
+
+### Build pipeline
+
+Items take any content: badges, cards, avatars, or a spinner inside the indicator for a running step.
+
+<ComponentPreview name="timeline-pipeline-demo" />
+
+## Tokens used
+
+`primary`, `success`, `warning`, `info`, `destructive`, `muted-foreground`, `border`, `background`, `duration-base`, `duration-slow`, `ease-out`, `radius`.
+
+## Accessibility
+
+- Renders a native ordered list, so screen readers announce position and count. Give the `Timeline` an `aria-label`.
+- The current item gets `aria-current="step"`.
+- Indicators and separators are decorative (`aria-hidden`). If state matters, say it in text too, for example a badge reading "failed", not only a red dot.
+- Not interactive: there is no keyboard behaviour and no `onValueChange`. For a clickable flow, use a stepper pattern instead.
+- Keep each `TimelineItem` a direct child of `Timeline`; the last item's separator is hidden with `:last-child`.
+
+## Props
+
+### Timeline
+
+<PropsTable rows={[
+  { prop: "value", type: "number", description: "Last reached step (controlled)." },
+  { prop: "defaultValue", type: "number", default: "0", description: "Last reached step when uncontrolled." },
+  { prop: "orientation", type: "\"vertical\" | \"horizontal\"", default: "\"vertical\"", description: "Column or row." },
+  { prop: "layout", type: "\"stacked\" | \"split\" | \"alternate\"", default: "\"stacked\"", description: "Where content sits relative to the rail. Vertical only." },
+  { prop: "size", type: "\"sm\" | \"md\" | \"lg\"", default: "\"md\"", description: "Indicator diameter: dot, standard, or icon-sized." },
+  { prop: "tone", type: "\"primary\" | \"success\" | \"warning\" | \"info\" | \"destructive\" | \"muted\"", default: "\"primary\"", description: "Default fill colour for reached items." },
+]} />
+
+### TimelineItem
+
+<PropsTable rows={[
+  { prop: "step", type: "number", description: "Required. 1-based position used to derive the state." },
+  { prop: "tone", type: "TimelineTone", description: "Overrides the colour of this item's indicator and outgoing line." },
+]} />
+
+### TimelineIndicator
+
+<PropsTable rows={[
+  { prop: "tone", type: "TimelineTone", description: "Overrides the colour of this indicator only." },
+  { prop: "children", type: "ReactNode", description: "Optional icon; sized to the indicator." },
+]} />
+
+`TimelineHeader`, `TimelineDate` (a `<time>`, so pass `dateTime`), `TimelineTitle` (an `<h3>`), `TimelineContent`, and `TimelineSeparator` accept their element's props and `className`.

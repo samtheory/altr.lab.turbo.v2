@@ -58,6 +58,21 @@ export {
   type TabsProps,
 } from "./components/ui/tabs";
 export {
+  Timeline,
+  TimelineItem,
+  TimelineHeader,
+  TimelineDate,
+  TimelineTitle,
+  TimelineContent,
+  TimelineIndicator,
+  TimelineSeparator,
+  type TimelineProps,
+  type TimelineItemProps,
+  type TimelineIndicatorProps,
+  type TimelineState,
+  type TimelineTone,
+} from "./components/ui/timeline";
+export {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,

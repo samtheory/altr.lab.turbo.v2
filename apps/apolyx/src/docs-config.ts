@@ -57,6 +57,7 @@ export const docsConfig: DocGroup[] = [
       component("tabs", "Tabs", "Tablist with automatic or manual activation.", "new"),
       component("text", "Text", "Text and Heading typography scale."),
       component("textarea", "Textarea", "Multi-line text field."),
+      component("timeline", "Timeline", "Chronological events with progress, tones, and four layouts.", "new"),
       component("toast", "Toast", "toast() API with an accessible Toaster region.", "new"),
       component("tooltip", "Tooltip", "Hover and focus hint with a shared delay.", "new"),
     ],

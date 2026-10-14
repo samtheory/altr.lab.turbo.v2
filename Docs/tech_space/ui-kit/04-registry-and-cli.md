@@ -2,7 +2,7 @@
 title: "Apolyx registry and apolyx CLI"
 description: "As-built registry manifests, import-resolution build, and CLI init/add for Apolyx-S0001"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - tech-space
   - ui-kit
@@ -18,7 +18,7 @@ tags:
 
 ## Registry (`elements/ui-kit`)
 
-- **51 manifests** in `registry/*.json` — lib, theme, primitive, ui, motion, chart.
+- **52 manifests** in `registry/*.json` — lib, theme, primitive, ui, motion, chart. The sprint closed with 51; `timeline` was added on 2026-10-14 ([[06-timeline]]) and installs with `apolyx add timeline`.
 - Theme CSS is split: `src/styles/tokens.css` (`@theme inline`, dark variant, reduced motion, base) + three family files. Kit `globals.css` imports all of them plus `@source`.
 - `scripts/build-registry.ts` validates required fields, kebab-case names, type enum; resolves every relative import to a file owned by the item or a transitive `registryDependency`; requires bare imports in `dependencies` (except `react` / `react-dom`); forbids `@altr/*`, `@radix-ui/*`, `@base-ui/*`; emits `dist/r/<name>.json` with inlined content + `files[].imports`, and `dist/r/index.json`.
 - Kit script: `"build": "tsx scripts/build-registry.ts"`.

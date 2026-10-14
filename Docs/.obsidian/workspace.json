@@ -190,6 +190,13 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "tech_space/ui-kit/06-timeline.md",
+    "feature_list/ui-kit/02-timeline.md",
+    "report/assets/apolyx-timeline/timeline-horizontal-default-dark.png",
+    "report/assets/apolyx-timeline/timeline-status-tones-default-dark.png",
+    "report/assets/apolyx-timeline/timeline-progress-default-dark.png",
+    "report/assets/apolyx-timeline/timeline-alternate-default-dark.png",
+    "report/assets/apolyx-timeline",
     "tech_space/01-hub-ui-kit-base.md",
     "plan/ui-kit/02-tokens-and-themes.md",
     "feature_list/ui-kit/01-apolyx-s0001-carryovers.md",
@@ -221,15 +228,12 @@
     "feature_list/README.md",
     "plan/ui-kit/09-docs-app.md",
     "plan/ui-kit/07-wave-1b-overlays.md",
-    "plan/ui-kit/06-charts.md",
-    "plan/ui-kit/05-motion-recipes.md",
     "plan/ui-kit",
     "agents/apollo/skills",
     "agents/apollo/prompts",
     "agents/apollo/instructions",
     "agents/apollo",
     "feature_list/ui-kit",
-    "idea/ui-kit",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }

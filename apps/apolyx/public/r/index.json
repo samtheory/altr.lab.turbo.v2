@@ -456,6 +456,16 @@
     "docs": "theming"
   },
   {
+    "name": "timeline",
+    "type": "ui",
+    "title": "Timeline",
+    "description": "Chronological events with progress, tones, and stacked / split / alternate / horizontal layouts",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/timeline"
+  },
+  {
     "name": "toast",
     "type": "ui",
     "title": "Toast",

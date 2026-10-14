@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - brain
   - index
@@ -119,10 +119,10 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 | Layer | Role | Freshness |
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
-| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/00-intent]] |
+| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/02-timeline]] (kit intent: [[../feature_list/ui-kit/00-intent]]) |
 | `plan/` | Checkbox overlay + next steps | Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**); carry-overs in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-11, Apolyx-S0001 closed) |
-| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/README]] (Apolyx-S0001 closed) |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, Timeline added after Apolyx-S0001) |
+| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/06-timeline]] · index [[../tech_space/ui-kit/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |

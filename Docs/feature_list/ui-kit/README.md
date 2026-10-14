@@ -2,7 +2,7 @@
 title: "feature_list/ui-kit — Apolyx intent index"
 description: "Product intent for the Apolyx UI kit (elements/ui-kit + apps/apolyx + CLI)"
 created: 2026-10-10
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - feature
   - ui-kit
@@ -33,6 +33,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Buil
 |------|--------|
 | [[00-intent]] | Intent locked — v1 acceptance boxes ticked (**Apolyx-S0001** closed) |
 | [[01-apolyx-s0001-carryovers]] | Deferred items for the next sprint |
+| [[02-timeline]] | Timeline (ReUI parity) — shipped 2026-10-14 |
 
 ## Related shipped foundation (pre-Apolyx)
 

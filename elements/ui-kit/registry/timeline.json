@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "timeline",
+  "type": "ui",
+  "title": "Timeline",
+  "description": "Chronological events with progress, tones, and stacked / split / alternate / horizontal layouts",
+  "files": [
+    {
+      "path": "src/components/ui/timeline.tsx",
+      "target": "timeline.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/timeline"
+}

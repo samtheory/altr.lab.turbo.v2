@@ -2,7 +2,7 @@
 title: "apps/apolyx — Apolyx docs app"
 description: "As-built MDX docs site for Apolyx-S0001: shell, previews, InstallTabs, registry at /r"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - tech-space
   - ui-kit
@@ -41,9 +41,11 @@ tags:
 
 ## Content
 
-Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (37 static routes): introduction, installation, theming, CLI, primitives, 20 components, motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page.
+Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (38 static routes): introduction, installation, theming, CLI, primitives, 21 components, motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. The sprint closed with 37 routes and 20 components; Timeline was added on 2026-10-14 ([[06-timeline]]).
 
-Landing `/` shows a live Card + LineChart sample and the sprint badge `Apolyx-S0001 · 20 components`.
+A page can hold several previews: `components/timeline.mdx` renders nine `ComponentPreview`s (one per layout or state), each backed by its own `src/demos/timeline-*.tsx` file registered in `src/demos/index.ts`.
+
+Landing `/` shows a live Card + LineChart sample and the badge `Apolyx-S0001 · N components`, where N is counted from `docs-config.ts` (21 today).
 
 ## Screenshots (verify)
 
