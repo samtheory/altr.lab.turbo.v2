@@ -1,22 +1,13 @@
 "use client";
 
-import { Label, Switch } from "@altr/apolyx";
+import { FieldSet, SwitchField } from "@altr/apolyx";
 
 export default function SwitchDemo() {
   return (
-    <div className="grid gap-4">
-      <div className="flex items-center gap-3">
-        <Switch id="sw-airplane" />
-        <Label htmlFor="sw-airplane">Airplane mode</Label>
-      </div>
-      <div className="flex items-center gap-3">
-        <Switch id="sw-sync" defaultChecked />
-        <Label htmlFor="sw-sync">Background sync</Label>
-      </div>
-      <div className="flex items-center gap-3">
-        <Switch id="sw-disabled" disabled />
-        <Label htmlFor="sw-disabled">Beta features (locked)</Label>
-      </div>
-    </div>
+    <FieldSet legend="Connectivity" variant="framed" className="w-full max-w-sm">
+      <SwitchField label="Airplane mode" description="Turns off every wireless radio." />
+      <SwitchField label="Background sync" description="Keeps drafts up to date." defaultChecked />
+      <SwitchField label="Beta channel" description="Locked by your organisation." disabled />
+    </FieldSet>
   );
 }

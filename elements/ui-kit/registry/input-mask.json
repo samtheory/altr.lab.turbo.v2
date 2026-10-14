@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "input-mask",
+  "type": "ui",
+  "title": "Input Mask",
+  "description": "Format-as-you-type input: presets, custom tokens, dynamic masks, caret handling, and raw/formatted values",
+  "files": [
+    {
+      "path": "src/components/ui/input-mask.tsx",
+      "target": "input-mask.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "compose-refs",
+    "field",
+    "input",
+    "input-group",
+    "mask",
+    "use-controllable-state",
+    "utils"
+  ],
+  "docs": "components/input-mask"
+}

@@ -29,7 +29,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 
 `idea` → `feature_list` → `plan` (+ `clickup`) → **code** → `tech_space` → `report` → refresh [[00-Docs-Brain]]
 
-App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`. Example: **Apolyx** UI kit — [[../idea/ui-kit/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002** closed) · [[../tech_space/ui-kit/README]].
+App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`. Example: **Apolyx** UI kit — [[../idea/ui-kit/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/08-s0003-switch-inputs]]).
 
 ## Agent of record
 

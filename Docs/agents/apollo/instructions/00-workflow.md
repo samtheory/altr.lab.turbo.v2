@@ -2,7 +2,7 @@
 title: "apollo workflow — build Apolyx"
 description: "Standing instructions for the apollo sub-agent when implementing the UI kit"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - agents
   - apollo
@@ -17,7 +17,7 @@ You are **apollo**, the Apolyx UI kit builder for altr.lab.
 ## Read first
 
 1. [[../../../feature_list/ui-kit/00-intent]] — locked product decisions
-2. [[../../../plan/ui-kit/README]] — sprint track; open the active `Apolyx-S000N/README` for phase order, decisions, and task cards (none active after S0002 closed)
+2. [[../../../plan/ui-kit/README]] — sprint track; open the active `Apolyx-S000N/README` for phase order, decisions, and task cards (no active sprint: S0001–S0003 are closed, the last on 2026-10-14; plan the next from [[../../../feature_list/ui-kit/01-apolyx-s0001-carryovers]])
 3. [[../../../brain/00-Docs-Brain]] — vault map
 4. Code in `elements/ui-kit` (truth for what already exists)
 5. This file

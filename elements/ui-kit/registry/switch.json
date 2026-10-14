@@ -3,21 +3,31 @@
   "name": "switch",
   "type": "ui",
   "title": "Switch",
-  "description": "On / off toggle with draggable, stretchy thumb physics",
+  "description": "On / off toggle with capped stretch physics, tones, icons, labels; SwitchField and SwitchCard",
   "files": [
     {
       "path": "src/components/ui/switch.tsx",
       "target": "switch.tsx"
+    },
+    {
+      "path": "src/components/ui/switch-physics.ts",
+      "target": "switch-physics.ts"
+    },
+    {
+      "path": "src/components/ui/switch-field.tsx",
+      "target": "switch-field.tsx"
     }
   ],
   "dependencies": {
     "motion": "^12.23.12"
   },
   "registryDependencies": [
+    "compose-refs",
     "use-controllable-state",
     "use-id",
     "use-reduced-motion",
-    "utils"
+    "utils",
+    "field"
   ],
   "docs": "components/switch"
 }

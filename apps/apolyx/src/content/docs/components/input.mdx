@@ -2,7 +2,7 @@
 
 ## Installation
 
-<InstallTabs name="input" exports="Input" />
+<InstallTabs name="input" exports="Input, inputVariants" />
 
 ## Usage
 
@@ -11,12 +11,71 @@
 <Input id="email" type="email" autoComplete="email" />
 ```
 
+`Input` is the bare native control. Reach for [Field](/docs/components/field) when you want the label, help text and errors wired for you, and [Input Group](/docs/components/input-group) when the box needs icons, text or buttons inside it.
+
+## Basics
+
+Default, disabled and read-only. Read-only keeps the value selectable and focusable but drops the editing affordance.
+
+<ComponentPreview name="input-basics-demo" />
+
+## Sizes and variants
+
+### Sizes
+
+`size` is `sm` (32px), `md` (40px, default) or `lg` (44px). The native `size` attribute is still available as `htmlSize`.
+
+<ComponentPreview name="input-sizes-demo" />
+
+### Variants
+
+`outline` (default), `filled`, `underline` and `ghost`. Add `shape="pill"` for search-style inputs. The underline variant grows its focus bar from the left.
+
+<ComponentPreview name="input-variants-demo" />
+
+## Native types
+
+Every `type` gets the same box. Date and time pickers follow the theme's colour scheme, and the number spinners are restyled to stay quiet.
+
+<ComponentPreview name="input-types-demo" />
+
+### File, colour and range
+
+File inputs get a styled selector button, colour inputs show a swatch, and range inputs use the primary token for the thumb.
+
+<ComponentPreview name="input-file-color-range-demo" />
+
+## States and validation
+
+Set `aria-invalid` and point `aria-describedby` at the message. The border and ring switch to the `destructive` token.
+
+<ComponentPreview name="input-validation-demo" />
+
+## When to use what
+
+| You need | Use |
+| --- | --- |
+| A bare control you label yourself | `Input` + `Label` |
+| Label, help text, errors and a counter | `Field` + `FieldInput` |
+| Icons, prefixes, suffixes or buttons inside the box | `InputGroup` |
+| A password with show/hide and strength | `PasswordInput` |
+| Numbers with steppers | `NumberInput` |
+| One-time codes | `InputOTP` |
+| Phone, card or date formats | `MaskedInput` |
+
 ## Accessibility
 
 - Always pair with a `Label` (or `aria-label`).
-- Set `aria-invalid` and `aria-describedby` for errors; the border switches to the `destructive` token.
-- Use the right `type` and `autoComplete` so mobile keyboards and password managers help.
+- Set `aria-invalid` and `aria-describedby` for errors.
+- Use the right `type`, `inputMode` and `autoComplete` so mobile keyboards and password managers help.
 
 ## Props
 
-Accepts every native `<input>` attribute.
+Accepts every native `<input>` attribute, plus:
+
+<PropsTable title="Input" rows={[
+  { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Control height and text size." },
+  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Surface style." },
+  { prop: "shape", type: '"default" | "pill"', default: '"default"', description: "Corner radius." },
+  { prop: "htmlSize", type: "number", description: "The native `size` attribute (visible character width)." },
+]} />

@@ -107,7 +107,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Hono API | `cloud/hono-server` | Altr.lab/stack · tech_space |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | AI bot agent | `cloud/ai-bot-agent` | Altr.lab · agents |
-| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Sprints **Apolyx-S0001** + **Apolyx-S0002** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/ui-kit/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
+| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Wave 3: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · Sprints **Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/ui-kit/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
 Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
@@ -119,10 +119,10 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 | Layer | Role | Freshness |
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
-| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/03-timeline]] · Sprint: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] (kit intent: [[../feature_list/ui-kit/00-intent]]) |
-| `plan/` | Checkbox overlay + next steps | Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**); carry-overs in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, Timeline + collapsible docs sidebar added after Apolyx-S0002) |
-| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/05-docs-app#Sidebar groups]] (collapsible docs sidebar) · [[../tech_space/ui-kit/07-timeline]] · Sprint: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] (Apolyx-S0002 closed) · index [[../tech_space/ui-kit/README]] |
+| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest shipped: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] (S0003, acceptance ticked) · Earlier: [[../feature_list/ui-kit/03-timeline]] · [[../feature_list/ui-kit/02-apolyx-s0002-wave]] (kit intent: [[../feature_list/ui-kit/00-intent]]) · Next seeds: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
+| `plan/` | Checkbox overlay + next steps | No active sprint · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** — [[../plan/ui-kit/Apolyx-S0003/README]], closed 2026-10-14) |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, after Apolyx-S0003: 66 registry items, 141 tests, 48 MDX pages) |
+| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/08-s0003-switch-inputs]] (Apolyx-S0003: Switch physics + family, ControlBox, input catalog, Forms docs group) · [[../tech_space/ui-kit/05-docs-app]] (Forms group, category convention) · [[../tech_space/ui-kit/07-timeline]] · index [[../tech_space/ui-kit/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |

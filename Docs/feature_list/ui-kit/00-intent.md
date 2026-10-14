@@ -2,7 +2,7 @@
 title: "Apolyx UI kit — intent (infra, tech, first components)"
 description: "What to build for Apolyx: registry/CLI, apps/apolyx MDX docs, own primitives, tokens, motion, charts — no Radix/Base UI"
 created: 2026-10-10
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - feature
   - ui-kit
@@ -264,6 +264,10 @@ Ship small, useful, documentable. Order is suggested dependency order.
 ### Wave 2 — Apolyx-S0002
 
 Hover-contrast tokens, navigation (Sheet, Breadcrumb, NavigationMenu, NavList, Dialog sizes), physics Switch, `Field` layouts, and Table / List / Grid. Intent and acceptance: [[02-apolyx-s0002-wave]].
+
+### Wave 3 — Apolyx-S0003
+
+Switch motion fix and Switch family (`SwitchField`, `SwitchCard`, `FieldSet`), the input catalog (`Input` variants, Field extras, `InputGroup`, `PasswordInput`, `NumberInput`, `InputOTP`, `MaskedInput`), form patterns, and a Forms docs group. Intent and acceptance: [[04-apolyx-s0003-switch-inputs]].
 
 ### Motion recipes (wave 1)
 

@@ -2,21 +2,18 @@
 
 ## Installation
 
-<InstallTabs name="field" exports="Field, FieldInput, FieldTextarea, FieldDescription, FieldError" />
+<InstallTabs name="field" exports="Field, FieldInput, FieldTextarea, FieldDescription, FieldError, FieldCounter, FieldSet" />
 
 ## Usage
 
 ```tsx
-<Field label="Email" layout="top" description="We never share it.">
+<Field label="Email" description="We never share it.">
   <FieldInput type="email" />
 </Field>
 
-<Field label="Full name" layout="floating" required>
-  <FieldInput />
-</Field>
-
-<Field label="Host" layout="inline" error="Unreachable host">
-  <FieldInput />
+<Field label="Bio" optional>
+  <FieldTextarea />
+  <FieldCounter max={160} />
 </Field>
 ```
 
@@ -26,7 +23,47 @@
 - **floating** — label sits inside the control and shrinks onto the border while focused or filled.
 - **inline** — label beside the control in a muted panel, separated by a border.
 
-Focus animates the border, a soft ring, and an accent bar along the bottom edge; blur eases out a little slower. Under reduced motion transitions are instant.
+Focus animates the border, a soft ring, and an accent bar along the bottom edge. Under reduced motion transitions are instant.
+
+### Sizes and variants
+
+`Field` takes the same `size`, `variant` and `shape` as `Input`, and passes them to its box.
+
+<ComponentPreview name="field-variants-demo" />
+
+## Label extras
+
+`labelAside` puts content at the end of the label row: a link, a tooltip trigger or a badge. It is not part of the control's accessible name. `optional` adds a muted "(optional)" marker.
+
+<ComponentPreview name="field-label-extras-demo" />
+
+## Orientation
+
+`orientation="horizontal"` puts the label and description in a left column. It responds to the field's own width (a container query), so it stacks again inside a narrow card. Set the column with `labelWidth`.
+
+<ComponentPreview name="field-horizontal-demo" />
+
+## Helpers and errors
+
+### Character counter
+
+`FieldCounter` reads the value length from the field. It turns amber near the limit, red and invalid past it, and announces politely only when close.
+
+<ComponentPreview name="field-counter-demo" />
+
+### Multiple errors
+
+Pass an array to `error` to list every rule that failed. It is still one `role="alert"` region.
+
+<ComponentPreview name="field-errors-demo" />
+
+## Groups
+
+Wrap related fields in `FieldSet` — a native `<fieldset>` with a legend and description.
+
+<ComponentPreview name="field-fieldset-demo" />
+
+Fields also host [Input Group](/docs/components/input-group) addons directly.
 
 ## Accessibility
 
@@ -39,10 +76,20 @@ Focus animates the border, a soft ring, and an accent bar along the bottom edge;
 <PropsTable title="Field" rows={[
   { prop: "label", type: "ReactNode", description: "Field label." },
   { prop: "layout", type: '"top" | "floating" | "inline"', default: '"top"', description: "Label placement." },
+  { prop: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"', description: "Horizontal puts the label in a responsive side column." },
+  { prop: "labelAside", type: "ReactNode", description: "Content at the end of the label row (link, tooltip, badge)." },
+  { prop: "optional", type: "boolean", description: "Shows an (optional) marker." },
   { prop: "description", type: "ReactNode", description: "Helper text under the control." },
-  { prop: "error", type: "ReactNode", description: "Error message; marks the field invalid." },
+  { prop: "error", type: "ReactNode | ReactNode[]", description: "Error message or list; marks the field invalid." },
   { prop: "required", type: "boolean", description: "Marks the control required." },
   { prop: "disabled", type: "boolean", description: "Disables the control." },
-  { prop: "labelWidth", type: "string", description: "Inline layout label width (CSS length)." },
+  { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Control height." },
+  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Box style." },
+  { prop: "shape", type: '"default" | "pill"', default: '"default"', description: "Box corner radius." },
+  { prop: "labelWidth", type: "string", description: "Label column width for inline and horizontal (CSS length)." },
   { prop: "controlClassName", type: "string", description: "Class for the control box." },
+]} />
+
+<PropsTable title="FieldCounter" rows={[
+  { prop: "max", type: "number", description: "Character limit. Over the limit marks the field invalid." },
 ]} />

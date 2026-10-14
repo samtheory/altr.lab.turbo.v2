@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Field, FieldInput, FieldTextarea, type FieldLayout } from "./field";
+import { Field, FieldCounter, FieldInput, FieldTextarea, type FieldLayout } from "./field";
 
 const meta = {
   title: "UI/Field",
@@ -86,6 +86,30 @@ export const States: Story = {
       </Field>
       <Field label="Locked" layout="inline" disabled>
         <FieldInput defaultValue="read-only value" />
+      </Field>
+    </div>
+  ),
+};
+
+export const Extras: Story = {
+  args: { label: "Email", children: null },
+  render: () => (
+    <div className="grid w-[34rem] gap-6">
+      <Field label="Password" labelAside={<a href="#reset">Forgot?</a>}>
+        <FieldInput type="password" />
+      </Field>
+      <Field label="Nickname" optional>
+        <FieldInput />
+      </Field>
+      <Field label="Bio" description="Short and sweet.">
+        <FieldTextarea defaultValue="Mathematician and first programmer." />
+        <FieldCounter max={40} />
+      </Field>
+      <Field label="New password" error={["At least 12 characters", "Include a number"]}>
+        <FieldInput type="password" defaultValue="short" />
+      </Field>
+      <Field orientation="horizontal" label="Display name" description="Shown on posts.">
+        <FieldInput defaultValue="Ada" />
       </Field>
     </div>
   ),

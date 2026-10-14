@@ -8,6 +8,7 @@ tags:
   - ui-kit
   - apolyx
   - Apolyx-S0001
+  - Apolyx-S0003
   - docs-app
   - mdx
 ---
@@ -47,6 +48,21 @@ If you change the `<ul>` padding (`pl-2`) or border width, update the `before:-l
 
 Screenshot: `Docs/report/assets/apolyx-sidebar/sidebar-open.png` (default family, dark, 1280 px).
 
+### Forms group (Apolyx-S0003)
+
+The **Forms** group sits after Components. It holds Field, Input, Input Group, Password Input, Number Input, Input OTP, Input Mask, Textarea, Checkbox, Switch, Label, and Form patterns (`forms/patterns`). The moved pages keep their `components/*` slugs, so registry `docs` links and old URLs still work. Details: [[08-s0003-switch-inputs#Forms docs group and form patterns]].
+
+### Category convention
+
+Pages touched since S0003 use one layout:
+
+1. Hero `ComponentPreview`.
+2. Installation (`InstallTabs`) and Usage.
+3. Category `##` sections, such as Basics / Appearance / Composition on Switch, or Addons / Actions / Status on Input Group.
+4. Accessibility and Props.
+
+The "On this page" table of contents is built from the `##` headings, so it doubles as category navigation. Demo files are named `src/demos/<component>-<example>-demo.tsx` and are registered in `src/demos/index.ts`, grouped by component.
+
 ## Docs building blocks
 
 | Component | Role |
@@ -58,11 +74,18 @@ Screenshot: `Docs/report/assets/apolyx-sidebar/sidebar-open.png` (default family
 
 ## Content
 
-Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (42 MDX pages): introduction, installation, theming, CLI, primitives, 28 components (incl. Navigation and Data groups), motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. S0001 closed with 37 routes and 20 components; S0002 added Field, Sheet, Breadcrumb, NavigationMenu, NavList, Table, List and Grid ([[06-s0002-contrast-nav-switch-field-data]]); Timeline was added on 2026-10-14 ([[07-timeline]]).
+Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (**48 MDX pages**): introduction, installation, theming, CLI, primitives, 34 component pages (across the Components, Forms, Navigation and Data groups), form patterns, motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. History:
+
+- S0001 closed with 37 routes and 20 components.
+- S0002 added Field, Sheet, Breadcrumb, NavigationMenu, NavList, Table, List and Grid ([[06-s0002-contrast-nav-switch-field-data]]).
+- Timeline was added on 2026-10-14 ([[07-timeline]]).
+- S0003 added Input Group, Password Input, Number Input, Input OTP, Input Mask and Form patterns ([[08-s0003-switch-inputs]]).
+
+There are 120 demo files in `src/demos/`.
 
 A page can hold several previews: `components/timeline.mdx` renders nine `ComponentPreview`s (one per layout or state), each backed by its own `src/demos/timeline-*.tsx` file registered in `src/demos/index.ts`.
 
-Landing `/` shows a live Card + LineChart sample and the badge `Apolyx-S0001 · N components`, where N is counted from `docs-config.ts` (28 today).
+Landing `/` shows a live Card + LineChart sample and the badge `Apolyx-S0001 · N components`, where N is the number of `components/*` slugs in `docs-config.ts` (34 today; Forms pages count because they keep `components/*` slugs).
 
 ## Screenshots (verify)
 
@@ -74,3 +97,5 @@ Saved under `Docs/report/assets/apolyx-s0001/`:
 - `docs-button-power-blue-dark.png`
 
 (CDP capture; `browser_take_screenshot` timed out in this environment.)
+
+S0003 screenshots are in `Docs/report/assets/apolyx-s0003/`. They were taken with headless Edge at 1280 px. Two Edge runs shared one `--user-data-dir`: the first loaded a throwaway same-origin page that set `localStorage` `apolyx-theme` (the family) and `theme` (the mode), and the second took the screenshot. Redirecting inside a single run produced no file.

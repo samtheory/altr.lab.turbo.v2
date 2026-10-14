@@ -1,0 +1,95 @@
+<ComponentPreview name="input-group-demo" />
+
+## Installation
+
+<InstallTabs name="input-group" exports="InputGroup, InputGroupAddon, InputGroupText, InputGroupButton, InputGroupInput, InputGroupTextarea" />
+
+## Usage
+
+```tsx
+<InputGroup>
+  <InputGroupAddon>
+    <Search />
+  </InputGroupAddon>
+  <InputGroupInput placeholder="Search" />
+  <InputGroupAddon align="inline-end">
+    <InputGroupButton>Go</InputGroupButton>
+  </InputGroupAddon>
+</InputGroup>
+```
+
+The group owns the border, focus ring and invalid state; the input inside is borderless. Addon order in the markup does not matter — `align` decides where it sits. Clicking empty space in an addon focuses the input.
+
+## Addons
+
+Icons, prefixes and suffixes. Use `InputGroupText` for text so it gets the muted colour and stays out of the tab order.
+
+<ComponentPreview name="input-group-addons-demo" />
+
+## Actions
+
+`InputGroupButton` is a ghost `xs` button sized to fit. Icon-only buttons need an `aria-label` (development builds warn when it is missing).
+
+<ComponentPreview name="input-group-actions-demo" />
+
+### Copy and clear
+
+<ComponentPreview name="input-group-copy-clear-demo" />
+
+### Menu trigger
+
+A dropdown inside the box, for search scopes or units.
+
+<ComponentPreview name="input-group-menu-demo" />
+
+## Status
+
+Loading, success, result counts, invalid and disabled. `aria-invalid` on the input turns the whole group red.
+
+<ComponentPreview name="input-group-status-demo" />
+
+## Block addons and textarea
+
+`align="block-start"` and `"block-end"` put a full-width row above or below the control. Add `divided` for a separator line. `InputGroupTextarea` grows with its content up to 16rem.
+
+<ComponentPreview name="input-group-textarea-demo" />
+
+### Composers
+
+<ComponentPreview name="input-group-composer-demo" />
+
+## With Field
+
+Put addons and `InputGroupInput` straight inside a `Field`; the field's box becomes the group, and the floating label moves past a start addon.
+
+<ComponentPreview name="input-group-field-demo" />
+
+## Real-world
+
+An API request bar, a share link with visibility, an order search with a status filter, and a member row with a role.
+
+<ComponentPreview name="input-group-real-world-demo" />
+
+## Accessibility
+
+- The group has `role="group"`; label the input itself (`aria-label`, `Label`, or `Field`).
+- Addon text is decorative to screen readers unless you reference it with `aria-describedby`.
+- Buttons inside are real buttons with `type="button"`, so they never submit the form by accident.
+
+## Props
+
+<PropsTable title="InputGroup" rows={[
+  { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Box height." },
+  { prop: "variant", type: '"outline" | "filled" | "underline" | "ghost"', default: '"outline"', description: "Box style." },
+  { prop: "shape", type: '"default" | "pill"', default: '"default"', description: "Corner radius." },
+]} />
+
+<PropsTable title="InputGroupAddon" rows={[
+  { prop: "align", type: '"inline-start" | "inline-end" | "block-start" | "block-end"', default: '"inline-start"', description: "Where the addon sits." },
+  { prop: "divided", type: "boolean", description: "Draws a separator between the addon and the control." },
+]} />
+
+<PropsTable title="InputGroupButton" rows={[
+  { prop: "size", type: '"xs" | "icon-xs" | "sm" | "icon"', default: '"xs"', description: "Button size." },
+  { prop: "variant", type: "ButtonVariant", default: '"ghost"', description: "Any Button variant." },
+]} />

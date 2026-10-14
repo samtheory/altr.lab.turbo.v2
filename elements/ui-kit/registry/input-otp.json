@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "input-otp",
+  "type": "ui",
+  "title": "Input OTP",
+  "description": "One-time-code input: one real input with visual slots, paste, SMS autofill, patterns, and PIN masking",
+  "files": [
+    {
+      "path": "src/components/ui/input-otp.tsx",
+      "target": "input-otp.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "compose-refs",
+    "field",
+    "use-controllable-state",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/input-otp"
+}

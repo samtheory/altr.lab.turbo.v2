@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "input-group",
+  "type": "ui",
+  "title": "Input Group",
+  "description": "Input or textarea with icons, text, buttons, and toolbars inside one box",
+  "files": [
+    {
+      "path": "src/components/ui/input-group.tsx",
+      "target": "input-group.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "button",
+    "compose-refs",
+    "field",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/input-group"
+}

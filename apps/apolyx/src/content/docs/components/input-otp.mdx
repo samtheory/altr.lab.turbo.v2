@@ -1,0 +1,80 @@
+<ComponentPreview name="input-otp-demo" />
+
+## Installation
+
+<InstallTabs name="input-otp" exports="InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator" />
+
+## Usage
+
+```tsx
+<InputOTP maxLength={6} value={code} onValueChange={setCode} onComplete={verify}>
+  <InputOTPGroup>
+    <InputOTPSlot index={0} />
+    <InputOTPSlot index={1} />
+    <InputOTPSlot index={2} />
+  </InputOTPGroup>
+  <InputOTPSeparator />
+  <InputOTPGroup>
+    <InputOTPSlot index={3} />
+    <InputOTPSlot index={4} />
+    <InputOTPSlot index={5} />
+  </InputOTPGroup>
+</InputOTP>
+```
+
+One real input holds the whole code and the slots only draw it. That keeps SMS autofill (`autoComplete="one-time-code"`), paste, password managers and screen readers working — they all see a single text field. No extra dependency.
+
+## Basics
+
+Inside a `Field` the label, description and error wire to the input, and the field skips its own box so the slots draw their own.
+
+<ComponentPreview name="input-otp-basics-demo" />
+
+## Patterns
+
+`pattern` is `digits` (default, number keyboard), `alphanumeric`, `alpha`, or your own `RegExp` tested per character. Letter patterns are uppercased unless `transform="none"`. `mask` shows dots for PINs. Slots can be styled per group — the PIN uses separate boxes.
+
+<ComponentPreview name="input-otp-patterns-demo" />
+
+## States
+
+`aria-invalid` on `InputOTP` (or an error on the `Field`) marks every slot. `tone="success"` shows a verified code. `size` is `sm`, `md` or `lg`.
+
+<ComponentPreview name="input-otp-states-demo" />
+
+## Verification flow
+
+`onComplete` fires once each time the code reaches `maxLength`, so the form can verify without a button press. The button stays for people who paste and then look for a next step. Resend is gated by a countdown.
+
+<ComponentPreview name="input-otp-verify-demo" />
+
+## Keyboard and pointer
+
+- Typing fills the next slot; a filled slot is selected when you move onto it, so typing replaces it.
+- Arrow Left / Right move between slots; Home / End jump to the ends; Backspace deletes.
+- Clicking a slot moves the caret there.
+- Paste fills from the caret; characters outside the pattern are dropped.
+
+## Accessibility
+
+- Give the input a name with `Field`, `aria-label`, or `aria-labelledby`. Slots are `aria-hidden`.
+- The blinking caret stops blinking under reduced motion.
+
+## Props
+
+<PropsTable title="InputOTP" rows={[
+  { prop: "maxLength", type: "number", description: "Number of characters." },
+  { prop: "pattern", type: '"digits" | "alphanumeric" | "alpha" | RegExp', default: '"digits"', description: "Allowed characters." },
+  { prop: "transform", type: '"upper" | "none"', description: "Case transform; `upper` by default for letter patterns." },
+  { prop: "value / defaultValue", type: "string", description: "Controlled / initial code." },
+  { prop: "onValueChange", type: "(value: string) => void", description: "Called on every change." },
+  { prop: "onComplete", type: "(value: string) => void", description: "Called once when the code is full." },
+  { prop: "mask", type: "boolean", description: "Shows dots instead of characters." },
+  { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Slot size." },
+  { prop: "tone", type: '"default" | "success"', default: '"default"', description: "Success styling after verification." },
+  { prop: "name", type: "string", description: "Submits the code with the form." },
+]} />
+
+<PropsTable title="InputOTPSlot" rows={[
+  { prop: "index", type: "number", description: "Which character this slot shows." },
+]} />

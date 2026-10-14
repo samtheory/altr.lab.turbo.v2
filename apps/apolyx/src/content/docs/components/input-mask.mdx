@@ -1,0 +1,85 @@
+<ComponentPreview name="input-mask-demo" />
+
+## Installation
+
+<InstallTabs name="input-mask" exports="MaskedInput, useMask, masks, detectCardBrand" />
+
+## Usage
+
+```tsx
+<Field label="Phone">
+  <MaskedInput mask={masks.phoneUS} name="phone" />
+</Field>
+```
+
+`value` is the **raw** value — token characters only (`5551234567`). The input shows the formatted value (`(555) 123-4567`). Literals appear only once a character follows them, so the text is always a clean prefix of the mask and Backspace never gets stuck on a `)`. The engine is ~200 lines with no extra dependency.
+
+## Presets
+
+`masks` covers the common US shapes. Typed characters that don't fit a slot are dropped; `[...]` marks an optional tail, like ZIP+4.
+
+<ComponentPreview name="input-mask-presets-demo" />
+
+| Preset | Mask |
+| --- | --- |
+| `masks.phoneUS` | `(999) 999-9999` |
+| `masks.date` | `99/99/9999` |
+| `masks.time` | `99:99` |
+| `masks.card` | `9999 9999 9999 9999`, or `9999 999999 99999` for Amex |
+| `masks.expiry` | `99/99` |
+| `masks.cvc` | `999[9]` |
+| `masks.zipUS` | `99999[-9999]` |
+
+## Billing
+
+`masks.card` is a function of the raw value, so the layout changes as soon as the brand is known. `detectCardBrand(raw)` returns `visa`, `mastercard`, `amex`, `discover` or `unknown` for your own badge. Inside a `Field`, `MaskedInput` composes with `InputGroupAddon` like any other input.
+
+<ComponentPreview name="input-mask-billing-demo" />
+
+## Custom masks
+
+Tokens: `9` digit, `a` letter, `*` letter or digit. Pass `tokens` to add your own (`{ H: /[0-9a-f]/i }`), escape a token character with `\`, and pass a function `(raw) => mask` for masks that depend on what was typed.
+
+<ComponentPreview name="input-mask-custom-demo" />
+
+## Values and submit
+
+`onValueChange(raw, formatted)` reports both. With `name`, a hidden input submits the raw value; set `submit="formatted"` to send what the user sees. `showGuide` draws the rest of the mask behind the value instead of using a placeholder.
+
+<ComponentPreview name="input-mask-values-demo" />
+
+## Validation
+
+The mask controls shape, not meaning. `onCompleteChange` runs on blur with whether every required slot is filled — use it to set the `Field` error. Check real validity (a date that exists, a Luhn-valid card) in your form logic.
+
+<ComponentPreview name="input-mask-validation-demo" />
+
+## Headless hook
+
+`useMask` returns `inputProps` for any `<input>`, plus `raw`, `formatted` and `complete`.
+
+```tsx
+const { inputProps, raw, complete } = useMask({ mask: masks.date });
+return <input {...inputProps} aria-label="Date" />;
+```
+
+## Behavior
+
+- The caret stays after the character you typed, skipping literals.
+- Backspace or Delete on a literal removes the neighboring character.
+- Paste is filtered through the mask; a long paste like `+1 555 123 4567` into an empty field keeps the last digits.
+- IME composition is left alone until it ends.
+- Digit-only masks set `inputMode="numeric"` for the number keyboard.
+
+## Props
+
+<PropsTable title="MaskedInput" rows={[
+  { prop: "mask", type: "string | (raw: string) => string", description: "Mask pattern or a function of the raw value." },
+  { prop: "tokens", type: "Record<string, RegExp>", description: "Token characters; defaults to `9`, `a`, `*`." },
+  { prop: "value / defaultValue", type: "string", description: "Controlled / initial raw value." },
+  { prop: "onValueChange", type: "(raw: string, formatted: string) => void", description: "Called on every change." },
+  { prop: "onCompleteChange", type: "(complete: boolean) => void", description: "Called on blur with whether the mask is filled." },
+  { prop: "showGuide", type: "boolean", default: "false", description: "Draws remaining slots behind the value." },
+  { prop: "placeholderChar", type: "string", default: '"_"', description: "Character for empty slots in the guide." },
+  { prop: "submit", type: '"raw" | "formatted"', default: '"raw"', description: "What `name` submits." },
+]} />

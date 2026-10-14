@@ -1,0 +1,128 @@
+Apolyx has no form component and no form library. Every recipe here is a native `<form>` built from kit parts: values come from `FormData`, submission runs through a React 19 action, and errors flow back into `Field`. Copy a recipe and replace the fake `wait()` with your request.
+
+<ComponentPreview name="form-signup-demo" />
+
+## The approach
+
+```tsx
+function useFormAction<S>(action: (prev: S, data: FormData) => Promise<S>, initial: S) {
+  const [state, dispatch, pending] = useActionState(action, initial);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    startTransition(() => dispatch(data));
+  };
+  return { state, pending, onSubmit };
+}
+
+const { state, pending, onSubmit } = useFormAction(async (prev, data) => {
+  const errors = validate(data);
+  if (Object.keys(errors).length) return { status: "error", errors };
+  await save(data);
+  return { status: "success", errors: {} };
+}, { status: "idle", errors: {} });
+
+<form onSubmit={onSubmit} noValidate>
+  <Field label="Email" error={state.errors.email}>
+    <FieldInput name="email" type="email" />
+  </Field>
+  <SubmitButton pending={pending}>Save</SubmitButton>
+</form>
+```
+
+- **Validation lives in the action** and returns `{ errors: Record<field, string | string[]> }`. An array renders as a list under the field.
+- **Pending state** is the third value of `useActionState`. The submit button shows a spinner, disables itself and sets `aria-busy`.
+- **Submit from `onSubmit`, not `<form action>`.** React resets a form after every action passed to `action`, failed or not. That clears what the user typed and desyncs controls that keep their own state, like `Checkbox` and `Switch`, whose hidden inputs revert while the visible control stays checked. Dispatching from `onSubmit` inside `startTransition` keeps the same pending and state handling without the reset.
+- **Reset on success** by changing the form's `key`; that resets kit controls too.
+- **Focus the first invalid control** after a failed submit: an effect queries `[aria-invalid="true"]` inside the form.
+- `noValidate` turns off browser bubbles so errors look the same everywhere; keep `type="email"`, `autoComplete` and `inputMode` for keyboards and autofill.
+
+The shared helpers (`useFormAction`, `SubmitButton`, `ErrorSummary`, `useFocusFirstInvalid`) are under 100 lines in the demo source, `form-shared.tsx`.
+
+## Layouts
+
+### Stacked
+
+The default: one column, label above the control. The sign-up form above uses `PasswordInput` with `PasswordStrength`, and a `Checkbox` whose error is wired with `aria-describedby`.
+
+### Two columns
+
+`Grid cols={{ base: 1, sm: 2 }}` pairs short fields and collapses to one column on narrow screens. Long fields span the full width below.
+
+<ComponentPreview name="form-two-column-demo" />
+
+### Horizontal labels
+
+`Field orientation="horizontal"` puts the label and description in a left column for settings pages; `FieldSet` groups rows under a legend.
+
+<ComponentPreview name="form-horizontal-demo" />
+
+### Inline
+
+A single-field form inside an `InputGroup`: the submit button sits in the box. The message under it is a live region for errors and success.
+
+<ComponentPreview name="form-inline-demo" />
+
+### Dense
+
+`size="sm"` on every `Field` for filter panels and toolbars. Clear remounts the form, because kit controls keep their own state and ignore a native reset.
+
+<ComponentPreview name="form-dense-demo" />
+
+## Containers
+
+### Dialog
+
+Put the `<form>` inside `DialogContent` in its own component, so its state resets each time the dialog opens. Close the dialog from the action on success.
+
+<ComponentPreview name="form-dialog-demo" />
+
+### Sheet
+
+Longer edit forms fit a side `Sheet`. The footer sticks to the bottom with `mt-auto`.
+
+<ComponentPreview name="form-sheet-demo" />
+
+### Card
+
+The form wraps the whole `Card`, so the footer button submits it. `labelAside` holds the "Forgot?" link.
+
+<ComponentPreview name="form-card-demo" />
+
+## Flows
+
+### Multi-step with verification and review
+
+A horizontal `Timeline` shows progress (`value` is the last finished step). Each step is its own small form that validates on Continue; answers live in one parent state, so Back and Edit keep them. Step 2 verifies an emailed code with `InputOTP` (try `424242`), and the last step lists the answers with Edit links back to each step. Focus moves to the step heading on every change, so screen readers announce it.
+
+<ComponentPreview name="form-multi-step-demo" />
+
+## Feedback
+
+### Error summary
+
+On a failed submit an `Alert` lists every error with a link that focuses the field, and focus moves to the first invalid control. Use it on long forms where some errors are off screen.
+
+<ComponentPreview name="form-error-summary-demo" />
+
+### Async field check
+
+Check a value against the server while typing: wait 300 ms after the last keystroke, show a `Spinner` in the addon, then a check or a cross. Ignore stale answers, and keep submit disabled until the name is available.
+
+<ComponentPreview name="form-async-check-demo" />
+
+### Success
+
+Confirm with `toast()` and reset the form. Keep the user on the page unless the next step is somewhere else.
+
+<ComponentPreview name="form-success-demo" />
+
+## Settings screen
+
+A full settings page: horizontal `Field`s, a `NumberInput`, a framed `FieldSet` of `SwitchField`s, and a Save bar that slides in only when something changed. Values are controlled, so "dirty" is a plain comparison with the last saved snapshot, and Discard restores it.
+
+<ComponentPreview name="form-settings-demo" />
+
+## Using a form library
+
+These recipes stay dependency-free on purpose. To add React Hook Form, keep the kit controls and connect them through `Controller` (or `register` for `FieldInput`) and pass `formState.errors[name]?.message` to `Field error`. For schema validation, run a Zod schema inside the action and map `error.flatten().fieldErrors` straight into `errors`. The array shape matches what `Field` already renders.

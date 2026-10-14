@@ -11,21 +11,105 @@ export {
 export { Badge, badgeVariants, type BadgeProps } from "./components/ui/badge";
 export { Text, Heading, type TextProps, type HeadingProps } from "./components/ui/text";
 export { Label, type LabelProps } from "./components/ui/label";
-export { Input, type InputProps } from "./components/ui/input";
-export { Textarea, type TextareaProps } from "./components/ui/textarea";
+export { Input, inputVariants, type InputProps } from "./components/ui/input";
+export { Textarea, textareaVariants, type TextareaProps } from "./components/ui/textarea";
+export {
+  ControlBox,
+  controlBoxVariants,
+  type ControlBoxProps,
+  type ControlSize,
+  type ControlVariant,
+  type ControlShape,
+} from "./components/ui/control-box";
 export {
   Field,
   FieldInput,
   FieldTextarea,
   FieldDescription,
   FieldError,
+  FieldCounter,
   type FieldProps,
   type FieldLayout,
+  type FieldOrientation,
   type FieldInputProps,
   type FieldTextareaProps,
+  type FieldErrorProps,
+  type FieldCounterProps,
 } from "./components/ui/field";
+export {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupTextarea,
+  type InputGroupProps,
+  type InputGroupAddonProps,
+  type InputGroupAddonAlign,
+  type InputGroupButtonProps,
+  type InputGroupInputProps,
+  type InputGroupTextareaProps,
+} from "./components/ui/input-group";
+export {
+  PasswordInput,
+  PasswordStrength,
+  defaultPasswordRules,
+  getPasswordStrength,
+  type PasswordInputProps,
+  type PasswordStrengthProps,
+  type PasswordRule,
+  type PasswordStrengthLevel,
+} from "./components/ui/password-input";
+export {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+  sanitizeOTP,
+  type InputOTPProps,
+  type InputOTPSlotProps,
+  type InputOTPPattern,
+} from "./components/ui/input-otp";
+export {
+  NumberInput,
+  parseLocaleNumber,
+  clampNumber,
+  type NumberInputProps,
+} from "./components/ui/number-input";
+export {
+  MaskedInput,
+  useMask,
+  type MaskedInputProps,
+  type UseMaskOptions,
+} from "./components/ui/input-mask";
+export {
+  applyMask,
+  defaultMaskTokens,
+  detectCardBrand,
+  isMaskComplete,
+  masks,
+  parseMask,
+  unmask,
+  type CardBrand,
+  type MaskSource,
+  type MaskTokens,
+} from "./lib/mask";
 export { Checkbox, type CheckboxProps } from "./components/ui/checkbox";
-export { Switch, type SwitchProps } from "./components/ui/switch";
+export { FieldSet, FieldLegend, type FieldSetProps } from "./components/ui/field-set";
+export { Switch, type SwitchProps, type SwitchTone } from "./components/ui/switch";
+export {
+  SwitchField,
+  SwitchCard,
+  type SwitchFieldProps,
+  type SwitchCardProps,
+} from "./components/ui/switch-field";
+export {
+  computeThumb,
+  getSwitchGeometry,
+  type SwitchGeometry,
+  type SwitchSize,
+  type ThumbLayout,
+} from "./components/ui/switch-physics";
 export {
   Avatar,
   AvatarImage,

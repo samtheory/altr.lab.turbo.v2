@@ -41,6 +41,17 @@
     "docs": "charts/bar-chart"
   },
   {
+    "name": "breadcrumb",
+    "type": "ui",
+    "title": "Breadcrumb",
+    "description": "Breadcrumb trail with links, current page, separator, ellipsis",
+    "registryDependencies": [
+      "slot",
+      "utils"
+    ],
+    "docs": "components/breadcrumb"
+  },
+  {
     "name": "button",
     "type": "ui",
     "title": "Button",
@@ -153,6 +164,17 @@
     "docs": "motion/fade-in"
   },
   {
+    "name": "field",
+    "type": "ui",
+    "title": "Field",
+    "description": "Labelled field with layouts, horizontal orientation, label extras, counter, error lists, and FieldSet",
+    "registryDependencies": [
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/field"
+  },
+  {
     "name": "focus-scope",
     "type": "primitive",
     "title": "FocusScope",
@@ -161,6 +183,17 @@
       "compose-refs"
     ],
     "docs": "primitives"
+  },
+  {
+    "name": "grid",
+    "type": "ui",
+    "title": "Grid",
+    "description": "Responsive CSS grid layout helper",
+    "registryDependencies": [
+      "slot",
+      "utils"
+    ],
+    "docs": "components/grid"
   },
   {
     "name": "hover-lift",
@@ -178,11 +211,55 @@
     "name": "input",
     "type": "ui",
     "title": "Input",
-    "description": "Text input",
+    "description": "Text input with sizes, variants, pill shape, and styled native types",
     "registryDependencies": [
       "utils"
     ],
     "docs": "components/input"
+  },
+  {
+    "name": "input-group",
+    "type": "ui",
+    "title": "Input Group",
+    "description": "Input or textarea with icons, text, buttons, and toolbars inside one box",
+    "registryDependencies": [
+      "button",
+      "compose-refs",
+      "field",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/input-group"
+  },
+  {
+    "name": "input-mask",
+    "type": "ui",
+    "title": "Input Mask",
+    "description": "Format-as-you-type input: presets, custom tokens, dynamic masks, caret handling, and raw/formatted values",
+    "registryDependencies": [
+      "compose-refs",
+      "field",
+      "input",
+      "input-group",
+      "mask",
+      "use-controllable-state",
+      "utils"
+    ],
+    "docs": "components/input-mask"
+  },
+  {
+    "name": "input-otp",
+    "type": "ui",
+    "title": "Input OTP",
+    "description": "One-time-code input: one real input with visual slots, paste, SMS autofill, patterns, and PIN masking",
+    "registryDependencies": [
+      "compose-refs",
+      "field",
+      "use-controllable-state",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/input-otp"
   },
   {
     "name": "kbd",
@@ -216,12 +293,89 @@
     "docs": "charts/line-chart"
   },
   {
+    "name": "list",
+    "type": "ui",
+    "title": "List",
+    "description": "List rows with leading / content / trailing slots and interactive rows",
+    "registryDependencies": [
+      "slot",
+      "utils"
+    ],
+    "docs": "components/list"
+  },
+  {
+    "name": "mask",
+    "type": "lib",
+    "title": "Mask engine",
+    "description": "Pure input-mask engine: tokens, optional sections, presets, caret mapping, and card brand detection",
+    "registryDependencies": [],
+    "docs": "components/input-mask"
+  },
+  {
     "name": "motion-tokens",
     "type": "motion",
     "title": "Motion tokens",
     "description": "Durations and easings",
     "registryDependencies": [],
     "docs": "motion"
+  },
+  {
+    "name": "nav-list",
+    "type": "ui",
+    "title": "Nav List",
+    "description": "Vertical sidebar navigation list with groups and active item",
+    "registryDependencies": [
+      "slot",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/nav-list"
+  },
+  {
+    "name": "navigation-menu",
+    "type": "ui",
+    "title": "Navigation Menu",
+    "description": "Horizontal disclosure navigation with hover-intent panels",
+    "registryDependencies": [
+      "dismissable-layer",
+      "presence",
+      "slot",
+      "use-controllable-state",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/navigation-menu"
+  },
+  {
+    "name": "number-input",
+    "type": "ui",
+    "title": "Number Input",
+    "description": "Number field with steppers, keyboard stepping, hold-to-repeat, clamping, and Intl formatting",
+    "registryDependencies": [
+      "compose-refs",
+      "field",
+      "input-group",
+      "use-controllable-state",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/number-input"
+  },
+  {
+    "name": "password-input",
+    "type": "ui",
+    "title": "Password Input",
+    "description": "Password field with a show / hide toggle, plus PasswordStrength meter and rule checklist",
+    "registryDependencies": [
+      "compose-refs",
+      "field",
+      "input-group",
+      "use-controllable-state",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/password-input"
   },
   {
     "name": "portal",
@@ -289,6 +443,23 @@
     "docs": "components/separator"
   },
   {
+    "name": "sheet",
+    "type": "ui",
+    "title": "Sheet",
+    "description": "Edge drawer (left / right / top / bottom) built on Dialog",
+    "registryDependencies": [
+      "dialog",
+      "dismissable-layer",
+      "focus-scope",
+      "portal",
+      "presence",
+      "scroll-lock",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/sheet"
+  },
+  {
     "name": "skeleton",
     "type": "ui",
     "title": "Skeleton",
@@ -335,13 +506,26 @@
     "name": "switch",
     "type": "ui",
     "title": "Switch",
-    "description": "On / off toggle",
+    "description": "On / off toggle with capped stretch physics, tones, icons, labels; SwitchField and SwitchCard",
     "registryDependencies": [
+      "compose-refs",
       "use-controllable-state",
       "use-id",
-      "utils"
+      "use-reduced-motion",
+      "utils",
+      "field"
     ],
     "docs": "components/switch"
+  },
+  {
+    "name": "table",
+    "type": "ui",
+    "title": "Table",
+    "description": "Semantic table with density, striped rows, sticky header",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/table"
   },
   {
     "name": "tabs",
@@ -371,7 +555,7 @@
     "name": "textarea",
     "type": "ui",
     "title": "Textarea",
-    "description": "Multi-line input",
+    "description": "Multi-line input with sizes, variants, and auto-resize",
     "registryDependencies": [
       "utils"
     ],

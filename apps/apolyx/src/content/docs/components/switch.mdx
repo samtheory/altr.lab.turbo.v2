@@ -2,34 +2,172 @@
 
 ## Installation
 
-<InstallTabs name="switch" exports="Switch" />
+<InstallTabs name="switch" exports="Switch, SwitchField, SwitchCard, FieldSet" />
 
 ## Usage
 
 ```tsx
-<Switch id="sync" checked={sync} onCheckedChange={setSync} />
-<Label htmlFor="sync">Background sync</Label>
+<SwitchField
+  label="Background sync"
+  description="Keeps drafts up to date."
+  checked={sync}
+  onCheckedChange={setSync}
+/>
 ```
+
+Use `Switch` on its own when you place the label yourself, `SwitchField` for a labelled settings row, and `SwitchCard` for a selectable tile.
+
+## Basics
+
+A bare `Switch` paired with `Label htmlFor`, plus disabled states.
+
+<ComponentPreview name="switch-label-demo" />
+
+### Controlled
+
+<ComponentPreview name="switch-controlled-demo" />
+
+### In a form
+
+Give the switch a `name` and it submits through a hidden checkbox, so `FormData` sees `"on"` for checked switches and nothing for unchecked ones.
+
+<ComponentPreview name="switch-form-demo" />
+
+## Appearance
+
+### Sizes
+
+<ComponentPreview name="switch-sizes-demo" />
+
+### Tones
+
+`tone` colours the checked track and the drag tint. Hover darkens the tone a little.
+
+<ComponentPreview name="switch-tones-demo" />
+
+### Thumb icons
+
+`icons={{ checked, unchecked }}` renders an icon inside the thumb, cross-faded on toggle.
+
+<ComponentPreview name="switch-icons-demo" />
+
+### Track labels
+
+`labels={{ checked, unchecked }}` writes short text on the free side of the track. The track widens to fit the longer label, and the drag physics read the measured width.
+
+<ComponentPreview name="switch-labels-demo" />
+
+### Label side
+
+<ComponentPreview name="switch-side-demo" />
+
+## Composition
+
+`aside` sits after the label text: an info tooltip, badges, or anything inline. The label itself can hold an icon tile. Interactive content inside `aside` (like the tooltip button) does not toggle the switch.
+
+<ComponentPreview name="switch-composition-demo" />
+
+### Switch card
+
+<ComponentPreview name="switch-card-demo" />
+
+## Settings layouts
+
+### Field set
+
+`FieldSet` is a native `<fieldset>` with a legend. Set `disabled` on it to disable every switch inside.
+
+<ComponentPreview name="switch-fieldset-demo" />
+
+### Framed list
+
+<ComponentPreview name="switch-framed-demo" />
+
+### Card list with icons
+
+<ComponentPreview name="switch-card-list-demo" />
+
+### Settings table
+
+<ComponentPreview name="switch-table-demo" />
+
+### Card grid
+
+<ComponentPreview name="switch-card-grid-demo" />
+
+## Confirmation
+
+### Reveal a warning
+
+A destructive switch that shows an `Alert` while it is on.
+
+<ComponentPreview name="switch-confirm-alert-demo" />
+
+### Confirm before committing
+
+Keep the switch controlled and only set `checked` after the user confirms in a `Dialog`.
+
+<ComponentPreview name="switch-confirm-dialog-demo" />
 
 ## Physics
 
-- **Press** — the thumb stretches toward the side it is about to travel to.
-- **Drag** — grab the thumb and slide it; past the midpoint on release it commits, otherwise it snaps back. Pulling past a rail stretches it against the wall (rubber band).
-- **Release** — the thumb springs to the end, squashes a little on impact, and settles back to its normal width.
-- **Reduced motion** — no stretch or bounce; the thumb moves straight to its end.
+The thumb geometry is a pure function, `computeThumb`, so every limit below is unit-tested.
 
-Click, Space, and Enter still toggle exactly once.
+- **Press** — the thumb stretches toward the side it will travel to by 20% of its width, over about 120 ms. Nothing changes on the frame you press.
+- **Drag** — the thumb follows the pointer. Stretch comes from smoothed pointer speed, leads in the direction of motion, and relaxes when you stop. It never exceeds **30% of the thumb width**.
+- **Ends** — stretch tapers to zero over the last half-thumb, so the thumb arrives at its normal size. Pushing past an end, or into the side it already rests on, never grows it: it squashes by at most 2 px against the wall.
+- **Direction changes** — need 2 px of movement the other way, so jitter does not flip the stretch.
+- **Release** — the thumb glides home with a near-critically damped spring and lands with a 1.5 px squash. Past the midpoint commits; under 3 px of movement counts as a click.
+- **Track tint** — while dragging, the track colour blends from the off colour to the tone by progress.
+- **Reduced motion** — no stretch, squash or tint animation; the thumb moves with a short tween.
 
 ## Accessibility
 
-`role="switch"` with `aria-checked`. Space and Enter toggle. Use a switch for settings that apply immediately; use a checkbox inside forms that are submitted.
+- `role="switch"` with `aria-checked`. Space and Enter toggle exactly once; so does a click.
+- `SwitchField` and `SwitchCard` render a `<label>`, so clicking anywhere on the row or card toggles. The switch is named by the label text (`aria-labelledby`) and described by the description (`aria-describedby`).
+- `FieldSet` is a native fieldset: screen readers announce the legend as the group name.
+- Use a switch for settings that apply immediately; use a checkbox in forms that are submitted later.
 
 ## Props
 
+### Switch
+
 <PropsTable rows={[
-  { prop: "size", type: '"sm" | "md"', default: '"md"', description: "Track and thumb size." },
+  { prop: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Track and thumb size." },
+  { prop: "tone", type: '"primary" | "success" | "warning" | "info" | "destructive"', default: '"primary"', description: "Checked track colour." },
+  { prop: "icons", type: "{ checked?: ReactNode; unchecked?: ReactNode }", description: "Icons inside the thumb." },
+  { prop: "labels", type: "{ checked?: ReactNode; unchecked?: ReactNode }", description: "Short text inside the track; widens the track." },
   { prop: "checked", type: "boolean", description: "Controlled state." },
   { prop: "defaultChecked", type: "boolean", default: "false", description: "Initial state when uncontrolled." },
   { prop: "onCheckedChange", type: "(checked: boolean) => void", description: "Called when toggled." },
+  { prop: "name / value", type: "string", default: 'value "on"', description: "Submits through a hidden checkbox." },
   { prop: "disabled", type: "boolean", description: "Prevents interaction." },
+]} />
+
+### SwitchField
+
+<PropsTable rows={[
+  { prop: "label", type: "ReactNode", description: "Required. Row label; names the switch." },
+  { prop: "description", type: "ReactNode", description: "Helper text; describes the switch." },
+  { prop: "aside", type: "ReactNode", description: "Inline content after the label (badge, tooltip)." },
+  { prop: "side", type: '"start" | "end"', default: '"end"', description: "Where the switch sits." },
+  { prop: "...Switch props", type: "SwitchProps", description: "checked, defaultChecked, onCheckedChange, size, tone, icons, disabled, name." },
+]} />
+
+### SwitchCard
+
+<PropsTable rows={[
+  { prop: "title", type: "ReactNode", description: "Required. Card title; names the switch." },
+  { prop: "description", type: "ReactNode", description: "Helper text." },
+  { prop: "icon", type: "ReactNode", description: "Leading icon tile, tinted with the tone when checked." },
+  { prop: "...Switch props", type: "SwitchProps", description: "Same as SwitchField." },
+]} />
+
+### FieldSet
+
+<PropsTable rows={[
+  { prop: "legend", type: "ReactNode", description: "Group name." },
+  { prop: "description", type: "ReactNode", description: "Text under the legend." },
+  { prop: "variant", type: '"plain" | "framed"', default: '"plain"', description: "Stacked rows, or a bordered list with separators." },
+  { prop: "disabled", type: "boolean", description: "Disables every control inside (native)." },
 ]} />

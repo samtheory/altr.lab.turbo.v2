@@ -36,6 +36,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Buil
 | [[01-apolyx-s0001-carryovers]] | Deferred items still open after S0001 and S0002 |
 | [[02-apolyx-s0002-wave]] | Hover contrast, navigation, physics Switch, Field, Table / List / Grid — acceptance ticked (**Apolyx-S0002** closed) |
 | [[03-timeline]] | Timeline (ReUI parity) — shipped 2026-10-14 |
+| [[04-apolyx-s0003-switch-inputs]] | Switch motion fix + family, input catalog, form patterns — shipped (**Apolyx-S0003**, closed 2026-10-14; [[../../tech_space/ui-kit/08-s0003-switch-inputs]]) |
 
 ## Related shipped foundation (pre-Apolyx)
 

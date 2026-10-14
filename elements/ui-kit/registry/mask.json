@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "mask",
+  "type": "lib",
+  "title": "Mask engine",
+  "description": "Pure input-mask engine: tokens, optional sections, presets, caret mapping, and card brand detection",
+  "files": [
+    {
+      "path": "src/lib/mask.ts",
+      "target": "mask.ts"
+    }
+  ],
+  "docs": "components/input-mask"
+}

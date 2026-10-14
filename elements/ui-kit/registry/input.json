@@ -3,13 +3,16 @@
   "name": "input",
   "type": "ui",
   "title": "Input",
-  "description": "Text input",
+  "description": "Text input with sizes, variants, pill shape, and styled native types",
   "files": [
     {
       "path": "src/components/ui/input.tsx",
       "target": "input.tsx"
     }
   ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
   "registryDependencies": [
     "utils"
   ],

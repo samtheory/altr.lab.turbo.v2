@@ -1,22 +1,37 @@
 "use client";
 
 import * as React from "react";
+import { CircleAlert } from "lucide-react";
 
 import { cn } from "../../lib/utils";
 import { useId } from "../../primitives/use-id";
+import {
+  ControlBox,
+  controlHeight,
+  controlText,
+  type ControlShape,
+  type ControlSize,
+  type ControlVariant,
+} from "./control-box";
 
 export type FieldLayout = "top" | "floating" | "inline";
+export type FieldOrientation = "vertical" | "horizontal";
 
 type FieldContextValue = {
   id: string;
   layout: FieldLayout;
+  size: ControlSize;
   describedBy: string | undefined;
   invalid: boolean;
   disabled: boolean;
   required: boolean;
   multiline: boolean;
+  valueLength: number;
   setMultiline: (multiline: boolean) => void;
-  setFilled: (filled: boolean) => void;
+  setValueLength: (length: number) => void;
+  setOverLimit: (over: boolean) => void;
+  /** Lets a control (e.g. InputOTP) draw its own boxes instead of the Field box. */
+  setBoxless: (boxless: boolean) => void;
 };
 
 const FieldContext = React.createContext<FieldContextValue | null>(null);
@@ -27,6 +42,11 @@ function useField() {
   return ctx;
 }
 
+/** Field context when inside a Field, otherwise `null`. */
+export function useOptionalField() {
+  return React.useContext(FieldContext);
+}
+
 export type FieldProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children"> & {
   label: React.ReactNode;
   /**
@@ -35,41 +55,69 @@ export type FieldProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children"> 
    * `inline` — label and control side by side in one box, label on a muted panel.
    */
   layout?: FieldLayout;
+  /** `horizontal` puts label and description in a left column; collapses on narrow containers. */
+  orientation?: FieldOrientation;
   description?: React.ReactNode;
-  error?: React.ReactNode;
+  /** One message, or several rendered as a list. */
+  error?: React.ReactNode | React.ReactNode[];
+  /** End of the label row (top layout and horizontal): a link, info tooltip, or badge. */
+  labelAside?: React.ReactNode;
   required?: boolean;
+  /** Shows a muted "(optional)". `required` wins if both are set. */
+  optional?: boolean;
   disabled?: boolean;
+  size?: ControlSize;
+  variant?: ControlVariant;
+  shape?: ControlShape;
   /** Id for the control. Generated when omitted. */
   id?: string;
-  /** Width of the label panel in `inline` layout (any CSS length). */
+  /** Width of the label panel in `inline` layout, or the label column in `horizontal`. */
   labelWidth?: string;
   /** Extra classes for the bordered control box. */
   controlClassName?: string;
   children: React.ReactNode;
 };
 
+function hasError(error: FieldProps["error"]) {
+  if (Array.isArray(error)) return error.length > 0;
+  return Boolean(error);
+}
+
 export function Field({
   label,
   layout = "top",
+  orientation = "vertical",
   description,
   error,
+  labelAside,
   required = false,
+  optional = false,
   disabled = false,
+  size = "md",
+  variant,
+  shape,
   id: idProp,
   labelWidth,
   className,
   controlClassName,
+  style,
   children,
   ...props
 }: FieldProps) {
   const id = useId(idProp);
   const descriptionId = useId();
   const errorId = useId();
-  const [filled, setFilled] = React.useState(false);
+  const [valueLength, setValueLength] = React.useState(0);
   const [multiline, setMultiline] = React.useState(false);
-  const invalid = Boolean(error);
+  const [overLimit, setOverLimit] = React.useState(false);
+  const [boxless, setBoxless] = React.useState(false);
+  const filled = valueLength > 0;
+  const horizontal = orientation === "horizontal";
+  // Horizontal rows keep the label outside the box.
+  const effectiveLayout: FieldLayout = horizontal ? "top" : layout;
+  const invalid = hasError(error) || overLimit;
   const describedBy =
-    [description ? descriptionId : null, invalid ? errorId : null]
+    [description ? descriptionId : null, hasError(error) ? errorId : null]
       .filter(Boolean)
       .join(" ") || undefined;
 
@@ -78,81 +126,137 @@ export function Field({
       htmlFor={id}
       data-slot="field-label"
       className={cn(
-        "select-none text-sm font-medium transition-[color,background-color,translate,scale,top] duration-(--duration-base) ease-(--ease-out)",
-        layout === "top" &&
+        "select-none text-sm font-medium transition-[color,background-color,translate,scale,top,left] duration-(--duration-base) ease-(--ease-out)",
+        effectiveLayout === "top" &&
           "text-foreground group-focus-within/field:text-primary group-data-[invalid]/field:text-destructive",
-        layout === "floating" && [
-          "pointer-events-none absolute left-2.5 z-10 origin-left -translate-y-1/2 rounded-sm bg-inherit px-1 font-normal text-muted-foreground",
+        effectiveLayout === "floating" && [
+          "pointer-events-none absolute left-(--field-label-left,0.625rem) z-10 origin-left -translate-y-1/2 rounded-sm bg-inherit px-1 font-normal text-muted-foreground",
           multiline ? "top-5" : "top-1/2",
           "group-focus-within/control:top-0 group-focus-within/control:scale-[0.82] group-focus-within/control:font-medium group-focus-within/control:text-primary",
           "group-data-[filled]/control:top-0 group-data-[filled]/control:scale-[0.82] group-data-[filled]/control:font-medium",
           "group-data-[invalid]/control:text-destructive",
         ],
-        layout === "inline" && [
+        effectiveLayout === "inline" && [
           "flex shrink-0 items-center self-stretch border-r border-input bg-muted px-3 text-muted-foreground",
           "group-hover/control:border-border-strong group-focus-within/control:border-ring group-focus-within/control:bg-accent group-focus-within/control:text-foreground",
           "group-data-[invalid]/control:border-destructive group-data-[invalid]/control:text-destructive",
           multiline && "items-start pt-2.5",
         ],
       )}
-      style={layout === "inline" && labelWidth ? { width: labelWidth } : undefined}
+      style={effectiveLayout === "inline" && labelWidth ? { width: labelWidth } : undefined}
     >
       {label}
       {required ? (
         <span aria-hidden className="ml-0.5 text-destructive">
           *
         </span>
+      ) : optional ? (
+        <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
       ) : null}
     </label>
   );
+
+  const labelRow =
+    effectiveLayout === "top" ? (
+      labelAside ? (
+        <div className="flex items-center justify-between gap-2">
+          {labelNode}
+          <span data-slot="field-label-aside" className="text-xs">
+            {labelAside}
+          </span>
+        </div>
+      ) : (
+        labelNode
+      )
+    ) : null;
+
+  const descriptionNode = description ? (
+    <FieldDescription id={descriptionId}>{description}</FieldDescription>
+  ) : null;
+
+  const control = boxless ? (
+    <div data-slot="field-control" className={controlClassName}>
+      {children}
+    </div>
+  ) : (
+    <ControlBox
+      data-slot="field-control"
+      size={size}
+      variant={variant}
+      shape={shape}
+      data-filled={filled ? "" : undefined}
+      data-invalid={invalid ? "" : undefined}
+      data-disabled={disabled ? "" : undefined}
+      className={cn(
+        effectiveLayout === "inline" && "overflow-hidden",
+        // A resting floating label sits after an inline-start addon; it returns to the edge when raised.
+        effectiveLayout === "floating" &&
+          "[&:has([data-align=inline-start]):not(:focus-within):not([data-filled])]:[--field-label-left:calc(var(--addon-start-width,2.25rem)+0.25rem)]",
+        controlClassName,
+      )}
+    >
+      {effectiveLayout !== "top" ? labelNode : null}
+      {children}
+    </ControlBox>
+  );
+
+  const errorNode = hasError(error) ? <FieldError id={errorId}>{error}</FieldError> : null;
 
   return (
     <FieldContext.Provider
       value={{
         id,
-        layout,
+        layout: effectiveLayout,
+        size,
         describedBy,
         invalid,
         disabled,
         required,
         multiline,
+        valueLength,
         setMultiline,
-        setFilled,
+        setValueLength,
+        setOverLimit,
+        setBoxless,
       }}
     >
-      <div
-        data-slot="field"
-        data-layout={layout}
-        data-invalid={invalid ? "" : undefined}
-        data-disabled={disabled ? "" : undefined}
-        className={cn("group/field flex w-full flex-col gap-1.5", className)}
-        {...props}
-      >
-        {layout === "top" ? labelNode : null}
+      {horizontal ? (
         <div
-          data-slot="field-control"
-          data-filled={filled ? "" : undefined}
+          data-slot="field"
+          data-orientation="horizontal"
           data-invalid={invalid ? "" : undefined}
-          className={cn(
-            "group/control relative flex w-full items-stretch rounded-md border border-input bg-background shadow-sm",
-            "transition-[border-color,box-shadow,background-color] duration-(--duration-slow) ease-(--ease-out) focus-within:duration-(--duration-base)",
-            "hover:border-border-strong",
-            "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/20",
-            "after:pointer-events-none after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-(--duration-slow) after:ease-(--ease-out) focus-within:after:scale-x-100",
-            "data-[invalid]:border-destructive data-[invalid]:focus-within:ring-destructive/25 data-[invalid]:after:bg-destructive",
-            layout === "inline" && "overflow-hidden",
-            disabled && "pointer-events-none opacity-50",
-            controlClassName,
-          )}
+          data-disabled={disabled ? "" : undefined}
+          className={cn("group/field @container w-full", className)}
+          style={{ ["--field-label-width" as string]: labelWidth ?? "12rem", ...style }}
+          {...props}
         >
-          {layout !== "top" ? labelNode : null}
-          {children}
+          <div className="grid gap-1.5 @md:grid-cols-[var(--field-label-width)_minmax(0,1fr)] @md:gap-x-6">
+            <div className="grid content-start gap-1 @md:pt-2">
+              {labelRow}
+              {descriptionNode}
+            </div>
+            <div className="grid content-start gap-1.5">
+              {control}
+              {errorNode}
+            </div>
+          </div>
         </div>
-        {description ? (
-          <FieldDescription id={descriptionId}>{description}</FieldDescription>
-        ) : null}
-        {invalid ? <FieldError id={errorId}>{error}</FieldError> : null}
-      </div>
+      ) : (
+        <div
+          data-slot="field"
+          data-layout={layout}
+          data-invalid={invalid ? "" : undefined}
+          data-disabled={disabled ? "" : undefined}
+          className={cn("group/field flex w-full flex-col gap-1.5", className)}
+          style={style}
+          {...props}
+        >
+          {labelRow}
+          {control}
+          {descriptionNode}
+          {errorNode}
+        </div>
+      )}
     </FieldContext.Provider>
   );
 }
@@ -170,48 +274,95 @@ export function FieldDescription({
   );
 }
 
-export function FieldError({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) {
+export type FieldErrorProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children"> & {
+  children?: React.ReactNode | React.ReactNode[];
+};
+
+/** One alert region; an array renders as a list of messages. */
+export function FieldError({ className, children, ...props }: FieldErrorProps) {
+  const base =
+    "text-xs font-medium text-destructive motion-safe:animate-[apolyx-field-error_var(--duration-base)_var(--ease-out)]";
+  if (Array.isArray(children)) {
+    return (
+      <div data-slot="field-error" role="alert" className={cn(base, className)} {...props}>
+        <ul className="grid gap-1">
+          {children.map((message, i) => (
+            <li key={i} className="flex items-start gap-1.5">
+              <CircleAlert aria-hidden className="mt-px size-3 shrink-0" />
+              <span>{message}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
   return (
-    <p
-      data-slot="field-error"
-      role="alert"
-      className={cn(
-        "text-xs font-medium text-destructive motion-safe:animate-[apolyx-field-error_var(--duration-base)_var(--ease-out)]",
-        className,
-      )}
-      {...props}
-    />
+    <p data-slot="field-error" role="alert" className={cn(base, className)} {...props}>
+      {children}
+    </p>
   );
 }
 
-function isFilled(value: unknown) {
-  if (value == null) return false;
-  if (Array.isArray(value)) return value.length > 0;
-  return String(value).length > 0;
+export type FieldCounterProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
+  max: number;
+};
+
+/**
+ * Character count for the Field's control, rendered inside the box. Turns warning at
+ * 90% of `max` and destructive past it, which also marks the Field invalid.
+ */
+export function FieldCounter({ max, className, ...props }: FieldCounterProps) {
+  const { valueLength, setOverLimit, multiline } = useField();
+  const over = valueLength > max;
+  const near = valueLength >= max * 0.9;
+  React.useEffect(() => {
+    setOverLimit(over);
+  }, [over, setOverLimit]);
+  React.useEffect(() => () => setOverLimit(false), [setOverLimit]);
+  return (
+    <span
+      data-slot="field-counter"
+      data-state={over ? "over" : near ? "near" : "ok"}
+      aria-live={near ? "polite" : "off"}
+      className={cn(
+        "flex shrink-0 select-none items-center pr-3 pl-1 text-xs tabular-nums text-muted-foreground transition-colors duration-(--duration-fast)",
+        multiline && "items-end pb-2",
+        "data-[state=near]:text-warning data-[state=over]:font-medium data-[state=over]:text-destructive",
+        className,
+      )}
+      {...props}
+    >
+      {valueLength} / {max}
+    </span>
+  );
 }
 
-function useFilledSync(
+function valueLengthOf(value: unknown) {
+  if (value == null) return 0;
+  if (Array.isArray(value)) return value.length;
+  return String(value).length;
+}
+
+/** Reports a control's value length to the Field (drives `filled` and `FieldCounter`). */
+export function useFieldValueSync(
   value: unknown,
   defaultValue: unknown,
-  setFilled: (filled: boolean) => void,
+  setValueLength: ((length: number) => void) | undefined,
 ) {
   const controlled = value !== undefined;
   React.useEffect(() => {
-    if (controlled) setFilled(isFilled(value));
-  }, [controlled, value, setFilled]);
+    if (controlled) setValueLength?.(valueLengthOf(value));
+  }, [controlled, value, setValueLength]);
   React.useEffect(() => {
-    if (!controlled) setFilled(isFilled(defaultValue));
+    if (!controlled) setValueLength?.(valueLengthOf(defaultValue));
     // Only the initial uncontrolled value matters; later edits report via onChange.
   }, []);
 }
 
 const controlBase =
-  "w-full min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed";
+  "w-full min-w-0 flex-1 bg-transparent px-3 outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed";
 
-export type FieldInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export type FieldInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   ref?: React.Ref<HTMLInputElement>;
 };
 
@@ -223,7 +374,7 @@ export function FieldInput({
   ...props
 }: FieldInputProps) {
   const field = useField();
-  useFilledSync(props.value, props.defaultValue, field.setFilled);
+  useFieldValueSync(props.value, props.defaultValue, field.setValueLength);
   return (
     <input
       ref={ref}
@@ -236,14 +387,17 @@ export function FieldInput({
       placeholder={placeholder}
       className={cn(
         controlBase,
-        field.layout === "floating" ? "h-11 pt-1" : "h-10",
+        controlText,
+        field.layout === "floating"
+          ? "h-11 pt-1 group-data-[size=sm]/control:h-10 group-data-[size=lg]/control:h-12"
+          : controlHeight,
         field.layout === "floating" &&
           "placeholder:text-transparent focus:placeholder:text-muted-foreground placeholder:transition-colors",
         className,
       )}
       onChange={(e) => {
         onChange?.(e);
-        field.setFilled(e.target.value.length > 0);
+        field.setValueLength(e.target.value.length);
       }}
       {...props}
     />
@@ -263,7 +417,7 @@ export function FieldTextarea({
 }: FieldTextareaProps) {
   const field = useField();
   const { setMultiline } = field;
-  useFilledSync(props.value, props.defaultValue, field.setFilled);
+  useFieldValueSync(props.value, props.defaultValue, field.setValueLength);
   React.useEffect(() => {
     setMultiline(true);
     return () => setMultiline(false);
@@ -279,6 +433,7 @@ export function FieldTextarea({
       disabled={field.disabled || undefined}
       className={cn(
         controlBase,
+        controlText,
         "min-h-24 resize-y py-2.5",
         field.layout === "floating" &&
           "pt-4 placeholder:text-transparent focus:placeholder:text-muted-foreground",
@@ -286,7 +441,7 @@ export function FieldTextarea({
       )}
       onChange={(e) => {
         onChange?.(e);
-        field.setFilled(e.target.value.length > 0);
+        field.setValueLength(e.target.value.length);
       }}
       {...props}
     />

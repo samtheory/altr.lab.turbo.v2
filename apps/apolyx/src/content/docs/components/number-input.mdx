@@ -1,0 +1,79 @@
+<ComponentPreview name="number-input-demo" />
+
+## Installation
+
+<InstallTabs name="number-input" exports="NumberInput" />
+
+## Usage
+
+```tsx
+const [qty, setQty] = React.useState<number | null>(1);
+
+<NumberInput value={qty} onValueChange={setQty} min={0} max={99} name="qty" />
+<NumberInput defaultValue={1200} format={{ style: "currency", currency: "USD" }} />
+```
+
+The value is `number | null` (an empty field is `null`). A hidden input carries the raw number under `name`, so forms get `1200`, not `$1,200.00`.
+
+## Basics
+
+`layout` is `split` (− and + on each side), `stacked` (chevrons on the end) or `none`. Stepper buttons are skipped by Tab; the keyboard does the same work.
+
+<ComponentPreview name="number-input-layouts-demo" />
+
+## Formatting
+
+`format` takes `Intl.NumberFormat` options and `locale` picks the separators. The formatted text shows while the field is not focused; focusing shows the raw number for editing. Typing accepts group separators and currency symbols.
+
+<ComponentPreview name="number-input-format-demo" />
+
+## Limits
+
+The value clamps to `min` / `max` on blur and on every step. Text that isn't a number reverts to the last valid value. Steppers disable at a bound.
+
+<ComponentPreview name="number-input-limits-demo" />
+
+## Patterns
+
+### Quantity in a cart row
+
+<ComponentPreview name="number-input-cart-demo" />
+
+### Price range
+
+Two inputs whose limits follow each other.
+
+<ComponentPreview name="number-input-range-demo" />
+
+## Keyboard
+
+| Key | Action |
+| --- | --- |
+| Arrow Up / Down | ± `step` |
+| Shift + Arrow, Page Up / Down | ± `largeStep` (default `step × 10`) |
+| Home / End | Jump to `min` / `max` |
+| Enter | Commit and clamp the typed value |
+
+Pressing and holding a stepper repeats after 400 ms, then every 60 ms. The mouse wheel only changes the value when `allowWheel` is set and the field is focused.
+
+## Accessibility
+
+- The input has `role="spinbutton"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and the formatted value in `aria-valuetext`.
+- `inputMode="decimal"` brings up a number keyboard on phones.
+
+## Props
+
+<PropsTable title="NumberInput" rows={[
+  { prop: "value", type: "number | null", description: "Controlled value." },
+  { prop: "defaultValue", type: "number | null", default: "null", description: "Initial value." },
+  { prop: "onValueChange", type: "(value: number | null) => void", description: "Called on typing, stepping and clamping." },
+  { prop: "min / max", type: "number", description: "Bounds." },
+  { prop: "step", type: "number", default: "1", description: "Arrow and stepper increment." },
+  { prop: "largeStep", type: "number", default: "step × 10", description: "Shift / Page increment." },
+  { prop: "format", type: "Intl.NumberFormatOptions", description: "Display format when not focused." },
+  { prop: "locale", type: "string", description: "Locale for formatting and parsing." },
+  { prop: "layout", type: '"split" | "stacked" | "none"', default: '"split"', description: "Stepper placement." },
+  { prop: "allowWheel", type: "boolean", default: "false", description: "Wheel steps while focused." },
+  { prop: "name", type: "string", description: "Submits the raw number through a hidden input." },
+  { prop: "children", type: "ReactNode", description: "Extra addons, such as a unit." },
+]} />

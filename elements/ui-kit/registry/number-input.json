@@ -1,0 +1,25 @@
+{
+  "$schema": "./schema.json",
+  "name": "number-input",
+  "type": "ui",
+  "title": "Number Input",
+  "description": "Number field with steppers, keyboard stepping, hold-to-repeat, clamping, and Intl formatting",
+  "files": [
+    {
+      "path": "src/components/ui/number-input.tsx",
+      "target": "number-input.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "compose-refs",
+    "field",
+    "input-group",
+    "use-controllable-state",
+    "use-id",
+    "utils"
+  ],
+  "docs": "components/number-input"
+}

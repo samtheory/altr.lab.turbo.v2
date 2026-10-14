@@ -3,13 +3,25 @@
   "name": "field",
   "type": "ui",
   "title": "Field",
-  "description": "Labelled field with top / floating / inline layouts and focus motion",
+  "description": "Labelled field with layouts, horizontal orientation, label extras, counter, error lists, and FieldSet",
   "files": [
     {
       "path": "src/components/ui/field.tsx",
       "target": "field.tsx"
+    },
+    {
+      "path": "src/components/ui/control-box.tsx",
+      "target": "control-box.tsx"
+    },
+    {
+      "path": "src/components/ui/field-set.tsx",
+      "target": "field-set.tsx"
     }
   ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.525.0"
+  },
   "registryDependencies": [
     "use-id",
     "utils"
