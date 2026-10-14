@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "4945944693b3de26",
+        "id": "a28282bd13cab334",
         "type": "tabs",
         "children": [
           {
-            "id": "a5d76a024d2c65c1",
+            "id": "83951ac55895cc18",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "plan/ui-kit/Apolyx-S0002/06-docs-registry-verify.md",
+                "file": "Altr.lab/commands.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "06-docs-registry-verify"
+              "title": "commands"
             }
           }
         ]
@@ -184,51 +184,56 @@
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
       "iconic:Open rulebook": false,
-      "webpage-html-export:Export as HTML": false
+      "webpage-html-export:Export as HTML": false,
+      "graph-styler:Graph Styler": false
     }
   },
-  "active": "a5d76a024d2c65c1",
+  "active": "83951ac55895cc18",
   "lastOpenFiles": [
-    "plan/ui-kit/Apolyx-S0002/03-switch-physics.md",
-    "plan/ui-kit/Apolyx-S0002/04-field-input.md",
-    "tech_space/ui-kit/03-overlays.md",
-    "idea/ui-kit/2026-10-11-naming-and-domains.md",
+    "report/assets/apolyx-sidebar/sidebar-open.png",
+    "report/assets/apolyx-sidebar",
+    "feature_list/ui-kit/03-timeline.md",
+    "tech_space/ui-kit/07-timeline.md",
     "tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data.md",
-    "feature_list/ui-kit/02-apolyx-s0002-wave.md",
+    "plan/ui-kit/Apolyx-S0002/README.md",
     "plan/ui-kit/Apolyx-S0002/07-docs-man-handoff.md",
     "plan/ui-kit/Apolyx-S0002/06-docs-registry-verify.md",
     "plan/ui-kit/Apolyx-S0002/05-data-components.md",
+    "plan/ui-kit/Apolyx-S0002/04-field-input.md",
+    "plan/ui-kit/Apolyx-S0002/03-switch-physics.md",
     "plan/ui-kit/Apolyx-S0002/02-navigation.md",
     "plan/ui-kit/Apolyx-S0002/01-hover-contrast.md",
-    "plan/ui-kit/Apolyx-S0002/README.md",
-    "plan/ui-kit/README.md",
+    "plan/ui-kit/Apolyx-S0002",
+    "plan/ui-kit/Apolyx-S0001/06-charts.md",
     "plan/ui-kit/Apolyx-S0001/README.md",
     "plan/ui-kit/Apolyx-S0001/10-verify-and-handoff.md",
     "plan/ui-kit/Apolyx-S0001/09-docs-app.md",
     "plan/ui-kit/Apolyx-S0001/08-registry-and-cli.md",
     "plan/ui-kit/Apolyx-S0001/07-wave-1b-overlays.md",
-    "plan/ui-kit/Apolyx-S0001/06-charts.md",
     "plan/ui-kit/Apolyx-S0001/05-motion-recipes.md",
     "plan/ui-kit/Apolyx-S0001/04-wave-1-components.md",
     "plan/ui-kit/Apolyx-S0001/03-primitives.md",
     "plan/ui-kit/Apolyx-S0001/02-tokens-and-themes.md",
     "plan/ui-kit/Apolyx-S0001/01-rename-package.md",
-    "plan/ui-kit/Apolyx-S0002",
     "plan/ui-kit/Apolyx-S0001",
-    "idea/ui-kit/2026-10-10-apolyx-portable-ui-kit.md",
-    "feature_list/ui-kit/01-apolyx-s0001-carryovers.md",
-    "tech_space/ui-kit",
+    "feature_list/ui-kit/02-apolyx-s0002-wave.md",
+    "tech_space/ui-kit/06-timeline.md",
+    "feature_list/ui-kit/02-timeline.md",
+    "report/assets/apolyx-timeline/timeline-horizontal-default-dark.png",
+    "report/assets/apolyx-timeline/timeline-status-tones-default-dark.png",
+    "report/assets/apolyx-timeline/timeline-progress-default-dark.png",
+    "report/assets/apolyx-timeline/timeline-alternate-default-dark.png",
+    "report/assets/apolyx-timeline",
     "report/assets/apolyx-s0001/docs-home-power-blue-dark.png",
-    "report/assets/apolyx-s0001/docs-home-default-light.png",
     "report/assets/apolyx-s0001/docs-button-power-blue-dark.png",
     "report/assets/apolyx-s0001/docs-button-default-light.png",
+    "report/assets/apolyx-s0001/docs-home-default-light.png",
     "report/assets/apolyx-s0001",
     "report/assets",
+    "tech_space/ui-kit",
     "plan/ui-kit",
     "agents/apollo/skills",
-    "agents/apollo/instructions",
     "agents/apollo/prompts",
-    "agents/apollo",
     "Idea/self-study-full-stack/node_modules/concurrently/docs/demo.gif"
   ]
 }

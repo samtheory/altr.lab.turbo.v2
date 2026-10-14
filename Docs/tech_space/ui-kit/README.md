@@ -23,7 +23,7 @@ tags:
 | [[02-motion-charts-cli-docs]] | Motion + charts (early note; see also 04/05) |
 | [[03-overlays]] | Dialog, DropdownMenu, Tabs, Tooltip, Toast, layer stack |
 | [[04-registry-and-cli]] | Registry manifests, import-resolution build, CLI smoke |
-| [[05-docs-app]] | `apps/apolyx` MDX shell, demos, `/r` registry |
+| [[05-docs-app]] | `apps/apolyx` MDX shell, collapsible sidebar groups (2026-10-14), demos, `/r` registry |
 | [[06-s0002-contrast-nav-switch-field-data]] | Hover tokens, Sheet / Breadcrumb / NavigationMenu / NavList, physics Switch, Field, Table / List / Grid (59 registry items) |
 | [[07-timeline]] | Timeline (after S0002): rail geometry, step states, tones, four layouts (60 registry items) |
 

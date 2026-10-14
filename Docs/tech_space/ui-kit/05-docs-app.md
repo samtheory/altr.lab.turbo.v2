@@ -26,9 +26,26 @@ tags:
 ## Shell
 
 - Sticky header: logo, Docs / Components / Theming, search placeholder (disabled ⌘K), `ThemeFamilySwitcher`, `ThemeToggle`, GitHub link
-- Left nav from `src/docs-config.ts` (groups + status badges); mobile drawer uses Apolyx `Dialog`
+- Left nav from `src/docs-config.ts` (groups + status badges); mobile drawer uses Apolyx `Dialog`. Behaviour in [[#Sidebar groups]]
 - Right “On this page” TOC from `##` headings in the MDX source
 - Root layout: `ApolyxProvider` + `ApolyxThemeScript` + `TooltipProvider` + `Toaster`
+
+## Sidebar groups
+
+Code: `src/components/site/sidebar-nav.tsx` (`SidebarNav` → one `SidebarGroup` per `docsConfig` entry). Added 2026-10-14. The desktop sidebar and the mobile drawer render the same component.
+
+| Behaviour | How |
+|-----------|-----|
+| Collapsible | Group title is a `<button>` inside the `<h2>`, with `aria-expanded` and `aria-controls` pointing at the list region. Chevron turns −90° when closed |
+| Open by default | Each group holds its own `useState(true)`. State survives client navigation (the layout stays mounted) and resets on a full reload; it is not persisted |
+| Animation | Region animates `grid-template-rows` 0fr ↔ 1fr plus opacity (200 ms, ease-out); `motion-reduce:transition-none` turns it off |
+| Closed links unreachable | Region gets `inert` when closed, so its links leave the tab order and the accessibility tree |
+| Depth guide line | The `<ul>` has `border-l border-border` from first to last child. Each link draws a `before:` 1 px segment over that line: `bg-primary` when active, `foreground/40` on hover |
+| Open background | Group wrapper gets `bg-muted/40` and `rounded-lg` while open, transparent when closed; also exposes `data-state="open" \| "closed"` |
+
+If you change the `<ul>` padding (`pl-2`) or border width, update the `before:-left-[9px]` offset too, or the active segment stops lining up with the guide line.
+
+Screenshot: `Docs/report/assets/apolyx-sidebar/sidebar-open.png` (default family, dark, 1280 px).
 
 ## Docs building blocks
 

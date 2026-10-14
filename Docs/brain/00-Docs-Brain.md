@@ -121,8 +121,8 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 | `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
 | `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest: [[../feature_list/ui-kit/03-timeline]] · Sprint: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] (kit intent: [[../feature_list/ui-kit/00-intent]]) |
 | `plan/` | Checkbox overlay + next steps | Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**); carry-overs in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, Timeline added after Apolyx-S0002) |
-| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/07-timeline]] · Sprint: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] (Apolyx-S0002 closed) · index [[../tech_space/ui-kit/README]] |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, Timeline + collapsible docs sidebar added after Apolyx-S0002) |
+| `tech_space/` | Implementation narrative | Latest: [[../tech_space/ui-kit/05-docs-app#Sidebar groups]] (collapsible docs sidebar) · [[../tech_space/ui-kit/07-timeline]] · Sprint: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] (Apolyx-S0002 closed) · index [[../tech_space/ui-kit/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |

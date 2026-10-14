@@ -12,7 +12,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-14 · Living map: [[../brain/00-Docs-Brain]] · Sprint: **Apolyx-S0002** (closed) · Previous: **Apolyx-S0001** (closed) · Timeline added after S0002 (2026-10-14)
+Last updated: 2026-10-14 · Living map: [[../brain/00-Docs-Brain]] · Sprint: **Apolyx-S0002** (closed) · Previous: **Apolyx-S0001** (closed) · Timeline and collapsible docs sidebar added after S0002 (2026-10-14)
 
 ## Implemented
 
@@ -22,11 +22,11 @@ Last updated: 2026-10-14 · Living map: [[../brain/00-Docs-Brain]] · Sprint: **
 - Cloud: `@altr/hono-server` (health), PocketBase + AI agent placeholders
 - **`@altr/apolyx`** (`elements/ui-kit`) — OKLCH themes (3×2) with hover-contrast tokens, ApolyxProvider, own primitives (no Radix / Base UI), wave-1 + overlays (Dialog with sizes, DropdownMenu, Tabs, Tooltip, Toast), navigation (Sheet, Breadcrumb, NavigationMenu, NavList), physics Switch, Field (top / floating / inline), Table / List / Grid, Timeline (2026-10-14, [[../tech_space/ui-kit/07-timeline]]), motion recipes, Line/Bar charts (visx), Storybook 9, 60 registry items with import-resolution build, 59 Vitest tests
 - **`apolyx` CLI** (`elements/apolyx-cli`) — `init` / `add` / `list`; external Next smoke (button, dialog, line-chart + overlays) builds
-- **`@altr/apolyx-docs`** (`apps/apolyx`) — MDX docs on :3004 (42 MDX pages; sidebar groups Components / Navigation / Data / Motion / Charts), ComponentPreview / InstallTabs / PropsTable / TokenTable, `/r/*.json`
+- **`@altr/apolyx-docs`** (`apps/apolyx`) — MDX docs on :3004 (42 MDX pages; sidebar groups Components / Navigation / Data / Motion / Charts, collapsible and open by default with a depth guide line, [[../tech_space/ui-kit/05-docs-app#Sidebar groups]]), ComponentPreview / InstallTabs / PropsTable / TokenTable, `/r/*.json`
 - **`@altr/base`** — utils, content, env, errors, stubs
 - Docs vault + brain + **docs_man** + **apollo**
 
-As-built: [[../tech_space/ui-kit/README]] (S0002: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] · Timeline: [[../tech_space/ui-kit/07-timeline]]) · Screenshots: `Docs/report/assets/apolyx-s0001/` · `Docs/report/assets/apolyx-timeline/` · Historical: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]]
+As-built: [[../tech_space/ui-kit/README]] (S0002: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] · Timeline: [[../tech_space/ui-kit/07-timeline]]) · Screenshots: `Docs/report/assets/apolyx-s0001/` · `Docs/report/assets/apolyx-timeline/` · `Docs/report/assets/apolyx-sidebar/` · Historical: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]]
 
 ## Remaining
 
