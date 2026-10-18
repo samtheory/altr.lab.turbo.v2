@@ -23,11 +23,14 @@ Yes, for the needs locked so far.
 |------|------------------------|
 | Run inside this repo with no hosted account | A file at `data/jord.db` |
 | Carry the lab between machines | Copy that file (gitignored). Schema lives in Drizzle, not in git as a binary |
-| Artemis bot rows and later search | Same file. `sqlite-vec` attaches when retrieval is real |
+| Concurrent bot + API | Connection pragmas: WAL, `busy_timeout = 5000`, `synchronous = NORMAL` ([[../idea/Jord/2026-10-18-sharpen]]) |
+| Survive disk mishaps | `pnpm db:snapshot` (SQLite online backup) before high-write work |
+| Artemis agent scratchpad (not trading tables) | Same file, `records` buckets. Typed `orders` / `positions` come later |
+| Later search | `sqlite-vec` attaches when retrieval is real — not Slice 0 |
 | Stay light | One process can open the file. No Kong / PostgREST stack |
 | Grow without a rewrite of table CRUD | Same Drizzle schema module; swap the driver and `DATABASE_URL` |
 
-Postgres stays a second dialect when a product needs Postgres-only plugins or SLAs. It is not the first boot target.
+Postgres stays a second dialect when a product needs Postgres-only plugins or SLAs. It is not the first boot target. Slice 0 adds no Postgres, Redis, or Mongo packages.
 
 ## Drizzle and a later Postgres port
 
@@ -37,7 +40,7 @@ Postgres stays a second dialect when a product needs Postgres-only plugins or SL
 
 | Concern | On libSQL / SQLite | On Postgres | Rule |
 |---------|--------------------|-------------|------|
-| Column types that are SQLite-only or Postgres-only | Prefer `text`, `integer`, `real`, and JSON-as-text until a dialect adapter exists | Prefer the same boring types first | Keep the first tables boring ([[00-intent]] `records.body` is text for this reason) |
+| Column types that are SQLite-only or Postgres-only | Prefer `text`, `integer`, `real`, and JSON-as-text until a dialect adapter exists | Prefer the same boring types first | Keep Slice 0 boring ([[00-intent]] `body` / `metadata` as text JSON) |
 | Extensions / plugins | `sqlite-vec`, SQLite extensions | `pgvector`, Postgres extensions | Own a small adapter per dialect. Do not pretend Drizzle ships the plugin |
 | Triggers and functions | SQLite trigger SQL | PL/pgSQL / Postgres functions | Store intent in Jord metadata; emit dialect SQL from a generator, or keep them dialect-scoped |
 | Row policies / roles | Emulate in the API until a real model exists | Postgres RLS is native | Studio “policies” are a Jord feature. On Postgres they may compile to RLS. On libSQL they stay in the API layer |

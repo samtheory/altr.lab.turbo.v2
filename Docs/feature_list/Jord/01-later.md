@@ -18,7 +18,7 @@ tags:
 | Slice | Outcome | Starts when |
 |-------|---------|-------------|
 | Hosted libSQL | `DATABASE_URL=libsql://…` with the same Drizzle schema | The file should leave one laptop |
-| Artemis bot rows | Writer uses bucket `artemis` on the same file | The bot has a payload shape |
+| Artemis agent scratchpad | Writer uses bucket `artemis` on `records` (not typed `orders` / `positions`) | The bot has a scratchpad payload shape |
 | Vectors | `sqlite-vec` on `data/jord.db` via a dialect adapter | Bot retrieval needs search |
 | Postgres driver | Same table schema, `postgres://` accepted. Plugins via Postgres adapters | A product needs a Postgres plugin or SLA |
 | Cache | One Redis-compatible store, measured choice | Live state or leaderboards exist |
