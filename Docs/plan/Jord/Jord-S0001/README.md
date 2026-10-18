@@ -1,39 +1,67 @@
 ---
 title: "Jord-S0001 — libSQL file and one server"
-description: "Slice 0 plan: LibSqlAdapter, WAL, mkdir data/, records scratchpad, snapshot, jord-server. PostgresAdapter seam only."
+description: "Ready to implement. Ordered cards for LibSqlAdapter, records OCC, WAL checkpoints, snapshot, and jord-server. No code yet."
 created: 2026-10-18
 updated: 2026-10-18
 tags:
   - plan
   - jord
   - Jord-S0001
+  - sprint
 ---
 
 # Jord-S0001 — libSQL file and one server
 
-> Checkbox overlay for [[../../../feature_list/Jord/00-intent]]. Status: opened 2026-10-18, not started. Architecture: [[../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../idea/Jord/2026-10-18-sharpen]].
+> Who: the implementer. **Status: ready — implement next.** No Jord packages exist yet. Contract: [[../../../feature_list/Jord/00-intent]]. Architecture: [[../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../idea/Jord/2026-10-18-sharpen]].
 
-## In scope
+**Sprint id:** `Jord-S0001`  
+**Opened:** 2026-10-18 · **Ready:** 2026-10-18 · **Owner:** —  
+**Do not start Jord Studio, Postgres, Redis, Mongo, or sqlite-vec in this sprint.**
 
-- [ ] `elements/jord` (`@altr/jord`): `JordDriverPort` + `LibSqlAdapter` (PostgresAdapter not installed)
-- [ ] `createJordClient` recursively creates `data/` then opens `data/jord.db`
-- [ ] On every open: `PRAGMA journal_mode = WAL`, `busy_timeout = 5000`, `synchronous = NORMAL`
-- [ ] Drizzle `records`: `id`, `bucket`, `body`, `metadata`, `created_at`, `updated_at` (64-bit-safe `integer({ mode: 'number' })` or equivalent), `version` integer default 1, index `(bucket, created_at)`
-- [ ] `PATCH /records/:id` with matching `version` increments it; a stale `version` returns 409 and does not write
-- [ ] Server runs `PRAGMA wal_checkpoint(TRUNCATE)` on an interval and on `SIGINT` / `SIGTERM`
-- [ ] `DATABASE_URL` defaults to `file:./data/jord.db`; other schemes fail clearly
-- [ ] `pnpm db:snapshot` (SQLite online backup) exists and is documented
-- [ ] `cloud/jord` (`@altr/jord-server`): `GET /health`, `POST /records`, `GET /records?bucket=`, `GET /records/:id`, `PATCH /records/:id` (OCC; hot ingestion still batched here)
-- [ ] One insert/read round-trip through that server
-- [ ] `@altr/base/db` is not a second live client
+## Goal
 
-## Out of scope
+Boot one gitignored libSQL file, one library, and one Hono server. A caller can insert a `records` row and read it back. Concurrent updates collide on `version` (409). The server checkpoints the WAL on a timer and on shutdown.
 
-- [ ] Jord Studio (`apps/jord-studio`)
-- [ ] `PostgresAdapter` runtime, Redis, Mongo, sqlite-vec, CDC, blob storage
-- [ ] Auth, jobs UI, logs UI, schema visualizer, generated/custom APIs
-- [ ] Typed trading tables (`orders`, `positions`, `trades`)
+## Phases
 
-## Done when
+Run in order. A later card may assume the files from the earlier ones.
 
-[[../../../feature_list/Jord/00-intent]] acceptance is true, and a `tech_space` note records the wiring.
+| # | Card | Delivers |
+|---|------|----------|
+| 1 | [[01-packages]] | `elements/jord`, `cloud/jord`, workspace scripts, deps |
+| 2 | [[02-driver]] | `JordDriverPort`, `LibSqlAdapter`, mkdir, pragmas, `file:` only |
+| 3 | [[03-schema]] | `records` columns, 64-bit timestamps, `version`, index |
+| 4 | [[04-occ]] | Insert at version 1; update matches version or returns conflict |
+| 5 | [[05-snapshot]] | `pnpm db:snapshot`, `data/*.db` gitignored |
+| 6 | [[06-server]] | Routes, serial write queue, WAL truncate checkpoint |
+| 7 | [[07-base-db]] | `@altr/base/db` stops being a live Turso client |
+| 8 | [[08-verify]] | Acceptance commands. Then docs_man writes `tech_space` |
+
+## Plan-level decisions
+
+Locked here so implementation does not reopen them. The feature contract stays in [[../../../feature_list/Jord/00-intent]].
+
+1. **Node 20+, not a Bun install gate.** Repo `engines.node` is `>=20`. `@altr/jord-server` is Hono on `@hono/node-server`. Do not use Bun-only APIs. [[../../../Altr.lab/stack]] still names Hono; Bun is not required to finish this sprint.
+2. **Deps stay inside the new packages.** Runtime: `drizzle-orm`, `@libsql/client` in `@altr/jord`; `hono`, `@hono/node-server` in `@altr/jord-server`. No `postgres`, `drizzle-orm/pg`, Redis, Mongo, or `sqlite-vec` packages.
+3. **Schema applies on open.** `createJordClient` creates `data/` and runs idempotent `CREATE TABLE` / `CREATE INDEX`. No drizzle-kit migration folder in this sprint.
+4. **Ids are UUID strings** from `crypto.randomUUID()`. No cuid2 package.
+5. **Timestamps** are Drizzle `integer({ mode: 'number' })` (millisecond Unix time). Not a 32-bit integer mode.
+6. **OCC is SQL, not a process lock.** `UPDATE … SET version = version + 1 WHERE id = ? AND version = ?`. Zero rows → conflict. The HTTP layer maps that to **409**.
+7. **One writer queue inside the server.** HTTP writes run one-at-a-time in that process. No second daemon. Snapshot and a single-process `createJordClient` may open the file directly.
+8. **WAL checkpoint interval is 60s** unless `JORD_WAL_CHECKPOINT_MS` overrides it. Shutdown (`SIGINT`, `SIGTERM`) always runs `PRAGMA wal_checkpoint(TRUNCATE)` before exit.
+9. **`@altr/base` is not the client.** Card 7 removes the live Turso stub path. Callers use `@altr/jord`.
+
+## Definition of done
+
+- [ ] Every card's "Done when" holds
+- [ ] [[../../../feature_list/Jord/00-intent]] acceptance is true
+- [ ] `pnpm --filter @altr/jord test` and `pnpm --filter @altr/jord typecheck` pass
+- [ ] `pnpm --filter @altr/jord-server typecheck` passes
+- [ ] A `tech_space` note exists only after the code is in the tree (card 8, docs_man)
+
+## Links
+
+- Track: [[../README]]
+- Intent: [[../../../feature_list/Jord/00-intent]]
+- Architecture: [[../../../feature_list/Jord/02-architecture]]
+- Later (do not build): [[../../../feature_list/Jord/01-later]] · [[../../../feature_list/Jord/03-jord-studio]]

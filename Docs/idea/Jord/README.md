@@ -1,6 +1,6 @@
 ---
 title: "Jord — idea track (current)"
-description: "Current Jord idea brief. Slice 0: LibSqlAdapter, WAL, records scratchpad, mkdir data/, one Hono server. Build contract in feature_list."
+description: "Current Jord idea brief. Slice 0 plan is ready to implement. Build contract in feature_list."
 created: 2026-10-18
 updated: 2026-10-18
 tags:
@@ -14,7 +14,7 @@ tags:
 
 > **Read this file.** Current idea brief. Decision record: [[2026-10-18-sharpen]]. Build contract: [[../../feature_list/Jord/00-intent]]. Architecture (ports, concurrency): [[../../feature_list/Jord/02-architecture]].
 
-**Status:** name locked. Intent written. Plan [[../../plan/Jord/Jord-S0001/README]] opened, **not started**. No Jord packages in the repo yet.
+**Status:** name locked. Intent written. Plan [[../../plan/Jord/Jord-S0001/README]] is **ready to implement** (start at card 1). No Jord packages in the repo yet.
 
 | | |
 |--|--|

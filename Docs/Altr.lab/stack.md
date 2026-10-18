@@ -13,7 +13,7 @@ tags:
 | Layer | Choice |
 |-------|--------|
 | Frontends | React / Next.js. Today that is the Apolyx docs app (`apps/apolyx`) plus Tailwind and `@altr/apolyx` |
-| API | Hono + Bun is the intended style. No API package is in `cloud/` after the 2026-10-18 sample cleanup |
+| API | Hono. Jord-S0001 boots on Node (`engines.node` >= 20). Bun is not required for that sprint. No API package is in `cloud/` until `cloud/jord` is implemented |
 | Primary DB | **Jord** — libSQL file `data/jord.db`. Drizzle on libSQL first. Intent: [[../feature_list/Jord/00-intent]] · layout: [[../feature_list/Jord/02-architecture]] |
 | API | Planned `@altr/jord-server` in `cloud/jord` (not in the tree yet) |
 | Studio | Planned `@altr/jord-studio` in `apps/jord-studio` — [[../feature_list/Jord/03-jord-studio]] |

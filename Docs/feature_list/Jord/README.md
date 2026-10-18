@@ -1,6 +1,6 @@
 ---
 title: "feature_list/Jord — Jord intent"
-description: "Intent index for Jord and Jord Studio. S0001 not started. Architecture and Studio vision documented."
+description: "Intent index for Jord and Jord Studio. S0001 plan is ready to implement. Architecture and Studio vision documented."
 created: 2026-10-18
 updated: 2026-10-18
 tags:
@@ -21,7 +21,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 |-------|------|
 | `idea/Jord/` | R&D and naming record |
 | **`feature_list/Jord/`** | **Valid intent** |
-| `plan/Jord/` | [[../../plan/Jord/Jord-S0001/README]] opened, not started |
+| `plan/Jord/` | [[../../plan/Jord/Jord-S0001/README]] ready to implement (cards 1–8). Code not started |
 | `tech_space/` | None yet |
 | Code targets | `data/jord.db` · `elements/jord` · `cloud/jord` · later `apps/jord-studio` |
 
@@ -36,4 +36,4 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 
 ## Gate
 
-S0001 is planned and not started. Studio packages wait until that plan is done.
+S0001 plan is ready. Next step is implementation, starting at [[../../plan/Jord/Jord-S0001/01-packages]]. Studio packages wait until that sprint is done.
