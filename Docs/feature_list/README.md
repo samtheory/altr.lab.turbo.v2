@@ -26,5 +26,5 @@ App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Spr
 
 ## Legacy / shipped features
 
-- [[01-hub-ui-kit-base]] — hub landing + ui-kit + base (shipped)
+- [[01-hub-ui-kit-base]] — hub landing shipped 2026-09-20, app removed 2026-10-18; ui-kit and base remain
 - [[02-ui-kit-storybook]] — Storybook for ui-kit (shipped)

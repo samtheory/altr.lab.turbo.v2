@@ -84,10 +84,10 @@ Exact OKLCH / HSL values for PowerBlue and PowerGreen are implementation detail 
 
 | Who | How they get components | Why |
 |-----|-------------------------|-----|
-| **altr.lab apps** (`hub`, `dashboard`, `trading-ui`, `web`, future `apolyx` docs) | Workspace package: `import { Button } from "@altr/apolyx"` | One shared source in `elements/ui-kit`; fix a bug once, every app picks it up via pnpm workspace |
+| **altr.lab apps** (`apps/apolyx` today; future product apps the same way) | Workspace package: `import { Button } from "@altr/apolyx"` | One shared source in `elements/ui-kit`; fix a bug once, every app picks it up via pnpm workspace |
 | **Other projects / publish users** | CLI: `npx apolyx add button` (copy files into *their* repo) | They own the source; no dependency on your private monorepo package |
 
-You keep monorepo apps on **workspace import**. You do **not** run `apolyx add` inside hub/dashboard just to use the kit — that would duplicate copies and fight the monorepo.
+You keep monorepo apps on **workspace import**. You do **not** run `apolyx add` inside an altr.lab app just to use the kit — that would duplicate copies and fight the monorepo.
 
 Optional later: an altr.lab app *may* still use the CLI for a one-off experiment, but the default and supported path is workspace import.
 
@@ -362,10 +362,8 @@ Use these when implementing; verify in code + tech_space:
 ## Packages touched (when we build)
 
 - `elements/ui-kit` — source, registry, Storybook, tokens; package renamed `@altr/ui-kit` → `@altr/apolyx`
-- `apps/hub`, `apps/web`, `apps/dashboard`, `apps/trading-ui` — update imports to `@altr/apolyx`
-- `apps/apolyx` — new docs app
+- `apps/apolyx` — docs app (the sample Next apps that also imported the kit were removed 2026-10-18)
 - `elements/apolyx-cli` — CLI package, published as `apolyx` (see "CLI location — decided")
-- Consumers later: `apps/hub`, `apps/dashboard`, `apps/trading-ui` (optional migration)
 
 ## Open questions
 

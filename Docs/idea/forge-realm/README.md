@@ -19,7 +19,7 @@ tags:
 
 **Working names:** ForgeRealm (world) and CardCraft (the craft loop). Pick one public name in the sharpening note.
 
-**Vault stage:** captured (phase 0). No `apps/card-forge` yet. `apps/web` is a spare Next scaffold if you want a home before a new app.
+**Vault stage:** captured (phase 0). No app folder yet. A new app (for example `apps/card-forge`) is the home when this track is built. The spare `apps/web` scaffold was removed 2026-10-18.
 
 ---
 
@@ -43,7 +43,7 @@ The catalog’s three layers, with phase 1 split so the first build has no marke
 
 | Phase | Name | User-visible outcome | Depends on | Intended packages |
 |-------|------|----------------------|------------|-------------------|
-| 1a | Collection | A grid of cards you own. Glass cards, Apolyx, motion on hover and merge preview. Static data is enough | Apolyx | `apps/web` or `apps/card-forge` |
+| 1a | Collection | A grid of cards you own. Glass cards, Apolyx, motion on hover and merge preview. Static data is enough | Apolyx | a new app, for example `apps/card-forge` |
 | 1b | Merge | Two cards combine by a written rule; inputs are consumed; the result is stored | 1a | client state, then Turso |
 | 1c | Activity loot | A server draw (secure RNG) grants a card from a table; opening it is the only random moment | 1b, Hono | `cloud/hono-server`, `elements/base` |
 | 2 | Guild exchange | Peer listing of a limited card, a small platform fee, Turso as the trade log | 1c inventory | Hono, Turso. Price idea: reuse Artemis ledger habits, not the trading terminal |
@@ -55,7 +55,7 @@ Phase 2 uses marketplace ideas (offers, fills, fees) in miniature. It does not i
 
 | Concern | Intended home |
 |---------|----------------|
-| Inventory UI | `apps/card-forge` or `apps/web`, Apolyx |
+| Inventory UI | a new app, for example `apps/card-forge`, Apolyx |
 | Motion | `motion` on card merge |
 | RNG and craft resolution | `cloud/hono-server` |
 | Inventory and trade log | Turso via `elements/base` |

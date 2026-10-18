@@ -1,7 +1,7 @@
 /**
  * Markdown-as-data helpers.
  *
- * Apps (e.g. @altr/hub) store content as `.md` files with YAML frontmatter
+ * Apps store content as `.md` files with YAML frontmatter
  * and load them at build/request time — a file-backed content DB.
  */
 

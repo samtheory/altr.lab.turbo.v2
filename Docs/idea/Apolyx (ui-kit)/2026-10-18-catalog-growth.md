@@ -24,7 +24,7 @@ The 2026-10-18 catalog treats Apolyx as the architecture showcase for every othe
 
 | Bet | Meaning here | Already decided elsewhere? |
 |-----|----------------|----------------------------|
-| Public showcase | `@altr/hub` plus the docs app / Storybook as the front door for serious client work and one visual identity | Docs app and Storybook exist. A hub gallery of product shells is still an idea. |
+| Public showcase | A public front door plus the docs app / Storybook for serious client work and one visual identity | Docs app and Storybook exist. `apps/hub` was removed 2026-10-18. A gallery of product shells is still an idea. |
 | Token Studio | An in-house place to manage dark/light themes, brand colors, and motion | Token generation was asked in [[../2026-09-27-altr-lab-project-brief]] Track 1 and in the portable-kit note. A studio UI is not a closed sprint. |
 | Premium layer | Sponsorship, consulting, paid themes | Hypothesis only. Not in feature_list. |
 

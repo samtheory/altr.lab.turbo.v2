@@ -2,7 +2,7 @@
 title: "Graft — codebase graph for agents"
 description: "How to install, wire, and use Graft in altr.lab (Cursor)"
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-10-18
 tags:
   - altr-lab
   - agents
@@ -82,7 +82,7 @@ graft check
 
 For `--deep`, set provider env vars (see upstream `.env.example`), e.g. `GRAFT_PROVIDER`, `GRAFT_API_KEY`, `GRAFT_MODEL`.
 
-Monorepo tip: scope queries with `--in apps/hub/` (or another package) so one app does not drown the others.
+Monorepo tip: scope queries with `--in apps/apolyx/` (or another package) so one package does not drown the others.
 
 ## Everyday commands (agents + humans)
 

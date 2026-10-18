@@ -2,7 +2,7 @@
 title: "altr.lab — project brief for AI ideation"
 description: "Self-contained description of altr.lab.turbo.v2 (current state, stack, conventions) plus three idea tracks to brainstorm: ui-kit/design system, Artemis trading ecosystem, side projects"
 created: 2026-09-27
-updated: 2026-09-27
+updated: 2026-10-18
 tags:
   - idea
   - brief
@@ -13,6 +13,8 @@ tags:
 ---
 
 # altr.lab — project brief for AI ideation
+
+> **Repo update 2026-10-18:** the sample packages described below as current (`apps/hub`, `apps/dashboard`, `apps/trading-ui`, `apps/web`, `cloud/hono-server`, `cloud/ai-bot-agent`) were deleted. What remains is `apps/apolyx`, `cloud/pocketbase`, and `elements/`. Layout: [[../Altr.lab/structure]] · [[../tech_space/03-sample-apps-removed]]. The rest of this note is the 2026-09-27 brainstorm context.
 
 > **To the AI reading this:** this document is the full context for a brainstorming session. You have no access to the repository, so everything you need is below. Read "Current state" carefully: a lot of the repo is still scaffolding, and your ideas should build on what really exists instead of assuming finished features. The format I want your answers in is at the end.
 

@@ -14,7 +14,7 @@ tags:
 
 > Who: **apollo** picks the active sprint below and works its cards in order. Intent: [[../../feature_list/ui-kit/00-intent]] · As-built: [[../../tech_space/ui-kit/README]].
 
-Each sprint lives in its own folder `Apolyx-S000N/`. Closed sprints stay as an audit trail; durable truth moves to `feature_list/ui-kit/` and `tech_space/ui-kit/`.
+Each sprint lives in its own folder `Apolyx-S000N/`. Closed sprints stay as an audit trail; durable truth moves to `feature_list/ui-kit/` and `tech_space/ui-kit/`. S0001 cards still name sample apps (`hub`, `web`, `dashboard`, `trading-ui`) that were removed 2026-10-18 ([[../../tech_space/03-sample-apps-removed]]). Those cards record the sprint, not the current tree.
 
 | Sprint | Scope | Status |
 |--------|-------|--------|

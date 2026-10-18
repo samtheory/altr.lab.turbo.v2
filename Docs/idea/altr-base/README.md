@@ -33,9 +33,7 @@ tags:
 | `elements/base/src/auth` | Session stub. `getSession` returns null. |
 | `elements/base/src/query` | Stub. No Drizzle, no dialect switch. |
 | `elements/base` cache | No `cache/` package. |
-| `cloud/hono-server` | API app. Intended home for REST, RPC, and websockets. |
-| `cloud/ai-bot-agent` | Placeholder. Intended later home for vector ingestion. |
-| `apps/dashboard` | Next.js admin scaffold. Intended home for the studio. |
+| API, studio, vectors | No Hono server, dashboard, or AI-agent package. Those samples were removed 2026-10-18 ([[../../tech_space/03-sample-apps-removed]]). A future API, studio app, and vector worker are still the intended homes. |
 | `cloud/pocketbase` | Optional PocketBase package. Still the stack doc’s quick admin/auth path. |
 
 ---
@@ -60,14 +58,14 @@ These are the catalog’s preferred pieces. They are candidates until the sharpe
 
 | Layer | Candidate | Why it is on the list | Repo today |
 |-------|-----------|----------------------|------------|
-| API runtime | Hono on Bun | Small process, fast router, typed RPC between client and server | `cloud/hono-server` |
+| API runtime | Hono on Bun | Small process, fast router, typed RPC between client and server | No API package. A new Hono app under `cloud/` is the intended home |
 | Embedded / edge SQL | libSQL / Turso | SQLite-compatible, already the monorepo default, local vector later via sqlite-vec | Stub in `@altr/base/db` |
 | Heavier SQL | Postgres (`pg`) and PGlite for local WASM/Node | Heavy transactions, JSONB, scale-out. PGlite is a way to run Postgres without a server during dev | Not a dependency. Stack doc: Postgres only when FTS, JSONB, or pgvector SLAs need it |
 | Cache | Dragonfly or Valkey (Redis-compatible) | Pub/sub, Artemis live state, game leaderboards | No `cache/` tree |
 | Documents (optional) | MongoDB or FerretDB on Postgres | Schemaless sync if a product actually needs it | Stack doc: Mongo only if needed |
 | Query layer | Drizzle | Same TypeScript schema; swap the connection between libSQL and Postgres | Not installed |
-| Studio | Next.js + Apolyx on `@altr/dashboard` | Table editor, auth, logs | Dashboard is a scaffold |
-| Vectors | `cloud/ai-bot-agent` | Ingestion pipeline for copilot-style search | Placeholder |
+| Studio | Next.js + Apolyx | Table editor, auth, logs | No studio app in the repo |
+| Vectors | A future cloud worker | Ingestion pipeline for copilot-style search | No agent package in the repo |
 
 PocketBase stays the optional quick path in [[../../Altr.lab/stack]] until AltrBase can create a table, a session, and a studio view. This track is the candidate replacement for that path, not a second admin product beside it.
 

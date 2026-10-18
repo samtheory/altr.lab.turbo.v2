@@ -2,7 +2,7 @@
 title: "Hub landing + shared elements"
 description: "Intent: apps/hub Next.js landing with markdown content DB; ui-kit (shadcn/Tailwind/Motion); base utils"
 created: 2026-09-20
-updated: 2026-09-20
+updated: 2026-10-18
 tags:
   - feature
   - hub
@@ -12,7 +12,7 @@ tags:
 
 # Hub landing + shared elements
 
-> Product intent for the first runnable monorepo surface.
+> Product intent for the first runnable monorepo surface. **`apps/hub` was removed 2026-10-18** ([[../tech_space/03-sample-apps-removed]]). The checkboxes below record the 2026-09-20 ship. `@altr/base` and the UI kit remain.
 
 ## Goals
 

@@ -2,7 +2,7 @@
 title: "tech_space — hub, ui-kit, base"
 description: "As-built notes for @altr/hub markdown content DB, @altr/ui-kit Motion/shadcn, @altr/base"
 created: 2026-09-20
-updated: 2026-09-20
+updated: 2026-10-18
 tags:
   - tech-space
   - hub
@@ -11,6 +11,8 @@ tags:
 ---
 
 # Hub + ui-kit + base (as-built)
+
+> **Removed 2026-10-18:** `apps/hub` and the other sample apps are gone. This note is the historical record of the 2026-09-20 ship. Current layout: [[03-sample-apps-removed]].
 
 > **Renamed 2026-10-11:** package `@altr/ui-kit` → `@altr/apolyx` (folder still `elements/ui-kit`). See [[ui-kit/README]] for current as-built.
 

@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot of altr.lab after Apolyx-S0004 closed"
+description: "Audited snapshot of altr.lab after sample apps were removed and Apolyx-S0004 closed"
 created: 2026-09-19
 updated: 2026-10-18
 tags:
@@ -14,14 +14,13 @@ tags:
 
 # Status
 
-Last updated: 2026-10-18 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: none · Last ship: **Apolyx-S0004** (closed 2026-10-18) · Previous: **Apolyx-S0003**, **Apolyx-S0002**, **Apolyx-S0001** (closed)
+Last updated: 2026-10-18 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: none · Last ship: **Apolyx-S0004** (closed 2026-10-18) · Sample apps removed the same day · Previous: **Apolyx-S0003**, **Apolyx-S0002**, **Apolyx-S0001** (closed)
 
 ## Implemented
 
 - Turborepo + pnpm workspaces (`apps/*`, `cloud/*`, `elements/*`)
-- **`@altr/hub`** — landing Next.js (:3000), markdown content DB (`content/*.md`)
-- `@altr/web` (:3003), `@altr/dashboard` (:3001), `@altr/trading-ui` (:3002) scaffolds (Apolyx themes)
-- Cloud: `@altr/hono-server` (health), PocketBase + AI agent placeholders
+- Sample packages removed 2026-10-18: `@altr/hub`, `@altr/web`, `@altr/dashboard`, `@altr/trading-ui`, `@service/hono-server`, `@service/ai-bot-agent` — [[../tech_space/03-sample-apps-removed]]
+- Cloud still present: PocketBase placeholder (`cloud/pocketbase`)
 - **`@altr/apolyx`** (`elements/ui-kit`)
   - Foundations: OKLCH themes (3 families × light / dark) with hover-contrast tokens, `ApolyxProvider`, and its own primitives (no Radix / Base UI).
   - Components: wave 1 + overlays (Dialog with sizes, DropdownMenu, Tabs, Tooltip, Toast, **Popover**), navigation (Sheet, Breadcrumb, NavigationMenu, NavList), Table / List / Grid, Timeline.
@@ -48,7 +47,7 @@ Screenshots:
 - `Docs/report/assets/apolyx-s0003/` (Switch default dark + power-blue light, Input Group light, Input OTP light, Form patterns dark with the Forms group)
 - `Docs/report/assets/apolyx-s0004/` (`popover-pop-dark`, `popover-pop-light`, `popover-slide-dark`, `popover-notifications-dark`)
 
-Historical: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]]
+Historical: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] · Removal: [[../tech_space/03-sample-apps-removed]]
 
 ## Remaining
 

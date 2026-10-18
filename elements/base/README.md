@@ -25,4 +25,4 @@ const pages = await listMarkdownDocuments({ dir: "./content" });
 const home = await getMarkdownBySlug("./content", "home");
 ```
 
-Frontmatter + body become the content DB for apps like `@altr/hub`.
+Frontmatter + body become the content DB for any app that passes a content directory.

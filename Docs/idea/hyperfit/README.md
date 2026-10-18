@@ -62,7 +62,7 @@ Hono, Turso, Apolyx. No new database family.
 
 ## Open questions
 
-1. App home: a route on `apps/web`, a new `apps/hyperfit`, or Telegram-only until phase 2?
+1. App home: a new `apps/hyperfit`, or Telegram-only until phase 2?
 2. Food parser: rules plus a small model, or a model only, and what do you store when the model is unsure?
 3. Which lift family is the first overload chart (one barbell movement, or a whole session tonnage)?
 4. Bodyweight entries: same ledger table as meals and sets, or a third entry type?

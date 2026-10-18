@@ -2,7 +2,7 @@
 title: "Agent skills — how to use them well"
 description: "Best practices for the project skills installed under .agents/skills/"
 created: 2026-09-26
-updated: 2026-10-11
+updated: 2026-10-18
 tags:
   - altr-lab
   - agents
@@ -97,7 +97,7 @@ Requires Strix CLI/cloud credentials per https://docs.strix.ai — skills teach 
 
 **Landing page from brief**
 
-> Use `design-taste-frontend`. Read the brief, state a one-line Design Read, then implement in `apps/hub` using ui-kit where possible.
+> Use `design-taste-frontend`. Read the brief, state a one-line Design Read, then implement in the target app using `@altr/apolyx` where possible. The docs app lives in `apps/apolyx`.
 
 **Polish an existing screen**
 

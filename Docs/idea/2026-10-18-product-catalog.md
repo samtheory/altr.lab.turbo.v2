@@ -25,7 +25,7 @@ Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2
 
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
-| 1 | **Artemis Engine** — wealth terminal, copilot, risk guard | [[artemis/README]] | Captured. Code surfaces exist as scaffolds (`apps/trading-ui`, `cloud/ai-bot-agent`). |
+| 1 | **Artemis Engine** — wealth terminal, copilot, risk guard | [[artemis/README]] | Captured. Sample scaffolds were removed 2026-10-18. Product is greenfield. |
 | 2 | **Apolyx (ui-kit)** — architecture showcase and shared visual system | [[Apolyx (ui-kit)/README]] | Promoted 2026-10-11. Sprints S0001–S0003 closed. Residual growth: [[Apolyx (ui-kit)/2026-10-18-catalog-growth]]. |
 
 ## Foundation
@@ -55,13 +55,13 @@ Figures below are catalog hypotheses from 2026-10-18, for choosing a track. They
 
 | Project | Target priority | Stack synergy | Monetization hypothesis | MVP feel |
 | :--- | :--- | :--- | :--- | :--- |
-| Artemis | Wealth / trading | Core (`trading-ui`, `ai-bot-agent`, Hono, Turso) | Pro subscription, bot licensing, own trading | Already scaffolded; product still greenfield |
+| Artemis | Wealth / trading | Apolyx, Turso, a future Hono API | Pro subscription, bot licensing, own trading | Greenfield. Sample apps were removed 2026-10-18 |
 | Apolyx | Developer brand | Core (`elements/ui-kit`, `apps/apolyx`) | Sponsorship, consulting, premium themes | Continuous; kit already shipping |
 | HyperFit OS | Fitness and routine | Hono, Turso, Apolyx | B2C subscription, Telegram bot SaaS | Shortest new product |
 | Co-Op Sphere | Partner and network | Next.js, auth | Verification badges, deal escrow fees | Needs identity and trust before chat |
 | PantryYield | Cooking | Hono, AI, Turso | Micro-SaaS for fitness meal-preppers | Small inventory loop |
 | ForgeRealm | Games | React, motion, Hono, Turso | Skins, craft tools, faster merge timers | Phase 1 is inventory and merge only |
-| AltrBase / PolyBase | Developer infrastructure | Core (`hono-server`, `@altr/base`, `dashboard`) | Open-core self-host, hosted projects later | First slice is a libSQL client that executes plus one studio table |
+| AltrBase / PolyBase | Developer infrastructure | `@altr/base`, a future Hono API, a future studio app | Open-core self-host, hosted projects later | First slice is a libSQL client that executes plus one studio table |
 
 ---
 

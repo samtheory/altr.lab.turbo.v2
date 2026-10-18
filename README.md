@@ -1,6 +1,6 @@
 # altr.lab
 
-Turborepo monorepo for **altr.lab** — Next.js apps, Hono API, shared UI kit, and foundation packages.
+Turborepo monorepo for **altr.lab** — Apolyx docs app, shared UI kit, and foundation packages.
 
 ## Package manager
 
@@ -8,7 +8,7 @@ Turborepo monorepo for **altr.lab** — Next.js apps, Hono API, shared UI kit, a
 
 ```bash
 pnpm install
-pnpm dev:hub      # http://localhost:3000 — landing (markdown content/)
+pnpm dev:apolyx   # http://localhost:3004 — Apolyx docs
 pnpm build
 pnpm typecheck
 ```
@@ -18,21 +18,22 @@ See [Docs/Altr.lab/commands.md](Docs/Altr.lab/commands.md).
 ## Layout
 
 ```
-apps/          # hub, dashboard, trading-ui, web (Next.js)
-cloud/         # hono-server, pocketbase, ai-bot-agent
-elements/      # ui-kit, base
+apps/          # apolyx (Apolyx docs, Next.js)
+cloud/         # pocketbase (optional placeholder)
+elements/      # ui-kit, apolyx-cli, base
 Docs/          # Obsidian second brain
 ```
 
 ## Stack (short)
 
-- **Landing:** `@altr/hub` — content from `apps/hub/content/*.md`
+- **Docs app:** `@altr/apolyx-docs` — `apps/apolyx` (:3004)
 - **DB:** Turso (libSQL) primary — stub in `@altr/base/db`
-- **UI:** Tailwind v4 + shadcn + Motion in `@altr/apolyx` — Storybook: `pnpm storybook:ui-kit` (:6006)
-- **API:** Hono + Bun (`@altr/hono-server`) — requires Bun
+- **UI:** Tailwind v4 + Motion in `@altr/apolyx` — Storybook: `pnpm storybook:ui-kit` (:6006)
 - **Optional:** PocketBase under `cloud/pocketbase`
 
-Full decisions: [Docs/Altr.lab/stack.md](Docs/Altr.lab/stack.md) · As-built: [Docs/tech_space/01-hub-ui-kit-base.md](Docs/tech_space/01-hub-ui-kit-base.md)
+Sample Next apps (`hub`, `dashboard`, `trading-ui`, `web`) and cloud placeholders (`hono-server`, `ai-bot-agent`) were removed 2026-10-18. See [Docs/tech_space/03-sample-apps-removed.md](Docs/tech_space/03-sample-apps-removed.md).
+
+Full decisions: [Docs/Altr.lab/stack.md](Docs/Altr.lab/stack.md) · As-built: [Docs/tech_space/ui-kit/README.md](Docs/tech_space/ui-kit/README.md)
 
 ## Theme in apps
 

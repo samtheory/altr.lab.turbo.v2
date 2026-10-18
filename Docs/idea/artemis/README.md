@@ -26,8 +26,8 @@ tags:
 |--|--|
 | Idea folder | `idea/artemis/` |
 | Intent | none yet under `feature_list/` |
-| Code surfaces | `apps/trading-ui` (`@altr/trading-ui`), `apps/dashboard`, `cloud/ai-bot-agent`, `cloud/hono-server`, `elements/base` |
-| As-built | no `tech_space` trading note. Treat product behavior as greenfield. The Sept 2026 brief still describes these apps as scaffolds. |
+| Code surfaces | Sample scaffolds removed 2026-10-18 ([[../../tech_space/03-sample-apps-removed]]). Shared code that remains: `elements/base`. A future terminal would be a new app. |
+| As-built | no `tech_space` trading note. Treat product behavior as greenfield. |
 
 Prior lens (Hyperliquid, copy trading, self-improving bots, custody): [[../2026-09-27-altr-lab-project-brief]] Track 2. This folder’s spine is the 2026-10-18 catalog. The older questions stay in [Deferred lane](#deferred-lane).
 
@@ -53,7 +53,7 @@ A single operator first: you, running a book and wanting the terminal, the conte
 
 ## Product phases
 
-Build these only after promotion. Each phase is one shippable slice.
+Build these only after promotion. Each phase is one shippable slice. Package names in the last column are intended future homes. Those sample folders are not in the repo.
 
 | Phase | Name | User-visible outcome | Depends on | Intended packages |
 |-------|------|----------------------|------------|-------------------|
@@ -85,7 +85,7 @@ Pro subscriptions, bot licensing, and profits from your own book. Licensing and 
 1. Which single venue or data feed is the phase 1 stream (public crypto book, equities delayed, or a recorded fixture)?
 2. Risk of ruin: which formula, and which inputs are required before the calculator is allowed to show a number?
 3. Copilot corpus: which one source (a news RSS, X/Twitter, or a manual paste inbox) is enough for phase 3?
-4. Does `apps/dashboard` stay an admin shell, or does the terminal live only in `apps/trading-ui`?
+4. When the terminal is built, does an admin shell live in a separate app, or only in the trading app?
 
 ## When this track is chosen
 

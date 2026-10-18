@@ -1,5 +1,5 @@
 /**
- * AI utilities stub — shared prompts / client wrappers for cloud/ai-bot-agent and apps.
+ * AI utilities stub — shared prompts and client wrappers for apps and cloud services.
  */
 
 export type AiMessage = {
