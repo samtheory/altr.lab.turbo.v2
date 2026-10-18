@@ -1,0 +1,31 @@
+{
+  "$schema": "./schema.json",
+  "name": "popover",
+  "type": "ui",
+  "title": "Popover",
+  "description": "Interactive panel anchored to a trigger, with pop, slide, and fade motion",
+  "files": [
+    {
+      "path": "src/components/ui/popover.tsx",
+      "target": "popover.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "dismissable-layer",
+    "focus-scope",
+    "portal",
+    "position",
+    "presence",
+    "slot",
+    "use-controllable-state",
+    "use-floating",
+    "use-id",
+    "use-reduced-motion",
+    "motion-tokens",
+    "utils"
+  ],
+  "docs": "components/popover"
+}

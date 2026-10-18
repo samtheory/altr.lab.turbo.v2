@@ -2,7 +2,7 @@
 title: "feature_list — product intent"
 description: "Raw feature instructions awaiting implementation"
 created: 2026-09-19
-updated: 2026-10-14
+updated: 2026-10-18
 tags:
   - feature
   - readme
@@ -22,7 +22,7 @@ App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Spr
 
 | Track | Index | Intent |
 |-------|-------|--------|
-| **Apolyx UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — CLI, docs app, own primitives, tokens, motion, charts · latest wave [[ui-kit/04-apolyx-s0003-switch-inputs]] (Switch family, input catalog, form patterns; closed 2026-10-14) |
+| **Apolyx UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — CLI, docs app, own primitives, tokens, motion, charts · shipped [[ui-kit/04-apolyx-s0003-switch-inputs]] · open intent [[ui-kit/05-apolyx-s0004-popover]] (Popover, not started) |
 
 ## Legacy / shipped features
 

@@ -33,7 +33,7 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 
 **Idea catalog (2026-10-18, v2.1):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/altr-base/README|AltrBase]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]]. Only Apolyx is promoted.
 
-**Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/08-s0003-switch-inputs]]). The idea folder is named `Apolyx (ui-kit)`. Intent, plan, and as-built stay under `ui-kit`.
+**Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/09-s0004-popover]]). The idea folder is named `Apolyx (ui-kit)`. Intent, plan, and as-built stay under `ui-kit`.
 
 ## Agent of record
 

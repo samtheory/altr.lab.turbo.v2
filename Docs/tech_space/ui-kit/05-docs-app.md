@@ -2,13 +2,14 @@
 title: "apps/apolyx — Apolyx docs app"
 description: "As-built MDX docs site for Apolyx-S0001: shell, previews, InstallTabs, registry at /r"
 created: 2026-10-11
-updated: 2026-10-14
+updated: 2026-10-18
 tags:
   - tech-space
   - ui-kit
   - apolyx
   - Apolyx-S0001
   - Apolyx-S0003
+  - Apolyx-S0004
   - docs-app
   - mdx
 ---
@@ -74,14 +75,15 @@ The "On this page" table of contents is built from the `##` headings, so it doub
 
 ## Content
 
-Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (**48 MDX pages**): introduction, installation, theming, CLI, primitives, 34 component pages (across the Components, Forms, Navigation and Data groups), form patterns, motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. History:
+Catch-all `src/app/docs/[[...slug]]/page.tsx` → `src/content/docs/**/*.mdx` (**49 MDX pages**): introduction, installation, theming, CLI, primitives, component pages (across the Components, Forms, Navigation and Data groups), form patterns, motion overview + 4 recipes, charts overview + line + bar. Every registry item’s `docs` field points at an existing page. History:
 
 - S0001 closed with 37 routes and 20 components.
 - S0002 added Field, Sheet, Breadcrumb, NavigationMenu, NavList, Table, List and Grid ([[06-s0002-contrast-nav-switch-field-data]]).
 - Timeline was added on 2026-10-14 ([[07-timeline]]).
 - S0003 added Input Group, Password Input, Number Input, Input OTP, Input Mask and Form patterns ([[08-s0003-switch-inputs]]).
+- S0004 added Popover (Components, after Dropdown Menu) and an Input Group “Popover addon” section ([[09-s0004-popover]]).
 
-There are 120 demo files in `src/demos/`.
+Demo files live in `src/demos/` (Popover panels + placement + motion demos among them).
 
 A page can hold several previews: `components/timeline.mdx` renders nine `ComponentPreview`s (one per layout or state), each backed by its own `src/demos/timeline-*.tsx` file registered in `src/demos/index.ts`.
 
@@ -99,3 +101,5 @@ Saved under `Docs/report/assets/apolyx-s0001/`:
 (CDP capture; `browser_take_screenshot` timed out in this environment.)
 
 S0003 screenshots are in `Docs/report/assets/apolyx-s0003/`. They were taken with headless Edge at 1280 px. Two Edge runs shared one `--user-data-dir`: the first loaded a throwaway same-origin page that set `localStorage` `apolyx-theme` (the family) and `theme` (the mode), and the second took the screenshot. Redirecting inside a single run produced no file.
+
+S0004 screenshots are in `Docs/report/assets/apolyx-s0004/` (see [[09-s0004-popover]]).

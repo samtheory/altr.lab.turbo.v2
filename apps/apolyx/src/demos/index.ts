@@ -129,6 +129,12 @@ import TimelineSplitDemo from "./timeline-split-demo";
 import TimelineStatusDemo from "./timeline-status-demo";
 import ToastDemo from "./toast-demo";
 import TooltipDemo from "./tooltip-demo";
+import PopoverDemo from "./popover-demo";
+import PopoverPlacementDemo from "./popover-placement-demo";
+import PopoverMotionDemo from "./popover-motion-demo";
+import PopoverPanelsDemo from "./popover-panels-demo";
+import PopoverDialogDemo from "./popover-dialog-demo";
+import InputGroupPopoverDemo from "./input-group-popover-demo";
 
 export const demos = {
   "alert-demo": AlertDemo,
@@ -165,6 +171,7 @@ export const demos = {
   "input-group-composer-demo": InputGroupComposerDemo,
   "input-group-field-demo": InputGroupFieldDemo,
   "input-group-real-world-demo": InputGroupRealWorldDemo,
+  "input-group-popover-demo": InputGroupPopoverDemo,
   "password-input-demo": PasswordInputDemo,
   "password-input-basics-demo": PasswordInputBasicsDemo,
   "password-strength-demo": PasswordStrengthDemo,
@@ -250,6 +257,11 @@ export const demos = {
   "timeline-status-demo": TimelineStatusDemo,
   "toast-demo": ToastDemo,
   "tooltip-demo": TooltipDemo,
+  "popover-demo": PopoverDemo,
+  "popover-placement-demo": PopoverPlacementDemo,
+  "popover-motion-demo": PopoverMotionDemo,
+  "popover-panels-demo": PopoverPanelsDemo,
+  "popover-dialog-demo": PopoverDialogDemo,
 } as const;
 
 export type DemoName = keyof typeof demos;

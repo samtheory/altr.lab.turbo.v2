@@ -259,6 +259,20 @@ export {
   type TooltipContentProps,
 } from "./components/ui/tooltip";
 export {
+  Popover,
+  PopoverTrigger,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTitle,
+  PopoverDescription,
+  PopoverClose,
+  usePopoverContext,
+  type PopoverProps,
+  type PopoverContentProps,
+  type PopoverTriggerMode,
+  type PopoverMotion,
+} from "./components/ui/popover";
+export {
   Toaster,
   toast,
   useToasts,

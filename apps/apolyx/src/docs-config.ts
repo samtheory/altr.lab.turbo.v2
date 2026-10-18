@@ -46,6 +46,7 @@ export const docsConfig: DocGroup[] = [
       component("card", "Card", "Surface with header, content, and footer."),
       component("dialog", "Dialog", "Modal dialog with size presets, and AlertDialog."),
       component("dropdown-menu", "Dropdown Menu", "Menu button with items, checkbox, and radio items."),
+      component("popover", "Popover", "Interactive panel anchored to a trigger, with pop, slide, and fade motion.", "new"),
       component("kbd", "Kbd", "Keyboard key hint."),
       component("separator", "Separator", "Horizontal or vertical rule."),
       component("skeleton", "Skeleton", "Loading placeholder."),

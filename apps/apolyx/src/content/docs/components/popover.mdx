@@ -1,0 +1,78 @@
+<ComponentPreview name="popover-demo" />
+
+## Installation
+
+<InstallTabs name="popover" exports="Popover, PopoverTrigger, PopoverAnchor, PopoverContent, PopoverTitle, PopoverDescription, PopoverClose" />
+
+## Usage
+
+```tsx
+<Popover>
+  <PopoverTrigger asChild>
+    <Button variant="outline">Open</Button>
+  </PopoverTrigger>
+  <PopoverContent>
+    <PopoverTitle>Dimensions</PopoverTitle>
+    <PopoverDescription>Set the size of the layer.</PopoverDescription>
+  </PopoverContent>
+</Popover>
+```
+
+Click opens by default. Pass `trigger="hover"` when the panel should open on hover and stay open while the pointer crosses the gap. Use `PopoverAnchor` when the panel should position against a different element than the trigger.
+
+## Placement
+
+Four sides and auto-flip when the viewport is tight.
+
+<ComponentPreview name="popover-placement-demo" />
+
+## Motion
+
+`motion` on `PopoverContent` is `pop` (default), `slide`, or `fade`. The panel grows from the trigger edge — never from its own center, and never from `scale(0)`. Reduced motion always fades.
+
+<ComponentPreview name="popover-motion-demo" />
+
+## Panels
+
+Recipes for the common kinds: ratings, pricing, volume, about, download progress, delete confirm, feedback, filter, people search, notifications, media preview, coupon (slide), share (slide), profile, and hover.
+
+<ComponentPreview name="popover-panels-demo" />
+
+## With other layers
+
+A popover inside a dialog dismisses alone. Escape and outside pointer hit the top layer only.
+
+<ComponentPreview name="popover-dialog-demo" />
+
+## When to use what
+
+| Need | Use |
+|------|-----|
+| Short non-interactive hint | `Tooltip` |
+| List of actions | `DropdownMenu` |
+| Interactive panel (form, filter, preview) | `Popover` |
+| Blocking work the page must wait on | `Dialog` / `AlertDialog` |
+| Full-height edge panel | `Sheet` |
+
+## Accessibility
+
+- Content is a non-modal `role="dialog"` with `aria-modal="false"`.
+- Focus moves into the panel on open and returns to the trigger on close.
+- Escape and outside pointer dismiss; Tab past the last control closes the popover.
+- Nested with Dialog: only the top `DismissableLayer` closes.
+
+## Props
+
+<PropsTable title="Popover" rows={[
+  { prop: "open", type: "boolean", description: "Controlled open state." },
+  { prop: "defaultOpen", type: "boolean", default: "false", description: "Uncontrolled initial state." },
+  { prop: "onOpenChange", type: "(open: boolean) => void", description: "Fires when open changes." },
+  { prop: "trigger", type: "\"click\" | \"hover\"", default: "\"click\"", description: "How the panel opens." },
+]} />
+
+<PropsTable title="PopoverContent" rows={[
+  { prop: "side", type: "\"top\" | \"right\" | \"bottom\" | \"left\"", default: "\"bottom\"", description: "Preferred side; flips when needed." },
+  { prop: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"center\"", description: "Alignment against the anchor." },
+  { prop: "sideOffset", type: "number", default: "8", description: "Gap in pixels." },
+  { prop: "motion", type: "\"pop\" | \"slide\" | \"fade\"", default: "\"pop\"", description: "Enter / exit recipe. Reduced motion forces fade." },
+]} />

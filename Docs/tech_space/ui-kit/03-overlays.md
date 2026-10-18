@@ -1,8 +1,8 @@
 ---
 title: "Apolyx overlays — Dialog, DropdownMenu, Tabs, Tooltip, Toast"
-description: "As-built wave 1b overlays for Apolyx-S0001: layer stack, floating position, tests, stories"
+description: "As-built wave 1b overlays for Apolyx-S0001: layer stack, floating position, tests, stories. Popover (S0004) extends this stack."
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-18
 tags:
   - tech-space
   - ui-kit
@@ -14,7 +14,7 @@ tags:
 
 # Apolyx overlays (wave 1b)
 
-> Who: implementers and reviewers. Code truth for sprint **Apolyx-S0001** phase 7. Plan: [[../../plan/ui-kit/Apolyx-S0001/07-wave-1b-overlays]].
+> Who: implementers and reviewers. Code truth for sprint **Apolyx-S0001** phase 7. Plan: [[../../plan/ui-kit/Apolyx-S0001/07-wave-1b-overlays]]. **Popover** (S0004) reuses Portal / Presence / DismissableLayer / FocusScope / `useFloating` — see [[09-s0004-popover]].
 
 ## Layer stack
 
