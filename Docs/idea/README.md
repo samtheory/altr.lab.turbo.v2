@@ -32,3 +32,7 @@ App-scoped tracks use a subfolder (e.g. `idea/ui-kit/`) that mirrors `feature_li
 
 - [[ui-kit/README]] — **Apolyx** portable UI kit (CLI, tokens, docs app)
 - [[2026-09-27-altr-lab-project-brief]] — full project brief (ui-kit / Artemis / side projects)
+
+## Drafts
+
+- [[draft/2026-10-17-p2p-social-messenger]] — P2P social messenger: offline-first, serverless, E2E encrypted, custom compression, React + Capacitor

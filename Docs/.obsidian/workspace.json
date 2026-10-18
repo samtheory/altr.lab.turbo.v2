@@ -188,8 +188,10 @@
       "graph-styler:Graph Styler": false
     }
   },
-  "active": "83951ac55895cc18",
+  "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
+    "idea/draft/2026-10-17-p2p-social-messenger.md",
+    "idea/draft",
     "tech_space/ui-kit/08-s0003-switch-inputs.md",
     "report/assets/apolyx-s0003/input-otp-default-light.png",
     "report/assets/apolyx-s0003/form-patterns-dark.png",
@@ -225,7 +227,6 @@
     "plan/ui-kit/Apolyx-S0002/05-data-components.md",
     "plan/ui-kit/Apolyx-S0002/04-field-input.md",
     "plan/ui-kit/Apolyx-S0002/03-switch-physics.md",
-    "plan/ui-kit/Apolyx-S0002/02-navigation.md",
     "plan/ui-kit/Apolyx-S0002",
     "plan/ui-kit/Apolyx-S0001",
     "report/assets/apolyx-timeline/timeline-horizontal-default-dark.png",
@@ -234,7 +235,6 @@
     "report/assets/apolyx-timeline",
     "report/assets/apolyx-s0001",
     "report/assets",
-    "tech_space/ui-kit",
-    "plan/ui-kit"
+    "tech_space/ui-kit"
   ]
 }
