@@ -106,7 +106,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Wave 3: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · Wave 4: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] · Sprints **Apolyx-S0001**–**Apolyx-S0004** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/09-s0004-popover]]) · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/Apolyx (ui-kit)/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
-Primary DB decision: **Jord** — `data/jord.db`, packages `elements/jord` + `cloud/jord`, Studio `apps/jord-studio` later ([[../feature_list/Jord/02-architecture]], [[../feature_list/Jord/03-jord-studio]], plan [[../plan/Jord/Jord-S0001/README]] not started). PocketBase stays optional.
+Primary DB decision: **Jord** — `JordDriverPort` / `LibSqlAdapter`, `data/jord.db`, `cloud/jord`; Studio later ([[../feature_list/Jord/02-architecture]], [[../feature_list/Jord/03-jord-studio]], plan [[../plan/Jord/Jord-S0001/README]] not started). PocketBase stays optional.
 
 ---
 

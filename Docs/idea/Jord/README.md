@@ -1,6 +1,6 @@
 ---
 title: "Jord — idea track (current)"
-description: "Current Jord idea brief for agents. Slice 0 is one libSQL file, WAL pragmas, records scratchpad, and one Hono server. Build contract is feature_list."
+description: "Current Jord idea brief. Slice 0: LibSqlAdapter, WAL, records scratchpad, mkdir data/, one Hono server. Build contract in feature_list."
 created: 2026-10-18
 updated: 2026-10-18
 tags:
@@ -12,15 +12,15 @@ tags:
 
 # Jord
 
-> **Read this file.** It is the current idea brief. Decision record (same facts, longer rationale): [[2026-10-18-sharpen]]. What to build: [[../../feature_list/Jord/00-intent]]. Do not treat the old candidate ladder as current — it has been removed from this note.
+> **Read this file.** Current idea brief. Decision record: [[2026-10-18-sharpen]]. Build contract: [[../../feature_list/Jord/00-intent]]. Architecture (ports, concurrency): [[../../feature_list/Jord/02-architecture]].
 
 **Status:** name locked. Intent written. Plan [[../../plan/Jord/Jord-S0001/README]] opened, **not started**. No Jord packages in the repo yet.
 
 | | |
 |--|--|
 | Product | **Jord** |
-| Later admin app | **Jord Studio** (`apps/jord-studio`) — not Slice 0 |
-| Slice 0 | One file, one library, one server. No Postgres, Redis, Mongo, Studio, or extra process |
+| Later admin app | **Jord Studio** — not Slice 0 |
+| Slice 0 | `file:` + `LibSqlAdapter` + one server. `PostgresAdapter` is a seam only. No Redis, Mongo, Studio, sqlite-vec |
 
 Catalog: [[../2026-10-18-product-catalog]] · Map: [[../../brain/00-Docs-Brain]] · Stack: [[../../Altr.lab/stack]]
 
@@ -29,51 +29,35 @@ Catalog: [[../2026-10-18-product-catalog]] · Map: [[../../brain/00-Docs-Brain]]
 | Thing | Path | Package |
 |-------|------|---------|
 | Database file | `data/jord.db` (gitignored) | — |
-| Client + schema | `elements/jord/` | `@altr/jord` |
-| API | `cloud/jord/` | `@altr/jord-server` |
+| Port + adapters + schema | `elements/jord/` | `@altr/jord` |
+| API (write batching) | `cloud/jord/` | `@altr/jord-server` |
 | Studio (later) | `apps/jord-studio/` | `@altr/jord-studio` |
 
-`@altr/base` stays shared utils. After Slice 0 it must not be a second database client. PocketBase is not Jord.
+`@altr/base` = shared utils, not a second DB client. PocketBase is not Jord.
 
-Modular packages now, one local product. Split deployables later without renaming Jord. Detail: [[../../feature_list/Jord/02-architecture]].
+## Slice 0 (only build allowed first)
 
-## Slice 0 (the only build allowed first)
-
-- File: `file:./data/jord.db`. Any other `DATABASE_URL` scheme fails.
-- On every connection open: `PRAGMA journal_mode = WAL;`, `PRAGMA busy_timeout = 5000;`, `PRAGMA synchronous = NORMAL;` so Artemis ticks and the Hono server can share the file without `database is locked`.
-- Snapshot before high-write work: `pnpm db:snapshot` (SQLite online backup) via `@altr/jord`. The `.db` file is untracked.
-- Drizzle + libSQL driver only. sqlite-vec is not installed.
-- Server routes: `GET /health`, `POST /records`, `GET /records?bucket=`, `GET /records/:id`.
+- Hexagonal: app code uses `JordDriverPort`. Only `LibSqlAdapter` is installed. `PostgresAdapter` reserved, not instantiated.
+- `DATABASE_URL` = `file:./data/jord.db` only. Other schemes fail.
+- `createJordClient` recursively creates `data/` then opens the file.
+- Pragmas every open: `WAL`, `busy_timeout = 5000`, `synchronous = NORMAL`.
+- Server checkpoints WAL with `PRAGMA wal_checkpoint(TRUNCATE)` on an interval and on `SIGINT` / `SIGTERM`.
+- Hot writes (Artemis ticks, bulk logs) go through `@altr/jord-server`, not many processes on the raw file.
+- Snapshot: `pnpm db:snapshot`. sqlite-vec not installed.
+- Routes: `GET /health`, `POST /records`, `GET /records?bucket=`, `GET /records/:id`, `PATCH /records/:id` (409 on stale `version`).
 
 ### `records`
 
-Generic JSON document / key-value / **agent scratchpad**. Not the trading ledger.
-
-| Column | Type |
-|--------|------|
-| `id` | text pk (cuid2 or uuid) |
-| `bucket` | text, not null |
-| `body` | text, not null (JSON) |
-| `metadata` | text, optional (JSON tags) |
-| `created_at` | integer, not null (unix ms) |
-| `updated_at` | integer, not null (unix ms) |
-
-**Required index:** `(bucket, created_at)`.
-
-**Boundary:** `orders`, `positions`, and `trades` must not be stored inside `records.body`. Those get typed Drizzle tables in a later slice.
+Agent / JSON scratchpad. Columns: `id`, `bucket`, `body`, `metadata?`, `created_at`, `updated_at`, `version` (integer, default 1). Index `(bucket, created_at)`. Updates match `version` and return **409** on conflict. `created_at` / `updated_at` are 64-bit-safe Drizzle integers (`integer({ mode: 'number' })` or equivalent). Typed `orders` / `positions` / `trades` never live in `body`.
 
 ## Later (not Slice 0)
 
-Order: [[../../feature_list/Jord/01-later]]. Studio surfaces (tables, schema visualizer, live save, jobs, logs, auth, generated and custom APIs, functions, triggers, policies, roles): [[../../feature_list/Jord/03-jord-studio]].
-
-Postgres is a second Drizzle driver later. Table CRUD can move; plugins, triggers, and policies need a dialect seam ([[../../feature_list/Jord/02-architecture]]).
+[[../../feature_list/Jord/01-later]] — hosted libSQL, `PostgresAdapter`, vectors, **realtime CDC**, **local blob storage**, **in-process vector pipelines**. Studio: [[../../feature_list/Jord/03-jord-studio]].
 
 ## Repo today
 
-`elements/base` db/auth/query are stubs. No `elements/jord`, no `cloud/jord`, no `data/jord.db`. Sample API and dashboard apps were removed ([[../../tech_space/03-sample-apps-removed]]). `apps/apolyx` and `cloud/pocketbase` remain.
+`elements/base` stubs only. No `elements/jord`, `cloud/jord`, or `data/jord.db`. Sample apps removed ([[../../tech_space/03-sample-apps-removed]]).
 
 ## Links
 
-- Decisions: [[2026-10-18-sharpen]]
-- Slice 0 contract: [[../../feature_list/Jord/00-intent]]
-- Plan (not started): [[../../plan/Jord/Jord-S0001/README]]
+- [[2026-10-18-sharpen]] · [[../../feature_list/Jord/00-intent]] · [[../../plan/Jord/Jord-S0001/README]]

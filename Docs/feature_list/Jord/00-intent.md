@@ -1,6 +1,6 @@
 ---
 title: "Jord — libSQL file, first slice"
-description: "Jord-S0001 / Slice 0: data/jord.db with WAL pragmas, records scratchpad, snapshot script. No Studio, no Postgres."
+description: "Slice 0: LibSqlAdapter, WAL checkpoints, records OCC version, 64-bit timestamps, mkdir data/, snapshot."
 created: 2026-10-18
 updated: 2026-10-18
 tags:
@@ -37,11 +37,13 @@ Every product in the catalog needs one store. Artemis will keep **agent scratchp
 | Piece | Decision |
 |-------|----------|
 | Infra | One file: `data/jord.db`. Gitignored. Created on first boot |
-| Library | `elements/jord` (`@altr/jord`) — Drizzle schema + libSQL client |
-| Driver | `@libsql/client` through Drizzle’s libSQL driver |
+| Library | `elements/jord` (`@altr/jord`) — `JordDriverPort`, `LibSqlAdapter`, Drizzle schema |
+| Driver | `LibSqlAdapter` only. `PostgresAdapter` is a reserved uninstantiated seam |
 | URL | `DATABASE_URL`, default `file:./data/jord.db`. Only `file:` accepted |
+| Init | Recursively create `data/` before open (`mkdir -p`) |
 | Schema | One table, `records` (scratchpad — see below) |
 | Pragmas | WAL / busy_timeout / synchronous on every open |
+| Writes | Hot paths batch through `@altr/jord-server` (see [[02-architecture]]) |
 | Snapshot | `pnpm db:snapshot` (SQLite online backup) before high-write work |
 | Cloud servers | **One:** `cloud/jord` (`@altr/jord-server`) |
 | Apps | **Zero.** No Jord Studio yet |
@@ -57,7 +59,18 @@ PRAGMA busy_timeout = 5000;
 PRAGMA synchronous = NORMAL;
 ```
 
-Rationale: non-blocking reads during concurrent writes between Artemis (logging / ticks) and the Hono server; avoid `database is locked`. No extra processes.
+Rationale: WAL = concurrent non-blocking reads; single writer + `busy_timeout` for light contention. High-frequency writers still batch through `@altr/jord-server`. No extra processes, no Redis.
+
+### WAL hygiene (`@altr/jord-server`)
+
+WAL mode writes a sidecar `jord.db-wal`. The server process owns checkpointing so that file cannot grow without bound:
+
+| When | Action |
+|------|--------|
+| Periodic background maintenance | `PRAGMA wal_checkpoint(TRUNCATE);` |
+| Graceful shutdown (`SIGINT`, `SIGTERM`) | The same truncate checkpoint, then exit |
+
+Checkpointing stays inside the one server process. Slice 0 does not add a second maintenance daemon.
 
 ### `records` — role
 
@@ -73,23 +86,37 @@ Generic **JSON document / key-value / agent scratchpad**. Buckets namespace apps
 | `bucket` | text, not null | App / agent namespace |
 | `body` | text, not null | JSON document |
 | `metadata` | text, optional | JSON tags; null allowed |
-| `created_at` | integer, not null | Unix ms |
-| `updated_at` | integer, not null | Unix ms; set on insert and update |
+| `created_at` | integer, not null | Unix **milliseconds**, 64-bit safe (see below) |
+| `updated_at` | integer, not null | Unix ms, 64-bit safe; set on insert and update |
+| `version` | integer, not null | Optimistic concurrency. Default `1` on insert |
 
 **Required index:** `(bucket, created_at)` composite — no full-table scans across buckets.
+
+**Timestamps in Drizzle:** map `created_at` and `updated_at` as 64-bit-safe integers — `integer({ mode: 'number' })` or an equivalent that stores a full SQLite/Postgres 64-bit integer. Do not use a 32-bit signed integer mode (that overflows millisecond Unix time). JavaScript `number` is safe for millisecond timestamps well past any practical horizon (`2^53`).
+
+**Optimistic concurrency:** every mutation increments `version` by 1 and updates only when the caller’s version matches:
+
+```sql
+UPDATE records
+SET …, version = version + 1, updated_at = ?
+WHERE id = ? AND version = ?;
+```
+
+Zero rows updated → **409 Conflict**. Inserts start at `version = 1`. Reads return `version` so the next write can send it back.
 
 ### Server routes
 
 | Method | Path | Behavior |
 |--------|------|----------|
 | `GET` | `/health` | `{ ok: true }`, dialect `libsql` |
-| `POST` | `/records` | Body `{ bucket, body, metadata? }` → one row |
-| `GET` | `/records?bucket=` | Rows for that bucket, newest first (uses the composite index) |
-| `GET` | `/records/:id` | One row or 404 |
+| `POST` | `/records` | Body `{ bucket, body, metadata? }` → one row, `version` 1 |
+| `GET` | `/records?bucket=` | Rows for that bucket, newest first (uses the composite index), including `version` |
+| `GET` | `/records/:id` | One row or 404, including `version` |
+| `PATCH` | `/records/:id` | Body includes `version` plus fields to change. Match `id` and `version`; increment `version`. **409** if the version does not match |
 
 ### Packages this slice may touch
 
-- `elements/jord` — new (client, pragmas, schema, snapshot helper)
+- `elements/jord` — new (`JordDriverPort`, `LibSqlAdapter`, pragmas, schema, mkdir, snapshot helper)
 - `elements/base` — stop being the live Turso client
 - `cloud/jord` — new
 - Root `.gitignore` — `data/*.db`
@@ -108,8 +135,12 @@ Generic **JSON document / key-value / agent scratchpad**. Buckets namespace apps
 
 ## Acceptance
 
-- [ ] First boot creates `data/jord.db` and `records` with the columns and `(bucket, created_at)` index above
+- [ ] `createJordClient` recursively creates `data/` then creates `data/jord.db` and `records` with the columns and `(bucket, created_at)` index above
+- [ ] Client exposes `JordDriverPort`; only `LibSqlAdapter` is installed; `PostgresAdapter` is not a runtime dependency
 - [ ] Every open applies WAL, `busy_timeout = 5000`, `synchronous = NORMAL`
+- [ ] `@altr/jord-server` runs `PRAGMA wal_checkpoint(TRUNCATE)` on an interval and on `SIGINT` / `SIGTERM`
+- [ ] `created_at` and `updated_at` are Drizzle 64-bit-safe integers (`integer({ mode: 'number' })` or equivalent), not 32-bit
+- [ ] `records.version` is integer, not null, default 1; a `PATCH` with a stale `version` returns 409 and does not write; a matching `PATCH` increments `version`
 - [ ] `data/*.db` is gitignored
 - [ ] `pnpm db:snapshot` (or documented equivalent) can copy the live file via SQLite online backup
 - [ ] Insert and read round-trip through `@altr/jord-server` for one bucket

@@ -66,6 +66,6 @@ Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]:
 
 ## Planned (repo)
 
-- **Jord**, not started: [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] — `data/jord.db` (WAL pragmas), `records` scratchpad, `pnpm db:snapshot`, `elements/jord`, `cloud/jord`. Layout [[../feature_list/Jord/02-architecture]]. Studio [[../feature_list/Jord/03-jord-studio]]. Later [[../feature_list/Jord/01-later]]
+- **Jord**, not started: [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] — `LibSqlAdapter`, WAL checkpoints, `records` OCC `version`, 64-bit timestamps, snapshot, `cloud/jord`. Architecture [[../feature_list/Jord/02-architecture]]. Studio [[../feature_list/Jord/03-jord-studio]]. Later [[../feature_list/Jord/01-later]]
 - CI pipeline
 - Product features beyond the design-system infra

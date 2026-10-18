@@ -29,10 +29,10 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 
 | Note | Status |
 |------|--------|
-| [[00-intent]] | S0001 / Slice 0: file + WAL pragmas + `records` scratchpad + snapshot + `@altr/jord` + `@altr/jord-server` |
-| [[01-later]] | Engine and Studio slice order |
-| [[02-architecture]] | libSQL fit, Drizzle→Postgres, modular layout |
-| [[03-jord-studio]] | Studio surfaces: tables, visualizer, jobs, logs, auth, APIs, triggers, policies, roles |
+| [[00-intent]] | Slice 0: `LibSqlAdapter`, WAL + truncate checkpoints, OCC `version`, 64-bit timestamps, mkdir `data/`, snapshot, `@altr/jord-server` |
+| [[01-later]] | Engine + Supabase-parity pillars (CDC, blobs, vectors) + Studio order |
+| [[02-architecture]] | `JordDriverPort`, adapters, concurrency, dialect seams, layout |
+| [[03-jord-studio]] | Studio surfaces + realtime / blobs / vectors roadmap |
 
 ## Gate
 

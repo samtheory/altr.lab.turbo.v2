@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "feature_list/Jord/README.md",
+                "file": "feature_list/Jord/03-jord-studio.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "03-jord-studio"
             }
           }
         ]
@@ -190,19 +190,19 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
-    "feature_list/Jord/03-jord-studio.md",
     "feature_list/Jord/02-architecture.md",
     "feature_list/Jord/01-later.md",
     "feature_list/Jord/00-intent.md",
-    "idea/Jord/README.md",
     "idea/Jord/2026-10-18-sharpen.md",
+    "feature_list/Jord/README.md",
+    "feature_list/Jord/03-jord-studio.md",
+    "idea/Jord/README.md",
     "idea/pantry-yield/README.md",
     "plan/Jord/Jord-S0001/README.md",
     "plan/Jord/Jord-S0001",
     "plan/Jord/README.md",
     "plan/Jord",
     "idea/altr-base/README.md",
-    "feature_list/Jord/README.md",
     "feature_list/Jord",
     "idea/Jord",
     "feature_list/altr-base/01-later.md",
