@@ -1,17 +1,16 @@
 ---
-title: "AltrBase / PolyBase — idea track"
-description: "R&D folder for a self-hosted multi-engine BaaS: libSQL first, Postgres later, studio on the dashboard, cache and documents deferred"
+title: "Jord — idea track"
+description: "R&D folder for Jord, the in-repo libSQL engine. Jord Studio is the later admin app. Name locked 2026-10-18."
 created: 2026-10-18
 updated: 2026-10-18
 tags:
   - idea
-  - altr-base
-  - polybase
+  - jord
   - baas
   - readme
 ---
 
-# AltrBase / PolyBase
+# Jord
 
 > Open this to grow the shared backend. Catalog: [[../2026-10-18-product-catalog]]. Map: [[../../brain/00-Docs-Brain]]. Current stack decision: [[../../Altr.lab/stack]].
 
@@ -19,9 +18,9 @@ tags:
 
 **Positioning:** a self-hosted, lightweight alternative to Supabase. One API and one query layer. Dev and edge run on SQLite-compatible libSQL/Turso. A heavier project can point the same queries at Postgres. Cache, websockets, and a document engine come after that switch is real.
 
-**Working names:** AltrBase (lab brand) and PolyBase (multi-engine). Pick the public name in the sharpening note.
+**Name, locked 2026-10-18:** **Jord**. The later admin app is **Jord Studio**. The naming record is [[2026-10-18-sharpen]].
 
-**Vault stage:** captured (phase 0). This is a core pillar in the catalog. It is not promoted, and it does not change [[../../Altr.lab/stack]] until a `feature_list/` brief says so.
+**Vault stage:** intent [[../../feature_list/Jord/00-intent]] · architecture [[../../feature_list/Jord/02-architecture]] · Studio [[../../feature_list/Jord/03-jord-studio]]. Plan [[../../plan/Jord/Jord-S0001/README]] opened, not started. Code packages not created yet.
 
 ---
 
@@ -44,7 +43,7 @@ Supabase is capable and tied to a heavy Postgres stack. Self-hosting it means ru
 
 ## Concept
 
-**AltrBase** is that backend inside this monorepo. Other catalog tracks (Artemis paper ledger, HyperFit entries, PantryYield stock, ForgeRealm inventory) call it. They do not each invent a database.
+This engine is that backend inside this monorepo. Other catalog tracks (Artemis paper ledger, HyperFit entries, PantryYield stock, ForgeRealm inventory) call it. They do not each invent a database. The Artemis bot uses the same file later, under the `artemis` bucket.
 
 ## Who it is for
 
@@ -67,22 +66,24 @@ These are the catalog’s preferred pieces. They are candidates until the sharpe
 | Studio | Next.js + Apolyx | Table editor, auth, logs | No studio app in the repo |
 | Vectors | A future cloud worker | Ingestion pipeline for copilot-style search | No agent package in the repo |
 
-PocketBase stays the optional quick path in [[../../Altr.lab/stack]] until AltrBase can create a table, a session, and a studio view. This track is the candidate replacement for that path, not a second admin product beside it.
+PocketBase stays the optional quick path in [[../../Altr.lab/stack]] until Jord can create a table, a session, and Jord Studio. Jord is the candidate replacement for that path.
 
 ---
 
 ## Product phases
 
+The ladder below is the original candidate map. The first slice is [[../../feature_list/Jord/00-intent]] (file + one server, no Jord Studio). Everything past that is [[../../feature_list/Jord/01-later]].
+
 | Phase | Name | User-visible outcome | Depends on | Intended packages |
 |-------|------|----------------------|------------|-------------------|
 | 1 | libSQL that executes | A local libSQL file runs `execute` from `@altr/base/db`. The stub no longer throws | — | `elements/base` |
-| 2 | One schema | Drizzle models for one table, queried from Hono. Connection target is libSQL only | Phase 1 | `elements/base`, `cloud/hono-server` |
-| 3 | Studio slice | Dashboard lists and edits that one table with Apolyx | Phase 2 | `apps/dashboard` |
-| 4 | Sessions | Sign-in creates a session the studio and the API both read. Better Auth is the candidate library | Phase 3 | `elements/base/auth` |
-| 5 | Postgres switch | The same Drizzle schema runs against Postgres by changing the connection. PGlite is a candidate for local Postgres | Phase 2 | `elements/base/db` |
-| 6 | Realtime | A Hono websocket publishes row changes for that one table | Phases 2 and 3 | `cloud/hono-server` |
-| 7 | Cache | A Redis-compatible store (Dragonfly or Valkey) holds pub/sub or a leaderboard key | A product that needs it (Artemis state or ForgeRealm) | new `elements/base` cache module |
-| 8 | Documents and vectors | FerretDB/Mongo, or vector ingest in `ai-bot-agent`, only after a track’s sharpening note requires it | A named consumer | `cloud/ai-bot-agent` |
+| 2 | One schema | Drizzle models for one table, queried from Hono. Connection target is libSQL only | Phase 1 | `elements/jord`, `cloud/jord` |
+| 3 | Jord Studio S1 | App lists and edits that one table with Apolyx | Phase 2 | `apps/jord-studio` — [[../../feature_list/Jord/03-jord-studio]] |
+| 4 | Sessions | Sign-in the studio and the API both read | Phase 3 | auth in Jord / Studio |
+| 5 | Postgres switch | Same Drizzle table schema, second driver | Phase 2 | `@altr/jord` — [[../../feature_list/Jord/02-architecture]] |
+| 6 | Realtime | Hono websocket for row changes | Phases 2 and 3 | `cloud/jord` |
+| 7 | Cache | Redis-compatible store when a product needs it | A named consumer | later module |
+| 8 | Documents and vectors | Dialect adapters / optional bot process | A named consumer | later |
 
 Phases 1–3 are the first build. Phases 5–8 stay deferred so the studio is not blocked on every engine.
 
@@ -90,15 +91,8 @@ Phases 1–3 are the first build. Phases 5–8 stay deferred so the studio is no
 
 Open-core self-hosting, then a hosted project tier once phase 4 exists. The studio is the thing someone would pay to avoid operating. Pricing waits until you use phases 1–3 for a real altr.lab table.
 
-## Open questions
+## Decided
 
-1. Public name: AltrBase or PolyBase?
-2. First table: a demo `notes` row, or the first real consumer (Artemis paper positions, HyperFit entries)?
-3. Is Drizzle required in phase 1, or does raw `@libsql/client` land first and Drizzle in phase 2?
-4. Better Auth versus a smaller session cookie you own, given `@altr/base/auth` is still a stub?
-5. When does [[../../Altr.lab/stack]] drop PocketBase as the recommended side-project admin?
-6. Which cache binary is the phase 7 candidate after a measured comparison, Dragonfly or Valkey?
+[[2026-10-18-sharpen]] answers the early questions. Intent: [[../../feature_list/Jord/00-intent]]. Layout and dialects: [[../../feature_list/Jord/02-architecture]]. Studio surfaces: [[../../feature_list/Jord/03-jord-studio]]. Slice order: [[../../feature_list/Jord/01-later]]. Plan: [[../../plan/Jord/Jord-S0001/README]].
 
-## When this track is chosen
-
-Add `idea/altr-base/YYYY-MM-DD-sharpen.md` that picks the public name, locks phase 1 to libSQL only, names the one table, and lists non-goals (no Postgres, no cache, no Mongo, no websocket, no multi-tenant hosting). That note is the entrance to `feature_list/altr-base/`. Updating [[../../Altr.lab/stack]] happens with that promotion, not before.
+**Placement:** file `data/jord.db` · library `elements/jord` · server `cloud/jord` · Studio `apps/jord-studio` (later). Modular packages; one product; split deployables later if needed.

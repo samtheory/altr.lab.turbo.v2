@@ -106,7 +106,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Wave 3: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · Wave 4: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] · Sprints **Apolyx-S0001**–**Apolyx-S0004** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/09-s0004-popover]]) · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/Apolyx (ui-kit)/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
-Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
+Primary DB decision: **Jord** — `data/jord.db`, packages `elements/jord` + `cloud/jord`, Studio `apps/jord-studio` later ([[../feature_list/Jord/02-architecture]], [[../feature_list/Jord/03-jord-studio]], plan [[../plan/Jord/Jord-S0001/README]] not started). PocketBase stays optional.
 
 ---
 
@@ -114,9 +114,9 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 
 | Layer | Role | Freshness |
 |-------|------|-----------|
-| `idea/` | Raw R&D before promotion | Catalog: [[../idea/2026-10-18-product-catalog]] (Artemis, Apolyx, AltrBase, HyperFit, Co-Op Sphere, PantryYield, ForgeRealm). Apolyx track: [[../idea/Apolyx (ui-kit)/README]] |
-| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest shipped: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] (S0004, acceptance ticked) · Earlier: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · [[../feature_list/ui-kit/03-timeline]] · [[../feature_list/ui-kit/02-apolyx-s0002-wave]] (kit intent: [[../feature_list/ui-kit/00-intent]]) · Seeds still open: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `plan/` | Checkbox overlay + next steps | Active: none · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004**; S0004 closed 2026-10-18) |
+| `idea/` | Raw R&D before promotion | Catalog: [[../idea/2026-10-18-product-catalog]] (Artemis, Apolyx, Jord, HyperFit, Co-Op Sphere, PantryYield, ForgeRealm). Apolyx track: [[../idea/Apolyx (ui-kit)/README]] · Jord: [[../idea/Jord/README]] |
+| `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Jord (not started): [[../feature_list/Jord/00-intent]] · [[../feature_list/Jord/02-architecture]] · [[../feature_list/Jord/03-jord-studio]] · Latest shipped: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] (S0004, acceptance ticked) · Seeds still open: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
+| `plan/` | Checkbox overlay + next steps | Opened, not started: [[../plan/Jord/Jord-S0001/README]] · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004**; S0004 closed 2026-10-18) |
 | `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-18: sample apps removed; **Apolyx-S0004** shipped — 67 registry items, 149 tests, 49 MDX pages) |
 | `tech_space/` | Implementation narrative | Latest: [[../tech_space/03-sample-apps-removed]] · [[../tech_space/ui-kit/09-s0004-popover]] (Apolyx-S0004 Popover) · [[../tech_space/ui-kit/08-s0003-switch-inputs]] · [[../tech_space/ui-kit/05-docs-app]] · [[../tech_space/ui-kit/07-timeline]] · index [[../tech_space/ui-kit/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |

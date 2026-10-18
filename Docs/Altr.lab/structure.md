@@ -1,6 +1,6 @@
 ---
 title: "Monorepo structure"
-description: "altr.lab apps / cloud / elements layout and package scope"
+description: "altr.lab apps / cloud / elements layout and package scope, including planned Jord packages"
 created: 2026-09-19
 updated: 2026-10-18
 tags:
@@ -19,13 +19,27 @@ altr.lab.turbo.v2/
 ├── elements/
 │   ├── ui-kit/           # @altr/apolyx — Apolyx UI kit (Tailwind + Motion + Storybook :6006)
 │   ├── apolyx-cli/       # apolyx — CLI (init / add / list)
-│   └── base/             # @altr/base — utils, content, db, env, errors, …
+│   └── base/             # @altr/base — utils, content, env, errors, …
+├── data/                 # gitignored runtime files (planned: jord.db)
 ├── Docs/                 # Obsidian second brain
 ├── package.json
 ├── pnpm-workspace.yaml
 ├── turbo.json
 └── tsconfig.base.json
 ```
+
+## Planned Jord packages (not in the tree yet)
+
+Intent: [[../feature_list/Jord/02-architecture]]. S0001: [[../plan/Jord/Jord-S0001/README]].
+
+| Path | Package | Role |
+|------|---------|------|
+| `data/jord.db` | — | libSQL file (gitignored) |
+| `elements/jord/` | `@altr/jord` | Schema, client, dialect seam |
+| `cloud/jord/` | `@altr/jord-server` | Hono API |
+| `apps/jord-studio/` | `@altr/jord-studio` | Jord Studio (after S0001) |
+
+Modular packages now; run as one local stack; split deployables later without renaming the product.
 
 ## Workspaces
 

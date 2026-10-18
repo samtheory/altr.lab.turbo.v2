@@ -31,7 +31,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 
 App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`.
 
-**Idea catalog (2026-10-18, v2.1):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/altr-base/README|AltrBase]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]]. Only Apolyx is promoted.
+**Idea catalog (2026-10-18, v2.1):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]]. Promoted: Apolyx (built) and Jord (intent [[../feature_list/Jord/00-intent]], architecture [[../feature_list/Jord/02-architecture]], Studio [[../feature_list/Jord/03-jord-studio]], plan [[../plan/Jord/Jord-S0001/README]] not started).
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/09-s0004-popover]]). The idea folder is named `Apolyx (ui-kit)`. Intent, plan, and as-built stay under `ui-kit`.
 

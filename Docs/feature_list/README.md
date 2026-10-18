@@ -23,6 +23,7 @@ App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Spr
 | Track | Index | Intent |
 |-------|-------|--------|
 | **Apolyx UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — CLI, docs app, own primitives, tokens, motion, charts · shipped [[ui-kit/04-apolyx-s0003-switch-inputs]] · open intent [[ui-kit/05-apolyx-s0004-popover]] (Popover, not started) |
+| **Jord** | [[Jord/README]] | [[Jord/00-intent]] — `data/jord.db` + `@altr/jord` + `@altr/jord-server`. Architecture [[Jord/02-architecture]] · Studio [[Jord/03-jord-studio]]. Plan [[../plan/Jord/Jord-S0001/README]] not started |
 
 ## Legacy / shipped features
 

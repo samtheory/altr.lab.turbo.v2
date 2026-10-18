@@ -1,6 +1,6 @@
 ---
 title: "altr.lab — product and ideas catalog (v2.1)"
-description: "Master idea catalog: Artemis, Apolyx, AltrBase, and four life-system products, with a folder per track and a pick-one growth path"
+description: "Master idea catalog: Artemis, Apolyx, Jord, and four life-system products, with a folder per track and a pick-one growth path"
 created: 2026-10-18
 updated: 2026-10-18
 tags:
@@ -15,7 +15,7 @@ tags:
 
 Map: [[../brain/00-Docs-Brain]] · Inbox: [[README]]
 
-**Pillars:** Artemis financial engine · Apolyx UI kit · AltrBase backend · high-leverage life systems.
+**Pillars:** Artemis financial engine · Apolyx UI kit · Jord · high-leverage life systems.
 
 Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2026-09-27-altr-lab-project-brief]]. This catalog is the current index. It does not retire that brief.
 
@@ -32,7 +32,7 @@ Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2
 
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
-| 7 | **AltrBase / PolyBase** — self-hosted multi-engine BaaS (libSQL first, Postgres later) | [[altr-base/README]] | Captured. `@altr/base` db and auth are stubs. Stack decision stays in [[../Altr.lab/stack]] until this track is promoted. |
+| 7 | **Jord** — libSQL file now, other engines later. Admin: Jord Studio | [[Jord/README]] | Intent [[../feature_list/Jord/00-intent]] · layout [[../feature_list/Jord/02-architecture]] · Studio [[../feature_list/Jord/03-jord-studio]]. Plan not started. |
 
 ## Life systems
 
@@ -61,7 +61,7 @@ Figures below are catalog hypotheses from 2026-10-18, for choosing a track. They
 | Co-Op Sphere | Partner and network | Next.js, auth | Verification badges, deal escrow fees | Needs identity and trust before chat |
 | PantryYield | Cooking | Hono, AI, Turso | Micro-SaaS for fitness meal-preppers | Small inventory loop |
 | ForgeRealm | Games | React, motion, Hono, Turso | Skins, craft tools, faster merge timers | Phase 1 is inventory and merge only |
-| AltrBase / PolyBase | Developer infrastructure | `@altr/base`, a future Hono API, a future studio app | Open-core self-host, hosted projects later | First slice is a libSQL client that executes plus one studio table |
+| Jord | Developer infrastructure | `@altr/base`, a future Hono API, Jord Studio later | Open-core self-host, hosted projects later | First slice is a libSQL file and one server. Jord Studio comes after |
 
 ---
 
@@ -87,4 +87,4 @@ flowchart LR
 
 **Next session:** name one folder. We add a phase-1 sharpening note there and stop. We do not open five products at once, and we do not skip into `plan/` from a captured brief.
 
-AltrBase is the shared backend track ([[altr-base/README]]). Other products name which AltrBase slice they need in their own sharpening note. They do not each invent a database client. Apolyx charts and forms stay on the Apolyx track.
+Jord is the shared backend track ([[Jord/README]]). Other products name which Jord slice they need in their own sharpening note. They do not each invent a database client. Apolyx charts and forms stay on the Apolyx track. Jord Studio is the later admin app, not part of Jord-S0001.

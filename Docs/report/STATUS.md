@@ -66,5 +66,6 @@ Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]:
 
 ## Planned (repo)
 
-- Wire Turso / auth in `@altr/base`; CI pipeline
+- **Jord**, not started: [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] — `data/jord.db`, `elements/jord`, `cloud/jord`. Layout [[../feature_list/Jord/02-architecture]]. Jord Studio vision [[../feature_list/Jord/03-jord-studio]]. Later slices [[../feature_list/Jord/01-later]]
+- CI pipeline
 - Product features beyond the design-system infra
