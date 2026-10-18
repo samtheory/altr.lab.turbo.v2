@@ -2,7 +2,7 @@
 title: "apollo — Apolyx UI kit sub-agent"
 description: "Owns building Apolyx: own primitives, tokens, motion, charts, CLI, docs app — unique taste, React/Tailwind/Motion best practice"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-18
 tags:
   - agents
   - apollo
@@ -45,7 +45,7 @@ Canonical intent: [[../../feature_list/ui-kit/00-intent]]
 | Piece | Path |
 |-------|------|
 | Intent (truth for “what to build”) | [[../../feature_list/ui-kit/00-intent]] |
-| Idea + naming | [[../../idea/ui-kit/README]] · [[../../idea/ui-kit/2026-10-11-naming-and-domains]] |
+| Idea + naming | [[../../idea/Apolyx (ui-kit)/README]] · [[../../idea/Apolyx (ui-kit)/2026-10-11-naming-and-domains]] |
 | Active sprint plan | [[../../plan/ui-kit/README]] |
 | Standing instructions | [[instructions/00-workflow]] |
 | Prompt pack | [[prompts/00-build-apolyx]] |

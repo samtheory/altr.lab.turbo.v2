@@ -2,7 +2,7 @@
 title: "Apolyx UI kit — intent (infra, tech, first components)"
 description: "What to build for Apolyx: registry/CLI, apps/apolyx MDX docs, own primitives, tokens, motion, charts — no Radix/Base UI"
 created: 2026-10-10
-updated: 2026-10-14
+updated: 2026-10-18
 tags:
   - feature
   - ui-kit
@@ -16,7 +16,7 @@ tags:
 
 > Who: anyone planning or building the design system. This is **intent**, not as-built. Code truth still wins for what already exists in `elements/ui-kit`.
 
-Promoted from [[../../idea/ui-kit/2026-10-10-apolyx-portable-ui-kit]].
+Promoted from [[../../idea/Apolyx (ui-kit)/2026-10-10-apolyx-portable-ui-kit]].
 
 ## Why
 
@@ -34,7 +34,7 @@ Developers should restyle and compose through tokens, variants, and composition 
 
 **Apolyx** — candidate name chosen 2026-10-11. A blend of *Apollo* (Greek god of music, poetry, art and light) with a crisp *-yx* ending. Replaces the earlier working name "Helix", which another UI kit already uses.
 
-`apolyx.com`, `apolyx.dev`, `apolyx.app` and the npm name `apolyx` were all unregistered on 2026-10-11. Register them before going public. Domain checks and the other candidates are in [[../../idea/ui-kit/2026-10-11-naming-and-domains]].
+`apolyx.com`, `apolyx.dev`, `apolyx.app` and the npm name `apolyx` were all unregistered on 2026-10-11. Register them before going public. Domain checks and the other candidates are in [[../../idea/Apolyx (ui-kit)/2026-10-11-naming-and-domains]].
 
 | Surface | Location |
 |---------|----------|
@@ -376,7 +376,7 @@ Use these when implementing; verify in code + tech_space:
 
 ## Links
 
-- Idea: [[../../idea/ui-kit/2026-10-10-apolyx-portable-ui-kit]]
+- Idea: [[../../idea/Apolyx (ui-kit)/2026-10-10-apolyx-portable-ui-kit]]
 - Index: [[README]]
 - Builder agent: [[../../agents/apollo/00-index]] · prompts: [[../../agents/apollo/prompts/00-build-apolyx]]
 - Prior foundation: [[../01-hub-ui-kit-base]] · [[../02-ui-kit-storybook]]

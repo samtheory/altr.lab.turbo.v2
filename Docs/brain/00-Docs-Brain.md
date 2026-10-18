@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-14
+updated: 2026-10-18
 tags:
   - brain
   - index
@@ -27,7 +27,7 @@ tags:
 | Every docs folder explained | [[00-Docs-Hub]] |
 | Monorepo structure / commands / stack | [[../Altr.lab/README]] · [[../Altr.lab/structure]] · [[../Altr.lab/commands]] · [[../Altr.lab/stack]] |
 | Agent skills / Graft | [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
-| Raw R&D ideas | [[../idea/README]] |
+| Raw R&D ideas | [[../idea/README]] · catalog [[../idea/2026-10-18-product-catalog]] |
 | Product intent (what to build) | [[../feature_list/README]] |
 | Build plans (next steps) | [[../plan/README]] |
 | Complete vs remaining | [[../report/README]] · [[../report/STATUS]] |
@@ -107,7 +107,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Hono API | `cloud/hono-server` | Altr.lab/stack · tech_space |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | AI bot agent | `cloud/ai-bot-agent` | Altr.lab · agents |
-| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Wave 3: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · Sprints **Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/ui-kit/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
+| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Wave 3: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · Sprints **Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/Apolyx (ui-kit)/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
 Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase for quick admin/auth side projects. Postgres only when a project needs it.
@@ -118,7 +118,7 @@ Primary DB decision: **Turso / libSQL** (see [[../Altr.lab/stack]]). PocketBase 
 
 | Layer | Role | Freshness |
 |-------|------|-----------|
-| `idea/` | Raw R&D before promotion | Latest track: [[../idea/ui-kit/README]] (Apolyx) |
+| `idea/` | Raw R&D before promotion | Catalog: [[../idea/2026-10-18-product-catalog]] (Artemis, Apolyx, AltrBase, HyperFit, Co-Op Sphere, PantryYield, ForgeRealm). Apolyx track: [[../idea/Apolyx (ui-kit)/README]] |
 | `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Latest shipped: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] (S0003, acceptance ticked) · Earlier: [[../feature_list/ui-kit/03-timeline]] · [[../feature_list/ui-kit/02-apolyx-s0002-wave]] (kit intent: [[../feature_list/ui-kit/00-intent]]) · Next seeds: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
 | `plan/` | Checkbox overlay + next steps | No active sprint · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** — [[../plan/ui-kit/Apolyx-S0003/README]], closed 2026-10-14) |
 | `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-14, after Apolyx-S0003: 66 registry items, 141 tests, 48 MDX pages) |

@@ -2,7 +2,7 @@
 title: "feature_list/ui-kit — Apolyx intent index"
 description: "Product intent for the Apolyx UI kit (elements/ui-kit + apps/apolyx + CLI)"
 created: 2026-10-10
-updated: 2026-10-14
+updated: 2026-10-18
 tags:
   - feature
   - ui-kit
@@ -17,13 +17,13 @@ tags:
 
 Intent for **Apolyx** — portable design system for altr.lab and future publish.
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/ui-kit/README]] · Builder: [[../../agents/apollo/00-index]] · Sprints: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]]
+Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Apolyx (ui-kit)/README]] · Builder: [[../../agents/apollo/00-index]] · Sprints: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]]
 
 ## Truth for this track
 
 | Layer | Role |
 |-------|------|
-| `idea/ui-kit/` | Exploratory |
+| `idea/Apolyx (ui-kit)/` | Exploratory |
 | **`feature_list/ui-kit/`** | **Valid intent** |
 | `plan/ui-kit/` | Sprint folders `Apolyx-S000N/` with task cards |
 | `tech_space/ui-kit/` | As-built after each sprint closes |

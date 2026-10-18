@@ -2,7 +2,7 @@
 title: "Docs Hub — folder index"
 description: "Canonical index of every Docs/ folder in the altr.lab vault"
 created: 2026-09-19
-updated: 2026-10-11
+updated: 2026-10-18
 tags:
   - brain
   - hub
@@ -17,7 +17,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 |--------|---------|-------|
 | `brain/` | Living map + hub (open first) | [[00-Docs-Brain]] · this file |
 | `Altr.lab/` | Root turbo project docs (structure, commands, stack, prompts, agent skills, Graft) | [[../Altr.lab/README]] · [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
-| `idea/` | Raw R&D ideas before promotion | [[../idea/README]] |
+| `idea/` | Raw R&D ideas before promotion | [[../idea/README]] · catalog [[../idea/2026-10-18-product-catalog]] |
 | `feature_list/` | Raw feature instructions to implement | [[../feature_list/README]] |
 | `plan/` | Next-step plans from feature_list + tech_space | [[../plan/README]] |
 | `tech_space/` | As-built technical implementation docs | [[../tech_space/README]] |
@@ -29,7 +29,11 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 
 `idea` → `feature_list` → `plan` (+ `clickup`) → **code** → `tech_space` → `report` → refresh [[00-Docs-Brain]]
 
-App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`. Example: **Apolyx** UI kit — [[../idea/ui-kit/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/08-s0003-switch-inputs]]).
+App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`.
+
+**Idea catalog (2026-10-18, v2.1):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/altr-base/README|AltrBase]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]]. Only Apolyx is promoted.
+
+**Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**, **Apolyx-S0002**, **Apolyx-S0003** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/08-s0003-switch-inputs]]). The idea folder is named `Apolyx (ui-kit)`. Intent, plan, and as-built stay under `ui-kit`.
 
 ## Agent of record
 

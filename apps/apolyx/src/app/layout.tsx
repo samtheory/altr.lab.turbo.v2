@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   title: "Apolyx — altr.lab UI kit",
   description:
     "Ownable React components, primitives, motion, and charts with three theme families. Workspace import in the monorepo, CLI everywhere else.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/apolyx-logo.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: "/apolyx-apple-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -190,6 +190,13 @@
   },
   "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
+    "idea/Apolyx (ui-kit)/README.md",
+    "idea/Apolyx (ui-kit)/2026-10-18-catalog-growth.md",
+    "idea/Apolyx (ui-kit)/2026-10-11-naming-and-domains.md",
+    "idea/Apolyx (ui-kit)/2026-10-10-apolyx-portable-ui-kit.md",
+    "idea/Apolyx (ui-kit)",
+    "idea/altr-base/README.md",
+    "idea/altr-base",
     "idea/draft/2026-10-17-p2p-social-messenger.md",
     "idea/draft",
     "tech_space/ui-kit/08-s0003-switch-inputs.md",
@@ -222,19 +229,12 @@
     "tech_space/ui-kit/07-timeline.md",
     "tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data.md",
     "plan/ui-kit/Apolyx-S0002/README.md",
-    "plan/ui-kit/Apolyx-S0002/07-docs-man-handoff.md",
-    "plan/ui-kit/Apolyx-S0002/06-docs-registry-verify.md",
-    "plan/ui-kit/Apolyx-S0002/05-data-components.md",
-    "plan/ui-kit/Apolyx-S0002/04-field-input.md",
-    "plan/ui-kit/Apolyx-S0002/03-switch-physics.md",
     "plan/ui-kit/Apolyx-S0002",
     "plan/ui-kit/Apolyx-S0001",
     "report/assets/apolyx-timeline/timeline-horizontal-default-dark.png",
     "report/assets/apolyx-timeline/timeline-status-tones-default-dark.png",
     "report/assets/apolyx-timeline/timeline-progress-default-dark.png",
     "report/assets/apolyx-timeline",
-    "report/assets/apolyx-s0001",
-    "report/assets",
-    "tech_space/ui-kit"
+    "report/assets/apolyx-s0001"
   ]
 }

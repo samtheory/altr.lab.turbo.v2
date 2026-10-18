@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { Kbd, ThemeFamilySwitcher, ThemeToggle } from "@altr/apolyx";
@@ -18,10 +19,16 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 sm:px-6">
         <MobileNav />
         <Link href="/" className="flex items-center gap-2 font-display text-base font-semibold tracking-tight">
-          <span aria-hidden className="grid size-6 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-            A
-          </span>
-          Apolyx
+          <Image
+            src="/apolyx-logo.png"
+            alt=""
+            width={24}
+            height={24}
+            className="size-6 shrink-0"
+            priority
+            aria-hidden
+          />
+          <span>Apolyx</span>
         </Link>
         <nav aria-label="Primary" className="ml-4 hidden items-center gap-4 text-sm md:flex">
           <Link href="/docs" className="text-muted-foreground transition-colors hover:text-foreground">

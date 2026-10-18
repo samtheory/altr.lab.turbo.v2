@@ -1,8 +1,8 @@
 ---
-title: "idea/ui-kit — Apolyx design system R&D"
+title: "Apolyx (ui-kit) — design system R&D"
 description: "Inbox for the portable Apolyx UI kit (CLI, tokens, docs app) before and alongside feature_list"
 created: 2026-10-10
-updated: 2026-10-11
+updated: 2026-10-18
 tags:
   - idea
   - ui-kit
@@ -10,7 +10,7 @@ tags:
   - readme
 ---
 
-# idea / ui-kit
+# Apolyx (ui-kit)
 
 R&D for the **Apolyx** design system — a shadcn-like, copy-into-project UI kit with CLI, custom tokens, motion, and charts.
 
@@ -21,9 +21,10 @@ Map: [[../../brain/00-Docs-Brain]] · Intent: [[../../feature_list/ui-kit/README
 - [[2026-10-10-apolyx-portable-ui-kit]] — promote portable kit (CLI + docs + own primitives)
 - [[2026-10-11-naming-and-domains]] — naming search (Helix was taken) → **Apolyx** chosen; .com/.dev/.app + npm availability
 - Related earlier brief: [[../2026-09-27-altr-lab-project-brief]] (Track 1)
+- [[2026-10-18-catalog-growth]] — v2 catalog leftovers: hub showcase, Token Studio, premium themes (idea only)
 
 ## Promotion
 
-**Promoted 2026-10-11:** both notes above are now intent in [[../../feature_list/ui-kit/00-intent]], planned in [[../../plan/ui-kit/README]]. Keep new R&D here; do not edit decided points in this folder.
+**Promoted 2026-10-11:** the 2026-10-10 and 2026-10-11 notes are intent in [[../../feature_list/ui-kit/00-intent]], planned in [[../../plan/ui-kit/README]]. [[2026-10-18-catalog-growth]] stays idea-only. Keep new R&D here; do not edit decided points in this folder.
 
 When an idea is firm enough to build against, promote into `Docs/feature_list/ui-kit/`. Sprint task cards go in `Docs/plan/ui-kit/` only while actively planning — durable intent stays in feature_list.

@@ -2,7 +2,7 @@
 title: "idea — R&D inbox"
 description: "Raw R&D ideas before promotion into feature_list"
 created: 2026-09-19
-updated: 2026-10-11
+updated: 2026-10-18
 tags:
   - idea
   - readme
@@ -26,13 +26,26 @@ idea (R&D)
 
 Use **docs_man** (`update_docs` / `document it`) to promote ideas. Keep ideas messy and dated; do not skip straight to large code changes.
 
-App-scoped tracks use a subfolder (e.g. `idea/ui-kit/`) that mirrors `feature_list/<app>/` and `plan/<app>/`.
+Idea folders use the product name. Apolyx lives in `idea/Apolyx (ui-kit)/`. Promoted intent stays in `feature_list/ui-kit/` and `plan/ui-kit/`.
+
+## Catalog (v2.1)
+
+Master index: [[2026-10-18-product-catalog]]. Pick one folder, sharpen it, then promote. Do not grow every track in the same session.
+
+| Track | Folder |
+|-------|--------|
+| Artemis Engine | [[artemis/README]] |
+| Apolyx (ui-kit) | [[Apolyx (ui-kit)/README]] |
+| HyperFit OS | [[hyperfit/README]] |
+| Co-Op Sphere | [[co-op-sphere/README]] |
+| PantryYield | [[pantry-yield/README]] |
+| ForgeRealm / CardCraft | [[forge-realm/README]] |
+| AltrBase / PolyBase | [[altr-base/README]] |
 
 ## Notes
 
-- [[ui-kit/README]] — **Apolyx** portable UI kit (CLI, tokens, docs app)
-- [[2026-09-27-altr-lab-project-brief]] — full project brief (ui-kit / Artemis / side projects)
+- [[2026-09-27-altr-lab-project-brief]] — earlier brainstorm brief (ui-kit / Artemis / side projects). Still the home for Hyperliquid and copy-trading questions.
 
 ## Drafts
 
-- [[draft/2026-10-17-p2p-social-messenger]] — P2P social messenger: offline-first, serverless, E2E encrypted, custom compression, React + Capacitor
+- [[draft/2026-10-17-p2p-social-messenger]] — P2P social messenger: offline-first, serverless, E2E encrypted, custom compression, React + Capacitor. Separate from [[co-op-sphere/README]].
