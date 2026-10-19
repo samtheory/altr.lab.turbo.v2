@@ -26,9 +26,9 @@ idea (R&D)
 
 Use **docs_man** (`update_docs` / `document it`) to promote ideas. Keep ideas messy and dated; do not skip straight to large code changes.
 
-Idea folders use the product name. Apolyx lives in `idea/Apolyx (ui-kit)/`. Promoted intent stays in `feature_list/ui-kit/` and `plan/ui-kit/`.
+Idea folders use the product name. Apolyx lives in `idea/Apolyx (ui-kit)/`. Tia lives in `idea/Tia (Map Engine)/`. Promoted intent stays in matching `feature_list/` / `plan/` tracks (Apolyx → `ui-kit/`; Tia → `tia/` when promoted).
 
-## Catalog (v2.2)
+## Catalog (v2.3)
 
 Master index: [[2026-10-18-product-catalog]]. Pick one folder, sharpen it, then promote. Do not grow every track in the same session.
 
@@ -43,6 +43,7 @@ Master index: [[2026-10-18-product-catalog]]. Pick one folder, sharpen it, then 
 | Jord | [[Jord/README]] · intent [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] |
 | API client | [[api-client/README]] |
 | Search | [[search/README]] |
+| Tia (Map Engine) | [[Tia (Map Engine)/README]] · intent [[../feature_list/tia/README]] |
 
 ## Notes
 

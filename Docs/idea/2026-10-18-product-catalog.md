@@ -1,6 +1,6 @@
 ---
-title: "altr.lab — product and ideas catalog (v2.2)"
-description: "Master idea catalog: Artemis, Apolyx, Jord, four life-system products, plus an API client and a search engine, with a folder per track and a pick-one growth path"
+title: "altr.lab — product and ideas catalog (v2.3)"
+description: "Master idea catalog: Artemis, Apolyx, Jord, life systems, API client, search, and Tia (map engine), with a folder per track and a pick-one growth path"
 created: 2026-10-18
 updated: 2026-10-19
 tags:
@@ -9,13 +9,13 @@ tags:
   - altr-lab
 ---
 
-# altr.lab — product and ideas catalog (v2.2)
+# altr.lab — product and ideas catalog (v2.3)
 
 > Open this to choose which product to grow next. Each track has its own folder. These notes are exploratory until promoted into `feature_list/`.
 
 Map: [[../brain/00-Docs-Brain]] · Inbox: [[README]]
 
-**Pillars:** Artemis financial engine · Apolyx UI kit · Jord · high-leverage life systems · open tools (API client, search).
+**Pillars:** Artemis financial engine · Apolyx UI kit · Jord · high-leverage life systems · open tools (API client, search, Tia).
 
 Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2026-09-27-altr-lab-project-brief]]. This catalog is the current index. It does not retire that brief.
 
@@ -49,12 +49,13 @@ Adjacent draft, separate from Co-Op Sphere: [[draft/2026-10-17-p2p-social-messen
 
 ## Open tools
 
-Captured 2026-10-19. Names are not locked. Both are phase 0 until a sharpening note.
+API client and Search: captured 2026-10-19 (names not locked). Tia: name locked and **promoted** to feature_list 2026-10-19.
 
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
 | 8 | **API client** — open-source Postman-class workbench. Reference: [Zapi](https://z-api.ir/). Extra features not named yet | [[api-client/README]] | Captured |
 | 9 | **Search** — open-source engine for Iran, in the DuckDuckGo and Google class | [[search/README]] | Captured |
+| 10 | **Tia** — Iran realtime map, navigation, and traffic | [[Tia (Map Engine)/README]] | **Promoted** 2026-10-19 → [[../feature_list/tia/README]]. Name locked. No code. |
 
 ---
 
@@ -73,6 +74,7 @@ Figures below are catalog hypotheses from 2026-10-18, for choosing a track. They
 | Jord | Developer infrastructure | `@altr/base`, a future Hono API, Jord Studio later | Open-core self-host, hosted projects later | First slice is a libSQL file and one server. Jord Studio comes after |
 | API client | Developer tool | Apolyx; Jord only if collections leave the local file | Open source; hosted sync later, undecided | One request and one response |
 | Search | Open web search for Iran | Apolyx; index storage decided at sharpening | Open source; hosted API later, undecided | Results page over a small local corpus |
+| Tia | Maps / navigation / traffic | MapLibre + Valhalla + PostGIS (proposed); Apolyx chrome; Jord-managed Postgres when Jord can | Open / reusable SDKs; partners optional paid | Pilot city map + base routes (Phase 1) |
 
 ---
 

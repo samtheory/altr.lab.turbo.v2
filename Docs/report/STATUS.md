@@ -1,8 +1,8 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot of altr.lab after sample apps were removed and Apolyx-S0004 closed"
+description: "Audited snapshot of altr.lab after sample apps were removed and Apolyx-S0004 closed; Tia intent noted"
 created: 2026-09-19
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - report
   - status
@@ -14,7 +14,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-18 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: none · Last ship: **Apolyx-S0004** (closed 2026-10-18) · Sample apps removed the same day · Previous: **Apolyx-S0003**, **Apolyx-S0002**, **Apolyx-S0001** (closed)
+Last updated: 2026-10-19 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: none · Last ship: **Apolyx-S0004** (closed 2026-10-18) · Docs: **Tia** intent promoted 2026-10-19 (no code)
 
 ## Implemented
 
@@ -67,5 +67,6 @@ Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]:
 ## Planned (repo)
 
 - **Jord**, plan ready, code not started: [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] (cards 1–8, start [[../plan/Jord/Jord-S0001/01-packages]]) — `LibSqlAdapter`, WAL checkpoints, `records` OCC `version`, 64-bit timestamps, snapshot, `cloud/jord`. Architecture [[../feature_list/Jord/02-architecture]]. Studio [[../feature_list/Jord/03-jord-studio]]. Later [[../feature_list/Jord/01-later]]
+- **Tia**, intent only (2026-10-19): [[../feature_list/tia/README]] — Iran map / nav / traffic. Postgres+PostGIS + MapLibre + Valhalla **proposed**. Jord PostGIS/jobs/WS **not** available yet. No `plan/tia/` and no Tia packages in code
 - CI pipeline
 - Product features beyond the design-system infra
