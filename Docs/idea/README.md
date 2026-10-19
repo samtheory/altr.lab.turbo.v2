@@ -2,7 +2,7 @@
 title: "idea — R&D inbox"
 description: "Raw R&D ideas before promotion into feature_list"
 created: 2026-09-19
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - idea
   - readme
@@ -28,7 +28,7 @@ Use **docs_man** (`update_docs` / `document it`) to promote ideas. Keep ideas me
 
 Idea folders use the product name. Apolyx lives in `idea/Apolyx (ui-kit)/`. Promoted intent stays in `feature_list/ui-kit/` and `plan/ui-kit/`.
 
-## Catalog (v2.1)
+## Catalog (v2.2)
 
 Master index: [[2026-10-18-product-catalog]]. Pick one folder, sharpen it, then promote. Do not grow every track in the same session.
 
@@ -41,6 +41,8 @@ Master index: [[2026-10-18-product-catalog]]. Pick one folder, sharpen it, then 
 | PantryYield | [[pantry-yield/README]] |
 | ForgeRealm / CardCraft | [[forge-realm/README]] |
 | Jord | [[Jord/README]] · intent [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] |
+| API client | [[api-client/README]] |
+| Search | [[search/README]] |
 
 ## Notes
 

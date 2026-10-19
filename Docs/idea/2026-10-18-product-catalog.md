@@ -1,21 +1,21 @@
 ---
-title: "altr.lab — product and ideas catalog (v2.1)"
-description: "Master idea catalog: Artemis, Apolyx, Jord, and four life-system products, with a folder per track and a pick-one growth path"
+title: "altr.lab — product and ideas catalog (v2.2)"
+description: "Master idea catalog: Artemis, Apolyx, Jord, four life-system products, plus an API client and a search engine, with a folder per track and a pick-one growth path"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - idea
   - catalog
   - altr-lab
 ---
 
-# altr.lab — product and ideas catalog (v2.1)
+# altr.lab — product and ideas catalog (v2.2)
 
 > Open this to choose which product to grow next. Each track has its own folder. These notes are exploratory until promoted into `feature_list/`.
 
 Map: [[../brain/00-Docs-Brain]] · Inbox: [[README]]
 
-**Pillars:** Artemis financial engine · Apolyx UI kit · Jord · high-leverage life systems.
+**Pillars:** Artemis financial engine · Apolyx UI kit · Jord · high-leverage life systems · open tools (API client, search).
 
 Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2026-09-27-altr-lab-project-brief]]. This catalog is the current index. It does not retire that brief.
 
@@ -26,7 +26,7 @@ Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
 | 1 | **Artemis Engine** — wealth terminal, copilot, risk guard | [[artemis/README]] | Captured. Sample scaffolds were removed 2026-10-18. Product is greenfield. |
-| 2 | **Apolyx (ui-kit)** — architecture showcase and shared visual system | [[Apolyx (ui-kit)/README]] | Promoted 2026-10-11. Sprints S0001–S0003 closed. Residual growth: [[Apolyx (ui-kit)/2026-10-18-catalog-growth]]. |
+| 2 | **Apolyx (ui-kit)** — architecture showcase and shared visual system | [[Apolyx (ui-kit)/README]] | Promoted 2026-10-11. Sprints S0001–S0004 closed. Residual growth: [[Apolyx (ui-kit)/2026-10-18-catalog-growth]]. |
 
 ## Foundation
 
@@ -47,6 +47,15 @@ Tools aimed at fitness, people, cooking, and games, built with the same engineer
 
 Adjacent draft, separate from Co-Op Sphere: [[draft/2026-10-17-p2p-social-messenger]] (offline-first encrypted messenger). It stays in `draft/` until you give it a track folder.
 
+## Open tools
+
+Captured 2026-10-19. Names are not locked. Both are phase 0 until a sharpening note.
+
+| # | Track | Folder | Vault stage |
+|---|--------|--------|-------------|
+| 8 | **API client** — open-source Postman-class workbench. Reference: [Zapi](https://z-api.ir/). Extra features not named yet | [[api-client/README]] | Captured |
+| 9 | **Search** — open-source engine for Iran, in the DuckDuckGo and Google class | [[search/README]] | Captured |
+
 ---
 
 ## Potential and feasibility
@@ -62,6 +71,8 @@ Figures below are catalog hypotheses from 2026-10-18, for choosing a track. They
 | PantryYield | Cooking | Hono, AI, Turso | Micro-SaaS for fitness meal-preppers | Small inventory loop |
 | ForgeRealm | Games | React, motion, Hono, Turso | Skins, craft tools, faster merge timers | Phase 1 is inventory and merge only |
 | Jord | Developer infrastructure | `@altr/base`, a future Hono API, Jord Studio later | Open-core self-host, hosted projects later | First slice is a libSQL file and one server. Jord Studio comes after |
+| API client | Developer tool | Apolyx; Jord only if collections leave the local file | Open source; hosted sync later, undecided | One request and one response |
+| Search | Open web search for Iran | Apolyx; index storage decided at sharpening | Open source; hosted API later, undecided | Results page over a small local corpus |
 
 ---
 

@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - brain
   - index
@@ -114,7 +114,7 @@ Primary DB decision: **Jord** — `JordDriverPort` / `LibSqlAdapter`, `data/jord
 
 | Layer | Role | Freshness |
 |-------|------|-----------|
-| `idea/` | Raw R&D before promotion | Catalog: [[../idea/2026-10-18-product-catalog]] (Artemis, Apolyx, Jord, HyperFit, Co-Op Sphere, PantryYield, ForgeRealm). Apolyx track: [[../idea/Apolyx (ui-kit)/README]] · Jord: [[../idea/Jord/README]] |
+| `idea/` | Raw R&D before promotion | Catalog v2.2: [[../idea/2026-10-18-product-catalog]] (Artemis, Apolyx, Jord, HyperFit, Co-Op Sphere, PantryYield, ForgeRealm, API client, Search). Apolyx track: [[../idea/Apolyx (ui-kit)/README]] · Jord: [[../idea/Jord/README]] · New 2026-10-19: [[../idea/api-client/README]] · [[../idea/search/README]] |
 | `feature_list/` | Intent / what to build | App tracks: [[../feature_list/ui-kit/README]] · Jord (not started): [[../feature_list/Jord/00-intent]] · [[../feature_list/Jord/02-architecture]] · [[../feature_list/Jord/03-jord-studio]] · Latest shipped: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] (S0004, acceptance ticked) · Seeds still open: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
 | `plan/` | Checkbox overlay + next steps | Ready to implement: [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]) · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004**; S0004 closed 2026-10-18) |
 | `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-18: sample apps removed; **Apolyx-S0004** shipped — 67 registry items, 149 tests, 49 MDX pages) |
