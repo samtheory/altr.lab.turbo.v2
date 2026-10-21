@@ -3,17 +3,33 @@
  * Never imports @libsql/client or touches data/jord.db.
  */
 
+import { getSession } from "@/lib/auth/session";
+
 const DEFAULT_JORD_SERVER_URL = "http://127.0.0.1:8787";
 
 export function getJordServerUrl(): string {
   const raw = process.env.JORD_SERVER_URL?.trim();
-  return (raw && raw.length > 0 ? raw : DEFAULT_JORD_SERVER_URL).replace(/\/$/, "");
+  return (raw && raw.length > 0 ? raw : DEFAULT_JORD_SERVER_URL).replace(
+    /\/$/,
+    "",
+  );
 }
 
 export async function proxyToJord(
   pathWithQuery: string,
   init?: RequestInit,
 ): Promise<Response> {
+  const session = await getSession();
+  if (!session) {
+    return Response.json(
+      {
+        error: "unauthorized",
+        message: "Sign in to Studio before calling jord-server.",
+      },
+      { status: 401 },
+    );
+  }
+
   const url = `${getJordServerUrl()}${pathWithQuery.startsWith("/") ? pathWithQuery : `/${pathWithQuery}`}`;
 
   try {
@@ -21,6 +37,7 @@ export async function proxyToJord(
     if (init?.body && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
+    headers.set("Authorization", `Bearer ${session.bearer}`);
 
     return await fetch(url, {
       ...init,

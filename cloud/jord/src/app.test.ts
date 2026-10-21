@@ -4,12 +4,32 @@ import { createJordClient, fsPathToFileUrl } from "@altr/jord";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { createJordApp } from "./app.js";
+import {
+  signSessionToken,
+  type JordAuthConfig,
+  type JordRole,
+} from "./auth/index.js";
 import { createWriteQueue } from "./queue.js";
 import { truncateWalCheckpoint } from "./wal.js";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
 const temps: string[] = [];
+
+const TEST_AUTH: JordAuthConfig = {
+  secret: "test-jord-server-token",
+  defaultRole: "admin",
+};
+
+function authHeaders(
+  roleOrRaw: JordRole | "raw" = "admin",
+): Record<string, string> {
+  if (roleOrRaw === "raw") {
+    return { Authorization: `Bearer ${TEST_AUTH.secret}` };
+  }
+  const token = signSessionToken(roleOrRaw, TEST_AUTH.secret);
+  return { Authorization: `Bearer ${token}` };
+}
 
 async function rmTempDir(dir: string): Promise<void> {
   for (let i = 0; i < 10; i++) {
@@ -37,12 +57,16 @@ async function testApp() {
   const jord = await createJordClient({
     url: fsPathToFileUrl(path.join(dir, "jord.db")),
   });
-  const app = createJordApp({ jord, enqueueWrite: createWriteQueue() });
+  const app = createJordApp({
+    jord,
+    enqueueWrite: createWriteQueue(),
+    auth: TEST_AUTH,
+  });
   return { app, jord };
 }
 
 describe("jord-server routes", () => {
-  it("health reports libsql", async () => {
+  it("health reports libsql without auth", async () => {
     const { app, jord } = await testApp();
     try {
       const res = await app.request("/health");
@@ -53,12 +77,37 @@ describe("jord-server routes", () => {
     }
   });
 
-  it("POST then GET by bucket round-trips", async () => {
+  it("protected routes return 401 without Authorization", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const res = await app.request("/records?bucket=lab");
+      expect(res.status).toBe(401);
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("protected routes return 401 with bad token", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const res = await app.request("/records?bucket=lab", {
+        headers: { Authorization: "Bearer wrong" },
+      });
+      expect(res.status).toBe(401);
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("POST then GET by bucket round-trips with bearer", async () => {
     const { app, jord } = await testApp();
     try {
       const created = await app.request("/records", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("raw"),
+        },
         body: JSON.stringify({
           bucket: "lab",
           body: JSON.stringify({ hello: "jord" }),
@@ -68,12 +117,16 @@ describe("jord-server routes", () => {
       const row = (await created.json()) as { id: string; version: number };
       expect(row.version).toBe(1);
 
-      const list = await app.request("/records?bucket=lab");
+      const list = await app.request("/records?bucket=lab", {
+        headers: authHeaders("raw"),
+      });
       expect(list.status).toBe(200);
       const rows = (await list.json()) as Array<{ id: string }>;
       expect(rows.map((r) => r.id)).toContain(row.id);
 
-      const one = await app.request(`/records/${row.id}`);
+      const one = await app.request(`/records/${row.id}`, {
+        headers: authHeaders("admin"),
+      });
       expect(one.status).toBe(200);
     } finally {
       await jord.close();
@@ -85,14 +138,20 @@ describe("jord-server routes", () => {
     try {
       const created = await app.request("/records", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
         body: JSON.stringify({ bucket: "lab", body: "{}" }),
       });
       const row = (await created.json()) as { id: string; version: number };
 
       const ok = await app.request(`/records/${row.id}`, {
         method: "PATCH",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
         body: JSON.stringify({ version: 1, body: '{"v":2}' }),
       });
       expect(ok.status).toBe(200);
@@ -100,12 +159,17 @@ describe("jord-server routes", () => {
 
       const stale = await app.request(`/records/${row.id}`, {
         method: "PATCH",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
         body: JSON.stringify({ version: 1, body: '{"v":stale}' }),
       });
       expect(stale.status).toBe(409);
 
-      const current = await app.request(`/records/${row.id}`);
+      const current = await app.request(`/records/${row.id}`, {
+        headers: authHeaders("readonly"),
+      });
       const body = (await current.json()) as { version: number; body: string };
       expect(body.version).toBe(2);
       expect(body.body).toBe('{"v":2}');
@@ -114,16 +178,64 @@ describe("jord-server routes", () => {
     }
   });
 
-  it("schema list/describe and ADD COLUMN round-trip", async () => {
+  it("readonly cannot write records (403)", async () => {
     const { app, jord } = await testApp();
     try {
-      const list = await app.request("/schema/tables");
+      const created = await app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("readonly"),
+        },
+        body: JSON.stringify({ bucket: "lab", body: "{}" }),
+      });
+      expect(created.status).toBe(403);
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("editor can write records but cannot ADD COLUMN (403)", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const created = await app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ bucket: "lab", body: "{}" }),
+      });
+      expect(created.status).toBe(201);
+
+      const added = await app.request("/schema/tables/records/columns", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ name: "editor_flag", type: "INTEGER" }),
+      });
+      expect(added.status).toBe(403);
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("schema list/describe and ADD COLUMN round-trip as admin", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const list = await app.request("/schema/tables", {
+        headers: authHeaders("admin"),
+      });
       expect(list.status).toBe(200);
       expect(((await list.json()) as { tables: string[] }).tables).toContain(
         "records",
       );
 
-      const desc = await app.request("/schema/tables/records");
+      const desc = await app.request("/schema/tables/records", {
+        headers: authHeaders("admin"),
+      });
       expect(desc.status).toBe(200);
       const info = (await desc.json()) as {
         name: string;
@@ -134,12 +246,17 @@ describe("jord-server routes", () => {
 
       const added = await app.request("/schema/tables/records/columns", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
         body: JSON.stringify({ name: "studio_flag", type: "INTEGER" }),
       });
       expect(added.status).toBe(201);
 
-      const again = await app.request("/schema/tables/records");
+      const again = await app.request("/schema/tables/records", {
+        headers: authHeaders("readonly"),
+      });
       const cols = (
         (await again.json()) as { columns: Array<{ name: string }> }
       ).columns.map((c) => c.name);
@@ -147,7 +264,10 @@ describe("jord-server routes", () => {
 
       const dup = await app.request("/schema/tables/records/columns", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
         body: JSON.stringify({ name: "studio_flag", type: "INTEGER" }),
       });
       expect(dup.status).toBe(409);

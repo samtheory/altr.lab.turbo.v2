@@ -11,27 +11,33 @@ import {
   cn,
 } from "@altr/apolyx";
 
-import { STUDIO_NAV } from "@/lib/studio-nav";
+import type { JordRole } from "@/lib/auth/roles";
+import { navForRole } from "@/lib/studio-nav";
 
 type Props = {
+  role: JordRole;
   onNavigate?: () => void;
   className?: string;
 };
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/records") {
-    return pathname === "/records" || (pathname.startsWith("/records/") && !pathname.startsWith("/records/new"));
+    return (
+      pathname === "/records" ||
+      (pathname.startsWith("/records/") && !pathname.startsWith("/records/new"))
+    );
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function StudioSideNav({ onNavigate, className }: Props) {
+export function StudioSideNav({ role, onNavigate, className }: Props) {
   const pathname = usePathname();
+  const groups = navForRole(role);
 
   return (
     <ScrollArea className={cn("h-full", className)}>
       <NavList aria-label="Jord Studio" className="gap-5 p-3">
-        {STUDIO_NAV.map((group) => (
+        {groups.map((group) => (
           <NavListGroup key={group.id} label={group.label}>
             {group.items.map((item) => {
               if (item.status === "soon" || !item.href) {

@@ -14,14 +14,17 @@ import {
   RecordRowFields,
   validateBodyJson,
 } from "@/components/record-row-fields";
+import { canWriteRecords, type JordRole } from "@/lib/auth/roles";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
 type Props = {
   initial: PublicRecord;
+  role: JordRole;
 };
 
-export function RecordDetail({ initial }: Props) {
+export function RecordDetail({ initial, role }: Props) {
   const router = useRouter();
+  const canWrite = canWriteRecords(role);
   const [record, setRecord] = useState(initial);
   const [body, setBody] = useState(initial.body);
   const [metadata, setMetadata] = useState(initial.metadata ?? "");
@@ -51,6 +54,10 @@ export function RecordDetail({ initial }: Props) {
 
   function onSave(e: React.FormEvent) {
     e.preventDefault();
+    if (!canWrite) {
+      setError(`Role "${role}" cannot write records.`);
+      return;
+    }
     setError(null);
     setConflict(false);
     setSaved(false);
@@ -112,6 +119,15 @@ export function RecordDetail({ initial }: Props) {
         <p className="font-mono text-xs text-muted-foreground break-all">{record.id}</p>
       </div>
 
+      {!canWrite ? (
+        <Alert variant="warning">
+          <AlertTitle>Read-only session</AlertTitle>
+          <AlertDescription>
+            Role <code className="font-mono">{role}</code> cannot save row changes.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       {conflict ? (
         <Alert variant="warning">
           <AlertTitle>OCC conflict</AlertTitle>
@@ -164,7 +180,7 @@ export function RecordDetail({ initial }: Props) {
       />
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || !canWrite}>
           {isPending ? "Saving…" : "Save row"}
         </Button>
         <Button

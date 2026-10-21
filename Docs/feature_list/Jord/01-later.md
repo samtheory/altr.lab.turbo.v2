@@ -8,13 +8,14 @@ tags:
   - jord
   - database
   - Jord-S0004
+  - Jord-S0005
 ---
 
 # Jord — later slices
 
-> After [[00-intent]]. Architecture (ports, concurrency): [[02-architecture]]. Studio: [[03-jord-studio]]. Studio S2 as-built: [[../../tech_space/jord/03-s0004-schema]].
+> After [[00-intent]]. Architecture (ports, concurrency): [[02-architecture]]. Studio: [[03-jord-studio]]. Studio S3 as-built: [[../../tech_space/jord/04-s0005-auth]].
 
-None of the engine rows below are Slice 0. Slice 0 is one `file:` database, `LibSqlAdapter` only, and one Hono process. Studio S1–S2 are shipped.
+None of the engine rows below are Slice 0. Slice 0 is one `file:` database, `LibSqlAdapter` only, and one Hono process. Studio S1–S3 are shipped.
 
 ## Engine slices
 
@@ -46,7 +47,7 @@ Detail: [[03-jord-studio]].
 | Studio S1 | `apps/jord-studio` lists `records` — **done** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] |
 | Studio S1.5 | Side nav + table-editor UX — **done** [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] |
 | Studio S2 | Schema visualizer + additive live save — **done** [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] |
-| Studio S3 | Auth + roles |
+| Studio S3 | Auth + feature roles — **done** [[../../plan/Jord/Jord-S0005/README|Jord-S0005]] · [[../../tech_space/jord/04-s0005-auth]] |
 | Studio S4 | Generated CRUD API panel |
 | Studio S5 | Jobs / cron + logs |
 | Studio S6 | Custom APIs + function APIs |

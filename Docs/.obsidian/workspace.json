@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "feature_list/Jord/03-jord-studio.md",
+                "file": "feature_list/Jord/00-intent.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "03-jord-studio"
+              "title": "00-intent"
             }
           }
         ]
@@ -188,8 +188,19 @@
       "graph-styler:Graph Styler": false
     }
   },
-  "active": "0d0147ae7713d13c",
+  "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "feature_list/Jord/01-later.md",
+    "feature_list/Jord/02-architecture.md",
+    "feature_list/Jord/03-jord-studio.md",
+    "tech_space/jord/04-s0005-auth.md",
+    "plan/Jord/Jord-S0005/05-verify.md",
+    "plan/Jord/Jord-S0005/04-role-gates.md",
+    "plan/Jord/Jord-S0005/03-studio-session.md",
+    "plan/Jord/Jord-S0005/02-server-auth.md",
+    "plan/Jord/Jord-S0005/01-auth-contract.md",
+    "plan/Jord/Jord-S0005/README.md",
+    "plan/Jord/Jord-S0005",
     "tech_space/jord/03-s0004-schema.md",
     "plan/Jord/Jord-S0004/06-verify.md",
     "plan/Jord/Jord-S0004/05-live-save-add-column.md",
@@ -208,24 +219,13 @@
     "plan/Jord/Jord-S0003",
     "tech_space/jord/01-s0002-studio-s1.md",
     "plan/Jord/Jord-S0002/06-verify.md",
-    "plan/Jord/Jord-S0002/05-local-gate.md",
-    "plan/Jord/Jord-S0002/04-record-mutate.md",
-    "plan/Jord/Jord-S0002/03-records-list.md",
-    "plan/Jord/Jord-S0002/02-server-proxy.md",
-    "plan/Jord/Jord-S0002/01-app-scaffold.md",
-    "plan/Jord/Jord-S0002/README.md",
     "plan/Jord/Jord-S0002",
-    "tech_space/jord/00-s0001-slice0.md",
     "tech_space/jord",
-    "feature_list/00-elements-dependency-rules.md",
-    "agents/mimir/subagents/heimdall.md",
-    "agents/mimir/subagents/saga.md",
     "agents/mimir/subagents",
     "agents/mimir/skills",
     "agents/mimir/prompts",
     "agents/mimir/instructions",
     "agents/mimir",
-    "plan/ui-kit/Apolyx-S0005",
     "report/assets/apolyx-s0004/popover-slide-dark.png",
     "report/assets/apolyx-s0004/popover-pop-light.png",
     "report/assets/apolyx-s0004/popover-notifications-dark.png",

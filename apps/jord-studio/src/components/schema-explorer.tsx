@@ -23,6 +23,7 @@ import {
   cn,
 } from "@altr/apolyx";
 
+import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
 import {
   COLUMN_TYPES,
   previewAddColumnSql,
@@ -34,7 +35,12 @@ type ViewMode = "browser" | "visualizer";
 
 type ApiError = { error?: string; message?: string };
 
-export function SchemaExplorer() {
+type Props = {
+  role: JordRole;
+};
+
+export function SchemaExplorer({ role }: Props) {
+  const canAlter = canAlterSchema(role);
   const [tables, setTables] = useState<string[] | null>(null);
   const [selected, setSelected] = useState<string>("records");
   const [tableInfo, setTableInfo] = useState<SchemaTable | null>(null);
@@ -123,6 +129,10 @@ export function SchemaExplorer() {
 
   function onAddColumn(e: React.FormEvent) {
     e.preventDefault();
+    if (!canAlter) {
+      setFormError(`Role "${role}" cannot alter schema.`);
+      return;
+    }
     setFormError(null);
     setFormOk(null);
     const name = colName.trim();
@@ -281,6 +291,16 @@ export function SchemaExplorer() {
               </p>
             </div>
 
+            {!canAlter ? (
+              <Alert variant="warning">
+                <AlertTitle>Schema locked for this role</AlertTitle>
+                <AlertDescription>
+                  Role <code className="font-mono">{role}</code> cannot run{" "}
+                  <code className="font-mono">ADD COLUMN</code> (admin only).
+                </AlertDescription>
+              </Alert>
+            ) : null}
+
             {formError ? (
               <Alert variant="destructive">
                 <AlertTitle>DDL failed</AlertTitle>
@@ -323,7 +343,7 @@ export function SchemaExplorer() {
               {sqlPreview}
             </pre>
 
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || !canAlter}>
               {isPending ? "Applying…" : "Apply ADD COLUMN"}
             </Button>
           </form>

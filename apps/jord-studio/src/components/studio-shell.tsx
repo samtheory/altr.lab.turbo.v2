@@ -12,9 +12,17 @@ import {
   SheetTrigger,
 } from "@altr/apolyx";
 
+import { SessionBadge } from "@/components/session-badge";
 import { StudioSideNav } from "@/components/studio-side-nav";
+import type { JordRole } from "@/lib/auth/roles";
 
-export function StudioShell({ children }: { children: React.ReactNode }) {
+type Props = {
+  children: React.ReactNode;
+  role: JordRole;
+  bypass: boolean;
+};
+
+export function StudioShell({ children, role, bypass }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -36,7 +44,11 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
             <SheetHeader className="border-b border-border px-4 py-3 text-left">
               <SheetTitle className="font-display">Jord Studio</SheetTitle>
             </SheetHeader>
-            <StudioSideNav onNavigate={() => setMobileOpen(false)} className="max-h-[calc(100vh-4rem)]" />
+            <StudioSideNav
+              role={role}
+              onNavigate={() => setMobileOpen(false)}
+              className="max-h-[calc(100vh-4rem)]"
+            />
           </SheetContent>
         </Sheet>
 
@@ -49,11 +61,12 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
         <span className="hidden text-xs text-muted-foreground sm:inline">
           libSQL · table <code className="font-mono">records</code>
         </span>
+        <SessionBadge role={role} bypass={bypass} />
       </header>
 
       <div className="flex min-h-0 flex-1">
         <aside className="hidden w-56 shrink-0 border-r border-border bg-muted/20 md:block lg:w-60">
-          <StudioSideNav className="max-h-[calc(100vh-3.5rem)]" />
+          <StudioSideNav role={role} className="max-h-[calc(100vh-3.5rem)]" />
         </aside>
         <div className="min-w-0 flex-1">{children}</div>
       </div>

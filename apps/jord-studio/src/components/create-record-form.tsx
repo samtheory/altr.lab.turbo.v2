@@ -13,10 +13,16 @@ import {
   RecordRowFields,
   validateBodyJson,
 } from "@/components/record-row-fields";
+import { canWriteRecords, type JordRole } from "@/lib/auth/roles";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
-export function CreateRecordForm() {
+type Props = {
+  role: JordRole;
+};
+
+export function CreateRecordForm({ role }: Props) {
   const router = useRouter();
+  const canWrite = canWriteRecords(role);
   const [bucket, setBucket] = useState("lab");
   const [body, setBody] = useState('{\n  "hello": "jord"\n}');
   const [metadata, setMetadata] = useState("");
@@ -27,6 +33,10 @@ export function CreateRecordForm() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!canWrite) {
+      setError(`Role "${role}" cannot write records.`);
+      return;
+    }
     setError(null);
     const jsonErr = validateBodyJson(body, validateJson);
     setBodyError(jsonErr);
@@ -70,6 +80,15 @@ export function CreateRecordForm() {
         </p>
       </div>
 
+      {!canWrite ? (
+        <Alert variant="warning">
+          <AlertTitle>Read-only session</AlertTitle>
+          <AlertDescription>
+            Role <code className="font-mono">{role}</code> cannot insert rows.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       {error ? (
         <Alert variant="destructive">
           <AlertTitle>Insert failed</AlertTitle>
@@ -94,7 +113,7 @@ export function CreateRecordForm() {
       />
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || !canWrite}>
           {isPending ? "Inserting…" : "Insert row"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push("/records")}>

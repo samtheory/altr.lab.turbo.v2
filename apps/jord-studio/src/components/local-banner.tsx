@@ -1,12 +1,19 @@
 import { Alert, AlertDescription, AlertTitle } from "@altr/apolyx";
 
-export function LocalBanner() {
+import type { JordRole } from "@/lib/auth/roles";
+
+type Props = {
+  role: JordRole;
+  bypass: boolean;
+};
+
+export function LocalBanner({ role, bypass }: Props) {
   return (
     <Alert variant="warning" className="rounded-none border-x-0 border-t-0">
       <AlertTitle>Local Studio — not for production</AlertTitle>
       <AlertDescription>
-        Jord Studio S1 is a lab control plane. No multi-tenant auth, no roles. Do not expose this
-        process beyond your machine.
+        Single-machine control plane · role <code className="font-mono">{role}</code>
+        {bypass ? " · env bypass (JORD_STUDIO_OPEN=1)" : ""} · do not expose beyond your machine.
       </AlertDescription>
     </Alert>
   );

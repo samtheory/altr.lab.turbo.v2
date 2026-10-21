@@ -1,3 +1,6 @@
+import type { JordRole } from "@/lib/auth/roles";
+import { canWriteRecords } from "@/lib/auth/roles";
+
 export type StudioNavStatus = "live" | "soon";
 
 export type StudioNavItem = {
@@ -7,6 +10,8 @@ export type StudioNavItem = {
   status: StudioNavStatus;
   /** Short badge for placeholders, e.g. "S5" */
   soonLabel?: string;
+  /** If set, item is hidden when the role cannot write records. */
+  requiresWrite?: boolean;
 };
 
 export type StudioNavGroup = {
@@ -17,7 +22,7 @@ export type StudioNavGroup = {
 
 /**
  * Single source for Studio side menu.
- * Live = wired in S1/S1.5. soon = visible but not implemented.
+ * Live = wired. soon = visible but not implemented.
  */
 export const STUDIO_NAV: StudioNavGroup[] = [
   {
@@ -25,7 +30,13 @@ export const STUDIO_NAV: StudioNavGroup[] = [
     label: "Data",
     items: [
       { id: "tables", label: "Tables · records", href: "/records", status: "live" },
-      { id: "insert", label: "Insert row", href: "/records/new", status: "live" },
+      {
+        id: "insert",
+        label: "Insert row",
+        href: "/records/new",
+        status: "live",
+        requiresWrite: true,
+      },
     ],
   },
   {
@@ -51,16 +62,23 @@ export const STUDIO_NAV: StudioNavGroup[] = [
     items: [
       { id: "schema", label: "Schema visualizer", href: "/schema", status: "live" },
       { id: "policies", label: "Policies", status: "soon", soonLabel: "S7" },
-      { id: "roles", label: "Roles", status: "soon", soonLabel: "S7" },
     ],
   },
   {
     id: "help",
     label: "Help",
     items: [
-      { id: "local", label: "Local lab gate", href: "/help", status: "live" },
+      { id: "session", label: "Session · role", href: "/help", status: "live" },
     ],
   },
 ];
+
+export function navForRole(role: JordRole): StudioNavGroup[] {
+  const write = canWriteRecords(role);
+  return STUDIO_NAV.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.requiresWrite || write),
+  }));
+}
 
 export const RECORD_BUCKETS = ["lab", "artemis", "jord"] as const;

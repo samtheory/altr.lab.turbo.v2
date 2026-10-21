@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ApolyxProvider, ApolyxThemeScript } from "@altr/apolyx";
 
 import { LocalBanner } from "@/components/local-banner";
 import { StudioBlocked } from "@/components/studio-gate";
 import { StudioShell } from "@/components/studio-shell";
-import { isStudioOpen } from "@/lib/studio-gate";
+import { getServerToken } from "@/lib/auth/config";
+import { getSession } from "@/lib/auth/session";
 
 import "./globals.css";
 
@@ -17,8 +19,13 @@ export const metadata: Metadata = {
   description: "Local control plane for Jord — libSQL table editor via jord-server.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const open = isStudioOpen();
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  const pathname = (await headers()).get("x-jord-pathname") ?? "";
+  const isLogin = pathname === "/login";
+  const session = await getSession();
+  const tokenConfigured = Boolean(getServerToken());
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -28,15 +35,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <ApolyxProvider defaultTheme="default" defaultMode="system">
           <div className="min-h-screen bg-background text-foreground">
-            {open ? (
+            {isLogin ? (
+              <main id="main">{children}</main>
+            ) : !tokenConfigured ? (
+              <StudioBlocked reason="missing-token" />
+            ) : session ? (
               <>
-                <LocalBanner />
-                <StudioShell>
+                <LocalBanner role={session.role} bypass={session.bypass} />
+                <StudioShell role={session.role} bypass={session.bypass}>
                   <main id="main">{children}</main>
                 </StudioShell>
               </>
             ) : (
-              <StudioBlocked />
+              <StudioBlocked reason="signed-out" />
             )}
           </div>
         </ApolyxProvider>

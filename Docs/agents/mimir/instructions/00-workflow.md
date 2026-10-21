@@ -27,7 +27,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0004/README]] closed 2026-10-21 — open next `Jord-S000N` for Studio S3+)
+4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0005/README]] closed 2026-10-21 — open next `Jord-S000N` for Studio S4+)
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. This file
 
@@ -67,6 +67,10 @@ See [[../../../plan/Jord/Jord-S0003/README]] (done 2026-10-21). As-built: [[../.
 ### Closed — Jord-S0004 (Studio S2 schema foundation)
 
 See [[../../../plan/Jord/Jord-S0004/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/03-s0004-schema]].
+
+### Closed — Jord-S0005 (Studio S3 auth + feature roles)
+
+See [[../../../plan/Jord/Jord-S0005/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/04-s0005-auth]].
 
 ## Skills discipline
 

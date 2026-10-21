@@ -2,6 +2,8 @@ import { createJordClient } from "@altr/jord";
 import { serve } from "@hono/node-server";
 
 import { createJordApp } from "./app.js";
+import { resolveAuthConfig } from "./auth/index.js";
+import { loadLocalEnv } from "./load-env.js";
 import { createWriteQueue } from "./queue.js";
 import {
   resolveWalCheckpointMs,
@@ -10,6 +12,20 @@ import {
 } from "./wal.js";
 
 export { createJordApp } from "./app.js";
+export {
+  canAlterSchema,
+  canWriteRecords,
+  DEFAULT_SESSION_TTL_MS,
+  isJordRole,
+  JORD_ROLES,
+  parseAuthorizationHeader,
+  resolveAuthConfig,
+  resolveBearerRole,
+  signSessionToken,
+  type JordAuthConfig,
+  type JordRole,
+  type JordSessionClaims,
+} from "./auth/index.js";
 export { createWriteQueue } from "./queue.js";
 export {
   DEFAULT_WAL_CHECKPOINT_MS,
@@ -23,11 +39,13 @@ const DEFAULT_PORT = 8787;
 export async function startJordServer(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<{ close: () => Promise<void> }> {
+  loadLocalEnv();
+  const auth = resolveAuthConfig(env);
   const jord = await createJordClient({
     url: env.DATABASE_URL,
   });
   const enqueueWrite = createWriteQueue();
-  const app = createJordApp({ jord, enqueueWrite });
+  const app = createJordApp({ jord, enqueueWrite, auth });
   const hygiene = startWalHygiene(jord, resolveWalCheckpointMs(env));
 
   const port = Number(env.PORT) || DEFAULT_PORT;

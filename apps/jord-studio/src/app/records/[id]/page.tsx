@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle, Button } from "@altr/apolyx";
 
 import { RecordDetail } from "@/components/record-detail";
+import { getSession } from "@/lib/auth/session";
 import { proxyToJord } from "@/lib/jord-proxy";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
@@ -11,6 +12,8 @@ type Props = {
 
 export default async function RecordPage({ params }: Props) {
   const { id } = await params;
+  const session = await getSession();
+  const role = session?.role ?? "readonly";
 
   let record: PublicRecord | null = null;
   let loadError: string | null = null;
@@ -44,5 +47,5 @@ export default async function RecordPage({ params }: Props) {
     );
   }
 
-  return <RecordDetail initial={record} />;
+  return <RecordDetail initial={record} role={role} />;
 }

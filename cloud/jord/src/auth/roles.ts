@@ -1,0 +1,17 @@
+/** Feature roles for Jord Studio / API (S3). Not SQL policies (S7). */
+
+export const JORD_ROLES = ["admin", "editor", "readonly"] as const;
+
+export type JordRole = (typeof JORD_ROLES)[number];
+
+export function isJordRole(value: string): value is JordRole {
+  return (JORD_ROLES as readonly string[]).includes(value);
+}
+
+export function canWriteRecords(role: JordRole): boolean {
+  return role === "admin" || role === "editor";
+}
+
+export function canAlterSchema(role: JordRole): boolean {
+  return role === "admin";
+}
