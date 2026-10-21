@@ -27,7 +27,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0007/README]] closed 2026-10-21 — open next `Jord-S000N` for Studio S6+)
+4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0008/README]] closed 2026-10-21 — open next `Jord-S000N` for Studio S7+)
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. This file
 
@@ -79,6 +79,10 @@ See [[../../../plan/Jord/Jord-S0006/README]] (done 2026-10-21). As-built: [[../.
 ### Closed — Jord-S0007 (Studio S5 jobs / cron + logs)
 
 See [[../../../plan/Jord/Jord-S0007/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/06-s0007-jobs-logs]].
+
+### Closed — Jord-S0008 (Studio S6 custom + function APIs)
+
+See [[../../../plan/Jord/Jord-S0008/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/07-s0008-custom-function-apis]].
 
 ## Skills discipline
 

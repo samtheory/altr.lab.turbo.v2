@@ -18,7 +18,7 @@ tags:
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S5 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] · [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] · [[../../plan/Jord/Jord-S0005/README|Jord-S0005]] · [[../../plan/Jord/Jord-S0006/README|Jord-S0006]] · [[../../plan/Jord/Jord-S0007/README|Jord-S0007]] · as-built through [[../../tech_space/jord/06-s0007-jobs-logs]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S6 shipped:** through [[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · as-built [[../../tech_space/jord/07-s0008-custom-function-apis]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -99,7 +99,7 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 | S3 | Auth + feature roles (`admin` / `editor` / `readonly`) | S1 — **done** ([[../../plan/Jord/Jord-S0005/README]] · [[../../tech_space/jord/04-s0005-auth]]) |
 | S4 | Generated CRUD API panel | S1 — **done** ([[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]]) |
 | S5 | Jobs / cron + logs | Server job runner — **done** ([[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]]) |
-| S6 | Custom + function APIs editor | S4 |
+| S6 | Custom + function APIs editor | S4 — **done** ([[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · [[../../tech_space/jord/07-s0008-custom-function-apis]]) |
 | S7 | Triggers, policies | S2 + dialect seam |
 | S8 | Postgres connection (`PostgresAdapter`) | Postgres driver installed |
 | S9 | Realtime subscriptions UI | CDC / SSE / WS on server |
@@ -125,4 +125,5 @@ S1.5 plan (closed): [[../../plan/Jord/Jord-S0003/README]] · [[../../tech_space/
 S2 plan (closed): [[../../plan/Jord/Jord-S0004/README]] · [[../../tech_space/jord/03-s0004-schema]].  
 S3 plan (closed): [[../../plan/Jord/Jord-S0005/README]] · [[../../tech_space/jord/04-s0005-auth]].  
 S4 plan (closed): [[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]].  
-S5 plan (closed): [[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]]. Later phases (S6+) get their own plan folders when opened by mimir.
+S5 plan (closed): [[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]].  
+S6 plan (closed): [[../../plan/Jord/Jord-S0008/README]] · [[../../tech_space/jord/07-s0008-custom-function-apis]]. Later phases (S7+) get their own plan folders when opened by mimir.

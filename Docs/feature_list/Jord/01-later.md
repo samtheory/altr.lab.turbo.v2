@@ -15,9 +15,9 @@ tags:
 
 # Jord — later slices
 
-> After [[00-intent]]. Architecture (ports, concurrency): [[02-architecture]]. Studio: [[03-jord-studio]]. Studio S5 as-built: [[../../tech_space/jord/06-s0007-jobs-logs]].
+> After [[00-intent]]. Architecture (ports, concurrency): [[02-architecture]]. Studio: [[03-jord-studio]]. Studio S6 as-built: [[../../tech_space/jord/07-s0008-custom-function-apis]].
 
-None of the engine rows below are Slice 0. Slice 0 is one `file:` database, `LibSqlAdapter` only, and one Hono process. Studio S1–S5 are shipped.
+None of the engine rows below are Slice 0. Slice 0 is one `file:` database, `LibSqlAdapter` only, and one Hono process. Studio S1–S6 are shipped.
 
 ## Engine slices
 
@@ -52,7 +52,7 @@ Detail: [[03-jord-studio]].
 | Studio S3 | Auth + feature roles — **done** [[../../plan/Jord/Jord-S0005/README|Jord-S0005]] · [[../../tech_space/jord/04-s0005-auth]] |
 | Studio S4 | Generated CRUD API panel — **done** [[../../plan/Jord/Jord-S0006/README|Jord-S0006]] · [[../../tech_space/jord/05-s0006-generated-api]] |
 | Studio S5 | Jobs / cron + logs — **done** [[../../plan/Jord/Jord-S0007/README|Jord-S0007]] · [[../../tech_space/jord/06-s0007-jobs-logs]] |
-| Studio S6 | Custom APIs + function APIs |
+| Studio S6 | Custom APIs + function APIs — **done** [[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · [[../../tech_space/jord/07-s0008-custom-function-apis]] |
 | Studio S7 | Triggers, policies (libSQL middleware / Postgres RLS compile) |
 | Studio S8 | Postgres connection in Studio (`PostgresAdapter`) |
 | Studio S9 | Realtime subscriptions UI (CDC / SSE / WS) |

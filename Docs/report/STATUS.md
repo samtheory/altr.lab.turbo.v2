@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot: Jord-S0001–S0007 shipped; next Studio S6 or Artemis"
+description: "Audited snapshot: Jord-S0001–S0008 shipped; next Studio S7 or Artemis"
 created: 2026-09-19
 updated: 2026-10-21
 tags:
@@ -14,25 +14,26 @@ tags:
   - Jord-S0005
   - Jord-S0006
   - Jord-S0007
+  - Jord-S0008
 ---
 
 # Status
 
-Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0007** (Studio S5 jobs/logs) · No active Jord sprint · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
+Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0008** (Studio S6 custom/function APIs) · No active Jord sprint · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Implemented
 
 - **Jord Slice 0 (`Jord-S0001`)** — [[../tech_space/jord/00-s0001-slice0]]
-- **Jord Studio S1–S4** — through [[../tech_space/jord/05-s0006-generated-api]]
-- **Jord Studio S5 (`Jord-S0007`)** — [[../tech_space/jord/06-s0007-jobs-logs]]
-  - `jord_jobs` / `jord_job_runs` + in-process scheduler
-  - Built-in kinds: `wal_checkpoint`, `echo`, `records_count`
-  - Log ring + Studio **Jobs** / **Logs** panels
+- **Jord Studio S1–S5** — through [[../tech_space/jord/06-s0007-jobs-logs]]
+- **Jord Studio S6 (`Jord-S0008`)** — [[../tech_space/jord/07-s0008-custom-function-apis]]
+  - `jord_functions` / `jord_custom_apis` + built-in step runner
+  - `METHOD /x/:slug` + `POST /functions/:id/invoke`
+  - Studio **Custom APIs** / **Function APIs** panels
 - **`@altr/apolyx`** through **S0005** · Apolyx-first · docs_man / apollo / mimir
 
 ## Planned (repo) — **do next**
 
-1. **Jord Studio S6+** (custom/function APIs) — open new `Jord-S000N` · [[../feature_list/Jord/03-jord-studio]]
+1. **Jord Studio S7+** (triggers/policies) — open new `Jord-S000N` · [[../feature_list/Jord/03-jord-studio]]
 2. Artemis — idea [[../idea/artemis/README]]
 3. Tia — intent [[../feature_list/tia/README]]
 4. CI pipeline
