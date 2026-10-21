@@ -12,10 +12,10 @@ tags:
 
 # Jord-S0001 — libSQL file and one server
 
-> Who: the implementer. **Status: ready — implement now** (Apolyx-S0005 closed 2026-10-21). No Jord packages exist yet. Contract: [[../../../feature_list/Jord/00-intent]]. Architecture: [[../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../idea/Jord/2026-10-18-sharpen]]. Roadmap: [[../../00-roadmap-apolyx-jord-artemis]].
+> Who: **mimir** (or specialists). **Status: ready — implement now** (Apolyx-S0005 closed 2026-10-21). No Jord packages exist yet. Contract: [[../../../feature_list/Jord/00-intent]]. Architecture: [[../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../idea/Jord/2026-10-18-sharpen]]. Roadmap: [[../../00-roadmap-apolyx-jord-artemis]]. Agent: [[../../../agents/mimir/00-index]].
 
 **Sprint id:** `Jord-S0001`  
-**Opened:** 2026-10-18 · **Ready:** 2026-10-18 · **Active:** 2026-10-21 · **Owner:** —  
+**Opened:** 2026-10-18 · **Ready:** 2026-10-18 · **Active:** 2026-10-21 · **Owner:** mimir  
 **Do not start Jord Studio, Postgres, Redis, Mongo, or sqlite-vec in this sprint.**
 
 ## Goal

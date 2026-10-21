@@ -27,8 +27,8 @@ flowchart LR
 | Order | Track | What “done” means | Docs |
 |-------|--------|-------------------|------|
 | **1** | **Apolyx-S0005** | Select, Combobox, Pagination, Accordion, Scroll Area, Progress, Radio Group shipped | **Closed 2026-10-21** — [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · [[../tech_space/ui-kit/10-s0005-product-gate]] |
-| **2** | **Jord-S0001** | `data/jord.db`, `@altr/jord`, `@altr/jord-server`, OCC `records`, WAL + snapshot | **← implement now** · Intent [[../feature_list/Jord/00-intent]] · Plan [[Jord/Jord-S0001/README]] |
-| **3** | **Jord Studio S1** | `apps/jord-studio` lists / browses `records` via server, Apolyx UI | [[../feature_list/Jord/03-jord-studio]] |
+| **2** | **Jord-S0001** | `data/jord.db`, `@altr/jord`, `@altr/jord-server`, OCC `records`, WAL + snapshot | **← implement now via [[../agents/mimir/00-index|mimir]]** · Intent [[../feature_list/Jord/00-intent]] · Plan [[Jord/Jord-S0001/README]] |
+| **3** | **Jord Studio S1** | `apps/jord-studio` lists / browses `records` via server; UI by **apollo** | [[../feature_list/Jord/03-jord-studio]] |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | Idea [[../idea/artemis/README]] (not promoted yet) |
 
 ## Why Apolyx before Jord engine?

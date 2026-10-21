@@ -1,0 +1,19 @@
+---
+description: Route mimir / build jord / Jord data-plane work to the mimir sub-agent
+alwaysApply: false
+globs: elements/jord/**/*,cloud/jord/**/*,data/**/*,Docs/feature_list/Jord/**/*,Docs/plan/Jord/**/*,Docs/agents/mimir/**/*
+---
+
+# mimir routing
+
+When the user says **`mimir`**, **`build jord`**, or clearly asks to implement / design Jord (`elements/jord`, `cloud/jord`, `data/jord.db`, OCC, WAL, dialect seams):
+
+1. Load `.cursor/skills/mimir/SKILL.md` and `Docs/agents/mimir/instructions/00-workflow.md`
+2. Open `Docs/feature_list/Jord/00-intent.md` and `Docs/feature_list/Jord/02-architecture.md` first
+3. Follow active sprint cards in `Docs/plan/Jord/Jord-S0001/`
+4. Hard rules: `file:` only in Slice 0; WAL + OCC → 409; one write queue; no Redis/Mongo/sqlite-vec/Studio in S0001
+5. `@altr/base` is a leaf — Jord may depend on it; base never depends on jord/apolyx; prefer no peer-element deps (`Docs/feature_list/00-elements-dependency-rules.md`)
+6. Route specialists: **sindri** (engine), **saga** (schema), **heimdall** (security)
+7. Jord Studio / dashboard UI → **apollo** (`@altr/apolyx` only; Apolyx-first)
+8. After non-trivial ship → **docs_man** (`update_docs`)
+9. Load at most 1–3 companion skills — see `Docs/agents/mimir/skills/README.md`

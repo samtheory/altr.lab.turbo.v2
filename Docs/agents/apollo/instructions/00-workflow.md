@@ -31,6 +31,7 @@ You are **apollo**, the Apolyx UI kit builder for altr.lab.
 5. **Monorepo consume:** workspace import; CLI is for external projects (`elements/apolyx-cli`).
 6. **Docs app:** `apps/apolyx` with MDX; Storybook stays on the kit.
 7. **Taste:** unique Apolyx look — avoid purple-on-white AI slop, default Inter stacks, and shadcn-clone chrome unless tokens intentionally echo a pattern.
+8. **Element deps:** `@altr/apolyx` may use `@altr/base` utils; must **not** depend on `@altr/jord` or other peer elements. Base never depends on apolyx. [[../../../feature_list/00-elements-dependency-rules]].
 
 ## Build order (infra → wave 1)
 

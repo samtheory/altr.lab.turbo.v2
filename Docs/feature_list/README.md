@@ -22,6 +22,7 @@ App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Spr
 
 | Track | Index | Intent |
 |-------|-------|--------|
+| **Elements deps** | — | [[00-elements-dependency-rules]] — `@altr/base` leaf; peer elements stay independent |
 | **Apolyx UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — S0001–**S0005** closed · latest [[ui-kit/06-apolyx-s0005-product-gate]] |
 | **Jord** | [[Jord/README]] | [[Jord/00-intent]] — **implement next** · Plan [[../plan/Jord/Jord-S0001/README]] · Architecture [[Jord/02-architecture]] · Studio [[Jord/03-jord-studio]] |
 | **Tia** | [[tia/README]] | [[tia/00-intent]] — promoted; **no code**; plan not started |

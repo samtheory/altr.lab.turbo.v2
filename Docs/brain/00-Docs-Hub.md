@@ -43,3 +43,4 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 |-------|------|----------|
 | **docs_man** | Docs vault | `update_docs`, `document it` |
 | **apollo** | Apolyx UI kit implementation | `apollo`, `build apolyx` |
+| **mimir** | Jord data plane (`elements/jord`, `cloud/jord`); specialists sindri / saga / heimdall; Studio UI → apollo | `mimir`, `build jord` |

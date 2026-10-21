@@ -30,7 +30,7 @@ Every product in the catalog needs one store. Artemis will keep **agent scratchp
 | Server | `@altr/jord-server` in `cloud/jord` |
 | Docs folders | `idea/Jord`, `feature_list/Jord`, `plan/Jord` |
 
-`@altr/base` stays for shared utils. It must not stay a second database client after this slice.
+`@altr/base` stays for shared **framework utils**. Jord (and other packages) **may** depend on it. Base must **not** depend on Jord or any other element, and must not stay a second database client after this slice. See [[../00-elements-dependency-rules]].
 
 ## What (Slice 0)
 

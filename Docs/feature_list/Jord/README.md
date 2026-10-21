@@ -14,7 +14,7 @@ tags:
 
 Intent for **Jord** (engine) and **Jord Studio** (control plane). **Implement Slice 0 now.**
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: [[../../plan/Jord/README]] · Lab sequence: [[../../plan/00-roadmap-apolyx-jord-artemis]]
+Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: [[../../plan/Jord/README]] · Builder: [[../../agents/mimir/00-index|mimir]] · Lab sequence: [[../../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Truth for this track
 

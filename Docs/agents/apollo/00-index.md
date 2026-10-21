@@ -54,6 +54,7 @@ Canonical intent: [[../../feature_list/ui-kit/00-intent]]
 | Cursor rule | `.cursor/rules/apollo.mdc` |
 | Skills map for this agent | [[skills/README]] |
 | Docs steward (after ship) | [[../docs_man/00-index]] |
+| Jord data plane (peer) | [[../mimir/00-index]] — Studio / dashboard screens for Jord go through **apollo** (Apolyx-first); data APIs stay with mimir |
 
 ## Skill stack (load small)
 

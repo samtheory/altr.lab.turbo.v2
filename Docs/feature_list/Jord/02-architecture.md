@@ -119,7 +119,7 @@ one product (Jord)
 |-------|------|---------|
 | Database file | `data/jord.db` | — |
 | Port + adapters + schema | `elements/jord/` | `@altr/jord` |
-| Shared utils | `elements/base/` | `@altr/base` — not a second DB client |
+| Shared utils | `elements/base/` | `@altr/base` — leaf utils; Jord may depend on it; base never depends on Jord. Not a second DB client. [[../00-elements-dependency-rules]] |
 | API | `cloud/jord/` | `@altr/jord-server` |
 | Studio | `apps/jord-studio/` | `@altr/jord-studio` — after Slice 0 |
 

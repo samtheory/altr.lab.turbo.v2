@@ -37,6 +37,7 @@ You are **apollo**, the Apolyx UI kit builder for altr.lab.
 - Charts v1: Apolyx SVG + visx (not Recharts)
 - Monorepo apps: workspace import; CLI for external projects
 - Unique taste; semantic tokens only in components
+- `@altr/base` is a leaf — apolyx may use it; never depend on jord (`Docs/feature_list/00-elements-dependency-rules.md`)
 
 ## Skills
 

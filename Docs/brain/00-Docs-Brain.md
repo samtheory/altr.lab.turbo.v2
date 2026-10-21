@@ -15,9 +15,9 @@ tags:
 
 > Open this file first. It is the shared map for people in Obsidian and agents in Cursor.
 
-**Agents:** [[../agents/docs_man/00-index|docs_man]] · [[../agents/apollo/00-index|apollo]] · **Folder hub:** [[00-Docs-Hub]]
+**Agents:** [[../agents/docs_man/00-index|docs_man]] · [[../agents/apollo/00-index|apollo]] · [[../agents/mimir/00-index|mimir]] · **Folder hub:** [[00-Docs-Hub]]
 
-**Triggers:** `update_docs` / `document it` → **docs_man**. `apollo` / `build apolyx` → **apollo** (Apolyx UI kit).
+**Triggers:** `update_docs` / `document it` → **docs_man**. `apollo` / `build apolyx` → **apollo** (Apolyx UI kit). `mimir` / `build jord` → **mimir** (Jord; specialists sindri / saga / heimdall; Studio UI → apollo).
 
 ---
 
@@ -105,9 +105,10 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | Removed 2026-10-18 | `apps/hub`, `apps/web`, `apps/dashboard`, `apps/trading-ui`, `cloud/hono-server`, `cloud/ai-bot-agent` | [[../tech_space/03-sample-apps-removed]] |
 | Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · S0005 closed: [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · As-built [[../tech_space/ui-kit/10-s0005-product-gate]] · Sprints [[../plan/ui-kit/README]] · Apolyx-first: `.cursor/rules/apolyx-first.mdc` · Builder: [[../agents/apollo/00-index]] |
-| Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
+| Data plane (**Jord**) | `elements/jord` · `cloud/jord` · `data/jord.db` (not shipped yet) | Intent: [[../feature_list/Jord/00-intent]] · Plan [[../plan/Jord/Jord-S0001/README]] · Builder: [[../agents/mimir/00-index]] (sindri / saga / heimdall; Studio UI → apollo) |
+| Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → **Jord-S0001 (implement now)** → Jord Studio S1 → Artemis.
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → **Jord-S0001 via mimir (implement now)** → Jord Studio S1 → Artemis.
 
 Primary DB: **Jord** — plan [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]). Architecture [[../feature_list/Jord/02-architecture]] · Studio [[../feature_list/Jord/03-jord-studio]]. PocketBase stays optional.
 
@@ -139,6 +140,7 @@ How-to: [[../Altr.lab/agent-skills]] · Graft: [[../Altr.lab/graft]] · MCP: `.c
 |-------|----------|-----|
 | `docs-man` | `.agents/skills/docs-man/` · `.cursor/skills/docs-man/` | Vault update order, frontmatter, wikilinks |
 | `apollo` | `.agents/skills/apollo/` · `.cursor/skills/apollo/` · [[../agents/apollo/00-index]] | Build Apolyx UI kit |
+| `mimir` | `.agents/skills/mimir/` · `.cursor/skills/mimir/` · [[../agents/mimir/00-index]] | Build Jord data plane (sindri / saga / heimdall) |
 | `docs-brain` | `.cursor/skills/docs-brain/` | Keep this living map honest |
 | `pdf` | `.agents/skills/pdf/` | Read/create/merge PDFs |
 | `doc-coauthoring` | `.agents/skills/doc-coauthoring/` | Large new specs with guided loop |

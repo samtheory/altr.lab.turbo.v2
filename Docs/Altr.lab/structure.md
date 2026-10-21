@@ -2,10 +2,11 @@
 title: "Monorepo structure"
 description: "altr.lab apps / cloud / elements layout and package scope, including planned Jord packages"
 created: 2026-09-19
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - altr-lab
   - structure
+  - base
 ---
 
 # Monorepo structure
@@ -19,7 +20,7 @@ altr.lab.turbo.v2/
 ├── elements/
 │   ├── ui-kit/           # @altr/apolyx — Apolyx UI kit (Tailwind + Motion + Storybook :6006)
 │   ├── apolyx-cli/       # apolyx — CLI (init / add / list)
-│   └── base/             # @altr/base — utils, content, env, errors, …
+│   └── base/             # @altr/base — leaf utils (no deps on other elements)
 ├── data/                 # gitignored runtime files (planned: jord.db)
 ├── Docs/                 # Obsidian second brain
 ├── package.json
@@ -27,6 +28,14 @@ altr.lab.turbo.v2/
 ├── turbo.json
 └── tsconfig.base.json
 ```
+
+## Element dependency rules
+
+Full contract: [[../feature_list/00-elements-dependency-rules]].
+
+1. **`@altr/base` is a leaf** — shared framework utilities only; **never** depends on jord, apolyx, or other elements.
+2. **Apps / cloud / elements may depend on base** for env, errors, Result, content helpers, etc.
+3. **Prefer zero peer-element deps** (`jord` ↛ `apolyx`, etc.) so packages stay add/remove-able per project. Compose in apps/cloud.
 
 ## Planned Jord packages (not in the tree yet)
 

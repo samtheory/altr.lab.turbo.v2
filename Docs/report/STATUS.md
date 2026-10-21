@@ -12,7 +12,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: **Jord-S0001** (ready to implement) · Last ship: **Apolyx-S0005** (closed 2026-10-21) · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
+Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: **Jord-S0001** via **[[../agents/mimir/00-index|mimir]]** · Last ship: **Apolyx-S0005** (closed 2026-10-21) · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Implemented
 
@@ -37,8 +37,8 @@ Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]: Command, data-
 
 ## Planned (repo) — **do next**
 
-1. **Jord-S0001** — implement now: [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]) · Intent [[../feature_list/Jord/00-intent]]
-2. Jord Studio S1 (after Slice 0) — [[../feature_list/Jord/03-jord-studio]]
+1. **Jord-S0001** — implement now with **mimir** (`mimir` / `build jord`): [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]) · Intent [[../feature_list/Jord/00-intent]] · Agent [[../agents/mimir/00-index]]
+2. Jord Studio S1 (after Slice 0) — APIs **mimir**; UI **apollo** — [[../feature_list/Jord/03-jord-studio]]
 3. Artemis — still idea [[../idea/artemis/README]]; promote after Jord Slice 0
 4. Tia — intent only [[../feature_list/tia/README]]
 5. CI pipeline

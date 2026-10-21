@@ -2,11 +2,12 @@
 title: "Agent skills — how to use them well"
 description: "Best practices for the project skills installed under .agents/skills/"
 created: 2026-09-26
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - altr-lab
   - agents
   - skills
+  - mimir
 ---
 
 # Agent skills — how to use them well
@@ -72,6 +73,8 @@ npx skills add <owner/repo> --skill '*' --agent cursor -y   # whole pack
 
 **Apolyx kit builder:** use the **apollo** sub-agent (`Docs/agents/apollo/`) — say `apollo` or `build apolyx`. Companion skills (React, Tailwind v4, Motion/animation, UX, tokens) are listed in [[../agents/apollo/skills/README]]. Do not stack competing aesthetics; repo intent in [[../feature_list/ui-kit/00-intent]] wins over generic skill defaults (no Radix).
 
+**Jord data plane:** use the **mimir** sub-agent (`Docs/agents/mimir/`) — say `mimir` or `build jord`. Specialists: **sindri** (engine), **saga** (schema), **heimdall** (security). Studio / dashboard UI → **apollo**. Companion skills (architecture, Hono, Drizzle, hardening) are listed in [[../agents/mimir/skills/README]]. Repo intent in [[../feature_list/Jord/00-intent]] wins (Slice 0 = `file:` only).
+
 ### Browser & 3D
 
 | Skill | When to use | Say / tip |
@@ -110,6 +113,10 @@ Requires Strix CLI/cloud credentials per https://docs.strix.ai — skills teach 
 **Understand this monorepo before editing**
 
 > Use Graft: `graft map` then `graft ask "…" --source` scoped with `--in apps/...` if needed. See [[graft]].
+
+**Implement Jord Slice 0**
+
+> Use `mimir`. Read `Docs/feature_list/Jord/00-intent.md` and execute `Docs/plan/Jord/Jord-S0001` from the first undone card. Say `mimir:sindri` / `mimir:saga` / `mimir:heimdall` for specialists. Studio UI later → `apollo`.
 
 **Image to 3D**
 

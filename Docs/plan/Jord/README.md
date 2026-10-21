@@ -12,7 +12,7 @@ tags:
 
 # plan / Jord
 
-> **Implement now.** Intent: [[../../feature_list/Jord/00-intent]]. Apolyx product gate closed ([[../ui-kit/Apolyx-S0005/README]]). Jord Studio is out of this sprint ([[../../feature_list/Jord/03-jord-studio]]).
+> **Implement now** via **[[../../agents/mimir/00-index|mimir]]** (`mimir` / `build jord`). Intent: [[../../feature_list/Jord/00-intent]]. Apolyx product gate closed ([[../ui-kit/Apolyx-S0005/README]]). Jord Studio is out of this sprint ([[../../feature_list/Jord/03-jord-studio]]); Studio UI later → **apollo**.
 
 | Sprint | Scope | Status |
 |--------|-------|--------|

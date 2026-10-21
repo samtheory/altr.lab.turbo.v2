@@ -14,3 +14,5 @@ Mirror of `.agents/skills/apollo/SKILL.md` for Cursor skill discovery.
 
 Follow `Docs/agents/apollo/instructions/00-workflow.md` and
 `Docs/feature_list/ui-kit/00-intent.md`.
+`@altr/base` is a leaf — apolyx may use it; never depend on jord
+(`Docs/feature_list/00-elements-dependency-rules.md`).

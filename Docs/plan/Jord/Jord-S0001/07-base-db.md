@@ -11,7 +11,7 @@ tags:
 
 # Phase 7 — retire the base Turso stub
 
-> Who: implementer. `@altr/base` stays a utils package.
+> Who: implementer (**sindri**). `@altr/base` stays a **leaf** utils package — no dep on `@altr/jord`. See [[../../../feature_list/00-elements-dependency-rules]].
 
 Sprint index: [[README]] · Code today: `elements/base/src/db/index.ts` throws from `createTursoClient`.
 

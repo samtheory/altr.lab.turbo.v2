@@ -24,6 +24,25 @@ For building the design system (`apollo`, `build apolyx`, `elements/ui-kit`, `ap
 - Skills: `.agents/skills/apollo/` · companion list in `Docs/agents/apollo/skills/README.md`
 - Rule: `.cursor/rules/apollo.mdc` · Cursor skill: `.cursor/skills/apollo/`
 
+## Jord data plane (mimir)
+
+For Jord engine / server / architecture (`mimir`, `build jord`, `elements/jord`, `cloud/jord`):
+
+- Follow **mimir**: `Docs/agents/mimir/00-index.md`
+- Intent: `Docs/feature_list/Jord/00-intent.md` · Architecture: `Docs/feature_list/Jord/02-architecture.md`
+- Specialists: **sindri** (engine), **saga** (schema), **heimdall** (security)
+- Studio / dashboard UI → **apollo** (Apolyx-first); vault → **docs_man**
+- Skills: `.agents/skills/mimir/` · companion list in `Docs/agents/mimir/skills/README.md`
+- Rule: `.cursor/rules/mimir.mdc` · Cursor skill: `.cursor/skills/mimir/`
+
+## Shared `@altr/base` (leaf)
+
+- Framework utilities only (`elements/base`) — env, errors, Result, content helpers, …
+- **Base has no dependency** on jord, apolyx, or any other element
+- Apps / cloud / elements **may** depend on `@altr/base`
+- Prefer **no peer-element deps** so packages stay individually add/removable
+- Contract: `Docs/feature_list/00-elements-dependency-rules.md`
+
 ## Agent skills + Graft
 
 - How to use project skills: `Docs/Altr.lab/agent-skills.md`
