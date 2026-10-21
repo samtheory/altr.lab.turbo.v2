@@ -9,6 +9,7 @@ tags:
   - mermaid
   - altr-lab
   - Jord-S0001
+  - Jord-S0002
 ---
 
 # Docs Brain — living map
@@ -17,7 +18,7 @@ tags:
 
 **Agents:** [[../agents/docs_man/00-index|docs_man]] · [[../agents/apollo/00-index|apollo]] · [[../agents/mimir/00-index|mimir]] · **Folder hub:** [[00-Docs-Hub]]
 
-**Triggers:** `update_docs` / `document it` → **docs_man**. `apollo` / `build apolyx` → **apollo** (Apolyx UI kit). `mimir` / `build jord` → **mimir** (Jord; specialists sindri / saga / heimdall; Studio UI → apollo).
+**Triggers:** `update_docs` / `document it` → **docs_man**. `apollo` / `build apolyx` → **apollo** (Apolyx UI kit). `mimir` / `build jord` → **mimir** (Jord **program master**: sindri / saga / heimdall; Studio → apollo; vault → docs_man).
 
 ---
 
@@ -105,12 +106,12 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | Removed 2026-10-18 | `apps/hub`, `apps/web`, `apps/dashboard`, `apps/trading-ui`, `cloud/hono-server`, `cloud/ai-bot-agent` | [[../tech_space/03-sample-apps-removed]] |
 | Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · S0005 closed: [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · As-built [[../tech_space/ui-kit/10-s0005-product-gate]] · Sprints [[../plan/ui-kit/README]] · Apolyx-first: `.cursor/rules/apolyx-first.mdc` · Builder: [[../agents/apollo/00-index]] |
-| Data plane (**Jord**) | `elements/jord` · `cloud/jord` · `data/jord.db` (gitignored) | Intent: [[../feature_list/Jord/00-intent]] · As-built [[../tech_space/jord/00-s0001-slice0]] · Plan [[../plan/Jord/Jord-S0001/README]] · Builder: [[../agents/mimir/00-index]] (sindri / saga / heimdall; Studio UI → apollo) |
+| Data plane (**Jord**) | `elements/jord` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` (gitignored) | Intent: [[../feature_list/Jord/00-intent]] · Engine [[../tech_space/jord/00-s0001-slice0]] · Studio S1 [[../tech_space/jord/01-s0002-studio-s1]] · Plans [[../plan/Jord/README]] · Builder: [[../agents/mimir/00-index]] (sindri / saga / heimdall; Studio UI → apollo) |
 | Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord-S0001 (**done** 2026-10-21) → **Jord Studio S1 (next)** → Artemis.
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord-S0001 (**done**) → Jord-S0002 Studio S1 (**done**) → Artemis / Studio S2+.
 
-Primary DB: **Jord** — Slice 0 shipped ([[../tech_space/jord/00-s0001-slice0]]). Architecture [[../feature_list/Jord/02-architecture]] · Studio [[../feature_list/Jord/03-jord-studio]]. PocketBase stays optional.
+Primary DB: **Jord** — Slice 0 + Studio S1 shipped ([[../tech_space/jord/00-s0001-slice0]] · [[../tech_space/jord/01-s0002-studio-s1]]). Architecture [[../feature_list/Jord/02-architecture]] · Studio intent [[../feature_list/Jord/03-jord-studio]] · Track [[../plan/Jord/README]]. PocketBase stays optional.
 
 ---
 
@@ -120,9 +121,9 @@ Primary DB: **Jord** — Slice 0 shipped ([[../tech_space/jord/00-s0001-slice0]]
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Catalog v2.3: [[../idea/2026-10-18-product-catalog]]. Apolyx · Jord · API client · Search · **Tia** ([[../idea/Tia (Map Engine)/README]], promoted). Sharpen: [[../idea/Tia (Map Engine)/2026-10-19-sharpen]] |
 | `feature_list/` | Intent / what to build | [[../feature_list/ui-kit/README]] · S0005 shipped [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · **Jord:** [[../feature_list/Jord/00-intent]] · **Tia:** [[../feature_list/tia/README]] · Carryovers: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `plan/` | Checkbox overlay + next steps | **Closed:** [[../plan/Jord/Jord-S0001/README]] · Next: Jord Studio S1 · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] · Closed Apolyx: S0001–**S0005** |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-21: **Jord-S0001 shipped**; next Studio S1) |
-| `tech_space/` | Implementation narrative | Latest Jord: [[../tech_space/jord/00-s0001-slice0]] · Apolyx: [[../tech_space/ui-kit/10-s0005-product-gate]] · index [[../tech_space/README]] |
+| `plan/` | Checkbox overlay + next steps | Jord track: [[../plan/Jord/README]] (S0001–**S0002 done**) · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] · Closed Apolyx: S0001–**S0005** |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-21: **Jord-S0002 Studio S1 done**) |
+| `tech_space/` | Implementation narrative | Latest Jord: [[../tech_space/jord/01-s0002-studio-s1]] · Engine: [[../tech_space/jord/00-s0001-slice0]] · Apolyx: [[../tech_space/ui-kit/10-s0005-product-gate]] · index [[../tech_space/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |

@@ -2,17 +2,18 @@
 title: "Jord Studio — dashboard and control plane"
 description: "Jord Studio surfaces: tables, visualizer, jobs, auth, APIs, plus roadmap for realtime CDC, blobs, and vectors. Not Slice 0."
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - feature
   - jord
   - jord-studio
   - dashboard
+  - Jord-S0002
 ---
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). **Not** [[../../plan/Jord/Jord-S0001/README|Jord-S0001]] / Slice 0. Architecture: [[02-architecture]]. Slice order: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · as-built [[../../tech_space/jord/01-s0002-studio-s1]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -105,8 +106,8 @@ In-app help for tables and routes. Obsidian `Docs/` remains the lab vault.
 
 ## Acceptance for “Studio exists” (S1)
 
-- [ ] `apps/jord-studio` runs and uses Apolyx
-- [ ] Local-dev or signed-in gate can list `records` from `@altr/jord-server`
-- [ ] No direct browser access to `data/jord.db`
+- [x] `apps/jord-studio` runs and uses Apolyx
+- [x] Local-dev or signed-in gate can list `records` from `@altr/jord-server`
+- [x] No direct browser access to `data/jord.db`
 
-Later Studio phases get their own plan folders when Slice 0 is closed.
+S1 plan (closed): [[../../plan/Jord/Jord-S0002/README]] · [[../../tech_space/jord/01-s0002-studio-s1]]. Later Studio phases (S2+) get their own plan folders when opened by mimir.

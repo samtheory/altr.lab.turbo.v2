@@ -1,19 +1,19 @@
 ---
-description: Route mimir / build jord / Jord data-plane work to the mimir sub-agent
+description: Route mimir / build jord / Jord program work to the mimir orchestrator
 alwaysApply: false
-globs: elements/jord/**/*,cloud/jord/**/*,data/**/*,Docs/feature_list/Jord/**/*,Docs/plan/Jord/**/*,Docs/agents/mimir/**/*
+globs: elements/jord/**/*,cloud/jord/**/*,apps/jord-studio/**/*,data/**/*,Docs/feature_list/Jord/**/*,Docs/plan/Jord/**/*,Docs/agents/mimir/**/*
 ---
 
 # mimir routing
 
-When the user says **`mimir`**, **`build jord`**, or clearly asks to implement / design Jord (`elements/jord`, `cloud/jord`, `data/jord.db`, OCC, WAL, dialect seams):
+When the user says **`mimir`**, **`build jord`**, **`mimir … with apollo`**, or clearly asks to design / implement Jord (engine, server, Studio, docs):
 
 1. Load `.cursor/skills/mimir/SKILL.md` and `Docs/agents/mimir/instructions/00-workflow.md`
-2. Open `Docs/feature_list/Jord/00-intent.md` and `Docs/feature_list/Jord/02-architecture.md` first
-3. Follow active sprint cards in `Docs/plan/Jord/Jord-S0001/`
-4. Hard rules: `file:` only in Slice 0; WAL + OCC → 409; one write queue; no Redis/Mongo/sqlite-vec/Studio in S0001
-5. `@altr/base` is a leaf — Jord may depend on it; base never depends on jord/apolyx; prefer no peer-element deps (`Docs/feature_list/00-elements-dependency-rules.md`)
-6. Route specialists: **sindri** (engine), **saga** (schema), **heimdall** (security)
-7. Jord Studio / dashboard UI → **apollo** (`@altr/apolyx` only; Apolyx-first)
-8. After non-trivial ship → **docs_man** (`update_docs`)
-9. Load at most 1–3 companion skills — see `Docs/agents/mimir/skills/README.md`
+2. Open Jord intent/architecture (and Studio intent if UI); then the **active** sprint under `Docs/plan/Jord/`
+3. **mimir is program master** — accountable for the Jord outcome; routes hats, does not skip acceptance
+4. Engine hats: **sindri** / **saga** / **heimdall**
+5. Studio / dashboard UI → act as **mimir → apollo** (load apollo workflow; `@altr/apolyx` only; Apolyx-first). Never invent kit primitives in `apps/jord-studio`
+6. Missing Apolyx control → build in kit with apollo first, then consume
+7. After non-trivial ship → **docs_man** (`update_docs`)
+8. Hard rules from feature_list / active sprint (Slice 0: `file:`, WAL, OCC→409, one write queue; base is a leaf)
+9. Load at most 1–3 companion skills — `Docs/agents/mimir/skills/README.md` (UI turns: apollo stack)

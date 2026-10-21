@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot: Jord-S0001 Slice 0 shipped; next Jord Studio S1"
+description: "Audited snapshot: Jord-S0001 + Jord-S0002 Studio S1 shipped"
 created: 2026-09-19
 updated: 2026-10-21
 tags:
@@ -8,11 +8,12 @@ tags:
   - status
   - Apolyx-S0005
   - Jord-S0001
+  - Jord-S0002
 ---
 
 # Status
 
-Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0001** (Slice 0) via **[[../agents/mimir/00-index|mimir]]** · Prior: **Apolyx-S0005** · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
+Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0002** (Studio S1) · No active Jord sprint — next Studio phase needs a new plan folder · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Implemented
 
@@ -23,6 +24,11 @@ Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
   - `@altr/jord` (`elements/jord`) — `file:` only, WAL pragmas, `records` + OCC
   - `@altr/jord-server` (`cloud/jord`) — Hono routes, write queue, WAL truncate on timer + shutdown
   - `pnpm db:snapshot` · `data/*.db` gitignored · `@altr/base/db` redirects to Jord
+- **Jord Studio S1 (`Jord-S0002`)** — [[../tech_space/jord/01-s0002-studio-s1]]
+  - `apps/jord-studio` (`@altr/jord-studio`) — Next.js + `@altr/apolyx`
+  - BFF `/api/*` → `JORD_SERVER_URL` (default `:8787`); browser never opens `data/jord.db`
+  - Records list / create / OCC patch with **409** UX; local-dev banner + `JORD_STUDIO_OPEN=1` gate
+  - Scripts: `pnpm dev:jord` + `pnpm dev:jord-studio`
 - **`@altr/apolyx`** (`elements/ui-kit`)
   - Foundations: OKLCH themes (3 families × light / dark), `ApolyxProvider`, owned primitives (no Radix / Base UI)
   - Through **S0004:** overlays incl. Popover, nav, Table / List / Grid, Timeline, Switch + input catalog, Line / Bar charts
@@ -33,7 +39,7 @@ Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Apolyx-first rule** — `.cursor/rules/apolyx-first.mdc` (apps consume kit; missing controls built via apollo + docs first)
 - Docs vault + brain + **docs_man** + **apollo** + **mimir**
 
-As-built: Jord [[../tech_space/jord/00-s0001-slice0]] · Apolyx [[../tech_space/ui-kit/README]]
+As-built: Jord engine [[../tech_space/jord/00-s0001-slice0]] · Studio S1 [[../tech_space/jord/01-s0002-studio-s1]] · Apolyx [[../tech_space/ui-kit/README]]
 
 ## Remaining (Apolyx — not blocking Studio)
 
@@ -41,7 +47,7 @@ Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]: Command, data-
 
 ## Planned (repo) — **do next**
 
-1. **Jord Studio S1** — APIs already on `@altr/jord-server`; UI via **apollo** (`@altr/apolyx` only) — [[../feature_list/Jord/03-jord-studio]]
-2. Artemis — still idea [[../idea/artemis/README]]; promote after Studio or as needed
+1. **Jord Studio S2+** — open a new `Jord-S000N` plan when ready (schema visualizer, auth, jobs, …) · Intent [[../feature_list/Jord/03-jord-studio]]
+2. Artemis — still idea [[../idea/artemis/README]]; promote after Studio S1 per roadmap gate
 3. Tia — intent only [[../feature_list/tia/README]]
 4. CI pipeline

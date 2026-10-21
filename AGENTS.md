@@ -24,14 +24,15 @@ For building the design system (`apollo`, `build apolyx`, `elements/ui-kit`, `ap
 - Skills: `.agents/skills/apollo/` · companion list in `Docs/agents/apollo/skills/README.md`
 - Rule: `.cursor/rules/apollo.mdc` · Cursor skill: `.cursor/skills/apollo/`
 
-## Jord data plane (mimir)
+## Jord program (mimir)
 
-For Jord engine / server / architecture (`mimir`, `build jord`, `elements/jord`, `cloud/jord`):
+For anything Jord (`mimir`, `build jord`, `elements/jord`, `cloud/jord`, `apps/jord-studio`):
 
-- Follow **mimir**: `Docs/agents/mimir/00-index.md`
-- Intent: `Docs/feature_list/Jord/00-intent.md` · Architecture: `Docs/feature_list/Jord/02-architecture.md`
-- Specialists: **sindri** (engine), **saga** (schema), **heimdall** (security)
-- Studio / dashboard UI → **apollo** (Apolyx-first); vault → **docs_man**
+- Follow **mimir** as **program master**: `Docs/agents/mimir/00-index.md`
+- Intent: `Docs/feature_list/Jord/00-intent.md` · Architecture: `Docs/feature_list/Jord/02-architecture.md` · Studio: `Docs/feature_list/Jord/03-jord-studio.md`
+- Active plan: `Docs/plan/Jord/README.md`
+- Hats: **sindri** (engine), **saga** (schema), **heimdall** (security), **apollo** (Studio UI / kit), **docs_man** (vault)
+- Say `mimir … with apollo` to run Studio under mimir’s conduct; mimir still owns the outcome
 - Skills: `.agents/skills/mimir/` · companion list in `Docs/agents/mimir/skills/README.md`
 - Rule: `.cursor/rules/mimir.mdc` · Cursor skill: `.cursor/skills/mimir/`
 

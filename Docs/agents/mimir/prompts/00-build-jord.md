@@ -1,6 +1,6 @@
 ---
 title: "Prompt — mimir / build Jord"
-description: "Copy-paste prompts that invoke the mimir sub-agent and specialists"
+description: "Copy-paste prompts: mimir as Jord program master, with apollo / docs_man hats"
 created: 2026-10-21
 updated: 2026-10-21
 tags:
@@ -12,7 +12,7 @@ tags:
 
 # Prompts — mimir
 
-## Short trigger
+## Short trigger (master)
 
 ```
 mimir
@@ -22,31 +22,35 @@ mimir
 build jord
 ```
 
+## What you want (orchestrator)
+
+```
+mimir: build the active Jord plan end-to-end.
+You are program master — design, engine, Studio, docs.
+Call sindri / saga / heimdall / apollo / docs_man as the cards require.
+Do not invent Apolyx primitives in apps/jord-studio.
+```
+
+```
+mimir: execute Docs/plan/Jord/Jord-S0002 with help of apollo.
+Stay mimir as conductor; for UI cards act as mimir → apollo (Apolyx-first).
+Start at the first phase not marked done. After verify → docs_man.
+```
+
 ## Full handoff
 
 ```
-Act as mimir (Docs/agents/mimir).
-Read Docs/feature_list/Jord/00-intent.md, Docs/feature_list/Jord/02-architecture.md,
-and Docs/agents/mimir/instructions/00-workflow.md.
-Implement Jord per Docs/plan/Jord/Jord-S0001 (start at first undone card).
-Hard rules: file: only; WAL + OCC version; one write queue in @altr/jord-server;
-no Redis/Mongo/sqlite-vec/Studio app in S0001.
-Route engine → sindri, schema → saga, security → heimdall.
-Studio UI later → apollo (@altr/apolyx only). After verify → docs_man.
-Load at most 2–3 skills for this task.
-```
-
-## Execute the sprint
-
-```
-mimir: execute Docs/plan/Jord/Jord-S0001 — start at the first phase not marked done.
-Read the sprint README and that phase card. Tick Done when. Summarize files touched.
+Act as mimir (Docs/agents/mimir) — Jord program master.
+Read Docs/agents/mimir/instructions/00-workflow.md and the active sprint under Docs/plan/Jord/.
+Own the outcome. Route: sindri (engine), saga (schema), heimdall (security),
+apollo (Studio UI / kit gaps), docs_man (vault after ship).
+Hard rules from feature_list + active cards. Load at most 2–3 skills per turn.
 ```
 
 ## Specialist shortcuts
 
 ```
-mimir:sindri — packages / LibSqlAdapter / pragmas / snapshot
+mimir:sindri — packages / LibSqlAdapter / pragmas / snapshot / server queue
 ```
 
 ```
@@ -54,9 +58,21 @@ mimir:saga — records schema / OCC SQL / dialect seams
 ```
 
 ```
-mimir:heimdall — security review / 409 / WAL / Strix (authorized)
+mimir:heimdall — security / 409 / WAL / Strix (authorized)
 ```
 
 ```
-apollo — Jord Studio UI / dashboard (Apolyx-first); mimir owns the data APIs
+mimir:apollo — Studio UI (load apollo workflow; Apolyx-first)
+```
+
+```
+mimir:docs_man — update_docs after green verify
+```
+
+## Direct apollo (optional)
+
+Only if you want UI without mimir conducting:
+
+```
+apollo: execute Docs/plan/Jord/Jord-S0002 — start at first undone card.
 ```

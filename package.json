@@ -12,6 +12,7 @@
     "build:storybook:ui-kit": "pnpm --filter @altr/apolyx build-storybook",
     "dev:apolyx": "turbo run dev --filter=@altr/apolyx-docs",
     "dev:jord": "pnpm --filter @altr/jord-server dev",
+    "dev:jord-studio": "pnpm --filter @altr/jord-studio dev",
     "db:snapshot": "pnpm --filter @altr/jord snapshot",
     "cli:apolyx": "pnpm --filter apolyx",
     "clean": "turbo run clean"

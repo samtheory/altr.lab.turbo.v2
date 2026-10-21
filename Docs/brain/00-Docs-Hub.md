@@ -35,7 +35,7 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
 
-**Jord** (Slice 0 done): intent [[../feature_list/Jord/00-intent]] · as-built [[../tech_space/jord/00-s0001-slice0]] · plan [[../plan/Jord/Jord-S0001/README]] (closed) · next Studio [[../feature_list/Jord/03-jord-studio]].
+**Jord** (Slice 0 done): intent [[../feature_list/Jord/00-intent]] · as-built [[../tech_space/jord/00-s0001-slice0]] · S0001 [[../plan/Jord/Jord-S0001/README]] (closed) · **next** [[../plan/Jord/Jord-S0002/README|Jord-S0002 Studio S1]] · Studio intent [[../feature_list/Jord/03-jord-studio]].
 
 ## Agent of record
 
@@ -43,4 +43,4 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 |-------|------|----------|
 | **docs_man** | Docs vault | `update_docs`, `document it` |
 | **apollo** | Apolyx UI kit implementation | `apollo`, `build apolyx` |
-| **mimir** | Jord data plane (`elements/jord`, `cloud/jord`); specialists sindri / saga / heimdall; Studio UI → apollo | `mimir`, `build jord` |
+| **mimir** | Jord **program master** (engine + Studio orchestration + docs); hats: sindri / saga / heimdall / apollo / docs_man | `mimir`, `build jord`, `mimir … with apollo` |

@@ -42,7 +42,7 @@ Detail: [[03-jord-studio]].
 
 | Slice | Outcome |
 |-------|---------|
-| Studio S1 | `apps/jord-studio` lists `records` |
+| Studio S1 | `apps/jord-studio` lists `records` — plan [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] |
 | Studio S2 | Schema visualizer + live save |
 | Studio S3 | Auth + roles |
 | Studio S4 | Generated CRUD API panel |
