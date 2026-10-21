@@ -27,11 +27,16 @@ Sprint index: [[README]]
 - Writes: `enqueueWrite` only
 - Reject identifier injection (strict `[a-zA-Z_][a-zA-Z0-9_]*`); type whitelist only
 
+## Status
+
+**done** (2026-10-21)
+
 ## Tasks
 
-- [ ] Route handlers + tests in `@altr/jord-server`
-- [ ] Clear errors (unknown table, duplicate column, invalid type)
+- [x] Route handlers + tests in `@altr/jord-server`
+- [x] Clear errors (unknown table, duplicate column, invalid type)
 
 ## Done when
 
 With `dev:jord` up, curl/list describes `records`; a test ADD COLUMN appears on next GET describe.
+

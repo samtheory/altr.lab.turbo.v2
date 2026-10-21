@@ -1,7 +1,42 @@
 import type { Client } from "@libsql/client";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
+import type { JordColumnType } from "./schema/ddl.js";
 import type { schema } from "./schema/records.js";
+
+export type { JordColumnType } from "./schema/ddl.js";
+
+/** PRAGMA table_info–shaped column (Studio schema browser). */
+export type JordColumnInfo = {
+  name: string;
+  type: string;
+  notnull: boolean;
+  pk: boolean;
+  dflt_value: string | null;
+};
+
+export type JordTableInfo = {
+  name: string;
+  columns: JordColumnInfo[];
+};
+
+export type AddColumnInput = {
+  table: string;
+  name: string;
+  type: JordColumnType;
+};
+
+export type AddColumnResult =
+  | { ok: true }
+  | {
+      ok: false;
+      error:
+        | "invalid_identifier"
+        | "invalid_type"
+        | "table_not_found"
+        | "column_exists";
+      message: string;
+    };
 
 export type JordRecord = {
   id: string;
@@ -54,6 +89,13 @@ export interface JordDriverPort {
   getRecord(id: string): Promise<JordRecord | null>;
   listRecordsByBucket(bucket: string): Promise<JordRecord[]>;
   updateRecord(input: UpdateRecordInput): Promise<UpdateRecordResult>;
+
+  /** User tables from sqlite_master (excludes sqlite_*). */
+  listTables(): Promise<string[]>;
+  /** Columns via PRAGMA table_info; null if table missing. */
+  describeTable(name: string): Promise<JordTableInfo | null>;
+  /** Additive DDL only — ADD COLUMN with type whitelist. */
+  addColumn(input: AddColumnInput): Promise<AddColumnResult>;
 
   /**
    * Consistent snapshot via SQLite `VACUUM INTO` (online backup substitute

@@ -27,11 +27,16 @@ Sprint index: [[README]]
 - Drag-edit schema that writes DDL (that is card 5)
 - FK / relation lines until tables have FKs to show
 
+## Status
+
+**done** (2026-10-21)
+
 ## Tasks
 
-- [ ] Visualizer view fed by same schema fetch as browser
-- [ ] Accessible structure (not canvas-only; keep a text/table fallback)
+- [x] Visualizer view fed by same schema fetch as browser
+- [x] Accessible structure (not canvas-only; keep a text/table fallback)
 
 ## Done when
 
 Operator can see a visual summary of tables/columns without leaving Studio.
+

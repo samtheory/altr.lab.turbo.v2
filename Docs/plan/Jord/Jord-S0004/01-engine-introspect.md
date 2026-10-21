@@ -25,12 +25,17 @@ Sprint index: [[README]] · Port: `elements/jord/src/port.ts`
 - Implement on `LibSqlAdapter` using the existing `client`
 - Unit tests against a temp `file:` DB that already has `records`
 
+## Status
+
+**done** (2026-10-21)
+
 ## Tasks
 
-- [ ] Types on `JordDriverPort` + export
-- [ ] LibSqlAdapter implementation
-- [ ] Focused tests in `@altr/jord`
+- [x] Types on `JordDriverPort` + export
+- [x] LibSqlAdapter implementation
+- [x] Focused tests in `@altr/jord`
 
 ## Done when
 
 `pnpm --filter @altr/jord test` covers introspect; callers can describe `records` without hard-coding columns in Studio.
+

@@ -15,7 +15,7 @@ tags:
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1 + S1.5 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] · as-built [[../../tech_space/jord/01-s0002-studio-s1]] · [[../../tech_space/jord/02-s0003-studio-shell]]. **Active plan:** [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] (Studio S2 schema). Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S2 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] · [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] · as-built [[../../tech_space/jord/02-s0003-studio-shell]] · [[../../tech_space/jord/03-s0004-schema]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -92,7 +92,7 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 |-------|---------|------------|
 | S1 | Table list + row browser for `records` | Slice 0 server — **done** ([[../../plan/Jord/Jord-S0002/README]]) |
 | S1.5 | Categorized side nav + Supabase-like Insert/edit for `records` | S1 — **done** ([[../../plan/Jord/Jord-S0003/README]] · [[../../tech_space/jord/02-s0003-studio-shell]]) |
-| S2 | Schema visualizer + live save (additive `ADD COLUMN` v1) | S1.5 — **active** ([[../../plan/Jord/Jord-S0004/README]]) |
+| S2 | Schema visualizer + live save (additive `ADD COLUMN` v1) | S1.5 — **done** ([[../../plan/Jord/Jord-S0004/README]] · [[../../tech_space/jord/03-s0004-schema]]) |
 | S3 | Auth + roles | S1 |
 | S4 | Generated CRUD API panel | S1 |
 | S5 | Jobs / cron + logs | Server job runner |
@@ -119,4 +119,4 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 
 S1 plan (closed): [[../../plan/Jord/Jord-S0002/README]] · [[../../tech_space/jord/01-s0002-studio-s1]].  
 S1.5 plan (closed): [[../../plan/Jord/Jord-S0003/README]] · [[../../tech_space/jord/02-s0003-studio-shell]].  
-S2 plan (active): [[../../plan/Jord/Jord-S0004/README]]. Later phases (S3+) get their own plan folders when opened by mimir.
+S2 plan (closed): [[../../plan/Jord/Jord-S0004/README]] · [[../../tech_space/jord/03-s0004-schema]]. Later phases (S3+) get their own plan folders when opened by mimir.

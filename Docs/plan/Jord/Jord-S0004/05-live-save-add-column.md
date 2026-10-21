@@ -29,12 +29,17 @@ Sprint index: [[README]]
 - Identifiers validated server-side (never trust preview-only)
 - Still local-dev gate; no multi-tenant auth
 
+## Status
+
+**done** (2026-10-21)
+
 ## Tasks
 
-- [ ] Studio form + preview + apply
-- [ ] BFF POST proxy
-- [ ] Manual path documented in README
+- [x] Studio form + preview + apply
+- [x] BFF POST proxy
+- [x] Manual path documented in README
 
 ## Done when
 
 Additive column lands in `data/jord.db` and appears in introspect without restarting Studio (server may keep connection open — re-PRAGMA after DDL).
+

@@ -31,12 +31,17 @@ Sprint index: [[README]] · Shell: [[../../../tech_space/jord/02-s0003-studio-sh
 
 Reuse `jord-proxy.ts`. No `fs` / `@libsql/client` in the app.
 
+## Status
+
+**done** (2026-10-21)
+
 ## Tasks
 
-- [ ] BFF route handlers
-- [ ] Schema browser page composing Apolyx Table / Field / Alert
-- [ ] Nav config live link
+- [x] BFF route handlers
+- [x] Schema browser page composing Apolyx Table / Field / Alert
+- [x] Nav config live link
 
 ## Done when
 
 Operator opens Schema from the side nav and sees `records` columns from the running DB.
+

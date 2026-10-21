@@ -15,19 +15,23 @@ tags:
 
 Sprint index: [[README]] · S2 intent: [[../../../feature_list/Jord/03-jord-studio]]
 
+## Status
+
+**done** (2026-10-21)
+
 ## Commands
 
-- [ ] `pnpm --filter @altr/jord test` + `typecheck`
-- [ ] `pnpm --filter @altr/jord-server test` + `typecheck`
-- [ ] `pnpm --filter @altr/jord-studio typecheck`
-- [ ] Manual: Schema nav live → see `records` → ADD COLUMN → column visible
-- [ ] Confirm Studio still has no `@libsql/client` / `jord.db` path usage
+- [x] `pnpm --filter @altr/jord test` + `typecheck`
+- [x] `pnpm --filter @altr/jord-server test` + `typecheck`
+- [x] `pnpm --filter @altr/jord-studio typecheck`
+- [x] Manual: Schema nav live → see `records` → ADD COLUMN → column visible
+- [x] Confirm Studio still has no `@libsql/client` / `jord.db` path usage
 
 ## After the code lands
 
 docs_man:
 
-1. `Docs/tech_space/jord/` note for S0004 (introspect, routes, Studio schema UX)
+1. [[../../../tech_space/jord/03-s0004-schema]]
 2. Tick S2 progress on [[../../../feature_list/Jord/03-jord-studio]]
 3. Refresh [[../../../report/STATUS]] and [[../../../brain/00-Docs-Brain]]
 

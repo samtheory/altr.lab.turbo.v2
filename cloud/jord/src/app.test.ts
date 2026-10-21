@@ -114,6 +114,48 @@ describe("jord-server routes", () => {
     }
   });
 
+  it("schema list/describe and ADD COLUMN round-trip", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const list = await app.request("/schema/tables");
+      expect(list.status).toBe(200);
+      expect(((await list.json()) as { tables: string[] }).tables).toContain(
+        "records",
+      );
+
+      const desc = await app.request("/schema/tables/records");
+      expect(desc.status).toBe(200);
+      const info = (await desc.json()) as {
+        name: string;
+        columns: Array<{ name: string }>;
+      };
+      expect(info.name).toBe("records");
+      expect(info.columns.map((c) => c.name)).toContain("bucket");
+
+      const added = await app.request("/schema/tables/records/columns", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name: "studio_flag", type: "INTEGER" }),
+      });
+      expect(added.status).toBe(201);
+
+      const again = await app.request("/schema/tables/records");
+      const cols = (
+        (await again.json()) as { columns: Array<{ name: string }> }
+      ).columns.map((c) => c.name);
+      expect(cols).toContain("studio_flag");
+
+      const dup = await app.request("/schema/tables/records/columns", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name: "studio_flag", type: "INTEGER" }),
+      });
+      expect(dup.status).toBe(409);
+    } finally {
+      await jord.close();
+    }
+  });
+
   it("truncateWalCheckpoint is callable (shutdown / interval path)", async () => {
     const { jord } = await testApp();
     try {

@@ -1,6 +1,6 @@
 # Jord Studio (`@altr/jord-studio`)
 
-Local control plane for Jord Slice 0: browse and edit `records` through `@altr/jord-server`. The browser never opens `data/jord.db`.
+Local control plane for Jord: browse/edit `records` rows and inspect/extend schema through `@altr/jord-server`. The browser never opens `data/jord.db`.
 
 ## Dev (two processes)
 
@@ -21,6 +21,14 @@ Copy `.env.example` → `.env.local` if needed. Defaults:
 |-----|---------|------|
 | `JORD_SERVER_URL` | `http://127.0.0.1:8787` | BFF upstream |
 | `JORD_STUDIO_OPEN` | `1` | Local-dev gate (must be `1`) |
+
+## Surfaces
+
+| Path | Role |
+|------|------|
+| `/records` | Table editor for `records` |
+| `/records/new` | Insert row |
+| `/schema` | Schema browser + visualizer + additive `ADD COLUMN` |
 
 ## Stack
 

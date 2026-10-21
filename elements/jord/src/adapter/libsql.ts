@@ -7,13 +7,23 @@ import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
 import type {
+  AddColumnInput,
+  AddColumnResult,
   InsertRecordInput,
+  JordColumnInfo,
   JordDb,
   JordDriverPort,
   JordRecord,
+  JordTableInfo,
   UpdateRecordInput,
   UpdateRecordResult,
 } from "../port.js";
+import {
+  buildAddColumnSql,
+  isJordColumnType,
+  isValidSqlIdent,
+  quoteIdent,
+} from "../schema/ddl.js";
 import { records, schema } from "../schema/records.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
 import { fileUrlToFsPath } from "../url.js";
@@ -143,6 +153,74 @@ export class LibSqlAdapter implements JordDriverPort {
       return { ok: false, conflict: true };
     }
     return { ok: true, record };
+  }
+
+  async listTables(): Promise<string[]> {
+    const rs = await this.client.execute(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
+    );
+    return rs.rows.map((r) => String(r.name ?? r[0]));
+  }
+
+  async describeTable(name: string): Promise<JordTableInfo | null> {
+    if (!isValidSqlIdent(name)) return null;
+    const tables = await this.listTables();
+    if (!tables.includes(name)) return null;
+
+    const rs = await this.client.execute(
+      `PRAGMA table_info(${quoteIdent(name)})`,
+    );
+    const columns: JordColumnInfo[] = rs.rows.map((r) => ({
+      name: String(r.name ?? r[1]),
+      type: String(r.type ?? r[2] ?? ""),
+      notnull: Number(r.notnull ?? r[3] ?? 0) === 1,
+      pk: Number(r.pk ?? r[5] ?? 0) > 0,
+      dflt_value:
+        r.dflt_value === undefined || r.dflt_value === null
+          ? r[4] === undefined || r[4] === null
+            ? null
+            : String(r[4])
+          : String(r.dflt_value),
+    }));
+    return { name, columns };
+  }
+
+  async addColumn(input: AddColumnInput): Promise<AddColumnResult> {
+    if (!isValidSqlIdent(input.table) || !isValidSqlIdent(input.name)) {
+      return {
+        ok: false,
+        error: "invalid_identifier",
+        message: "table and column names must match [a-zA-Z_][a-zA-Z0-9_]*",
+      };
+    }
+    if (!isJordColumnType(input.type)) {
+      return {
+        ok: false,
+        error: "invalid_type",
+        message: `type must be one of TEXT, INTEGER, REAL, BLOB (got ${JSON.stringify(input.type)})`,
+      };
+    }
+
+    const described = await this.describeTable(input.table);
+    if (!described) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${input.table} not found`,
+      };
+    }
+    if (described.columns.some((c) => c.name === input.name)) {
+      return {
+        ok: false,
+        error: "column_exists",
+        message: `column ${input.name} already exists on ${input.table}`,
+      };
+    }
+
+    await this.client.execute(
+      buildAddColumnSql(input.table, input.name, input.type),
+    );
+    return { ok: true };
   }
 
   async snapshotTo(destPath: string): Promise<string> {

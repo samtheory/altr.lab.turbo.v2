@@ -190,6 +190,7 @@
   },
   "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
+    "tech_space/jord/03-s0004-schema.md",
     "plan/Jord/Jord-S0004/06-verify.md",
     "plan/Jord/Jord-S0004/05-live-save-add-column.md",
     "plan/Jord/Jord-S0004/04-schema-visualizer.md",
@@ -219,7 +220,6 @@
     "feature_list/00-elements-dependency-rules.md",
     "agents/mimir/subagents/heimdall.md",
     "agents/mimir/subagents/saga.md",
-    "agents/mimir/subagents/sindri.md",
     "agents/mimir/subagents",
     "agents/mimir/skills",
     "agents/mimir/prompts",
