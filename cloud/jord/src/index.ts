@@ -1,0 +1,77 @@
+import { createJordClient } from "@altr/jord";
+import { serve } from "@hono/node-server";
+
+import { createJordApp } from "./app.js";
+import { createWriteQueue } from "./queue.js";
+import {
+  resolveWalCheckpointMs,
+  startWalHygiene,
+  truncateWalCheckpoint,
+} from "./wal.js";
+
+export { createJordApp } from "./app.js";
+export { createWriteQueue } from "./queue.js";
+export {
+  DEFAULT_WAL_CHECKPOINT_MS,
+  resolveWalCheckpointMs,
+  startWalHygiene,
+  truncateWalCheckpoint,
+} from "./wal.js";
+
+const DEFAULT_PORT = 8787;
+
+export async function startJordServer(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ close: () => Promise<void> }> {
+  const jord = await createJordClient({
+    url: env.DATABASE_URL,
+  });
+  const enqueueWrite = createWriteQueue();
+  const app = createJordApp({ jord, enqueueWrite });
+  const hygiene = startWalHygiene(jord, resolveWalCheckpointMs(env));
+
+  const port = Number(env.PORT) || DEFAULT_PORT;
+  const server = serve({ fetch: app.fetch, port });
+
+  let shuttingDown = false;
+  const shutdown = async (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`[@altr/jord-server] ${signal} — wal_checkpoint(TRUNCATE)`);
+    hygiene.stop();
+    try {
+      await truncateWalCheckpoint(jord);
+    } catch (err) {
+      console.error("[@altr/jord-server] shutdown checkpoint failed", err);
+    }
+    await jord.close();
+    server.close();
+    process.exit(0);
+  };
+
+  process.once("SIGINT", () => void shutdown("SIGINT"));
+  process.once("SIGTERM", () => void shutdown("SIGTERM"));
+
+  console.log(`[@altr/jord-server] listening on http://127.0.0.1:${port}`);
+
+  return {
+    async close() {
+      hygiene.stop();
+      await truncateWalCheckpoint(jord);
+      await jord.close();
+      server.close();
+    },
+  };
+}
+
+// CLI entry when run as `tsx src/index.ts`
+const isMain =
+  process.argv[1] !== undefined &&
+  /jord[\\/]src[\\/]index\.(ts|js)$/.test(process.argv[1].replace(/\\/g, "/"));
+
+if (isMain) {
+  void startJordServer().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

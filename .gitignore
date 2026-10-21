@@ -46,3 +46,12 @@ apps/apolyx/public/r
 
 # Graft — regenerable local codebase graph (like node_modules)
 graft/
+
+# Jord libSQL file + snapshots (never commit live DB)
+data/*.db
+data/**/*.db
+data/*.db-wal
+data/*.db-shm
+data/**/*.db-wal
+data/**/*.db-shm
+

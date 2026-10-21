@@ -2,12 +2,13 @@
 title: "Jord — libSQL file, first slice"
 description: "Slice 0: LibSqlAdapter, WAL checkpoints, records OCC version, 64-bit timestamps, mkdir data/, snapshot."
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - feature
   - jord
   - libsql
   - database
+  - Jord-S0001
 ---
 
 # Jord — libSQL file, first slice
@@ -135,19 +136,21 @@ Zero rows updated → **409 Conflict**. Inserts start at `version = 1`. Reads re
 
 ## Acceptance
 
-- [ ] `createJordClient` recursively creates `data/` then creates `data/jord.db` and `records` with the columns and `(bucket, created_at)` index above
-- [ ] Client exposes `JordDriverPort`; only `LibSqlAdapter` is installed; `PostgresAdapter` is not a runtime dependency
-- [ ] Every open applies WAL, `busy_timeout = 5000`, `synchronous = NORMAL`
-- [ ] `@altr/jord-server` runs `PRAGMA wal_checkpoint(TRUNCATE)` on an interval and on `SIGINT` / `SIGTERM`
-- [ ] `created_at` and `updated_at` are Drizzle 64-bit-safe integers (`integer({ mode: 'number' })` or equivalent), not 32-bit
-- [ ] `records.version` is integer, not null, default 1; a `PATCH` with a stale `version` returns 409 and does not write; a matching `PATCH` increments `version`
-- [ ] `data/*.db` is gitignored
-- [ ] `pnpm db:snapshot` (or documented equivalent) can copy the live file via SQLite online backup
-- [ ] Insert and read round-trip through `@altr/jord-server` for one bucket
-- [ ] A non-`file:` `DATABASE_URL` fails with an error that names the Slice 0 limit
-- [ ] `apps/` gains no new package
-- [ ] `cloud/` gains only `jord` among new API packages (PocketBase may remain unused)
-- [ ] No second competing client left in `@altr/base/db`
+Verified 2026-10-21 against code + tests ([[../../tech_space/jord/00-s0001-slice0]]):
+
+- [x] `createJordClient` recursively creates `data/` then creates `data/jord.db` and `records` with the columns and `(bucket, created_at)` index above
+- [x] Client exposes `JordDriverPort`; only `LibSqlAdapter` is installed; `PostgresAdapter` is not a runtime dependency
+- [x] Every open applies WAL, `busy_timeout = 5000`, `synchronous = NORMAL`
+- [x] `@altr/jord-server` runs `PRAGMA wal_checkpoint(TRUNCATE)` on an interval and on `SIGINT` / `SIGTERM`
+- [x] `created_at` and `updated_at` are Drizzle 64-bit-safe integers (`integer({ mode: 'number' })` or equivalent), not 32-bit
+- [x] `records.version` is integer, not null, default 1; a `PATCH` with a stale `version` returns 409 and does not write; a matching `PATCH` increments `version`
+- [x] `data/*.db` is gitignored
+- [x] `pnpm db:snapshot` (or documented equivalent) can copy the live file via SQLite online backup
+- [x] Insert and read round-trip through `@altr/jord-server` for one bucket
+- [x] A non-`file:` `DATABASE_URL` fails with an error that names the Slice 0 limit
+- [x] `apps/` gains no new package
+- [x] `cloud/` gains only `jord` among new API packages (PocketBase may remain unused)
+- [x] No second competing client left in `@altr/base/db`
 
 ## Open question
 

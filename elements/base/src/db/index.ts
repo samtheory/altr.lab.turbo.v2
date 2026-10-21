@@ -1,42 +1,34 @@
 /**
- * Turso / libSQL client stub.
- *
- * Primary DB decision: Turso (libSQL).
- * Replace this stub with `@libsql/client` when wiring real persistence.
- *
- * Expected env (see @altr/base/env):
- * - TURSO_DATABASE_URL
- * - TURSO_AUTH_TOKEN
+ * @deprecated Database access lives in `@altr/jord` (`createJordClient`, `DATABASE_URL`).
+ * `@altr/base` is a leaf utils package and must not ship a live DB client.
  */
 
-export type TursoConfig = {
-  url: string;
-  authToken?: string;
-};
-
-export type DbClient = {
-  execute: (sql: string, args?: unknown[]) => Promise<unknown>;
+export type DeprecatedDbRedirect = {
+  /** Always throws — use `@altr/jord`. */
+  execute: (sql: string, args?: unknown[]) => Promise<never>;
 };
 
 /**
- * Creates a placeholder client. Throws if used before real libSQL wiring.
+ * @deprecated Use `createJordClient` from `@altr/jord` with a `file:` `DATABASE_URL`.
  */
-export function createTursoClient(_config: TursoConfig): DbClient {
+export function createTursoClient(_config?: unknown): DeprecatedDbRedirect {
   return {
-    async execute(_sql: string, _args?: unknown[]) {
+    async execute(_sql: string, _args?: unknown[]): Promise<never> {
       throw new Error(
-        "[@altr/base/db] Turso client stub — install @libsql/client and implement createTursoClient.",
+        "[@altr/base/db] Removed. Use createJordClient from @altr/jord (DATABASE_URL file:…).",
       );
     },
   };
 }
 
+/**
+ * @deprecated Prefer `DATABASE_URL` with `@altr/jord`.
+ */
 export function getDefaultTursoConfig(
-  env: Record<string, string | undefined> = process.env,
-): TursoConfig {
-  const url = env.TURSO_DATABASE_URL ?? "libsql://localhost:8080";
+  _env: Record<string, string | undefined> = process.env,
+): { message: string } {
   return {
-    url,
-    authToken: env.TURSO_AUTH_TOKEN,
+    message:
+      "[@altr/base/db] Use @altr/jord with DATABASE_URL (Slice 0: file:./data/jord.db).",
   };
 }

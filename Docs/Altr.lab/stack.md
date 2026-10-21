@@ -2,10 +2,11 @@
 title: "Stack decisions"
 description: "libSQL file first; PocketBase optional; Postgres and hosted Turso later"
 created: 2026-09-19
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - altr-lab
   - stack
+  - Jord-S0001
 ---
 
 # Stack
@@ -13,9 +14,8 @@ tags:
 | Layer | Choice |
 |-------|--------|
 | Frontends | React / Next.js. Today that is the Apolyx docs app (`apps/apolyx`) plus Tailwind and `@altr/apolyx` |
-| API | Hono. Jord-S0001 boots on Node (`engines.node` >= 20). Bun is not required for that sprint. No API package is in `cloud/` until `cloud/jord` is implemented |
-| Primary DB | **Jord** — libSQL file `data/jord.db`. Drizzle on libSQL first. Intent: [[../feature_list/Jord/00-intent]] · layout: [[../feature_list/Jord/02-architecture]] |
-| API | Planned `@altr/jord-server` in `cloud/jord` (not in the tree yet) |
+| API | Hono on Node (`engines.node` >= 20). `@altr/jord-server` in `cloud/jord` (default port 8787) |
+| Primary DB | **Jord** — libSQL file `data/jord.db` via `@altr/jord`. Drizzle on libSQL. Intent: [[../feature_list/Jord/00-intent]] · as-built: [[../tech_space/jord/00-s0001-slice0]] · layout: [[../feature_list/Jord/02-architecture]] |
 | Studio | Planned `@altr/jord-studio` in `apps/jord-studio` — [[../feature_list/Jord/03-jord-studio]] |
 | Optional | PocketBase for a quick admin side path. It is not Jord |
 | Later | Hosted Turso URL, then Postgres as a second Drizzle driver. Plugins need dialect adapters. See [[../feature_list/Jord/01-later]] |
@@ -28,6 +28,6 @@ tags:
 - Vector via sqlite-vec on this file when retrieval is in scope (dialect adapter, not a free Drizzle switch)
 - Table CRUD ports to Postgres through Drizzle; triggers, policies, and extensions stay dialect-aware ([[../feature_list/Jord/02-architecture]])
 
-`@altr/jord` and `data/jord.db` do not exist until Jord-S0001 is implemented. `@altr/base/db` is still a stub.
+Jord-S0001 shipped 2026-10-21: `@altr/jord` + `@altr/jord-server`. `@altr/base/db` only redirects callers to Jord (leaf utils; no live client).
 
-Shared stubs today: `elements/base` (`db`, `env`, `errors`, `auth`, `query`, `ai`).
+Shared utils: `elements/base` (`env`, `errors`, `auth`, `query`, `ai`, deprecated `db` redirect).

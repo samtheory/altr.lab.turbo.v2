@@ -1,6 +1,6 @@
 ---
 title: "Jord-S0001 — libSQL file and one server"
-description: "Active lab implement track. Ordered cards for LibSqlAdapter, records OCC, WAL checkpoints, snapshot, and jord-server. No code yet."
+description: "Closed lab implement track. LibSqlAdapter, records OCC, WAL checkpoints, snapshot, and jord-server shipped 2026-10-21."
 created: 2026-10-18
 updated: 2026-10-21
 tags:
@@ -12,10 +12,10 @@ tags:
 
 # Jord-S0001 — libSQL file and one server
 
-> Who: **mimir** (or specialists). **Status: ready — implement now** (Apolyx-S0005 closed 2026-10-21). No Jord packages exist yet. Contract: [[../../../feature_list/Jord/00-intent]]. Architecture: [[../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../idea/Jord/2026-10-18-sharpen]]. Roadmap: [[../../00-roadmap-apolyx-jord-artemis]]. Agent: [[../../../agents/mimir/00-index]].
+> Who: **mimir** (or specialists). **Status: done** (2026-10-21). As-built: [[../../../tech_space/jord/00-s0001-slice0]]. Contract: [[../../../feature_list/Jord/00-intent]]. Architecture: [[../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../idea/Jord/2026-10-18-sharpen]]. Roadmap: [[../../00-roadmap-apolyx-jord-artemis]]. Agent: [[../../../agents/mimir/00-index]].
 
 **Sprint id:** `Jord-S0001`  
-**Opened:** 2026-10-18 · **Ready:** 2026-10-18 · **Active:** 2026-10-21 · **Owner:** mimir  
+**Opened:** 2026-10-18 · **Ready:** 2026-10-18 · **Active:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** mimir  
 **Do not start Jord Studio, Postgres, Redis, Mongo, or sqlite-vec in this sprint.**
 
 ## Goal
@@ -53,11 +53,11 @@ Locked here so implementation does not reopen them. The feature contract stays i
 
 ## Definition of done
 
-- [ ] Every card's "Done when" holds
-- [ ] [[../../../feature_list/Jord/00-intent]] acceptance is true
-- [ ] `pnpm --filter @altr/jord test` and `pnpm --filter @altr/jord typecheck` pass
-- [ ] `pnpm --filter @altr/jord-server typecheck` passes
-- [ ] A `tech_space` note exists only after the code is in the tree (card 8, docs_man)
+- [x] Every card's "Done when" holds
+- [x] [[../../../feature_list/Jord/00-intent]] acceptance is true
+- [x] `pnpm --filter @altr/jord test` and `pnpm --filter @altr/jord typecheck` pass
+- [x] `pnpm --filter @altr/jord-server typecheck` passes
+- [x] A `tech_space` note exists only after the code is in the tree (card 8, docs_man) → [[../../../tech_space/jord/00-s0001-slice0]]
 
 ## Links
 
