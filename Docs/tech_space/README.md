@@ -31,4 +31,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next Jord track:** Studio S2+ when mimir opens a new sprint — [[../feature_list/Jord/03-jord-studio]].
+**Next Jord track:** [[../plan/Jord/Jord-S0004/README|Jord-S0004]] Studio S2 schema — [[../feature_list/Jord/03-jord-studio]].

@@ -30,7 +30,8 @@ flowchart LR
 | **2** | **Jord-S0001** | `data/jord.db`, `@altr/jord`, `@altr/jord-server`, OCC `records`, WAL + snapshot | **Closed 2026-10-21** — [[../tech_space/jord/00-s0001-slice0]] · Plan [[Jord/Jord-S0001/README]] |
 | **3** | **Jord Studio S1** (`Jord-S0002`) | `apps/jord-studio` lists / browses / mutates `records` via server; UI by **apollo** | **Closed 2026-10-21** — [[../tech_space/jord/01-s0002-studio-s1]] · Plan [[Jord/Jord-S0002/README]] |
 | **3b** | **Jord Studio S1.5** (`Jord-S0003`) | Categorized side nav + Supabase-like SQL Insert/edit for `records` | **Closed 2026-10-21** — [[../tech_space/jord/02-s0003-studio-shell]] · Plan [[Jord/Jord-S0003/README]] |
-| **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | **← next product gate** · Idea [[../idea/artemis/README]] |
+| **3c** | **Jord Studio S2** (`Jord-S0004`) | Schema introspect + visualizer + additive `ADD COLUMN` live save | **← Jord implement next** · Plan [[Jord/Jord-S0004/README]] |
+| **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | Lab product gate (parallel OK) · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
 
@@ -38,7 +39,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–S0003 are closed. **Next product gate:** Artemis (or open Studio S2+ `Jord-S000N` under mimir). Product apps remain Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–S0003 are closed. **Jord next:** [[Jord/Jord-S0004/01-engine-introspect]] under **mimir**. **Lab product gate:** Artemis remains available in parallel. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

@@ -2,18 +2,19 @@
 title: "Jord — later slices"
 description: "After Slice 0: hosted libSQL, PostgresAdapter, vectors, CDC realtime, blob storage, Studio phases"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - feature
   - jord
   - database
+  - Jord-S0004
 ---
 
 # Jord — later slices
 
-> After [[00-intent]]. Architecture (ports, concurrency): [[02-architecture]]. Studio: [[03-jord-studio]].
+> After [[00-intent]]. Architecture (ports, concurrency): [[02-architecture]]. Studio: [[03-jord-studio]]. Active Studio S2 plan: [[../../plan/Jord/Jord-S0004/README|Jord-S0004]].
 
-None of the rows below are Slice 0. Slice 0 is one `file:` database, `LibSqlAdapter` only, and one Hono process.
+None of the engine rows below are Slice 0. Slice 0 is one `file:` database, `LibSqlAdapter` only, and one Hono process. Studio S1/S1.5 are shipped; S2 is the next Studio plan.
 
 ## Engine slices
 
@@ -42,8 +43,9 @@ Detail: [[03-jord-studio]].
 
 | Slice | Outcome |
 |-------|---------|
-| Studio S1 | `apps/jord-studio` lists `records` — plan [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] |
-| Studio S2 | Schema visualizer + live save |
+| Studio S1 | `apps/jord-studio` lists `records` — **done** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] |
+| Studio S1.5 | Side nav + table-editor UX — **done** [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] |
+| Studio S2 | Schema visualizer + additive live save — **active** [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] |
 | Studio S3 | Auth + roles |
 | Studio S4 | Generated CRUD API panel |
 | Studio S5 | Jobs / cron + logs |
