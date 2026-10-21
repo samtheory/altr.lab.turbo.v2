@@ -9,11 +9,12 @@ tags:
   - jord-studio
   - dashboard
   - Jord-S0002
+  - Jord-S0003
 ---
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · as-built [[../../tech_space/jord/01-s0002-studio-s1]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1 + S1.5 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] · as-built [[../../tech_space/jord/01-s0002-studio-s1]] · [[../../tech_space/jord/02-s0003-studio-shell]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -80,12 +81,17 @@ In-app help for tables and routes. Obsidian `Docs/` remains the lab vault.
 | Talks to | `@altr/jord-server` over HTTP (later SSE / WebSockets for realtime) |
 | Never opens | `data/jord.db` from the browser. All writes go through the server (honors the write-batching invariant) |
 
+## Storage reminder (Studio UI)
+
+Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON document store. The `records.body` column is `TEXT` (often a JSON *string* for agent scratchpad). Insert/edit UX should look like a **table editor** (column fields), matching Supabase Table Editor expectations. Plan: [[../../plan/Jord/Jord-S0003/README]].
+
 ## Phases (Studio only)
 
 | Phase | Outcome | Depends on |
 |-------|---------|------------|
-| S1 | Table list + row browser for `records` | Slice 0 server |
-| S2 | Schema visualizer + live save | S1, migrations in `@altr/jord` |
+| S1 | Table list + row browser for `records` | Slice 0 server — **done** ([[../../plan/Jord/Jord-S0002/README]]) |
+| S1.5 | Categorized side nav + Supabase-like Insert/edit for `records` | S1 — **done** ([[../../plan/Jord/Jord-S0003/README]] · [[../../tech_space/jord/02-s0003-studio-shell]]) |
+| S2 | Schema visualizer + live save | S1.5, migrations in `@altr/jord` |
 | S3 | Auth + roles | S1 |
 | S4 | Generated CRUD API panel | S1 |
 | S5 | Jobs / cron + logs | Server job runner |
@@ -110,4 +116,5 @@ In-app help for tables and routes. Obsidian `Docs/` remains the lab vault.
 - [x] Local-dev or signed-in gate can list `records` from `@altr/jord-server`
 - [x] No direct browser access to `data/jord.db`
 
-S1 plan (closed): [[../../plan/Jord/Jord-S0002/README]] · [[../../tech_space/jord/01-s0002-studio-s1]]. Later Studio phases (S2+) get their own plan folders when opened by mimir.
+S1 plan (closed): [[../../plan/Jord/Jord-S0002/README]] · [[../../tech_space/jord/01-s0002-studio-s1]].  
+S1.5 plan (closed): [[../../plan/Jord/Jord-S0003/README]] · [[../../tech_space/jord/02-s0003-studio-shell]]. Later Studio phases (S2+) get their own plan folders when opened by mimir.

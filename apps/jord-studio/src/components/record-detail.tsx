@@ -8,12 +8,13 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
-  Field,
-  FieldInput,
-  FieldTextarea,
 } from "@altr/apolyx";
 
-import { formatMs, type ApiErrorBody, type PublicRecord } from "@/lib/records";
+import {
+  RecordRowFields,
+  validateBodyJson,
+} from "@/components/record-row-fields";
+import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
 type Props = {
   initial: PublicRecord;
@@ -25,6 +26,8 @@ export function RecordDetail({ initial }: Props) {
   const [body, setBody] = useState(initial.body);
   const [metadata, setMetadata] = useState(initial.metadata ?? "");
   const [bucket, setBucket] = useState(initial.bucket);
+  const [validateJson, setValidateJson] = useState(false);
+  const [bodyError, setBodyError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -51,6 +54,9 @@ export function RecordDetail({ initial }: Props) {
     setError(null);
     setConflict(false);
     setSaved(false);
+    const jsonErr = validateBodyJson(body, validateJson);
+    setBodyError(jsonErr);
+    if (jsonErr) return;
 
     startTransition(async () => {
       try {
@@ -92,31 +98,19 @@ export function RecordDetail({ initial }: Props) {
   }
 
   return (
-    <form onSubmit={onSave} className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10 sm:px-6">
+    <form onSubmit={onSave} className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="space-y-1">
         <p className="text-sm text-muted-foreground">
           <Link href="/records" className="underline-offset-4 hover:underline">
-            ← Records
+            ← Table · records
           </Link>
         </p>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Record</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Edit row
+        </p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">records</h1>
         <p className="font-mono text-xs text-muted-foreground break-all">{record.id}</p>
       </div>
-
-      <dl className="grid gap-2 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-muted-foreground">version</dt>
-          <dd className="font-mono tabular-nums">{record.version}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">updated_at</dt>
-          <dd>{formatMs(record.updated_at)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">created_at</dt>
-          <dd>{formatMs(record.created_at)}</dd>
-        </div>
-      </dl>
 
       {conflict ? (
         <Alert variant="warning">
@@ -146,35 +140,32 @@ export function RecordDetail({ initial }: Props) {
         <Alert variant="success">
           <AlertTitle>Saved</AlertTitle>
           <AlertDescription>
-            Version is now <span className="font-mono tabular-nums">{record.version}</span>.
+            Column <code className="font-mono">version</code> is now{" "}
+            <span className="font-mono tabular-nums">{record.version}</span>.
           </AlertDescription>
         </Alert>
       ) : null}
 
-      <Field label="Bucket" required>
-        <FieldInput value={bucket} onChange={(e) => setBucket(e.target.value)} />
-      </Field>
-
-      <Field label="Body" required>
-        <FieldTextarea
-          rows={12}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          className="font-mono text-sm"
-        />
-      </Field>
-
-      <Field label="Metadata" optional>
-        <FieldInput
-          value={metadata}
-          onChange={(e) => setMetadata(e.target.value)}
-          placeholder="optional"
-        />
-      </Field>
+      <RecordRowFields
+        mode="edit"
+        record={record}
+        bucket={bucket}
+        onBucketChange={setBucket}
+        body={body}
+        onBodyChange={(v) => {
+          setBody(v);
+          setBodyError(null);
+        }}
+        metadata={metadata}
+        onMetadataChange={setMetadata}
+        validateJson={validateJson}
+        onValidateJsonChange={setValidateJson}
+        bodyError={bodyError}
+      />
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : "Save"}
+          {isPending ? "Saving…" : "Save row"}
         </Button>
         <Button
           type="button"
@@ -185,6 +176,7 @@ export function RecordDetail({ initial }: Props) {
               setError(null);
               setConflict(false);
               setSaved(false);
+              setBodyError(null);
               try {
                 await reloadLatest();
               } catch (err) {

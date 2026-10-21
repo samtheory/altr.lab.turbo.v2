@@ -28,8 +28,7 @@ import {
   type ApiErrorBody,
   type PublicRecord,
 } from "@/lib/records";
-
-const BUCKET_OPTIONS = ["lab", "artemis", "jord"] as const;
+import { RECORD_BUCKETS } from "@/lib/studio-nav";
 
 type Props = {
   initialBucket?: string;
@@ -83,20 +82,26 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
   }, [bucket]);
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-10 sm:px-6">
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="font-display text-3xl font-semibold tracking-tight">Records</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Table editor
+          </p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            <span className="text-muted-foreground">public.</span>records
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Newest first from jord-server. Click a row for detail and OCC patch.
+            libSQL rows · newest first · click a row to edit columns (OCC on{" "}
+            <code className="font-mono">version</code>).
           </p>
         </div>
         <Button asChild>
-          <Link href="/records/new">New record</Link>
+          <Link href="/records/new">Insert row</Link>
         </Button>
       </div>
 
-      <Field label="Bucket" description="Namespace filter (default lab)." className="max-w-xs">
+      <Field label="bucket filter" description="WHERE bucket = ?" className="max-w-xs">
         <Select
           value={bucket}
           onValueChange={(value) => {
@@ -105,10 +110,10 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Pick a bucket" />
+            <SelectValue placeholder="bucket" />
           </SelectTrigger>
           <SelectContent>
-            {BUCKET_OPTIONS.map((b) => (
+            {RECORD_BUCKETS.map((b) => (
               <SelectItem key={b} value={b}>
                 {b}
               </SelectItem>
@@ -119,22 +124,21 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
 
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Could not load records</AlertTitle>
+          <AlertTitle>Could not load table</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
       {!error && rows === null ? (
-        <p className="text-sm text-muted-foreground">
-          {isPending ? "Loading…" : "Loading…"}
-        </p>
+        <p className="text-sm text-muted-foreground">{isPending ? "Loading…" : "Loading…"}</p>
       ) : null}
 
       {!error && rows && rows.length === 0 ? (
         <Alert variant="info">
-          <AlertTitle>Empty bucket</AlertTitle>
+          <AlertTitle>No rows</AlertTitle>
           <AlertDescription>
-            No rows in <code className="font-mono">{bucket}</code>. Create one to seed the list.
+            Table <code className="font-mono">records</code> has no rows for bucket{" "}
+            <code className="font-mono">{bucket}</code>. Insert a row to seed it.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -143,11 +147,11 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
         <Table striped stickyHeader containerClassName="max-h-[70vh]">
           <TableHeader>
             <TableRow>
-              <TableHead>id</TableHead>
-              <TableHead>bucket</TableHead>
-              <TableHead>version</TableHead>
-              <TableHead>updated_at</TableHead>
-              <TableHead>body</TableHead>
+              <TableHead className="font-mono text-xs">id</TableHead>
+              <TableHead className="font-mono text-xs">bucket</TableHead>
+              <TableHead className="font-mono text-xs">version</TableHead>
+              <TableHead className="font-mono text-xs">updated_at</TableHead>
+              <TableHead className="font-mono text-xs">body</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -158,9 +162,9 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
                 onClick={() => router.push(`/records/${row.id}`)}
               >
                 <TableCell className="font-mono text-xs">{row.id.slice(0, 8)}…</TableCell>
-                <TableCell>{row.bucket}</TableCell>
-                <TableCell className="tabular-nums">{row.version}</TableCell>
-                <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                <TableCell className="font-mono text-xs">{row.bucket}</TableCell>
+                <TableCell className="tabular-nums font-mono text-xs">{row.version}</TableCell>
+                <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
                   {formatMs(row.updated_at)}
                 </TableCell>
                 <TableCell className="max-w-xs truncate font-mono text-xs">

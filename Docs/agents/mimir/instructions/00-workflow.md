@@ -27,7 +27,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0002/README]] closed 2026-10-21 — open next `Jord-S000N` when starting Studio S2+)
+4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0003/README]] closed 2026-10-21 — open next `Jord-S000N` for Studio S2+)
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. This file
 
@@ -59,6 +59,10 @@ See [[../../../plan/Jord/Jord-S0001/README]] (done 2026-10-21). As-built: [[../.
 ### Closed — Jord-S0002 (Studio S1)
 
 See [[../../../plan/Jord/Jord-S0002/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/01-s0002-studio-s1]].
+
+### Closed — Jord-S0003 (Studio shell + table-editor UX)
+
+See [[../../../plan/Jord/Jord-S0003/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/02-s0003-studio-shell]].
 
 ## Skills discipline
 

@@ -18,6 +18,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/02-s0003-studio-shell]] — **Jord-S0003** side nav + table-editor Insert/edit (2026-10-21)
 - [[jord/01-s0002-studio-s1]] — **Jord-S0002** Studio S1: `apps/jord-studio` BFF + Apolyx records browser (2026-10-21)
 - [[jord/00-s0001-slice0]] — **Jord-S0001** Slice 0: `@altr/jord` + `@altr/jord-server`, WAL, OCC → 409, `pnpm db:snapshot` (2026-10-21)
 - [[ui-kit/README]] — **Apolyx** (`@altr/apolyx`) as-built; sprints **Apolyx-S0001**–**Apolyx-S0005** closed

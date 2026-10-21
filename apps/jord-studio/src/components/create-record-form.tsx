@@ -7,31 +7,30 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
-  Field,
-  FieldInput,
-  FieldTextarea,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@altr/apolyx";
 
+import {
+  RecordRowFields,
+  validateBodyJson,
+} from "@/components/record-row-fields";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
-
-const BUCKET_OPTIONS = ["lab", "artemis", "jord"] as const;
 
 export function CreateRecordForm() {
   const router = useRouter();
   const [bucket, setBucket] = useState("lab");
   const [body, setBody] = useState('{\n  "hello": "jord"\n}');
   const [metadata, setMetadata] = useState("");
+  const [validateJson, setValidateJson] = useState(true);
+  const [bodyError, setBodyError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const jsonErr = validateBodyJson(body, validateJson);
+    setBodyError(jsonErr);
+    if (jsonErr) return;
 
     startTransition(async () => {
       try {
@@ -46,7 +45,7 @@ export function CreateRecordForm() {
         });
         if (!res.ok) {
           const err = (await res.json().catch(() => ({}))) as ApiErrorBody;
-          setError(err.message ?? `Create failed (${res.status}).`);
+          setError(err.message ?? `Insert failed (${res.status}).`);
           return;
         }
         const row = (await res.json()) as PublicRecord;
@@ -59,56 +58,44 @@ export function CreateRecordForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10 sm:px-6">
+    <form onSubmit={onSubmit} className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="space-y-1">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">New record</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Table · records
+        </p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Insert row</h1>
         <p className="text-sm text-muted-foreground">
-          POST via Studio BFF → jord-server write queue. New rows start at version 1.
+          Column fields map to SQL <code className="font-mono">INSERT</code> via jord-server (libSQL).
+          Not a document database.
         </p>
       </div>
 
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Create failed</AlertTitle>
+          <AlertTitle>Insert failed</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
-      <Field label="Bucket" required>
-        <Select value={bucket} onValueChange={setBucket}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {BUCKET_OPTIONS.map((b) => (
-              <SelectItem key={b} value={b}>
-                {b}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
-
-      <Field label="Body" description="Stored as a string (JSON text is fine)." required>
-        <FieldTextarea
-          rows={10}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          className="font-mono text-sm"
-        />
-      </Field>
-
-      <Field label="Metadata" optional description="Optional string; leave empty for null.">
-        <FieldInput
-          value={metadata}
-          onChange={(e) => setMetadata(e.target.value)}
-          placeholder="optional"
-        />
-      </Field>
+      <RecordRowFields
+        mode="insert"
+        bucket={bucket}
+        onBucketChange={setBucket}
+        body={body}
+        onBodyChange={(v) => {
+          setBody(v);
+          setBodyError(null);
+        }}
+        metadata={metadata}
+        onMetadataChange={setMetadata}
+        validateJson={validateJson}
+        onValidateJsonChange={setValidateJson}
+        bodyError={bodyError}
+      />
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Creating…" : "Create"}
+          {isPending ? "Inserting…" : "Insert row"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push("/records")}>
           Cancel

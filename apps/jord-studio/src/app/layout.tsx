@@ -4,7 +4,7 @@ import { ApolyxProvider, ApolyxThemeScript } from "@altr/apolyx";
 
 import { LocalBanner } from "@/components/local-banner";
 import { StudioBlocked } from "@/components/studio-gate";
-import { StudioHeader } from "@/components/studio-header";
+import { StudioShell } from "@/components/studio-shell";
 import { isStudioOpen } from "@/lib/studio-gate";
 
 import "./globals.css";
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 
 export const metadata: Metadata = {
   title: "Jord Studio",
-  description: "Local control plane for Jord — records browser via jord-server.",
+  description: "Local control plane for Jord — libSQL table editor via jord-server.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -31,8 +31,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             {open ? (
               <>
                 <LocalBanner />
-                <StudioHeader />
-                <main id="main">{children}</main>
+                <StudioShell>
+                  <main id="main">{children}</main>
+                </StudioShell>
               </>
             ) : (
               <StudioBlocked />

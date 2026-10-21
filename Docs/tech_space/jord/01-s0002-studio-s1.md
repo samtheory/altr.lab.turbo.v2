@@ -1,6 +1,6 @@
 ---
 title: "Jord-S0002 — Studio S1 as-built"
-description: "apps/jord-studio BFF to jord-server; Apolyx records list/create/OCC patch; local-dev gate"
+description: "Studio S1 as-built: BFF, Apolyx records UI; clarifies SQL/libSQL vs JSON textarea UX debt"
 created: 2026-10-21
 updated: 2026-10-21
 tags:
@@ -56,10 +56,21 @@ Documented in `apps/jord-studio/README.md` and `.env.example`.
 |-------|----------|
 | `/` | Brand-first Jord Studio shell |
 | `/records` | Bucket Select (default `lab`) + Apolyx Table; empty / 503 states |
-| `/records/new` | Create form → detail |
+| `/records/new` | Create form → detail (**S1 UX:** large textarea; often used with JSON text) |
 | `/records/[id]` | Detail + PATCH with `version`; **409** reloads latest row |
 
-Chrome: persistent “local / lab only” banner. Gate: `JORD_STUDIO_OPEN !== "1"` → blocked screen (no silent prod admin).
+Chrome: persistent “local / lab only” banner. Gate: `JORD_STUDIO_OPEN !== "1"` → blocked screen (no silent prod admin). No categorized side nav yet (planned [[../../plan/Jord/Jord-S0003/README|Jord-S0003]]).
+
+## SQL vs JSON (S1 clarity)
+
+| Layer | What is true in code |
+|-------|----------------------|
+| Engine | **libSQL** (SQLite SQL dialect) on `data/jord.db` — see [[00-s0001-slice0]] |
+| Table | `records` with columns `id`, `bucket`, `body` (**TEXT**), `metadata`, `created_at`, `updated_at`, `version` |
+| Writes | SQL `INSERT` / OCC `UPDATE` via `@altr/jord` + jord-server write queue |
+| Studio create UI | S1 used a free-form textarea for `body`. Operators often paste JSON *strings* because Slice 0 treats `body` as a scratchpad blob — **that is UI/docs convenience, not a JSON document database** |
+
+Next UX: Supabase-like column Insert row + side nav — [[../../plan/Jord/Jord-S0003/README]].
 
 ## Verify (2026-10-21)
 

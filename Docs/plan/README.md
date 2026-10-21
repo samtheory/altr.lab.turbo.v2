@@ -22,7 +22,9 @@ After shipping, move narrative to `tech_space/` and refresh `report/` — do not
 
 | Plan | Track | Opened | Owner | Status |
 |------|-------|--------|-------|--------|
-| [[Jord/Jord-S0001/README]] | Jord-S0001 — `data/jord.db`, `elements/jord`, `cloud/jord`. Cards 1–8 | 2026-10-18 | — | **ready to implement (do next)** |
+| [[Jord/Jord-S0003/README]] | Jord-S0003 — Studio side nav + table-editor Insert/edit | 2026-10-21 | apollo (mimir) | closed (2026-10-21) |
+| [[Jord/Jord-S0002/README]] | Jord-S0002 — Studio S1 records browser | 2026-10-21 | apollo (mimir) | closed (2026-10-21) |
+| [[Jord/Jord-S0001/README]] | Jord-S0001 — Slice 0 engine | 2026-10-18 | mimir | closed (2026-10-21) |
 | [[ui-kit/Apolyx-S0005/README]] | Apolyx-S0005 — product gate | 2026-10-21 | apollo | closed (2026-10-21) |
 | [[ui-kit/Apolyx-S0004/README]] | Apolyx-S0004 — Popover | 2026-10-18 | apollo | closed |
 | [[ui-kit/Apolyx-S0003/README]] | Apolyx-S0003 — Switch + input catalog | 2026-10-14 | apollo | closed |
