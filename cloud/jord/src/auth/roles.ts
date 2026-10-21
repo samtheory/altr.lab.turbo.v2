@@ -25,3 +25,8 @@ export function canManageApis(role: JordRole): boolean {
 export function canManageJobs(role: JordRole): boolean {
   return role === "admin";
 }
+
+/** Invoke custom / function APIs (Studio S6). Editor + admin; not readonly. */
+export function canInvokeApis(role: JordRole): boolean {
+  return role === "admin" || role === "editor";
+}

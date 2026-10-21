@@ -132,6 +132,69 @@ export type FinishJobRunInput = {
   finishedAt?: number;
 };
 
+export type JordHttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+
+export type JordFunction = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  /** JSON array of `{ kind, config }` steps. */
+  steps: string;
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type InsertFunctionInput = {
+  name: string;
+  slug: string;
+  description?: string | null;
+  steps?: string;
+  enabled?: boolean;
+};
+
+export type UpdateFunctionInput = {
+  id: string;
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  steps?: string;
+  enabled?: boolean;
+};
+
+export type DeleteFunctionResult =
+  | { ok: true }
+  | { ok: false; error: "not_found" | "has_dependents"; dependents?: number };
+
+export type JordCustomApi = {
+  id: string;
+  name: string;
+  method: JordHttpMethod;
+  slug: string;
+  functionId: string;
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type InsertCustomApiInput = {
+  name: string;
+  method: JordHttpMethod;
+  slug: string;
+  functionId: string;
+  enabled?: boolean;
+};
+
+export type UpdateCustomApiInput = {
+  id: string;
+  name?: string;
+  method?: JordHttpMethod;
+  slug?: string;
+  functionId?: string;
+  enabled?: boolean;
+};
+
 export type JordDb = LibSQLDatabase<typeof schema>;
 
 /**
@@ -166,6 +229,24 @@ export interface JordDriverPort {
   finishJobRun(input: FinishJobRunInput): Promise<JordJobRun | null>;
   /** Enabled jobs with next_run_at <= now (or null treated as due). */
   listDueJobs(nowMs: number): Promise<JordJob[]>;
+
+  listFunctions(): Promise<JordFunction[]>;
+  getFunction(id: string): Promise<JordFunction | null>;
+  getFunctionBySlug(slug: string): Promise<JordFunction | null>;
+  insertFunction(input: InsertFunctionInput): Promise<JordFunction>;
+  updateFunction(input: UpdateFunctionInput): Promise<JordFunction | null>;
+  deleteFunction(id: string): Promise<DeleteFunctionResult>;
+
+  listCustomApis(): Promise<JordCustomApi[]>;
+  getCustomApi(id: string): Promise<JordCustomApi | null>;
+  getCustomApiByMethodSlug(
+    method: JordHttpMethod,
+    slug: string,
+  ): Promise<JordCustomApi | null>;
+  insertCustomApi(input: InsertCustomApiInput): Promise<JordCustomApi>;
+  updateCustomApi(input: UpdateCustomApiInput): Promise<JordCustomApi | null>;
+  deleteCustomApi(id: string): Promise<boolean>;
+  countCustomApisByFunction(functionId: string): Promise<number>;
 
   /** User tables from sqlite_master (excludes sqlite_*). */
   listTables(): Promise<string[]>;

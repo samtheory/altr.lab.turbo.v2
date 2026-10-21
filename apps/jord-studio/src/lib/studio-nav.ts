@@ -57,8 +57,18 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         href: "/apis/generated",
         status: "live",
       },
-      { id: "custom", label: "Custom APIs", status: "soon", soonLabel: "S6" },
-      { id: "functions", label: "Function APIs", status: "soon", soonLabel: "S6" },
+      {
+        id: "custom",
+        label: "Custom APIs",
+        href: "/apis/custom",
+        status: "live",
+      },
+      {
+        id: "functions",
+        label: "Function APIs",
+        href: "/apis/functions",
+        status: "live",
+      },
     ],
   },
   {

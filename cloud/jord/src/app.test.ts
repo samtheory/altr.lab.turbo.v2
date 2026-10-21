@@ -537,4 +537,107 @@ describe("jord-server routes", () => {
       await ctx.jord.close();
     }
   });
+
+  it("admin creates function + custom API; editor invokes; disable → 503; readonly blocked", async () => {
+    const ctx = await testApp();
+    try {
+      const createDenied = await ctx.app.request("/functions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({
+          name: "Nope",
+          slug: "nope",
+          steps: JSON.stringify([{ kind: "echo", config: { message: "x" } }]),
+        }),
+      });
+      expect(createDenied.status).toBe(403);
+
+      const createdFn = await ctx.app.request("/functions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "Echo lab",
+          slug: "echo-lab",
+          steps: JSON.stringify([
+            { kind: "echo", config: { message: "hello" } },
+          ]),
+        }),
+      });
+      expect(createdFn.status).toBe(201);
+      const fn = (await createdFn.json()) as { id: string; slug: string };
+      expect(fn.slug).toBe("echo-lab");
+
+      const createdApi = await ctx.app.request("/custom-apis", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "Echo GET",
+          method: "GET",
+          slug: "echo",
+          function_id: fn.id,
+        }),
+      });
+      expect(createdApi.status).toBe(201);
+      const api = (await createdApi.json()) as { id: string; slug: string };
+
+      const invokeDenied = await ctx.app.request("/x/echo", {
+        headers: authHeaders("readonly"),
+      });
+      expect(invokeDenied.status).toBe(403);
+
+      const invoked = await ctx.app.request("/x/echo", {
+        headers: authHeaders("editor"),
+      });
+      expect(invoked.status).toBe(200);
+      const invokeBody = (await invoked.json()) as {
+        ok: boolean;
+        result: { echoed: string };
+      };
+      expect(invokeBody.ok).toBe(true);
+      expect(invokeBody.result.echoed).toBe("hello");
+
+      const direct = await ctx.app.request(`/functions/${fn.id}/invoke`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ message: "from-body" }),
+      });
+      expect(direct.status).toBe(200);
+
+      const disabled = await ctx.app.request(`/custom-apis/${api.id}`, {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ enabled: false }),
+      });
+      expect(disabled.status).toBe(200);
+
+      const afterDisable = await ctx.app.request("/x/echo", {
+        headers: authHeaders("editor"),
+      });
+      expect(afterDisable.status).toBe(503);
+      const disabledBody = (await afterDisable.json()) as {
+        error: string;
+        kind: string;
+      };
+      expect(disabledBody.error).toBe("api_disabled");
+      expect(disabledBody.kind).toBe("custom");
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
 });

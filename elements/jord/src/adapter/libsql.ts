@@ -9,18 +9,26 @@ import { drizzle } from "drizzle-orm/libsql";
 import type {
   AddColumnInput,
   AddColumnResult,
+  DeleteFunctionResult,
   FinishJobRunInput,
+  InsertCustomApiInput,
+  InsertFunctionInput,
   InsertJobInput,
   InsertJobRunInput,
   InsertRecordInput,
   JordColumnInfo,
+  JordCustomApi,
   JordDb,
   JordDriverPort,
+  JordFunction,
+  JordHttpMethod,
   JordJob,
   JordJobRun,
   JordJobStatus,
   JordRecord,
   JordTableInfo,
+  UpdateCustomApiInput,
+  UpdateFunctionInput,
   UpdateJobInput,
   UpdateRecordInput,
   UpdateRecordResult,
@@ -31,10 +39,25 @@ import {
   isValidSqlIdent,
   quoteIdent,
 } from "../schema/ddl.js";
+import { jordCustomApis, jordFunctions } from "../schema/functions.js";
 import { jordJobRuns, jordJobs } from "../schema/jobs.js";
 import { records, schema } from "../schema/records.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
 import { fileUrlToFsPath } from "../url.js";
+
+const HTTP_METHODS = new Set<JordHttpMethod>([
+  "GET",
+  "POST",
+  "PATCH",
+  "DELETE",
+]);
+
+function asHttpMethod(value: string): JordHttpMethod {
+  if (HTTP_METHODS.has(value as JordHttpMethod)) {
+    return value as JordHttpMethod;
+  }
+  return "GET";
+}
 
 const WAL_PRAGMAS = [
   "PRAGMA journal_mode = WAL",
@@ -88,6 +111,32 @@ function mapJobRun(row: typeof jordJobRuns.$inferSelect): JordJobRun {
     finishedAt: row.finishedAt ?? null,
     error: row.error ?? null,
     result: row.result ?? null,
+  };
+}
+
+function mapFunction(row: typeof jordFunctions.$inferSelect): JordFunction {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description ?? null,
+    steps: row.steps,
+    enabled: Boolean(row.enabled),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapCustomApi(row: typeof jordCustomApis.$inferSelect): JordCustomApi {
+  return {
+    id: row.id,
+    name: row.name,
+    method: asHttpMethod(row.method),
+    slug: row.slug,
+    functionId: row.functionId,
+    enabled: Boolean(row.enabled),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -344,6 +393,173 @@ export class LibSqlAdapter implements JordDriverPort {
       )
       .orderBy(jordJobs.nextRunAt);
     return rows.map(mapJob);
+  }
+
+  async listFunctions(): Promise<JordFunction[]> {
+    const rows = await this.db
+      .select()
+      .from(jordFunctions)
+      .orderBy(desc(jordFunctions.createdAt));
+    return rows.map(mapFunction);
+  }
+
+  async getFunction(id: string): Promise<JordFunction | null> {
+    const rows = await this.db
+      .select()
+      .from(jordFunctions)
+      .where(eq(jordFunctions.id, id))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapFunction(row) : null;
+  }
+
+  async getFunctionBySlug(slug: string): Promise<JordFunction | null> {
+    const rows = await this.db
+      .select()
+      .from(jordFunctions)
+      .where(eq(jordFunctions.slug, slug))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapFunction(row) : null;
+  }
+
+  async insertFunction(input: InsertFunctionInput): Promise<JordFunction> {
+    const now = Date.now();
+    const row = {
+      id: randomUUID(),
+      name: input.name,
+      slug: input.slug,
+      description: input.description ?? null,
+      steps: input.steps ?? "[]",
+      enabled: input.enabled ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.db.insert(jordFunctions).values(row);
+    return mapFunction(row);
+  }
+
+  async updateFunction(
+    input: UpdateFunctionInput,
+  ): Promise<JordFunction | null> {
+    const existing = await this.getFunction(input.id);
+    if (!existing) return null;
+    const now = Date.now();
+    await this.db
+      .update(jordFunctions)
+      .set({
+        name: input.name ?? existing.name,
+        slug: input.slug ?? existing.slug,
+        description:
+          input.description !== undefined
+            ? input.description
+            : existing.description,
+        steps: input.steps ?? existing.steps,
+        enabled: input.enabled ?? existing.enabled,
+        updatedAt: now,
+      })
+      .where(eq(jordFunctions.id, input.id));
+    return this.getFunction(input.id);
+  }
+
+  async deleteFunction(id: string): Promise<DeleteFunctionResult> {
+    const existing = await this.getFunction(id);
+    if (!existing) return { ok: false, error: "not_found" };
+    const dependents = await this.countCustomApisByFunction(id);
+    if (dependents > 0) {
+      return { ok: false, error: "has_dependents", dependents };
+    }
+    const result = await this.client.execute({
+      sql: "DELETE FROM jord_functions WHERE id = ?",
+      args: [id],
+    });
+    if (result.rowsAffected === 0) return { ok: false, error: "not_found" };
+    return { ok: true };
+  }
+
+  async listCustomApis(): Promise<JordCustomApi[]> {
+    const rows = await this.db
+      .select()
+      .from(jordCustomApis)
+      .orderBy(desc(jordCustomApis.createdAt));
+    return rows.map(mapCustomApi);
+  }
+
+  async getCustomApi(id: string): Promise<JordCustomApi | null> {
+    const rows = await this.db
+      .select()
+      .from(jordCustomApis)
+      .where(eq(jordCustomApis.id, id))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapCustomApi(row) : null;
+  }
+
+  async getCustomApiByMethodSlug(
+    method: JordHttpMethod,
+    slug: string,
+  ): Promise<JordCustomApi | null> {
+    const rows = await this.db
+      .select()
+      .from(jordCustomApis)
+      .where(
+        and(eq(jordCustomApis.method, method), eq(jordCustomApis.slug, slug)),
+      )
+      .limit(1);
+    const row = rows[0];
+    return row ? mapCustomApi(row) : null;
+  }
+
+  async insertCustomApi(input: InsertCustomApiInput): Promise<JordCustomApi> {
+    const now = Date.now();
+    const row = {
+      id: randomUUID(),
+      name: input.name,
+      method: input.method,
+      slug: input.slug,
+      functionId: input.functionId,
+      enabled: input.enabled ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.db.insert(jordCustomApis).values(row);
+    return mapCustomApi(row);
+  }
+
+  async updateCustomApi(
+    input: UpdateCustomApiInput,
+  ): Promise<JordCustomApi | null> {
+    const existing = await this.getCustomApi(input.id);
+    if (!existing) return null;
+    const now = Date.now();
+    await this.db
+      .update(jordCustomApis)
+      .set({
+        name: input.name ?? existing.name,
+        method: input.method ?? existing.method,
+        slug: input.slug ?? existing.slug,
+        functionId: input.functionId ?? existing.functionId,
+        enabled: input.enabled ?? existing.enabled,
+        updatedAt: now,
+      })
+      .where(eq(jordCustomApis.id, input.id));
+    return this.getCustomApi(input.id);
+  }
+
+  async deleteCustomApi(id: string): Promise<boolean> {
+    const result = await this.client.execute({
+      sql: "DELETE FROM jord_custom_apis WHERE id = ?",
+      args: [id],
+    });
+    return result.rowsAffected > 0;
+  }
+
+  async countCustomApisByFunction(functionId: string): Promise<number> {
+    const rows = await this.db
+      .select()
+      .from(jordCustomApis)
+      .where(eq(jordCustomApis.functionId, functionId));
+    return rows.length;
   }
 
   async listTables(): Promise<string[]> {

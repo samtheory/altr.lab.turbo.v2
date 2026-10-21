@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import type { JordAuthConfig } from "./config.js";
 import {
   canAlterSchema,
+  canInvokeApis,
   canManageApis,
   canManageJobs,
   canWriteRecords,
@@ -96,6 +97,20 @@ export function requireManageJobs() {
       if (!canManageJobs(role)) {
         throw new HTTPException(403, {
           message: "role cannot manage jobs",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireInvokeApis() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canInvokeApis(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot invoke custom or function APIs",
         });
       }
       await next();

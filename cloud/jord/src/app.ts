@@ -1,6 +1,9 @@
 import type {
   JordColumnType,
+  JordCustomApi,
   JordDriverPort,
+  JordFunction,
+  JordHttpMethod,
   JordJob,
   JordJobRun,
   JordRecord,
@@ -17,6 +20,7 @@ import { HTTPException } from "hono/http-exception";
 import {
   createAuthMiddleware,
   requireAlterSchema,
+  requireInvokeApis,
   requireManageApis,
   requireManageJobs,
   requireWriteRecords,
@@ -29,6 +33,15 @@ import {
   isGeneratedApiResourceId,
   type GeneratedApiRegistry,
 } from "./generated-api/index.js";
+import {
+  isBuiltinStepKind,
+  isCustomApiEnvDisabled,
+  isCustomHttpMethod,
+  isValidApiSlug,
+  parseCustomApiDisabledEnv,
+  parseStepsJson,
+  runFunction,
+} from "./functions/index.js";
 import {
   isBuiltinJobKind,
   LogRing,
@@ -87,6 +100,52 @@ function publicJobRun(row: JordJobRun) {
     error: row.error,
     result: row.result,
   };
+}
+
+function publicFunction(row: JordFunction) {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    steps: row.steps,
+    enabled: row.enabled,
+    created_at: row.createdAt,
+    updated_at: row.updatedAt,
+  };
+}
+
+function publicCustomApi(row: JordCustomApi) {
+  return {
+    id: row.id,
+    name: row.name,
+    method: row.method,
+    slug: row.slug,
+    function_id: row.functionId,
+    enabled: row.enabled,
+    created_at: row.createdAt,
+    updated_at: row.updatedAt,
+  };
+}
+
+function validateStepsJson(raw: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return "steps must be valid JSON";
+  }
+  if (!Array.isArray(parsed)) return "steps must be a JSON array";
+  for (const item of parsed) {
+    if (!item || typeof item !== "object") {
+      return "each step must be an object";
+    }
+    const kind = (item as { kind?: unknown }).kind;
+    if (typeof kind !== "string" || !isBuiltinStepKind(kind)) {
+      return "each step.kind must be a built-in step kind";
+    }
+  }
+  return null;
 }
 
 function requireGeneratedEnabled(
@@ -477,6 +536,419 @@ export function createJordApp(deps: JordAppDeps) {
         : undefined;
     return c.json({
       events: logs.list(Number.isFinite(limit) ? limit : 100, source),
+    });
+  });
+
+  const customApiDisabled = parseCustomApiDisabledEnv(process.env);
+
+  protectedRoutes.get("/functions", async (c) => {
+    const rows = await deps.jord.listFunctions();
+    return c.json({
+      functions: rows.map(publicFunction),
+      step_kinds: [
+        "echo",
+        "records_list",
+        "records_get",
+        "records_insert",
+        "records_count",
+      ],
+    });
+  });
+
+  protectedRoutes.post("/functions", requireManageApis(), async (c) => {
+    const body = await c.req.json<{
+      name?: string;
+      slug?: string;
+      description?: string | null;
+      steps?: string;
+      enabled?: boolean;
+    }>();
+    if (typeof body.name !== "string" || body.name.trim().length === 0) {
+      throw new HTTPException(400, { message: "name is required" });
+    }
+    if (typeof body.slug !== "string" || !isValidApiSlug(body.slug)) {
+      throw new HTTPException(400, {
+        message:
+          "slug must match [a-zA-Z][a-zA-Z0-9_-]{0,63} (no slashes)",
+      });
+    }
+    const steps =
+      typeof body.steps === "string" && body.steps.length > 0
+        ? body.steps
+        : "[]";
+    const stepsErr = validateStepsJson(steps);
+    if (stepsErr) throw new HTTPException(400, { message: stepsErr });
+    if (parseStepsJson(steps).length === 0) {
+      throw new HTTPException(400, {
+        message: "steps must include at least one built-in step",
+      });
+    }
+    const existing = await deps.jord.getFunctionBySlug(body.slug);
+    if (existing) {
+      throw new HTTPException(409, { message: "slug already exists" });
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.insertFunction({
+        name: body.name!.trim(),
+        slug: body.slug!,
+        description: body.description ?? null,
+        steps,
+        enabled: body.enabled ?? true,
+      }),
+    );
+    return c.json(publicFunction(row), 201);
+  });
+
+  protectedRoutes.get("/functions/:id", async (c) => {
+    const row = await deps.jord.getFunction(c.req.param("id"));
+    if (!row) throw new HTTPException(404, { message: "function not found" });
+    return c.json(publicFunction(row));
+  });
+
+  protectedRoutes.patch("/functions/:id", requireManageApis(), async (c) => {
+    const id = c.req.param("id");
+    const existing = await deps.jord.getFunction(id);
+    if (!existing) {
+      throw new HTTPException(404, { message: "function not found" });
+    }
+    const body = await c.req.json<{
+      name?: string;
+      slug?: string;
+      description?: string | null;
+      steps?: string;
+      enabled?: boolean;
+    }>();
+    if (body.slug !== undefined && !isValidApiSlug(body.slug)) {
+      throw new HTTPException(400, {
+        message:
+          "slug must match [a-zA-Z][a-zA-Z0-9_-]{0,63} (no slashes)",
+      });
+    }
+    if (body.steps !== undefined) {
+      const stepsErr = validateStepsJson(body.steps);
+      if (stepsErr) throw new HTTPException(400, { message: stepsErr });
+      if (parseStepsJson(body.steps).length === 0) {
+        throw new HTTPException(400, {
+          message: "steps must include at least one built-in step",
+        });
+      }
+    }
+    if (body.slug && body.slug !== existing.slug) {
+      const clash = await deps.jord.getFunctionBySlug(body.slug);
+      if (clash) {
+        throw new HTTPException(409, { message: "slug already exists" });
+      }
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.updateFunction({
+        id,
+        name: body.name,
+        slug: body.slug,
+        description: body.description,
+        steps: body.steps,
+        enabled: body.enabled,
+      }),
+    );
+    return c.json(publicFunction(row!));
+  });
+
+  protectedRoutes.delete("/functions/:id", requireManageApis(), async (c) => {
+    const id = c.req.param("id");
+    const result = await deps.enqueueWrite(() => deps.jord.deleteFunction(id));
+    if (!result.ok) {
+      if (result.error === "not_found") {
+        throw new HTTPException(404, { message: "function not found" });
+      }
+      return c.json(
+        {
+          error: "has_dependents",
+          dependents: result.dependents ?? 0,
+          message: "delete or rebind custom APIs first",
+        },
+        409,
+      );
+    }
+    return c.json({ ok: true as const, id });
+  });
+
+  protectedRoutes.post(
+    "/functions/:id/invoke",
+    requireInvokeApis(),
+    async (c) => {
+      const id = c.req.param("id");
+      const fn = await deps.jord.getFunction(id);
+      if (!fn) throw new HTTPException(404, { message: "function not found" });
+
+      let body: unknown = null;
+      const contentType = c.req.header("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        try {
+          body = await c.req.json();
+        } catch {
+          body = null;
+        }
+      }
+
+      const query: Record<string, string> = {};
+      const url = new URL(c.req.url);
+      url.searchParams.forEach((v, k) => {
+        query[k] = v;
+      });
+
+      const run = await runFunction({
+        jord: deps.jord,
+        fn,
+        role: c.get("jordRole"),
+        enqueueWrite: deps.enqueueWrite,
+        request: {
+          method: "POST",
+          path: `/functions/${id}/invoke`,
+          params: { id },
+          query,
+          body,
+        },
+      });
+
+      if (!run.ok) {
+        return c.json(
+          {
+            error: run.error,
+            message: run.message,
+            stepIndex: run.stepIndex,
+            kind: run.kind,
+          },
+          run.status as 400 | 403 | 404 | 500 | 503,
+        );
+      }
+      return c.json({ ok: true as const, result: run.result, steps_run: run.stepsRun });
+    },
+  );
+
+  protectedRoutes.get("/custom-apis", async (c) => {
+    const rows = await deps.jord.listCustomApis();
+    return c.json({ custom_apis: rows.map(publicCustomApi) });
+  });
+
+  protectedRoutes.post("/custom-apis", requireManageApis(), async (c) => {
+    const body = await c.req.json<{
+      name?: string;
+      method?: string;
+      slug?: string;
+      function_id?: string;
+      enabled?: boolean;
+    }>();
+    if (typeof body.name !== "string" || body.name.trim().length === 0) {
+      throw new HTTPException(400, { message: "name is required" });
+    }
+    if (typeof body.method !== "string" || !isCustomHttpMethod(body.method)) {
+      throw new HTTPException(400, {
+        message: "method must be GET, POST, PATCH, or DELETE",
+      });
+    }
+    if (typeof body.slug !== "string" || !isValidApiSlug(body.slug)) {
+      throw new HTTPException(400, {
+        message:
+          "slug must match [a-zA-Z][a-zA-Z0-9_-]{0,63} (no slashes)",
+      });
+    }
+    if (typeof body.function_id !== "string") {
+      throw new HTTPException(400, { message: "function_id is required" });
+    }
+    const fn = await deps.jord.getFunction(body.function_id);
+    if (!fn) throw new HTTPException(400, { message: "function_id not found" });
+
+    const clash = await deps.jord.getCustomApiByMethodSlug(
+      body.method as JordHttpMethod,
+      body.slug,
+    );
+    if (clash) {
+      throw new HTTPException(409, {
+        message: "method+slug already registered",
+      });
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.insertCustomApi({
+        name: body.name!.trim(),
+        method: body.method as JordHttpMethod,
+        slug: body.slug!,
+        functionId: body.function_id!,
+        enabled: body.enabled ?? true,
+      }),
+    );
+    return c.json(publicCustomApi(row), 201);
+  });
+
+  protectedRoutes.get("/custom-apis/:id", async (c) => {
+    const row = await deps.jord.getCustomApi(c.req.param("id"));
+    if (!row) {
+      throw new HTTPException(404, { message: "custom API not found" });
+    }
+    return c.json(publicCustomApi(row));
+  });
+
+  protectedRoutes.patch("/custom-apis/:id", requireManageApis(), async (c) => {
+    const id = c.req.param("id");
+    const existing = await deps.jord.getCustomApi(id);
+    if (!existing) {
+      throw new HTTPException(404, { message: "custom API not found" });
+    }
+    const body = await c.req.json<{
+      name?: string;
+      method?: string;
+      slug?: string;
+      function_id?: string;
+      enabled?: boolean;
+    }>();
+    if (body.method !== undefined && !isCustomHttpMethod(body.method)) {
+      throw new HTTPException(400, {
+        message: "method must be GET, POST, PATCH, or DELETE",
+      });
+    }
+    if (body.slug !== undefined && !isValidApiSlug(body.slug)) {
+      throw new HTTPException(400, {
+        message:
+          "slug must match [a-zA-Z][a-zA-Z0-9_-]{0,63} (no slashes)",
+      });
+    }
+    if (body.function_id !== undefined) {
+      const fn = await deps.jord.getFunction(body.function_id);
+      if (!fn) {
+        throw new HTTPException(400, { message: "function_id not found" });
+      }
+    }
+    const nextMethod = (body.method ?? existing.method) as JordHttpMethod;
+    const nextSlug = body.slug ?? existing.slug;
+    if (nextMethod !== existing.method || nextSlug !== existing.slug) {
+      const clash = await deps.jord.getCustomApiByMethodSlug(
+        nextMethod,
+        nextSlug,
+      );
+      if (clash && clash.id !== id) {
+        throw new HTTPException(409, {
+          message: "method+slug already registered",
+        });
+      }
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.updateCustomApi({
+        id,
+        name: body.name,
+        method: body.method as JordHttpMethod | undefined,
+        slug: body.slug,
+        functionId: body.function_id,
+        enabled: body.enabled,
+      }),
+    );
+    return c.json(publicCustomApi(row!));
+  });
+
+  protectedRoutes.delete("/custom-apis/:id", requireManageApis(), async (c) => {
+    const id = c.req.param("id");
+    const deleted = await deps.enqueueWrite(() =>
+      deps.jord.deleteCustomApi(id),
+    );
+    if (!deleted) {
+      throw new HTTPException(404, { message: "custom API not found" });
+    }
+    return c.json({ ok: true as const, id });
+  });
+
+  protectedRoutes.all("/x/:slug", requireInvokeApis(), async (c) => {
+    const slug = c.req.param("slug");
+    if (!isValidApiSlug(slug)) {
+      throw new HTTPException(404, { message: "custom API not found" });
+    }
+    const method = c.req.method.toUpperCase();
+    if (!isCustomHttpMethod(method)) {
+      return c.json({ error: "method_not_allowed" }, 405);
+    }
+
+    const api = await deps.jord.getCustomApiByMethodSlug(
+      method as JordHttpMethod,
+      slug,
+    );
+    if (!api) {
+      // Method exists under another verb?
+      const any = (await deps.jord.listCustomApis()).some(
+        (row) => row.slug === slug,
+      );
+      if (any) return c.json({ error: "method_not_allowed" }, 405);
+      throw new HTTPException(404, { message: "custom API not found" });
+    }
+
+    if (!api.enabled || isCustomApiEnvDisabled(api, customApiDisabled)) {
+      return c.json(
+        {
+          error: "api_disabled",
+          kind: "custom",
+          id: api.id,
+          message: `Custom API "${api.method} /x/${api.slug}" is disabled`,
+        },
+        503,
+      );
+    }
+
+    const fn = await deps.jord.getFunction(api.functionId);
+    if (!fn) {
+      throw new HTTPException(500, {
+        message: "custom API function missing",
+      });
+    }
+
+    let body: unknown = null;
+    if (method !== "GET" && method !== "DELETE") {
+      const contentType = c.req.header("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        try {
+          body = await c.req.json();
+        } catch {
+          body = null;
+        }
+      }
+    }
+
+    const query: Record<string, string> = {};
+    const url = new URL(c.req.url);
+    url.searchParams.forEach((v, k) => {
+      query[k] = v;
+    });
+
+    const run = await runFunction({
+      jord: deps.jord,
+      fn,
+      role: c.get("jordRole"),
+      enqueueWrite: deps.enqueueWrite,
+      request: {
+        method,
+        path: `/x/${slug}`,
+        slug,
+        params: { slug },
+        query,
+        body,
+      },
+    });
+
+    if (!run.ok) {
+      return c.json(
+        {
+          error: run.error,
+          message: run.message,
+          stepIndex: run.stepIndex,
+          kind: run.kind,
+        },
+        run.status as 400 | 403 | 404 | 500 | 503,
+      );
+    }
+    return c.json({
+      ok: true as const,
+      custom_api_id: api.id,
+      function_id: fn.id,
+      result: run.result,
+      steps_run: run.stepsRun,
     });
   });
 

@@ -18,6 +18,7 @@ export async function ensureRecordsSchema(client: Client): Promise<void> {
     ON records (bucket, created_at)
   `);
   await ensureJobsSchema(client);
+  await ensureFunctionsSchema(client);
 }
 
 /** Studio S5 job definitions + run history. */
@@ -56,5 +57,45 @@ export async function ensureJobsSchema(client: Client): Promise<void> {
   await client.execute(`
     CREATE INDEX IF NOT EXISTS jord_job_runs_job_started_idx
     ON jord_job_runs (job_id, started_at)
+  `);
+}
+
+/** Studio S6 functions + custom API bindings. */
+export async function ensureFunctionsSchema(client: Client): Promise<void> {
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_functions (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      description TEXT,
+      steps TEXT NOT NULL DEFAULT '[]',
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE UNIQUE INDEX IF NOT EXISTS jord_functions_slug_uidx
+    ON jord_functions (slug)
+  `);
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_custom_apis (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      method TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      function_id TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE UNIQUE INDEX IF NOT EXISTS jord_custom_apis_method_slug_uidx
+    ON jord_custom_apis (method, slug)
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_custom_apis_function_id_idx
+    ON jord_custom_apis (function_id)
   `);
 }

@@ -19,6 +19,7 @@ import {
 export { createJordApp } from "./app.js";
 export {
   canAlterSchema,
+  canInvokeApis,
   canManageApis,
   canManageJobs,
   canWriteRecords,
@@ -33,6 +34,12 @@ export {
   type JordRole,
   type JordSessionClaims,
 } from "./auth/index.js";
+export {
+  BUILTIN_STEP_KINDS,
+  isBuiltinStepKind,
+  isValidApiSlug,
+  type BuiltinStepKind,
+} from "./functions/index.js";
 export {
   createGeneratedApiRegistry,
   GENERATED_API_RESOURCES,

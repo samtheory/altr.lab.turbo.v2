@@ -5,6 +5,7 @@ export {
 export {
   createAuthMiddleware,
   requireAlterSchema,
+  requireInvokeApis,
   requireManageApis,
   requireManageJobs,
   requireWriteRecords,
@@ -12,6 +13,7 @@ export {
 } from "./middleware.js";
 export {
   canAlterSchema,
+  canInvokeApis,
   canManageApis,
   canManageJobs,
   canWriteRecords,

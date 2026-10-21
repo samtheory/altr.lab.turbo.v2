@@ -1,5 +1,6 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+import { jordCustomApis, jordFunctions } from "./functions.js";
 import { jordJobRuns, jordJobs } from "./jobs.js";
 
 /**
@@ -25,4 +26,10 @@ export const records = sqliteTable(
 export type RecordRow = typeof records.$inferSelect;
 export type NewRecordRow = typeof records.$inferInsert;
 
-export const schema = { records, jordJobs, jordJobRuns };
+export const schema = {
+  records,
+  jordJobs,
+  jordJobRuns,
+  jordFunctions,
+  jordCustomApis,
+};
