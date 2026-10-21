@@ -15,3 +15,8 @@ export function canWriteRecords(role: JordRole): boolean {
 export function canAlterSchema(role: JordRole): boolean {
   return role === "admin";
 }
+
+/** Enable/disable generated API resources (Studio S4). */
+export function canManageApis(role: JordRole): boolean {
+  return role === "admin";
+}

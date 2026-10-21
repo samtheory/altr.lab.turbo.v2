@@ -14,6 +14,7 @@ import {
 export { createJordApp } from "./app.js";
 export {
   canAlterSchema,
+  canManageApis,
   canWriteRecords,
   DEFAULT_SESSION_TTL_MS,
   isJordRole,
@@ -26,6 +27,15 @@ export {
   type JordRole,
   type JordSessionClaims,
 } from "./auth/index.js";
+export {
+  createGeneratedApiRegistry,
+  GENERATED_API_RESOURCES,
+  GeneratedApiRegistry,
+  isGeneratedApiResourceId,
+  type GeneratedApiOperation,
+  type GeneratedApiResource,
+  type GeneratedApiResourceId,
+} from "./generated-api/index.js";
 export { createWriteQueue } from "./queue.js";
 export {
   DEFAULT_WAL_CHECKPOINT_MS,

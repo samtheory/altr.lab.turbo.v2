@@ -155,6 +155,14 @@ export class LibSqlAdapter implements JordDriverPort {
     return { ok: true, record };
   }
 
+  async deleteRecord(id: string): Promise<boolean> {
+    const result = await this.client.execute({
+      sql: "DELETE FROM records WHERE id = ?",
+      args: [id],
+    });
+    return result.rowsAffected > 0;
+  }
+
   async listTables(): Promise<string[]> {
     const rs = await this.client.execute(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",

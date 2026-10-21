@@ -9,6 +9,7 @@ import {
   type JordAuthConfig,
   type JordRole,
 } from "./auth/index.js";
+import { GeneratedApiRegistry } from "./generated-api/index.js";
 import { createWriteQueue } from "./queue.js";
 import { truncateWalCheckpoint } from "./wal.js";
 import { mkdtemp, rm } from "node:fs/promises";
@@ -51,18 +52,20 @@ afterEach(async () => {
   }
 });
 
-async function testApp() {
+async function testApp(opts?: { generatedApi?: GeneratedApiRegistry }) {
   const dir = await mkdtemp(path.join(tmpdir(), "jord-server-"));
   temps.push(dir);
   const jord = await createJordClient({
     url: fsPathToFileUrl(path.join(dir, "jord.db")),
   });
+  const generatedApi = opts?.generatedApi ?? new GeneratedApiRegistry();
   const app = createJordApp({
     jord,
     enqueueWrite: createWriteQueue(),
     auth: TEST_AUTH,
+    generatedApi,
   });
-  return { app, jord };
+  return { app, jord, generatedApi };
 }
 
 describe("jord-server routes", () => {
@@ -280,6 +283,165 @@ describe("jord-server routes", () => {
     const { jord } = await testApp();
     try {
       await expect(truncateWalCheckpoint(jord)).resolves.toBeUndefined();
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("DELETE /records/:id removes the row", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const created = await app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ bucket: "lab", body: "{}" }),
+      });
+      const row = (await created.json()) as { id: string };
+
+      const deleted = await app.request(`/records/${row.id}`, {
+        method: "DELETE",
+        headers: authHeaders("editor"),
+      });
+      expect(deleted.status).toBe(200);
+      expect(await deleted.json()).toEqual({ ok: true, id: row.id });
+
+      const missing = await app.request(`/records/${row.id}`, {
+        headers: authHeaders("readonly"),
+      });
+      expect(missing.status).toBe(404);
+
+      const again = await app.request(`/records/${row.id}`, {
+        method: "DELETE",
+        headers: authHeaders("editor"),
+      });
+      expect(again.status).toBe(404);
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("readonly cannot DELETE records (403)", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const created = await app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ bucket: "lab", body: "{}" }),
+      });
+      const row = (await created.json()) as { id: string };
+
+      const deleted = await app.request(`/records/${row.id}`, {
+        method: "DELETE",
+        headers: authHeaders("readonly"),
+      });
+      expect(deleted.status).toBe(403);
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("generated API catalog lists records CRUD ops", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const res = await app.request("/apis/generated", {
+        headers: authHeaders("readonly"),
+      });
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        resources: Array<{
+          id: string;
+          enabled: boolean;
+          operations: Array<{ method: string; path: string }>;
+        }>;
+      };
+      expect(body.resources).toHaveLength(1);
+      expect(body.resources[0]?.id).toBe("records");
+      expect(body.resources[0]?.enabled).toBe(true);
+      const methods = body.resources[0]?.operations.map((o) => o.method) ?? [];
+      expect(methods).toEqual(
+        expect.arrayContaining(["GET", "POST", "PATCH", "DELETE"]),
+      );
+    } finally {
+      await jord.close();
+    }
+  });
+
+  it("admin can disable generated records API → 503; editor/readonly cannot toggle", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const editorToggle = await app.request("/apis/generated/records", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ enabled: false }),
+      });
+      expect(editorToggle.status).toBe(403);
+
+      const readonlyToggle = await app.request("/apis/generated/records", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("readonly"),
+        },
+        body: JSON.stringify({ enabled: false }),
+      });
+      expect(readonlyToggle.status).toBe(403);
+
+      const disabled = await app.request("/apis/generated/records", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ enabled: false }),
+      });
+      expect(disabled.status).toBe(200);
+      expect(((await disabled.json()) as { enabled: boolean }).enabled).toBe(
+        false,
+      );
+
+      const list = await app.request("/records?bucket=lab", {
+        headers: authHeaders("admin"),
+      });
+      expect(list.status).toBe(503);
+      expect(((await list.json()) as { error: string }).error).toBe(
+        "api_disabled",
+      );
+
+      const catalog = await app.request("/apis/generated", {
+        headers: authHeaders("readonly"),
+      });
+      expect(catalog.status).toBe(200);
+      expect(
+        (
+          (await catalog.json()) as {
+            resources: Array<{ enabled: boolean }>;
+          }
+        ).resources[0]?.enabled,
+      ).toBe(false);
+
+      const enabled = await app.request("/apis/generated/records", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ enabled: true }),
+      });
+      expect(enabled.status).toBe(200);
+
+      const listOk = await app.request("/records?bucket=lab", {
+        headers: authHeaders("admin"),
+      });
+      expect(listOk.status).toBe(200);
     } finally {
       await jord.close();
     }

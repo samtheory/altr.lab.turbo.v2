@@ -9,21 +9,31 @@ import {
   isValidSqlIdent,
 } from "@altr/jord";
 import { Hono } from "hono";
+import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 
 import {
   createAuthMiddleware,
   requireAlterSchema,
+  requireManageApis,
   requireWriteRecords,
   type JordAuthConfig,
   type JordAuthVariables,
 } from "./auth/index.js";
+import {
+  buildRecordsResource,
+  createGeneratedApiRegistry,
+  isGeneratedApiResourceId,
+  type GeneratedApiRegistry,
+} from "./generated-api/index.js";
 import type { WriteQueue } from "./queue.js";
 
 export type JordAppDeps = {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
   auth: JordAuthConfig;
+  /** Defaults to env-seeded registry when omitted. */
+  generatedApi?: GeneratedApiRegistry;
 };
 
 function publicRecord(row: JordRecord) {
@@ -38,9 +48,32 @@ function publicRecord(row: JordRecord) {
   };
 }
 
+function requireGeneratedEnabled(
+  registry: GeneratedApiRegistry,
+  resource: string,
+) {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      if (!registry.isEnabled(resource)) {
+        return c.json(
+          {
+            error: "api_disabled",
+            resource,
+            message: `Generated API resource "${resource}" is disabled`,
+          },
+          503,
+        );
+      }
+      await next();
+    },
+  );
+}
+
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
   const requireAuth = createAuthMiddleware(deps.auth);
+  const generatedApi =
+    deps.generatedApi ?? createGeneratedApiRegistry(process.env);
 
   app.get("/health", (c) =>
     c.json({ ok: true as const, dialect: "libsql" as const }),
@@ -48,6 +81,39 @@ export function createJordApp(deps: JordAppDeps) {
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
   protectedRoutes.use("*", requireAuth);
+
+  protectedRoutes.get("/apis/generated", (c) => {
+    return c.json({
+      resources: [buildRecordsResource(generatedApi.isEnabled("records"))],
+    });
+  });
+
+  protectedRoutes.get("/apis/generated/:resource", (c) => {
+    const resource = c.req.param("resource");
+    if (!isGeneratedApiResourceId(resource)) {
+      throw new HTTPException(404, { message: "resource not found" });
+    }
+    return c.json(buildRecordsResource(generatedApi.isEnabled(resource)));
+  });
+
+  protectedRoutes.patch(
+    "/apis/generated/:resource",
+    requireManageApis(),
+    async (c) => {
+      const resource = c.req.param("resource");
+      if (!isGeneratedApiResourceId(resource)) {
+        throw new HTTPException(404, { message: "resource not found" });
+      }
+      const body = await c.req.json<{ enabled?: boolean }>();
+      if (typeof body.enabled !== "boolean") {
+        throw new HTTPException(400, {
+          message: "enabled (boolean) is required",
+        });
+      }
+      generatedApi.setEnabled(resource, body.enabled);
+      return c.json(buildRecordsResource(generatedApi.isEnabled(resource)));
+    },
+  );
 
   protectedRoutes.get("/schema/tables", async (c) => {
     const tables = await deps.jord.listTables();
@@ -110,7 +176,10 @@ export function createJordApp(deps: JordAppDeps) {
     },
   );
 
-  protectedRoutes.post("/records", requireWriteRecords(), async (c) => {
+  const recordsRoutes = new Hono<{ Variables: JordAuthVariables }>();
+  recordsRoutes.use("*", requireGeneratedEnabled(generatedApi, "records"));
+
+  recordsRoutes.post("/", requireWriteRecords(), async (c) => {
     const body = await c.req.json<{
       bucket?: string;
       body?: string;
@@ -132,7 +201,7 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json(publicRecord(row), 201);
   });
 
-  protectedRoutes.get("/records", async (c) => {
+  recordsRoutes.get("/", async (c) => {
     const bucket = c.req.query("bucket");
     if (!bucket) {
       throw new HTTPException(400, { message: "query bucket= is required" });
@@ -141,7 +210,7 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json(rows.map(publicRecord));
   });
 
-  protectedRoutes.get("/records/:id", async (c) => {
+  recordsRoutes.get("/:id", async (c) => {
     const row = await deps.jord.getRecord(c.req.param("id"));
     if (!row) {
       throw new HTTPException(404, { message: "record not found" });
@@ -149,42 +218,49 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json(publicRecord(row));
   });
 
-  protectedRoutes.patch(
-    "/records/:id",
-    requireWriteRecords(),
-    async (c) => {
-      const id = c.req.param("id");
-      const body = await c.req.json<{
-        version?: number;
-        body?: string;
-        metadata?: string | null;
-        bucket?: string;
-      }>();
-      if (typeof body.version !== "number") {
-        throw new HTTPException(400, {
-          message: "version (number) is required",
-        });
-      }
+  recordsRoutes.patch("/:id", requireWriteRecords(), async (c) => {
+    const id = c.req.param("id");
+    const body = await c.req.json<{
+      version?: number;
+      body?: string;
+      metadata?: string | null;
+      bucket?: string;
+    }>();
+    if (typeof body.version !== "number") {
+      throw new HTTPException(400, {
+        message: "version (number) is required",
+      });
+    }
 
-      const result = await deps.enqueueWrite(() =>
-        deps.jord.updateRecord({
-          id,
-          version: body.version!,
-          body: body.body,
-          metadata: body.metadata,
-          bucket: body.bucket,
-        }),
+    const result = await deps.enqueueWrite(() =>
+      deps.jord.updateRecord({
+        id,
+        version: body.version!,
+        body: body.body,
+        metadata: body.metadata,
+        bucket: body.bucket,
+      }),
+    );
+
+    if (!result.ok) {
+      return c.json(
+        { error: "version_conflict", message: "stale version" },
+        409,
       );
+    }
+    return c.json(publicRecord(result.record));
+  });
 
-      if (!result.ok) {
-        return c.json(
-          { error: "version_conflict", message: "stale version" },
-          409,
-        );
-      }
-      return c.json(publicRecord(result.record));
-    },
-  );
+  recordsRoutes.delete("/:id", requireWriteRecords(), async (c) => {
+    const id = c.req.param("id");
+    const deleted = await deps.enqueueWrite(() => deps.jord.deleteRecord(id));
+    if (!deleted) {
+      throw new HTTPException(404, { message: "record not found" });
+    }
+    return c.json({ ok: true as const, id });
+  });
+
+  protectedRoutes.route("/records", recordsRoutes);
 
   app.route("/", protectedRoutes);
 

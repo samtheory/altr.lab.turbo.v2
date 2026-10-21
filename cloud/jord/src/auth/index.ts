@@ -5,11 +5,13 @@ export {
 export {
   createAuthMiddleware,
   requireAlterSchema,
+  requireManageApis,
   requireWriteRecords,
   type JordAuthVariables,
 } from "./middleware.js";
 export {
   canAlterSchema,
+  canManageApis,
   canWriteRecords,
   isJordRole,
   JORD_ROLES,

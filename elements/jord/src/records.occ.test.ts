@@ -97,4 +97,19 @@ describe("records OCC", () => {
       await jord.close();
     }
   });
+
+  it("deleteRecord removes the row; missing id returns false", async () => {
+    const jord = await openTemp();
+    try {
+      const inserted = await jord.insertRecord({
+        bucket: "lab",
+        body: "{}",
+      });
+      expect(await jord.deleteRecord(inserted.id)).toBe(true);
+      expect(await jord.getRecord(inserted.id)).toBeNull();
+      expect(await jord.deleteRecord(inserted.id)).toBe(false);
+    } finally {
+      await jord.close();
+    }
+  });
 });

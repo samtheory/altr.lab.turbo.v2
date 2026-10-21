@@ -1,6 +1,6 @@
 ---
 title: "Roadmap — Apolyx → Jord → Artemis"
-description: "Sequencing plan: Apolyx + Jord S1–S2 done; Jord-S0005 Studio S3 auth active; then Artemis"
+description: "Sequencing plan: Apolyx + Jord S1–S3 done; Jord-S0006 Studio S4 active; Artemis product gate in parallel"
 created: 2026-10-21
 updated: 2026-10-21
 tags:
@@ -9,19 +9,21 @@ tags:
   - apolyx
   - jord
   - artemis
+  - Jord-S0006
 ---
 
 # Roadmap — Apolyx → Jord → Artemis
 
-> Who: anyone picking the next lab track. This is the **current** big-picture sequence (locked 2026-10-21). Living map: [[../brain/00-Docs-Brain]] · Status: [[../report/STATUS]].
+> Who: anyone picking the next lab track. This is the **current** big-picture sequence (updated 2026-10-21). Living map: [[../brain/00-Docs-Brain]] · Status: [[../report/STATUS]].
 
 ## Sequence
 
 ```mermaid
 flowchart LR
   A5[Apolyx-S0005 product gate] --> J0[Jord-S0001 Slice 0 engine]
-  J0 --> JS1[Jord Studio S1]
-  JS1 --> Art[Artemis sharpen → feature_list → plan → build]
+  J0 --> JS1[Jord Studio S1–S3]
+  JS1 --> JS4[Jord Studio S4 done]
+  JS4 --> Art[Artemis sharpen → feature_list → plan → build]
 ```
 
 | Order | Track | What “done” means | Docs |
@@ -32,6 +34,7 @@ flowchart LR
 | **3b** | **Jord Studio S1.5** (`Jord-S0003`) | Categorized side nav + Supabase-like SQL Insert/edit for `records` | **Closed 2026-10-21** — [[../tech_space/jord/02-s0003-studio-shell]] · Plan [[Jord/Jord-S0003/README]] |
 | **3c** | **Jord Studio S2** (`Jord-S0004`) | Schema introspect + visualizer + additive `ADD COLUMN` live save | **Closed 2026-10-21** — [[../tech_space/jord/03-s0004-schema]] · Plan [[Jord/Jord-S0004/README]] |
 | **3d** | **Jord Studio S3** (`Jord-S0005`) | Auth sessions + feature roles (`admin` / `editor` / `readonly`); protect jord-server | **Closed 2026-10-21** — [[../tech_space/jord/04-s0005-auth]] · Plan [[Jord/Jord-S0005/README]] |
+| **3e** | **Jord Studio S4** (`Jord-S0006`) | Generated CRUD API catalog + Studio inspect/toggle panel (+ `records` DELETE) | **Closed 2026-10-21** — [[../tech_space/jord/05-s0006-generated-api]] · Plan [[Jord/Jord-S0006/README]] |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | **← next product gate** · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
@@ -40,7 +43,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–**S0005** are closed. **Next product gate:** Artemis (or open Studio S4+ `Jord-S000N` under mimir). Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–**S0006** are closed. **Next product gate:** Artemis (or open Studio S5+ `Jord-S000N` under mimir). Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

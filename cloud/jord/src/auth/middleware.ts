@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import type { JordAuthConfig } from "./config.js";
 import {
   canAlterSchema,
+  canManageApis,
   canWriteRecords,
   type JordRole,
 } from "./roles.js";
@@ -66,6 +67,20 @@ export function requireAlterSchema() {
       if (!canAlterSchema(role)) {
         throw new HTTPException(403, {
           message: "role cannot alter schema",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireManageApis() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canManageApis(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot manage generated APIs",
         });
       }
       await next();

@@ -17,3 +17,11 @@ export async function PATCH(request: Request, context: RouteContext) {
   });
   return forwardUpstream(upstream);
 }
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const { id } = await context.params;
+  const upstream = await proxyToJord(`/records/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  return forwardUpstream(upstream);
+}

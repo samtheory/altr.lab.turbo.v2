@@ -89,6 +89,8 @@ export interface JordDriverPort {
   getRecord(id: string): Promise<JordRecord | null>;
   listRecordsByBucket(bucket: string): Promise<JordRecord[]>;
   updateRecord(input: UpdateRecordInput): Promise<UpdateRecordResult>;
+  /** Hard delete. Returns true if a row was removed. */
+  deleteRecord(id: string): Promise<boolean>;
 
   /** User tables from sqlite_master (excludes sqlite_*). */
   listTables(): Promise<string[]>;
