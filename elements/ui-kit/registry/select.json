@@ -1,0 +1,32 @@
+{
+  "$schema": "./schema.json",
+  "name": "select",
+  "type": "ui",
+  "title": "Select",
+  "description": "Listbox select with keyboard, typeahead, and Field wiring",
+  "files": [
+    {
+      "path": "src/components/ui/select.tsx",
+      "target": "select.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "dismissable-layer",
+    "field",
+    "portal",
+    "position",
+    "presence",
+    "slot",
+    "use-controllable-state",
+    "use-floating",
+    "use-id",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/select"
+}

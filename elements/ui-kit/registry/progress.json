@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.json",
+  "name": "progress",
+  "type": "ui",
+  "title": "Progress",
+  "description": "Determinate and indeterminate progress bar",
+  "files": [
+    {
+      "path": "src/components/ui/progress.tsx",
+      "target": "progress.tsx"
+    }
+  ],
+  "registryDependencies": ["utils"],
+  "docs": "components/progress"
+}

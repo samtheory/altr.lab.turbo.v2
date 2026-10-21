@@ -1,0 +1,27 @@
+<ComponentPreview name="radio-group-demo" />
+
+## Installation
+
+<InstallTabs name="radio-group" exports="RadioGroup, RadioGroupItem" />
+
+## Usage
+
+```tsx
+<RadioGroup value={density} onValueChange={setDensity}>
+  <div className="flex items-center gap-2">
+    <RadioGroupItem value="compact" id="compact" />
+    <Label htmlFor="compact">Compact</Label>
+  </div>
+</RadioGroup>
+```
+
+Arrow keys move within the group (roving tabindex). Pair each item with a `Label`.
+
+## Props
+
+<PropsTable title="RadioGroup" rows={[
+  { prop: "value", type: "string", description: "Controlled value." },
+  { prop: "onValueChange", type: "(value: string) => void", description: "Called when selection changes." },
+  { prop: "orientation", type: "\"horizontal\" | \"vertical\"", default: "\"vertical\"", description: "Layout and arrow-key axis." },
+  { prop: "name", type: "string", description: "Hidden input name for forms." },
+]} />

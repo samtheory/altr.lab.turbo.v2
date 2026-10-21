@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.json",
+  "name": "scroll-area",
+  "type": "ui",
+  "title": "Scroll Area",
+  "description": "Owned scrollport with token-styled scrollbars",
+  "files": [
+    {
+      "path": "src/components/ui/scroll-area.tsx",
+      "target": "scroll-area.tsx"
+    }
+  ],
+  "registryDependencies": ["utils"],
+  "docs": "components/scroll-area"
+}

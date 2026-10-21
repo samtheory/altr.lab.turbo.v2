@@ -1,0 +1,30 @@
+<ComponentPreview name="accordion-demo" />
+
+## Installation
+
+<InstallTabs name="accordion" exports="Accordion, AccordionItem, AccordionTrigger, AccordionContent, Collapsible, CollapsibleTrigger, CollapsibleContent" />
+
+## Usage
+
+```tsx
+<Accordion type="single" collapsible defaultValue="schema">
+  <AccordionItem value="schema">
+    <AccordionTrigger>Schema</AccordionTrigger>
+    <AccordionContent>Tables and columns.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+`type="multiple"` takes `string[]` for `value` / `defaultValue`. `Collapsible` is a single disclosure without grouping.
+
+## Anatomy
+
+`Accordion` → `AccordionItem` → `AccordionTrigger` + `AccordionContent`.
+
+## Props
+
+<PropsTable title="Accordion" rows={[
+  { prop: "type", type: "\"single\" | \"multiple\"", default: "\"single\"", description: "One open item or many." },
+  { prop: "collapsible", type: "boolean", default: "true", description: "Allow closing the open item when type is single." },
+  { prop: "value", type: "string | string[]", description: "Controlled open value(s)." },
+]} />

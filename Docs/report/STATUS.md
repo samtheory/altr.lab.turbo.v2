@@ -1,72 +1,44 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot of altr.lab after sample apps were removed and Apolyx-S0004 closed; Tia intent noted"
+description: "Audited snapshot: Apolyx-S0005 product gate closed; next implement Jord-S0001"
 created: 2026-09-19
-updated: 2026-10-19
+updated: 2026-10-21
 tags:
   - report
   - status
-  - Apolyx-S0001
-  - Apolyx-S0002
-  - Apolyx-S0003
-  - Apolyx-S0004
+  - Apolyx-S0005
+  - Jord-S0001
 ---
 
 # Status
 
-Last updated: 2026-10-19 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: none · Last ship: **Apolyx-S0004** (closed 2026-10-18) · Docs: **Tia** intent promoted 2026-10-19 (no code)
+Last updated: 2026-10-21 · Living map: [[../brain/00-Docs-Brain]] · Active sprint: **Jord-S0001** (ready to implement) · Last ship: **Apolyx-S0005** (closed 2026-10-21) · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Implemented
 
 - Turborepo + pnpm workspaces (`apps/*`, `cloud/*`, `elements/*`)
-- Sample packages removed 2026-10-18: `@altr/hub`, `@altr/web`, `@altr/dashboard`, `@altr/trading-ui`, `@service/hono-server`, `@service/ai-bot-agent` — [[../tech_space/03-sample-apps-removed]]
-- Cloud still present: PocketBase placeholder (`cloud/pocketbase`)
+- Sample packages removed 2026-10-18 — [[../tech_space/03-sample-apps-removed]]
+- Cloud: PocketBase placeholder (`cloud/pocketbase`)
 - **`@altr/apolyx`** (`elements/ui-kit`)
-  - Foundations: OKLCH themes (3 families × light / dark) with hover-contrast tokens, `ApolyxProvider`, and its own primitives (no Radix / Base UI).
-  - Components: wave 1 + overlays (Dialog with sizes, DropdownMenu, Tabs, Tooltip, Toast, **Popover**), navigation (Sheet, Breadcrumb, NavigationMenu, NavList), Table / List / Grid, Timeline.
-  - **S0003:** Switch with pure, unit-tested physics, plus `lg`, tones, icons, track labels, `SwitchField`, `SwitchCard` and `FieldSet`. Field extras (`labelAside`, `optional`, horizontal, `FieldCounter`, multiple errors) sit on a `ControlBox` shared with `InputGroup`. `Input` variants and native types, `PasswordInput` + `PasswordStrength`, `NumberInput`, `InputOTP`, and `MaskedInput` / `useMask` with presets — [[../tech_space/ui-kit/08-s0003-switch-inputs]].
-  - **Post-S0003 polish (2026-10-14):** default inputs are borderless (muted pad + soft focus ring bloom; bottom accent bar removed in `ControlBox` / `Input` / `Textarea`). Checkbox fill / clear pops the mark with `apolyx-check-in` and respects reduced motion.
-  - **S0004:** owned Popover (`click` / `hover`, `PopoverAnchor`, non-modal dialog focus), origin-aware `pop` / `slide` / `fade` motion, docs recipes for every Shadcn Studio popover kind, Input Group popover addon — [[../tech_space/ui-kit/09-s0004-popover]].
-  - Motion recipes, Line / Bar charts (visx), Storybook 9.
-  - **67 registry items** with an import-resolution build; **149 Vitest tests**.
-- **`apolyx` CLI** (`elements/apolyx-cli`) — `init` / `add` / `list`. The external Next smoke app builds with button, dialog, line-chart + overlays, and since S0003 with input-group, password-input, number-input, input-otp, input-mask and switch; S0004 adds `popover`.
-- **`@altr/apolyx-docs`** (`apps/apolyx`) — MDX docs on :3004
-  - 49 MDX pages; Popover under Components (after Dropdown Menu, status `new`).
-  - Sidebar groups: Components / **Forms** / Navigation / Data / Motion / Charts. They are collapsible, open by default, and drawn with a depth guide line ([[../tech_space/ui-kit/05-docs-app#Sidebar groups]]).
-  - **Form patterns** page: layouts, Dialog / Sheet / Card containers, a multi-step flow with verification and review, error summary, async check, and a settings screen.
-  - Building blocks: ComponentPreview / InstallTabs / PropsTable / TokenTable; registry served at `/r/*.json`.
-- **`@altr/base`** — utils, content, env, errors, stubs
+  - Foundations: OKLCH themes (3 families × light / dark), `ApolyxProvider`, owned primitives (no Radix / Base UI)
+  - Through **S0004:** overlays incl. Popover, nav, Table / List / Grid, Timeline, Switch + input catalog, Line / Bar charts
+  - **S0005 product gate:** Select, Combobox, Pagination, Scroll Area, Progress, Accordion / Collapsible, Radio Group — [[../tech_space/ui-kit/10-s0005-product-gate]]
+  - **74 registry items**; **163 Vitest tests**
+- **`apolyx` CLI** — `init` / `add` / `list`
+- **`@altr/apolyx-docs`** (`apps/apolyx`) — MDX docs; S0005 pages marked with purple `new` badge; Forms / Components / Navigation updated
+- **Apolyx-first rule** — `.cursor/rules/apolyx-first.mdc` (apps consume kit; missing controls built via apollo + docs first)
 - Docs vault + brain + **docs_man** + **apollo**
 
-As-built: [[../tech_space/ui-kit/README]] (S0002: [[../tech_space/ui-kit/06-s0002-contrast-nav-switch-field-data]] · Timeline: [[../tech_space/ui-kit/07-timeline]] · S0003: [[../tech_space/ui-kit/08-s0003-switch-inputs]] · S0004: [[../tech_space/ui-kit/09-s0004-popover]])
+As-built: [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]])
 
-Screenshots:
-- `Docs/report/assets/apolyx-s0001/`
-- `Docs/report/assets/apolyx-timeline/`
-- `Docs/report/assets/apolyx-sidebar/`
-- `Docs/report/assets/apolyx-s0003/` (Switch default dark + power-blue light, Input Group light, Input OTP light, Form patterns dark with the Forms group)
-- `Docs/report/assets/apolyx-s0004/` (`popover-pop-dark`, `popover-pop-light`, `popover-slide-dark`, `popover-notifications-dark`)
+## Remaining (Apolyx — not blocking Jord)
 
-Historical: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] · Removal: [[../tech_space/03-sample-apps-removed]]
+Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]: Command, data-grid engine, Slider, date / color pickers, phone input, submenus, candlestick, RHF / Zod, remote registry / CLI update, docs search, a11y CI.
 
-## Remaining
+## Planned (repo) — **do next**
 
-Tracked in [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]]:
-
-- Remote registry hosting, `apolyx diff` / `update`, npm publish of `apolyx`
-- Docs search, dropdown submenus, installable blocks
-- Candlestick / canvas OHLC charts
-- Automated Lighthouse + Storybook a11y CI gates
-- From S0002: data grid engine (sort / filter / virtualize), Command palette, Select / Combobox, Accordion, Pagination
-- From S0003: international phone input, date / color pickers (Popover exists; pickers still deferred), Slider; tags input, file dropzone, rich text; React Hook Form / Zod adapter
-
-## Planned (Apolyx)
-
-- No open Apolyx sprint. Next wave TBD from carry-overs (Select / Combobox / Slider / pickers are the natural follow-ons now that Popover exists).
-
-## Planned (repo)
-
-- **Jord**, plan ready, code not started: [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] (cards 1–8, start [[../plan/Jord/Jord-S0001/01-packages]]) — `LibSqlAdapter`, WAL checkpoints, `records` OCC `version`, 64-bit timestamps, snapshot, `cloud/jord`. Architecture [[../feature_list/Jord/02-architecture]]. Studio [[../feature_list/Jord/03-jord-studio]]. Later [[../feature_list/Jord/01-later]]
-- **Tia**, intent only (2026-10-19): [[../feature_list/tia/README]] — Iran map / nav / traffic. Postgres+PostGIS + MapLibre + Valhalla **proposed**. Jord PostGIS/jobs/WS **not** available yet. No `plan/tia/` and no Tia packages in code
-- CI pipeline
-- Product features beyond the design-system infra
+1. **Jord-S0001** — implement now: [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]) · Intent [[../feature_list/Jord/00-intent]]
+2. Jord Studio S1 (after Slice 0) — [[../feature_list/Jord/03-jord-studio]]
+3. Artemis — still idea [[../idea/artemis/README]]; promote after Jord Slice 0
+4. Tia — intent only [[../feature_list/tia/README]]
+5. CI pipeline

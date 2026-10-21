@@ -1,0 +1,36 @@
+<ComponentPreview name="combobox-demo" />
+
+## Installation
+
+<InstallTabs name="combobox" exports="Combobox, ComboboxTrigger, ComboboxContent, ComboboxItem, ComboboxEmpty" />
+
+## Usage
+
+```tsx
+<Combobox value={value} onValueChange={setValue}>
+  <ComboboxTrigger placeholder="Search symbol" />
+  <ComboboxContent>
+    <ComboboxItem value="btc">BTC — Bitcoin</ComboboxItem>
+    <ComboboxItem value="eth">ETH — Ethereum</ComboboxItem>
+    <ComboboxEmpty>No symbol found</ComboboxEmpty>
+  </ComboboxContent>
+</Combobox>
+```
+
+## Anatomy
+
+`Combobox` → `ComboboxTrigger` + `ComboboxContent` (filter input, `ComboboxItem`, `ComboboxEmpty`).
+
+Studio Autocomplete layouts are **recipes** on this one component — not a second package.
+
+## Accessibility
+
+Combobox + listbox with a searchbox in the panel. Arrow keys move from the filter into options; Escape closes.
+
+## Props
+
+<PropsTable title="Combobox" rows={[
+  { prop: "value", type: "string", description: "Controlled value." },
+  { prop: "onValueChange", type: "(value: string) => void", description: "Called when an option is chosen." },
+  { prop: "filter", type: "(label: string, query: string) => boolean", description: "Override local filter (default: case-insensitive includes)." },
+]} />

@@ -1,0 +1,42 @@
+---
+description: Apps must consume Apolyx UI; missing components are built in Apolyx via apollo before app use
+alwaysApply: true
+---
+
+# Apolyx-first UI
+
+Monorepo apps (`apps/*` except the docs app itself) **must not** invent local UI primitives or pull Radix / Base UI / shadcn clones for kit-level controls.
+
+## Rule
+
+1. **Need a component in an app?** Import it from `@altr/apolyx` (workspace). Prefer composition of existing kit parts over new one-offs.
+2. **Component missing from Apolyx?** Stop app work. Build it in the kit first with **apollo** (`apollo` / `build apolyx`):
+   - Source: `elements/ui-kit` (`@altr/apolyx`)
+   - Docs + demo: `apps/apolyx`
+   - Registry / CLI when applicable: `elements/apolyx-cli`
+   - Hard constraints: no Radix / Base UI; semantic tokens; Storybook + tests + MDX
+3. **Document before consume:** update `Docs/feature_list/ui-kit/` (intent if new wave), ship as-built via **docs_man** (`update_docs`) — at least MDX page + registry entry + STATUS / tech_space when non-trivial.
+4. **Then** wire the app: `import { … } from "@altr/apolyx"`.
+
+## Do not
+
+- Copy-paste kit components into `apps/<product>/`
+- Add `@radix-ui/*`, Base UI, or parallel button/input/select stacks in product apps
+- “Temporary” local Dialog / Select / Table “just for this screen”
+- Skip docs / registry so only one app knows the API
+
+## Exceptions
+
+- App-specific **screens and layouts** (pages, domain widgets) that only compose Apolyx parts
+- One-off marketing illustrations / 3D that are not design-system controls
+- `apps/apolyx` itself (the kit docs app)
+
+## Agent routing
+
+| Situation | Agent |
+|-----------|--------|
+| Missing kit component | **apollo** → then **docs_man** |
+| Vault / STATUS / brain after ship | **docs_man** |
+| Product app feature using existing kit | normal app work |
+
+Intent: `Docs/feature_list/ui-kit/00-intent.md` · Builder: `.cursor/skills/apollo/SKILL.md` · Rule companion: `.cursor/rules/apollo.mdc`

@@ -135,6 +135,13 @@ import PopoverMotionDemo from "./popover-motion-demo";
 import PopoverPanelsDemo from "./popover-panels-demo";
 import PopoverDialogDemo from "./popover-dialog-demo";
 import InputGroupPopoverDemo from "./input-group-popover-demo";
+import SelectDemo from "./select-demo";
+import ComboboxDemo from "./combobox-demo";
+import PaginationDemo from "./pagination-demo";
+import ScrollAreaDemo from "./scroll-area-demo";
+import ProgressDemo from "./progress-demo";
+import AccordionDemo from "./accordion-demo";
+import RadioGroupDemo from "./radio-group-demo";
 
 export const demos = {
   "alert-demo": AlertDemo,
@@ -262,6 +269,13 @@ export const demos = {
   "popover-motion-demo": PopoverMotionDemo,
   "popover-panels-demo": PopoverPanelsDemo,
   "popover-dialog-demo": PopoverDialogDemo,
+  "select-demo": SelectDemo,
+  "combobox-demo": ComboboxDemo,
+  "pagination-demo": PaginationDemo,
+  "scroll-area-demo": ScrollAreaDemo,
+  "progress-demo": ProgressDemo,
+  "accordion-demo": AccordionDemo,
+  "radio-group-demo": RadioGroupDemo,
 } as const;
 
 export type DemoName = keyof typeof demos;

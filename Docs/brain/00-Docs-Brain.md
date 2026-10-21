@@ -2,12 +2,13 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-19
+updated: 2026-10-21
 tags:
   - brain
   - index
   - mermaid
   - altr-lab
+  - Jord-S0001
 ---
 
 # Docs Brain — living map
@@ -103,10 +104,12 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Apolyx docs app | `apps/apolyx` | [[../tech_space/ui-kit/05-docs-app]] |
 | PocketBase (optional) | `cloud/pocketbase` | Altr.lab/stack |
 | Removed 2026-10-18 | `apps/hub`, `apps/web`, `apps/dashboard`, `apps/trading-ui`, `cloud/hono-server`, `cloud/ai-bot-agent` | [[../tech_space/03-sample-apps-removed]] |
-| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · Wave 2: [[../feature_list/ui-kit/02-apolyx-s0002-wave]] · Wave 3: [[../feature_list/ui-kit/04-apolyx-s0003-switch-inputs]] · Wave 4: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] · Sprints **Apolyx-S0001**–**Apolyx-S0004** (closed): [[../plan/ui-kit/README]] · As-built: [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/09-s0004-popover]]) · Builder: [[../agents/apollo/00-index]] · Idea: [[../idea/Apolyx (ui-kit)/README]] · Historical v0: [[../tech_space/01-hub-ui-kit-base]] · [[../tech_space/02-ui-kit-storybook]] |
+| Design system (**Apolyx**) | `elements/ui-kit` (`@altr/apolyx`) · `apps/apolyx` · `elements/apolyx-cli` | Intent: [[../feature_list/ui-kit/00-intent]] · S0005 closed: [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · As-built [[../tech_space/ui-kit/10-s0005-product-gate]] · Sprints [[../plan/ui-kit/README]] · Apolyx-first: `.cursor/rules/apolyx-first.mdc` · Builder: [[../agents/apollo/00-index]] |
 | Shared libs | `elements/base` | [[../tech_space/01-hub-ui-kit-base]] · base README |
 
-Primary DB decision: **Jord** — `JordDriverPort` / `LibSqlAdapter`, `data/jord.db`, `cloud/jord`; Studio later ([[../feature_list/Jord/02-architecture]], [[../feature_list/Jord/03-jord-studio]], plan [[../plan/Jord/Jord-S0001/README]] ready to implement). PocketBase stays optional.
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → **Jord-S0001 (implement now)** → Jord Studio S1 → Artemis.
+
+Primary DB: **Jord** — plan [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]). Architecture [[../feature_list/Jord/02-architecture]] · Studio [[../feature_list/Jord/03-jord-studio]]. PocketBase stays optional.
 
 ---
 
@@ -115,10 +118,10 @@ Primary DB decision: **Jord** — `JordDriverPort` / `LibSqlAdapter`, `data/jord
 | Layer | Role | Freshness |
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Catalog v2.3: [[../idea/2026-10-18-product-catalog]]. Apolyx · Jord · API client · Search · **Tia** ([[../idea/Tia (Map Engine)/README]], promoted). Sharpen: [[../idea/Tia (Map Engine)/2026-10-19-sharpen]] |
-| `feature_list/` | Intent / what to build | [[../feature_list/ui-kit/README]] · Jord: [[../feature_list/Jord/00-intent]] · **Tia (promoted 2026-10-19, no code):** [[../feature_list/tia/README]] · Latest shipped Apolyx: [[../feature_list/ui-kit/05-apolyx-s0004-popover]] · Carryovers: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| `plan/` | Checkbox overlay + next steps | Ready to implement: [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]) · Closed: [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004**; S0004 closed 2026-10-18) |
-| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-18: sample apps removed; **Apolyx-S0004** shipped — 67 registry items, 149 tests, 49 MDX pages) |
-| `tech_space/` | Implementation narrative | Latest: [[../tech_space/03-sample-apps-removed]] · [[../tech_space/ui-kit/09-s0004-popover]] (Apolyx-S0004 Popover) · [[../tech_space/ui-kit/08-s0003-switch-inputs]] · [[../tech_space/ui-kit/05-docs-app]] · [[../tech_space/ui-kit/07-timeline]] · index [[../tech_space/ui-kit/README]] |
+| `feature_list/` | Intent / what to build | [[../feature_list/ui-kit/README]] · S0005 shipped [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · **Jord:** [[../feature_list/Jord/00-intent]] · **Tia:** [[../feature_list/tia/README]] · Carryovers: [[../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
+| `plan/` | Checkbox overlay + next steps | **Active:** [[../plan/Jord/Jord-S0001/README]] · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] · Closed Apolyx: S0001–**S0005** |
+| `report/` | Audited complete vs remaining | Latest: [[../report/STATUS]] (2026-10-21: **S0005 closed** — 74 registry, 163 tests; next Jord-S0001) |
+| `tech_space/` | Implementation narrative | Latest Apolyx: [[../tech_space/ui-kit/10-s0005-product-gate]] · index [[../tech_space/ui-kit/README]] · [[../tech_space/03-sample-apps-removed]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |

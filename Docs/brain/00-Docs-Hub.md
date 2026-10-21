@@ -2,7 +2,7 @@
 title: "Docs Hub — folder index"
 description: "Canonical index of every Docs/ folder in the altr.lab vault"
 created: 2026-09-19
-updated: 2026-10-19
+updated: 2026-10-21
 tags:
   - brain
   - hub
@@ -31,9 +31,11 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 
 App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`.
 
-**Idea catalog (v2.3):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]] · [[../idea/api-client/README|API client]] · [[../idea/search/README|Search]] · [[../idea/Tia (Map Engine)/README|Tia]]. Promoted: Apolyx (built); Jord (intent [[../feature_list/Jord/00-intent]], plan [[../plan/Jord/Jord-S0001/README]] ready); **Tia** (intent [[../feature_list/tia/README]], plan not started, no code). API client and Search remain captured 2026-10-19 (names not locked).
+**Idea catalog (v2.3):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]] · [[../idea/api-client/README|API client]] · [[../idea/search/README|Search]] · [[../idea/Tia (Map Engine)/README|Tia]]. Promoted: Apolyx (S0001–**S0005** shipped); Jord (**implement next**); **Tia** (intent only). Artemis still idea-only. Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]].
 
-**Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**Apolyx-S0001**–**Apolyx-S0004** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/09-s0004-popover]]). The idea folder is named `Apolyx (ui-kit)`. Intent, plan, and as-built stay under `ui-kit`.
+**Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
+
+**Jord (next):** intent [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] (start [[../plan/Jord/Jord-S0001/01-packages]]).
 
 ## Agent of record
 

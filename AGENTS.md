@@ -15,6 +15,8 @@ Truth order: **code** > **tech_space** > **report/plan** > **feature_list**.
 
 ## Apolyx UI kit (apollo)
 
+**Apolyx-first (always):** product apps consume `@altr/apolyx` only. If a control is missing, build it in the kit with **apollo**, document it (**docs_man**), then import in the app — never fork local primitives. Rule: `.cursor/rules/apolyx-first.mdc`.
+
 For building the design system (`apollo`, `build apolyx`, `elements/ui-kit`, `apps/apolyx`, CLI):
 
 - Follow **apollo**: `Docs/agents/apollo/00-index.md`

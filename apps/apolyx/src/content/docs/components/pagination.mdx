@@ -1,0 +1,29 @@
+<ComponentPreview name="pagination-demo" />
+
+## Installation
+
+<InstallTabs name="pagination" exports="Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis, getPaginationRange" />
+
+## Usage
+
+```tsx
+<Pagination>
+  <PaginationContent>
+    <PaginationItem>
+      <PaginationPrevious href="?page=1" />
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink href="?page=2" isActive>2</PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationNext href="?page=3" />
+    </PaginationItem>
+  </PaginationContent>
+</Pagination>
+```
+
+`getPaginationRange(page, pageCount)` builds a compact list with `"ellipsis"` gaps. Pagination is **chrome only** — no fetch or URL sync inside the kit.
+
+## Anatomy
+
+`Pagination` → `PaginationContent` → `PaginationItem` → `PaginationLink` / `PaginationPrevious` / `PaginationNext` / `PaginationEllipsis`.

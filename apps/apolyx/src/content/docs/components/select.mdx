@@ -1,0 +1,73 @@
+<ComponentPreview name="select-demo" />
+
+## Installation
+
+<InstallTabs name="select" exports="Select, SelectTrigger, SelectValue, SelectContent, SelectItem" />
+
+## Usage
+
+```tsx
+<Select defaultValue="lab">
+  <SelectTrigger>
+    <SelectValue placeholder="Pick a bucket" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="lab">lab</SelectItem>
+    <SelectItem value="artemis">artemis</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+Inside `Field`, the trigger inherits the control box surface:
+
+```tsx
+<Field label="Bucket">
+  <Select defaultValue="lab">
+    <SelectTrigger>
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent>…</SelectContent>
+  </Select>
+</Field>
+```
+
+## Anatomy
+
+`Select` → `SelectTrigger` (`SelectValue`) + `SelectContent` (`SelectGroup`, `SelectLabel`, `SelectItem`, `SelectSeparator`).
+
+## Accessibility
+
+WAI-ARIA **combobox** + **listbox** pattern (value select, not a menu).
+
+| Key | Action |
+|---|---|
+| Enter / Space / ArrowDown | Open |
+| ArrowUp (on trigger) | Open and focus the last option |
+| ArrowDown / ArrowUp | Move between options (wraps, skips disabled) |
+| Home / End | First / last option |
+| Letters | Typeahead |
+| Enter / Space | Commit and close |
+| Escape / Tab | Close and return focus |
+
+## Props
+
+<PropsTable title="Select" rows={[
+  { prop: "value", type: "string", description: "Controlled value." },
+  { prop: "defaultValue", type: "string", description: "Uncontrolled initial value." },
+  { prop: "onValueChange", type: "(value: string) => void", description: "Called when an option is chosen." },
+  { prop: "size", type: "\"sm\" | \"md\" | \"lg\"", default: "\"md\"", description: "Trigger size (also reads Field size)." },
+  { prop: "disabled", type: "boolean", description: "Disables the trigger." },
+  { prop: "name", type: "string", description: "Hidden input name for native forms." },
+]} />
+
+<PropsTable title="SelectContent" rows={[
+  { prop: "side", type: "\"top\" | \"right\" | \"bottom\" | \"left\"", default: "\"bottom\"", description: "Preferred side; flips when there is no room." },
+  { prop: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"start\"", description: "Alignment against the trigger." },
+  { prop: "sideOffset", type: "number", default: "6", description: "Gap from the trigger in pixels." },
+]} />
+
+<PropsTable title="SelectItem" rows={[
+  { prop: "value", type: "string", description: "Option value." },
+  { prop: "disabled", type: "boolean", description: "Skipped by keyboard navigation." },
+  { prop: "textValue", type: "string", description: "Override typeahead / SelectValue text." },
+]} />

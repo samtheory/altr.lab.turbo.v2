@@ -1,0 +1,21 @@
+<ComponentPreview name="progress-demo" />
+
+## Installation
+
+<InstallTabs name="progress" exports="Progress" />
+
+## Usage
+
+```tsx
+<Progress value={42} aria-label="Upload" />
+<Progress aria-label="Loading" /> {/* indeterminate */}
+```
+
+Omit `value` (or pass `null`) for indeterminate. Determinate values are clamped to `0…max`.
+
+## Props
+
+<PropsTable title="Progress" rows={[
+  { prop: "value", type: "number | null", description: "0–100. Omit for indeterminate." },
+  { prop: "max", type: "number", default: "100", description: "Upper bound for aria-valuemax." },
+]} />

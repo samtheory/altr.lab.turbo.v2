@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "pagination",
+  "type": "ui",
+  "title": "Pagination",
+  "description": "Accessible pagination chrome and page-range helper",
+  "files": [
+    {
+      "path": "src/components/ui/pagination.tsx",
+      "target": "pagination.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": ["button", "utils"],
+  "docs": "components/pagination"
+}

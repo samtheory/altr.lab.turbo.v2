@@ -2,7 +2,7 @@
 title: "altr.lab — product and ideas catalog (v2.3)"
 description: "Master idea catalog: Artemis, Apolyx, Jord, life systems, API client, search, and Tia (map engine), with a folder per track and a pick-one growth path"
 created: 2026-10-18
-updated: 2026-10-19
+updated: 2026-10-21
 tags:
   - idea
   - catalog
@@ -26,13 +26,13 @@ Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
 | 1 | **Artemis Engine** — wealth terminal, copilot, risk guard | [[artemis/README]] | Captured. Sample scaffolds were removed 2026-10-18. Product is greenfield. |
-| 2 | **Apolyx (ui-kit)** — architecture showcase and shared visual system | [[Apolyx (ui-kit)/README]] | Promoted 2026-10-11. Sprints S0001–S0004 closed. Residual growth: [[Apolyx (ui-kit)/2026-10-18-catalog-growth]]. |
+| 2 | **Apolyx (ui-kit)** — architecture showcase and shared visual system | [[Apolyx (ui-kit)/README]] | Promoted 2026-10-11. S0001–S0004 closed. **S0005** product gate ready ([[../feature_list/ui-kit/06-apolyx-s0005-product-gate]]). Residual growth: [[Apolyx (ui-kit)/2026-10-18-catalog-growth]]. |
 
 ## Foundation
 
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
-| 7 | **Jord** — libSQL file now, other engines later. Admin: Jord Studio | [[Jord/README]] | Intent [[../feature_list/Jord/00-intent]] · layout [[../feature_list/Jord/02-architecture]] · Studio [[../feature_list/Jord/03-jord-studio]]. Plan not started. |
+| 7 | **Jord** — libSQL file now, other engines later. Admin: Jord Studio | [[Jord/README]] | Intent + architecture + Studio documented. Plan [[../plan/Jord/Jord-S0001/README]] ready. Implement **after** Apolyx-S0005 per [[../plan/00-roadmap-apolyx-jord-artemis]]. |
 
 ## Life systems
 

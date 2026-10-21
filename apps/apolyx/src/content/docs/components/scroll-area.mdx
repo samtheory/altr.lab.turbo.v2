@@ -1,0 +1,21 @@
+<ComponentPreview name="scroll-area-demo" />
+
+## Installation
+
+<InstallTabs name="scroll-area" exports="ScrollArea" />
+
+## Usage
+
+```tsx
+<ScrollArea className="h-40" aria-label="Log">
+  {rows}
+</ScrollArea>
+```
+
+Owned CSS scrollport with thin token-styled scrollbars. No third-party scroll library.
+
+## Props
+
+<PropsTable title="ScrollArea" rows={[
+  { prop: "orientation", type: "\"vertical\" | \"horizontal\" | \"both\"", default: "\"vertical\"", description: "Which axes overflow." },
+]} />

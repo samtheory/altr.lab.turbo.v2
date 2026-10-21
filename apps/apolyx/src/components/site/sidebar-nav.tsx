@@ -4,9 +4,10 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { Badge, cn } from "@altr/apolyx";
+import { cn } from "@altr/apolyx";
 
 import { docHref, docsConfig, type DocGroup } from "@/docs-config";
+import { DocStatusBadge } from "./doc-status-badge";
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -91,11 +92,7 @@ function SidebarGroup({
                     )}
                   >
                     {item.title}
-                    {item.status === "new" ? (
-                      <Badge variant="info" className="px-1.5 py-0 text-[10px]">
-                        new
-                      </Badge>
-                    ) : null}
+                    <DocStatusBadge status={item.status} />
                   </Link>
                 </li>
               );

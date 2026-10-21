@@ -1,20 +1,23 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001 is ready to implement: eight ordered cards, no code yet. Jord Studio is out of this sprint."
+description: "Jord-S0001 is the active implement track: eight ordered cards. Apolyx-S0005 closed; no Jord code yet."
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-21
 tags:
   - plan
   - jord
+  - Jord-S0001
   - readme
 ---
 
 # plan / Jord
 
-> Next step is **implementation**. Intent: [[../../feature_list/Jord/00-intent]]. Jord Studio is named in [[../../feature_list/Jord/01-later]] and is not this sprint.
+> **Implement now.** Intent: [[../../feature_list/Jord/00-intent]]. Apolyx product gate closed ([[../ui-kit/Apolyx-S0005/README]]). Jord Studio is out of this sprint ([[../../feature_list/Jord/03-jord-studio]]).
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
-| [[Jord-S0001/README]] | `data/jord.db`, `@altr/jord`, `@altr/jord-server` — cards 1–8 | ready to implement |
+| [[Jord-S0001/README]] | `data/jord.db`, `@altr/jord`, `@altr/jord-server` — cards 1–8 | **ready to implement** |
 
-Active sprint: [[Jord-S0001/README]]. Start at [[Jord-S0001/01-packages]]. No code has been written for it.
+Active sprint: [[Jord-S0001/README]]. Start at [[Jord-S0001/01-packages]]. No code has been written for it yet.
+
+Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]

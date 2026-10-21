@@ -4,8 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Badge } from "@altr/apolyx";
-
+import { DocStatusBadge } from "@/components/site/doc-status-badge";
 import { TableOfContents } from "@/components/site/toc";
 import { allDocs, docFile, docHref, findDoc, neighbours } from "@/docs-config";
 import { extractHeadings } from "@/lib/slugify";
@@ -52,7 +51,7 @@ export default async function DocPage({ params }: Props) {
             <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">
               {doc.title}
             </h1>
-            {doc.status === "new" ? <Badge variant="info">new</Badge> : null}
+            <DocStatusBadge status={doc.status} className="text-xs normal-case tracking-normal" />
           </div>
           <p className="text-lg text-muted-foreground text-pretty">{doc.description}</p>
         </header>

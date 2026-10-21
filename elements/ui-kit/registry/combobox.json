@@ -1,0 +1,31 @@
+{
+  "$schema": "./schema.json",
+  "name": "combobox",
+  "type": "ui",
+  "title": "Combobox",
+  "description": "Searchable select with filter input and empty state",
+  "files": [
+    {
+      "path": "src/components/ui/combobox.tsx",
+      "target": "combobox.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": [
+    "dismissable-layer",
+    "portal",
+    "position",
+    "presence",
+    "select",
+    "slot",
+    "use-controllable-state",
+    "use-floating",
+    "use-id",
+    "use-reduced-motion",
+    "utils"
+  ],
+  "docs": "components/combobox"
+}
