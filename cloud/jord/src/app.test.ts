@@ -10,6 +10,7 @@ import {
   type JordRole,
 } from "./auth/index.js";
 import { GeneratedApiRegistry } from "./generated-api/index.js";
+import { LogRing, startJobScheduler } from "./jobs/index.js";
 import { createWriteQueue } from "./queue.js";
 import { truncateWalCheckpoint } from "./wal.js";
 import { mkdtemp, rm } from "node:fs/promises";
@@ -59,13 +60,32 @@ async function testApp(opts?: { generatedApi?: GeneratedApiRegistry }) {
     url: fsPathToFileUrl(path.join(dir, "jord.db")),
   });
   const generatedApi = opts?.generatedApi ?? new GeneratedApiRegistry();
+  const enqueueWrite = createWriteQueue();
+  const logs = new LogRing();
+  const scheduler = startJobScheduler({
+    jord,
+    enqueueWrite,
+    logs,
+    autostart: false,
+  });
   const app = createJordApp({
     jord,
-    enqueueWrite: createWriteQueue(),
+    enqueueWrite,
     auth: TEST_AUTH,
     generatedApi,
+    logs,
+    scheduler,
   });
-  return { app, jord, generatedApi };
+  return {
+    app,
+    jord,
+    generatedApi,
+    logs,
+    scheduler,
+    stop() {
+      scheduler.stop();
+    },
+  };
 }
 
 describe("jord-server routes", () => {
@@ -444,6 +464,77 @@ describe("jord-server routes", () => {
       expect(listOk.status).toBe(200);
     } finally {
       await jord.close();
+    }
+  });
+
+  it("admin creates echo job, run-now succeeds; editor cannot manage", async () => {
+    const ctx = await testApp();
+    try {
+      const denied = await ctx.app.request("/jobs", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({
+          name: "Nope",
+          kind: "echo",
+          interval_ms: 5000,
+        }),
+      });
+      expect(denied.status).toBe(403);
+
+      const created = await ctx.app.request("/jobs", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "Echo once",
+          kind: "echo",
+          enabled: false,
+          interval_ms: 5000,
+          config: JSON.stringify({ message: "lab" }),
+        }),
+      });
+      expect(created.status).toBe(201);
+      const job = (await created.json()) as { id: string; kind: string };
+      expect(job.kind).toBe("echo");
+
+      const runDenied = await ctx.app.request(`/jobs/${job.id}/run`, {
+        method: "POST",
+        headers: authHeaders("readonly"),
+      });
+      expect(runDenied.status).toBe(403);
+
+      const ran = await ctx.app.request(`/jobs/${job.id}/run`, {
+        method: "POST",
+        headers: authHeaders("admin"),
+      });
+      expect(ran.status).toBe(200);
+
+      const runs = await ctx.app.request(`/jobs/${job.id}/runs`, {
+        headers: authHeaders("readonly"),
+      });
+      expect(runs.status).toBe(200);
+      const body = (await runs.json()) as {
+        runs: Array<{ status: string }>;
+      };
+      expect(body.runs.length).toBeGreaterThanOrEqual(1);
+      expect(body.runs[0]?.status).toBe("ok");
+
+      const logs = await ctx.app.request("/logs?source=job", {
+        headers: authHeaders("readonly"),
+      });
+      expect(logs.status).toBe(200);
+      const logBody = (await logs.json()) as {
+        events: Array<{ source: string }>;
+      };
+      expect(logBody.events.some((e) => e.source === "job")).toBe(true);
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
     }
   });
 });

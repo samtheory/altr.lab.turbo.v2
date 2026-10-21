@@ -3,6 +3,11 @@ import { serve } from "@hono/node-server";
 
 import { createJordApp } from "./app.js";
 import { resolveAuthConfig } from "./auth/index.js";
+import {
+  LogRing,
+  seedDefaultJobs,
+  startJobScheduler,
+} from "./jobs/index.js";
 import { loadLocalEnv } from "./load-env.js";
 import { createWriteQueue } from "./queue.js";
 import {
@@ -15,6 +20,7 @@ export { createJordApp } from "./app.js";
 export {
   canAlterSchema,
   canManageApis,
+  canManageJobs,
   canWriteRecords,
   DEFAULT_SESSION_TTL_MS,
   isJordRole,
@@ -36,6 +42,16 @@ export {
   type GeneratedApiResource,
   type GeneratedApiResourceId,
 } from "./generated-api/index.js";
+export {
+  BUILTIN_JOB_KINDS,
+  isBuiltinJobKind,
+  LogRing,
+  MIN_JOB_INTERVAL_MS,
+  seedDefaultJobs,
+  startJobScheduler,
+  type JobScheduler,
+  type LogEvent,
+} from "./jobs/index.js";
 export { createWriteQueue } from "./queue.js";
 export {
   DEFAULT_WAL_CHECKPOINT_MS,
@@ -55,7 +71,16 @@ export async function startJordServer(
     url: env.DATABASE_URL,
   });
   const enqueueWrite = createWriteQueue();
-  const app = createJordApp({ jord, enqueueWrite, auth });
+  const logs = new LogRing();
+  await seedDefaultJobs(jord);
+  const scheduler = startJobScheduler({ jord, enqueueWrite, logs });
+  const app = createJordApp({
+    jord,
+    enqueueWrite,
+    auth,
+    logs,
+    scheduler,
+  });
   const hygiene = startWalHygiene(jord, resolveWalCheckpointMs(env));
 
   const port = Number(env.PORT) || DEFAULT_PORT;
@@ -66,6 +91,7 @@ export async function startJordServer(
     if (shuttingDown) return;
     shuttingDown = true;
     console.log(`[@altr/jord-server] ${signal} — wal_checkpoint(TRUNCATE)`);
+    scheduler.stop();
     hygiene.stop();
     try {
       await truncateWalCheckpoint(jord);
@@ -84,6 +110,7 @@ export async function startJordServer(
 
   return {
     async close() {
+      scheduler.stop();
       hygiene.stop();
       await truncateWalCheckpoint(jord);
       await jord.close();

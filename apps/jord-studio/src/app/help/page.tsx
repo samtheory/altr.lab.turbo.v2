@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth/session";
 import {
   canAlterSchema,
   canManageApis,
+  canManageJobs,
   canWriteRecords,
 } from "@/lib/auth/roles";
 
@@ -16,7 +17,7 @@ export default async function HelpPage() {
       <div className="space-y-1">
         <h1 className="font-display text-3xl font-semibold tracking-tight">Session · role</h1>
         <p className="text-sm text-muted-foreground">
-          Studio S3–S4 feature roles. SQL policies / RLS remain Studio S7.
+          Studio S3–S5 feature roles. SQL policies / RLS remain Studio S7.
         </p>
       </div>
 
@@ -36,12 +37,13 @@ export default async function HelpPage() {
         <AlertTitle>Capabilities</AlertTitle>
         <AlertDescription>
           <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
-            <li>Read records / schema / generated API catalog: yes</li>
+            <li>Read records / schema / APIs / jobs / logs: yes</li>
             <li>Write records (incl. DELETE): {canWriteRecords(role) ? "yes" : "no"}</li>
             <li>ADD COLUMN: {canAlterSchema(role) ? "yes" : "no"}</li>
             <li>
               Toggle generated API: {canManageApis(role) ? "yes" : "no"}
             </li>
+            <li>Manage jobs (create / run): {canManageJobs(role) ? "yes" : "no"}</li>
           </ul>
         </AlertDescription>
       </Alert>
@@ -58,7 +60,7 @@ export default async function HelpPage() {
       <Alert variant="info">
         <AlertTitle>Vault docs</AlertTitle>
         <AlertDescription>
-          Plan: <code className="font-mono">Docs/plan/Jord/Jord-S0006/</code> · intent{" "}
+          Plan: <code className="font-mono">Docs/plan/Jord/Jord-S0007/</code> · intent{" "}
           <code className="font-mono">Docs/feature_list/Jord/03-jord-studio</code>.
         </AlertDescription>
       </Alert>

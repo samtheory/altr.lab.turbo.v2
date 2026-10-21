@@ -3,18 +3,25 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 
 import { createClient, type Client } from "@libsql/client";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull, lte, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
 import type {
   AddColumnInput,
   AddColumnResult,
+  FinishJobRunInput,
+  InsertJobInput,
+  InsertJobRunInput,
   InsertRecordInput,
   JordColumnInfo,
   JordDb,
   JordDriverPort,
+  JordJob,
+  JordJobRun,
+  JordJobStatus,
   JordRecord,
   JordTableInfo,
+  UpdateJobInput,
   UpdateRecordInput,
   UpdateRecordResult,
 } from "../port.js";
@@ -24,6 +31,7 @@ import {
   isValidSqlIdent,
   quoteIdent,
 } from "../schema/ddl.js";
+import { jordJobRuns, jordJobs } from "../schema/jobs.js";
 import { records, schema } from "../schema/records.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
 import { fileUrlToFsPath } from "../url.js";
@@ -43,6 +51,43 @@ function mapRow(row: typeof records.$inferSelect): JordRecord {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
+  };
+}
+
+function mapJob(row: typeof jordJobs.$inferSelect): JordJob {
+  const lastStatus =
+    row.lastStatus === "ok" || row.lastStatus === "error"
+      ? (row.lastStatus as JordJobStatus)
+      : null;
+  return {
+    id: row.id,
+    name: row.name,
+    kind: row.kind,
+    enabled: Boolean(row.enabled),
+    intervalMs: row.intervalMs,
+    config: row.config,
+    nextRunAt: row.nextRunAt ?? null,
+    lastRunAt: row.lastRunAt ?? null,
+    lastStatus,
+    lastError: row.lastError ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapJobRun(row: typeof jordJobRuns.$inferSelect): JordJobRun {
+  const status =
+    row.status === "running" || row.status === "ok" || row.status === "error"
+      ? row.status
+      : "error";
+  return {
+    id: row.id,
+    jobId: row.jobId,
+    status,
+    startedAt: row.startedAt,
+    finishedAt: row.finishedAt ?? null,
+    error: row.error ?? null,
+    result: row.result ?? null,
   };
 }
 
@@ -161,6 +206,144 @@ export class LibSqlAdapter implements JordDriverPort {
       args: [id],
     });
     return result.rowsAffected > 0;
+  }
+
+  async listJobs(): Promise<JordJob[]> {
+    const rows = await this.db
+      .select()
+      .from(jordJobs)
+      .orderBy(desc(jordJobs.createdAt));
+    return rows.map(mapJob);
+  }
+
+  async getJob(id: string): Promise<JordJob | null> {
+    const rows = await this.db
+      .select()
+      .from(jordJobs)
+      .where(eq(jordJobs.id, id))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapJob(row) : null;
+  }
+
+  async insertJob(input: InsertJobInput): Promise<JordJob> {
+    const now = Date.now();
+    const row = {
+      id: randomUUID(),
+      name: input.name,
+      kind: input.kind,
+      enabled: input.enabled ?? false,
+      intervalMs: input.intervalMs,
+      config: input.config ?? "{}",
+      nextRunAt: input.nextRunAt ?? (input.enabled ? now : null),
+      lastRunAt: null as number | null,
+      lastStatus: null as string | null,
+      lastError: null as string | null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.db.insert(jordJobs).values(row);
+    return mapJob(row);
+  }
+
+  async updateJob(input: UpdateJobInput): Promise<JordJob | null> {
+    const existing = await this.getJob(input.id);
+    if (!existing) return null;
+    const now = Date.now();
+    const next = {
+      name: input.name ?? existing.name,
+      kind: input.kind ?? existing.kind,
+      enabled: input.enabled ?? existing.enabled,
+      intervalMs: input.intervalMs ?? existing.intervalMs,
+      config: input.config ?? existing.config,
+      nextRunAt:
+        input.nextRunAt !== undefined ? input.nextRunAt : existing.nextRunAt,
+      lastRunAt:
+        input.lastRunAt !== undefined ? input.lastRunAt : existing.lastRunAt,
+      lastStatus:
+        input.lastStatus !== undefined
+          ? input.lastStatus
+          : existing.lastStatus,
+      lastError:
+        input.lastError !== undefined ? input.lastError : existing.lastError,
+      updatedAt: now,
+    };
+    await this.db
+      .update(jordJobs)
+      .set(next)
+      .where(eq(jordJobs.id, input.id));
+    return this.getJob(input.id);
+  }
+
+  async deleteJob(id: string): Promise<boolean> {
+    await this.client.execute({
+      sql: "DELETE FROM jord_job_runs WHERE job_id = ?",
+      args: [id],
+    });
+    const result = await this.client.execute({
+      sql: "DELETE FROM jord_jobs WHERE id = ?",
+      args: [id],
+    });
+    return result.rowsAffected > 0;
+  }
+
+  async listJobRuns(jobId: string, limit = 50): Promise<JordJobRun[]> {
+    const rows = await this.db
+      .select()
+      .from(jordJobRuns)
+      .where(eq(jordJobRuns.jobId, jobId))
+      .orderBy(desc(jordJobRuns.startedAt))
+      .limit(Math.max(1, Math.min(limit, 200)));
+    return rows.map(mapJobRun);
+  }
+
+  async insertJobRun(input: InsertJobRunInput): Promise<JordJobRun> {
+    const startedAt = input.startedAt ?? Date.now();
+    const row = {
+      id: randomUUID(),
+      jobId: input.jobId,
+      status: "running" as const,
+      startedAt,
+      finishedAt: null as number | null,
+      error: null as string | null,
+      result: null as string | null,
+    };
+    await this.db.insert(jordJobRuns).values(row);
+    return mapJobRun(row);
+  }
+
+  async finishJobRun(input: FinishJobRunInput): Promise<JordJobRun | null> {
+    const finishedAt = input.finishedAt ?? Date.now();
+    await this.db
+      .update(jordJobRuns)
+      .set({
+        status: input.status,
+        finishedAt,
+        error: input.error ?? null,
+        result: input.result ?? null,
+      })
+      .where(eq(jordJobRuns.id, input.id));
+    const rows = await this.db
+      .select()
+      .from(jordJobRuns)
+      .where(eq(jordJobRuns.id, input.id))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapJobRun(row) : null;
+  }
+
+  async listDueJobs(nowMs: number): Promise<JordJob[]> {
+    const rows = await this.db
+      .select()
+      .from(jordJobs)
+      .where(
+        and(
+          eq(jordJobs.enabled, true),
+          or(isNull(jordJobs.nextRunAt), lte(jordJobs.nextRunAt, nowMs)),
+        ),
+      )
+      .orderBy(jordJobs.nextRunAt);
+    return rows.map(mapJob);
   }
 
   async listTables(): Promise<string[]> {

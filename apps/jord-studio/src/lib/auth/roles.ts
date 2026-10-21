@@ -20,3 +20,8 @@ export function canAlterSchema(role: JordRole): boolean {
 export function canManageApis(role: JordRole): boolean {
   return role === "admin";
 }
+
+/** Create / update / run / delete scheduled jobs (Studio S5). */
+export function canManageJobs(role: JordRole): boolean {
+  return role === "admin";
+}

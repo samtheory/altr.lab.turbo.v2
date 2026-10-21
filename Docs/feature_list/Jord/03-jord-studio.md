@@ -13,11 +13,12 @@ tags:
   - Jord-S0004
   - Jord-S0005
   - Jord-S0006
+  - Jord-S0007
 ---
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S4 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] · [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] · [[../../plan/Jord/Jord-S0005/README|Jord-S0005]] · [[../../plan/Jord/Jord-S0006/README|Jord-S0006]] · as-built [[../../tech_space/jord/02-s0003-studio-shell]] · [[../../tech_space/jord/03-s0004-schema]] · [[../../tech_space/jord/04-s0005-auth]] · [[../../tech_space/jord/05-s0006-generated-api]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S5 shipped:** [[../../plan/Jord/Jord-S0002/README|Jord-S0002]] · [[../../plan/Jord/Jord-S0003/README|Jord-S0003]] · [[../../plan/Jord/Jord-S0004/README|Jord-S0004]] · [[../../plan/Jord/Jord-S0005/README|Jord-S0005]] · [[../../plan/Jord/Jord-S0006/README|Jord-S0006]] · [[../../plan/Jord/Jord-S0007/README|Jord-S0007]] · as-built through [[../../tech_space/jord/06-s0007-jobs-logs]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -97,7 +98,7 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 | S2 | Schema visualizer + live save (additive `ADD COLUMN` v1) | S1.5 — **done** ([[../../plan/Jord/Jord-S0004/README]] · [[../../tech_space/jord/03-s0004-schema]]) |
 | S3 | Auth + feature roles (`admin` / `editor` / `readonly`) | S1 — **done** ([[../../plan/Jord/Jord-S0005/README]] · [[../../tech_space/jord/04-s0005-auth]]) |
 | S4 | Generated CRUD API panel | S1 — **done** ([[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]]) |
-| S5 | Jobs / cron + logs | Server job runner |
+| S5 | Jobs / cron + logs | Server job runner — **done** ([[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]]) |
 | S6 | Custom + function APIs editor | S4 |
 | S7 | Triggers, policies | S2 + dialect seam |
 | S8 | Postgres connection (`PostgresAdapter`) | Postgres driver installed |
@@ -123,4 +124,5 @@ S1 plan (closed): [[../../plan/Jord/Jord-S0002/README]] · [[../../tech_space/jo
 S1.5 plan (closed): [[../../plan/Jord/Jord-S0003/README]] · [[../../tech_space/jord/02-s0003-studio-shell]].  
 S2 plan (closed): [[../../plan/Jord/Jord-S0004/README]] · [[../../tech_space/jord/03-s0004-schema]].  
 S3 plan (closed): [[../../plan/Jord/Jord-S0005/README]] · [[../../tech_space/jord/04-s0005-auth]].  
-S4 plan (closed): [[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]]. Later phases (S5+) get their own plan folders when opened by mimir.
+S4 plan (closed): [[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]].  
+S5 plan (closed): [[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]]. Later phases (S6+) get their own plan folders when opened by mimir.

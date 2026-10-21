@@ -1,6 +1,8 @@
 import type {
   JordColumnType,
   JordDriverPort,
+  JordJob,
+  JordJobRun,
   JordRecord,
 } from "@altr/jord";
 import {
@@ -16,6 +18,7 @@ import {
   createAuthMiddleware,
   requireAlterSchema,
   requireManageApis,
+  requireManageJobs,
   requireWriteRecords,
   type JordAuthConfig,
   type JordAuthVariables,
@@ -26,6 +29,13 @@ import {
   isGeneratedApiResourceId,
   type GeneratedApiRegistry,
 } from "./generated-api/index.js";
+import {
+  isBuiltinJobKind,
+  LogRing,
+  MIN_JOB_INTERVAL_MS,
+  type JobScheduler,
+  type LogSource,
+} from "./jobs/index.js";
 import type { WriteQueue } from "./queue.js";
 
 export type JordAppDeps = {
@@ -34,6 +44,8 @@ export type JordAppDeps = {
   auth: JordAuthConfig;
   /** Defaults to env-seeded registry when omitted. */
   generatedApi?: GeneratedApiRegistry;
+  logs?: LogRing;
+  scheduler?: JobScheduler;
 };
 
 function publicRecord(row: JordRecord) {
@@ -45,6 +57,35 @@ function publicRecord(row: JordRecord) {
     created_at: row.createdAt,
     updated_at: row.updatedAt,
     version: row.version,
+  };
+}
+
+function publicJob(row: JordJob) {
+  return {
+    id: row.id,
+    name: row.name,
+    kind: row.kind,
+    enabled: row.enabled,
+    interval_ms: row.intervalMs,
+    config: row.config,
+    next_run_at: row.nextRunAt,
+    last_run_at: row.lastRunAt,
+    last_status: row.lastStatus,
+    last_error: row.lastError,
+    created_at: row.createdAt,
+    updated_at: row.updatedAt,
+  };
+}
+
+function publicJobRun(row: JordJobRun) {
+  return {
+    id: row.id,
+    job_id: row.jobId,
+    status: row.status,
+    started_at: row.startedAt,
+    finished_at: row.finishedAt,
+    error: row.error,
+    result: row.result,
   };
 }
 
@@ -74,6 +115,7 @@ export function createJordApp(deps: JordAppDeps) {
   const requireAuth = createAuthMiddleware(deps.auth);
   const generatedApi =
     deps.generatedApi ?? createGeneratedApiRegistry(process.env);
+  const logs = deps.logs ?? new LogRing();
 
   app.get("/health", (c) =>
     c.json({ ok: true as const, dialect: "libsql" as const }),
@@ -81,6 +123,23 @@ export function createJordApp(deps: JordAppDeps) {
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
   protectedRoutes.use("*", requireAuth);
+  protectedRoutes.use("*", async (c, next) => {
+    const started = Date.now();
+    await next();
+    const path = c.req.path;
+    if (path === "/logs") return;
+    logs.append({
+      level: c.res.status >= 500 ? "error" : c.res.status >= 400 ? "warn" : "info",
+      source: "http",
+      message: `${c.req.method} ${path} → ${c.res.status}`,
+      meta: {
+        method: c.req.method,
+        path,
+        status: c.res.status,
+        ms: Date.now() - started,
+      },
+    });
+  });
 
   protectedRoutes.get("/apis/generated", (c) => {
     return c.json({
@@ -261,6 +320,165 @@ export function createJordApp(deps: JordAppDeps) {
   });
 
   protectedRoutes.route("/records", recordsRoutes);
+
+  protectedRoutes.get("/jobs", async (c) => {
+    const jobs = await deps.jord.listJobs();
+    return c.json({ jobs: jobs.map(publicJob) });
+  });
+
+  protectedRoutes.post("/jobs", requireManageJobs(), async (c) => {
+    const body = await c.req.json<{
+      name?: string;
+      kind?: string;
+      enabled?: boolean;
+      interval_ms?: number;
+      config?: string;
+    }>();
+    if (typeof body.name !== "string" || body.name.trim().length === 0) {
+      throw new HTTPException(400, { message: "name is required" });
+    }
+    if (typeof body.kind !== "string" || !isBuiltinJobKind(body.kind)) {
+      throw new HTTPException(400, {
+        message: "kind must be wal_checkpoint, echo, or records_count",
+      });
+    }
+    if (
+      typeof body.interval_ms !== "number" ||
+      body.interval_ms < MIN_JOB_INTERVAL_MS
+    ) {
+      throw new HTTPException(400, {
+        message: `interval_ms must be >= ${MIN_JOB_INTERVAL_MS}`,
+      });
+    }
+    const config =
+      typeof body.config === "string" && body.config.length > 0
+        ? body.config
+        : "{}";
+    try {
+      JSON.parse(config);
+    } catch {
+      throw new HTTPException(400, { message: "config must be valid JSON" });
+    }
+
+    const job = await deps.enqueueWrite(() =>
+      deps.jord.insertJob({
+        name: body.name!.trim(),
+        kind: body.kind!,
+        enabled: body.enabled ?? false,
+        intervalMs: body.interval_ms!,
+        config,
+      }),
+    );
+    return c.json(publicJob(job), 201);
+  });
+
+  protectedRoutes.get("/jobs/:id", async (c) => {
+    const job = await deps.jord.getJob(c.req.param("id"));
+    if (!job) throw new HTTPException(404, { message: "job not found" });
+    return c.json(publicJob(job));
+  });
+
+  protectedRoutes.patch("/jobs/:id", requireManageJobs(), async (c) => {
+    const id = c.req.param("id");
+    const existing = await deps.jord.getJob(id);
+    if (!existing) throw new HTTPException(404, { message: "job not found" });
+
+    const body = await c.req.json<{
+      name?: string;
+      kind?: string;
+      enabled?: boolean;
+      interval_ms?: number;
+      config?: string;
+    }>();
+
+    if (body.kind !== undefined && !isBuiltinJobKind(body.kind)) {
+      throw new HTTPException(400, {
+        message: "kind must be wal_checkpoint, echo, or records_count",
+      });
+    }
+    if (
+      body.interval_ms !== undefined &&
+      (typeof body.interval_ms !== "number" ||
+        body.interval_ms < MIN_JOB_INTERVAL_MS)
+    ) {
+      throw new HTTPException(400, {
+        message: `interval_ms must be >= ${MIN_JOB_INTERVAL_MS}`,
+      });
+    }
+    if (body.config !== undefined) {
+      try {
+        JSON.parse(body.config);
+      } catch {
+        throw new HTTPException(400, { message: "config must be valid JSON" });
+      }
+    }
+
+    let nextRunAt: number | null | undefined;
+    if (body.enabled === true && !existing.enabled) {
+      nextRunAt = Date.now();
+    } else if (body.enabled === false) {
+      nextRunAt = null;
+    }
+
+    const job = await deps.enqueueWrite(() =>
+      deps.jord.updateJob({
+        id,
+        name: body.name,
+        kind: body.kind,
+        enabled: body.enabled,
+        intervalMs: body.interval_ms,
+        config: body.config,
+        nextRunAt,
+      }),
+    );
+    return c.json(publicJob(job!));
+  });
+
+  protectedRoutes.delete("/jobs/:id", requireManageJobs(), async (c) => {
+    const id = c.req.param("id");
+    const deleted = await deps.enqueueWrite(() => deps.jord.deleteJob(id));
+    if (!deleted) throw new HTTPException(404, { message: "job not found" });
+    return c.json({ ok: true as const, id });
+  });
+
+  protectedRoutes.post("/jobs/:id/run", requireManageJobs(), async (c) => {
+    if (!deps.scheduler) {
+      throw new HTTPException(503, { message: "job scheduler unavailable" });
+    }
+    const result = await deps.scheduler.runNow(c.req.param("id"));
+    if (!result.ok) {
+      const status = result.error === "job_not_found" ? 404 : 409;
+      return c.json({ error: result.error }, status);
+    }
+    const job = await deps.jord.getJob(c.req.param("id"));
+    return c.json({ ok: true as const, job: job ? publicJob(job) : null });
+  });
+
+  protectedRoutes.get("/jobs/:id/runs", async (c) => {
+    const id = c.req.param("id");
+    const job = await deps.jord.getJob(id);
+    if (!job) throw new HTTPException(404, { message: "job not found" });
+    const limitRaw = c.req.query("limit");
+    const limit = limitRaw ? Number(limitRaw) : 50;
+    const runs = await deps.jord.listJobRuns(
+      id,
+      Number.isFinite(limit) ? limit : 50,
+    );
+    return c.json({ runs: runs.map(publicJobRun) });
+  });
+
+  protectedRoutes.get("/logs", (c) => {
+    const limitRaw = c.req.query("limit");
+    const limit = limitRaw ? Number(limitRaw) : 100;
+    const sourceRaw = c.req.query("source");
+    const source =
+      sourceRaw === "http" || sourceRaw === "job" || sourceRaw === "system"
+        ? (sourceRaw as LogSource)
+        : undefined;
+    return c.json({
+      events: logs.list(Number.isFinite(limit) ? limit : 100, source),
+    });
+  });
 
   app.route("/", protectedRoutes);
 

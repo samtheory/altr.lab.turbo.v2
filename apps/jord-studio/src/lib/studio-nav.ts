@@ -43,8 +43,8 @@ export const STUDIO_NAV: StudioNavGroup[] = [
     id: "runtime",
     label: "Runtime",
     items: [
-      { id: "jobs", label: "Jobs", status: "soon", soonLabel: "S5" },
-      { id: "logs", label: "Logs", status: "soon", soonLabel: "S5" },
+      { id: "jobs", label: "Jobs", href: "/jobs", status: "live" },
+      { id: "logs", label: "Logs", href: "/logs", status: "live" },
     ],
   },
   {

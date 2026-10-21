@@ -68,6 +68,70 @@ export type UpdateRecordResult =
   | { ok: true; record: JordRecord }
   | { ok: false; conflict: true };
 
+export type JordJobStatus = "ok" | "error";
+
+export type JordJob = {
+  id: string;
+  name: string;
+  kind: string;
+  enabled: boolean;
+  intervalMs: number;
+  config: string;
+  nextRunAt: number | null;
+  lastRunAt: number | null;
+  lastStatus: JordJobStatus | null;
+  lastError: string | null;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type InsertJobInput = {
+  name: string;
+  kind: string;
+  enabled?: boolean;
+  intervalMs: number;
+  config?: string;
+  nextRunAt?: number | null;
+};
+
+export type UpdateJobInput = {
+  id: string;
+  name?: string;
+  kind?: string;
+  enabled?: boolean;
+  intervalMs?: number;
+  config?: string;
+  nextRunAt?: number | null;
+  lastRunAt?: number | null;
+  lastStatus?: JordJobStatus | null;
+  lastError?: string | null;
+};
+
+export type JordJobRunStatus = "running" | "ok" | "error";
+
+export type JordJobRun = {
+  id: string;
+  jobId: string;
+  status: JordJobRunStatus;
+  startedAt: number;
+  finishedAt: number | null;
+  error: string | null;
+  result: string | null;
+};
+
+export type InsertJobRunInput = {
+  jobId: string;
+  startedAt?: number;
+};
+
+export type FinishJobRunInput = {
+  id: string;
+  status: "ok" | "error";
+  error?: string | null;
+  result?: string | null;
+  finishedAt?: number;
+};
+
 export type JordDb = LibSQLDatabase<typeof schema>;
 
 /**
@@ -91,6 +155,17 @@ export interface JordDriverPort {
   updateRecord(input: UpdateRecordInput): Promise<UpdateRecordResult>;
   /** Hard delete. Returns true if a row was removed. */
   deleteRecord(id: string): Promise<boolean>;
+
+  listJobs(): Promise<JordJob[]>;
+  getJob(id: string): Promise<JordJob | null>;
+  insertJob(input: InsertJobInput): Promise<JordJob>;
+  updateJob(input: UpdateJobInput): Promise<JordJob | null>;
+  deleteJob(id: string): Promise<boolean>;
+  listJobRuns(jobId: string, limit?: number): Promise<JordJobRun[]>;
+  insertJobRun(input: InsertJobRunInput): Promise<JordJobRun>;
+  finishJobRun(input: FinishJobRunInput): Promise<JordJobRun | null>;
+  /** Enabled jobs with next_run_at <= now (or null treated as due). */
+  listDueJobs(nowMs: number): Promise<JordJob[]>;
 
   /** User tables from sqlite_master (excludes sqlite_*). */
   listTables(): Promise<string[]>;

@@ -17,4 +17,44 @@ export async function ensureRecordsSchema(client: Client): Promise<void> {
     CREATE INDEX IF NOT EXISTS records_bucket_created_at_idx
     ON records (bucket, created_at)
   `);
+  await ensureJobsSchema(client);
+}
+
+/** Studio S5 job definitions + run history. */
+export async function ensureJobsSchema(client: Client): Promise<void> {
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_jobs (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 0,
+      interval_ms INTEGER NOT NULL,
+      config TEXT NOT NULL DEFAULT '{}',
+      next_run_at INTEGER,
+      last_run_at INTEGER,
+      last_status TEXT,
+      last_error TEXT,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_jobs_enabled_next_run_idx
+    ON jord_jobs (enabled, next_run_at)
+  `);
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_job_runs (
+      id TEXT PRIMARY KEY NOT NULL,
+      job_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      started_at INTEGER NOT NULL,
+      finished_at INTEGER,
+      error TEXT,
+      result TEXT
+    )
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_job_runs_job_started_idx
+    ON jord_job_runs (job_id, started_at)
+  `);
 }

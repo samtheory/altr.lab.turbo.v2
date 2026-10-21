@@ -18,6 +18,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/06-s0007-jobs-logs]] — **Jord-S0007** Studio S5 jobs scheduler + log ring (2026-10-21)
 - [[jord/05-s0006-generated-api]] — **Jord-S0006** Studio S4 generated CRUD API catalog + DELETE (2026-10-21)
 - [[jord/04-s0005-auth]] — **Jord-S0005** Studio S3 auth + feature roles (2026-10-21)
 - [[jord/03-s0004-schema]] — **Jord-S0004** schema introspect + Studio `/schema` + ADD COLUMN (2026-10-21)
@@ -34,4 +35,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next Jord track:** Studio S5+ when mimir opens a new sprint — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/05-s0006-generated-api]].
+**Next Jord track:** Studio S6+ when mimir opens a new sprint — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/06-s0007-jobs-logs]].

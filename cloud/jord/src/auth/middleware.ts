@@ -5,6 +5,7 @@ import type { JordAuthConfig } from "./config.js";
 import {
   canAlterSchema,
   canManageApis,
+  canManageJobs,
   canWriteRecords,
   type JordRole,
 } from "./roles.js";
@@ -81,6 +82,20 @@ export function requireManageApis() {
       if (!canManageApis(role)) {
         throw new HTTPException(403, {
           message: "role cannot manage generated APIs",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireManageJobs() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canManageJobs(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot manage jobs",
         });
       }
       await next();

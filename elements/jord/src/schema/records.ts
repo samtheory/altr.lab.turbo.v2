@@ -1,5 +1,7 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+import { jordJobRuns, jordJobs } from "./jobs.js";
+
 /**
  * Generic JSON scratchpad. Not for typed trading entities.
  * Timestamps: 64-bit-safe integer ms via `mode: "number"`.
@@ -23,4 +25,4 @@ export const records = sqliteTable(
 export type RecordRow = typeof records.$inferSelect;
 export type NewRecordRow = typeof records.$inferInsert;
 
-export const schema = { records };
+export const schema = { records, jordJobs, jordJobRuns };
