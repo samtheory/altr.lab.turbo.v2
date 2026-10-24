@@ -1,4 +1,5 @@
 import { LibSqlAdapter } from "./adapter/libsql.js";
+import { PostgresAdapter } from "./adapter/postgres.js";
 import type { JordDriverPort } from "./port.js";
 import { resolveDatabaseUrl } from "./url.js";
 
@@ -8,12 +9,17 @@ export type CreateJordClientOptions = {
 };
 
 /**
- * Open a Slice 0 Jord client. Only `file:` URLs are accepted.
- * Creates the parent directory, applies WAL pragmas, ensures `records`.
+ * Open a Jord client from DATABASE_URL scheme.
+ * - `file:` → LibSqlAdapter (mkdir + WAL)
+ * - `postgres://` / `postgresql://` → PostgresAdapter (pooled)
+ * - `libsql://` → rejected until a later slice
  */
 export async function createJordClient(
   options: CreateJordClientOptions = {},
 ): Promise<JordDriverPort> {
-  const url = resolveDatabaseUrl(options.url);
-  return LibSqlAdapter.open(url);
+  const resolved = resolveDatabaseUrl(options.url);
+  if (resolved.scheme === "file") {
+    return LibSqlAdapter.open(resolved.url);
+  }
+  return PostgresAdapter.open(resolved.url);
 }

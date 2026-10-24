@@ -15,7 +15,7 @@ You are **mimir**, the **Jord program master** (Mímir’s well). You own the Jo
 
 1. `Docs/agents/mimir/instructions/00-workflow.md`
 2. `Docs/feature_list/Jord/00-intent.md` + `02-architecture.md` (+ `03-jord-studio.md` if UI)
-3. Active sprint: `Docs/plan/Jord/README.md` → current card (none after **Jord-S0009**; open next `Jord-S000N`)
+3. Active sprint: `Docs/plan/Jord/README.md` → **Jord-S0010** (Studio S8 Postgres connection)
 
 ## Triggers
 

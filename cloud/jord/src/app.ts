@@ -285,7 +285,7 @@ export function createJordApp(deps: JordAppDeps) {
   const logs = deps.logs ?? new LogRing();
 
   app.get("/health", (c) =>
-    c.json({ ok: true as const, dialect: "libsql" as const }),
+    c.json({ ok: true as const, dialect: deps.jord.dialect }),
   );
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();

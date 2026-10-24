@@ -2,12 +2,13 @@
 title: "Docs Hub — folder index"
 description: "Canonical index of every Docs/ folder in the altr.lab vault"
 created: 2026-09-19
-updated: 2026-10-23
+updated: 2026-10-24
 tags:
   - brain
   - hub
   - index
   - Jord-S0009
+  - Jord-S0010
 ---
 
 # Docs Hub
@@ -32,11 +33,11 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 
 App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`.
 
-**Idea catalog (v2.3):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]] · [[../idea/api-client/README|API client]] · [[../idea/search/README|Search]] · [[../idea/Tia (Map Engine)/README|Tia]]. Promoted: Apolyx (S0001–**S0005** shipped); Jord (**S0001**–**S0009** shipped); **Tia** (intent only). Artemis still idea-only. Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]].
+**Idea catalog (v2.3):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]] · [[../idea/api-client/README|API client]] · [[../idea/search/README|Search]] · [[../idea/Tia (Map Engine)/README|Tia]]. Promoted: Apolyx (S0001–**S0005** shipped); Jord (**S0001**–**S0010** shipped); **Tia** (intent only). Artemis still idea-only. Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]].
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
 
-**Jord** (Slice 0 + Studio S1–S7 done): intent [[../feature_list/Jord/00-intent]] · engine [[../tech_space/jord/00-s0001-slice0]] · latest [[../tech_space/jord/08-s0009-triggers-policies]] · track [[../plan/Jord/README]] · Studio intent [[../feature_list/Jord/03-jord-studio]].
+**Jord** (Slice 0 + Studio S1–S8 done): intent [[../feature_list/Jord/00-intent]] · engine [[../tech_space/jord/00-s0001-slice0]] · latest [[../tech_space/jord/09-s0010-postgres]] · track [[../plan/Jord/README]] · Studio intent [[../feature_list/Jord/03-jord-studio]].
 
 ## Agent of record
 

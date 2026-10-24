@@ -1,8 +1,8 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0009 closed; next Studio S8 or Artemis"
+description: "Jord-S0001–S0010 closed; next Studio S9 / Artemis when opened"
 created: 2026-10-18
-updated: 2026-10-23
+updated: 2026-10-24
 tags:
   - plan
   - jord
@@ -15,12 +15,13 @@ tags:
   - Jord-S0007
   - Jord-S0008
   - Jord-S0009
+  - Jord-S0010
   - readme
 ---
 
 # plan / Jord
 
-> **Closed:** [[Jord-S0009/README]] (Studio S7 triggers + policies, 2026-10-23) · [[Jord-S0008/README]] … [[Jord-S0001/README]] · As-built: [[../../tech_space/jord/08-s0009-triggers-policies]] · Intent: [[../../feature_list/Jord/03-jord-studio]]
+> **Active:** none (open next Studio S9 or Artemis via mimir) · **Closed:** [[Jord-S0010/README]] … [[Jord-S0001/README]] · As-built through [[../../tech_space/jord/09-s0010-postgres]] · Intent: [[../../feature_list/Jord/03-jord-studio]]
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
@@ -33,7 +34,6 @@ tags:
 | [[Jord-S0007/README]] | Studio S5 jobs / cron + logs | **done** (2026-10-21) |
 | [[Jord-S0008/README]] | Studio S6 custom + function APIs | **done** (2026-10-21) |
 | [[Jord-S0009/README]] | Studio S7 triggers + policies | **done** (2026-10-23) |
-
-No active Jord sprint. Next: Studio S8 (Postgres) or Artemis — open a new `Jord-S000N` when mimir starts it.
+| [[Jord-S0010/README]] | Studio S8 Postgres connection | **done** (2026-10-24) |
 
 Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]

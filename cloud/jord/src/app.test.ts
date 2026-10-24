@@ -89,12 +89,16 @@ async function testApp(opts?: { generatedApi?: GeneratedApiRegistry }) {
 }
 
 describe("jord-server routes", () => {
-  it("health reports libsql without auth", async () => {
+  it("health reports dialect without auth", async () => {
     const { app, jord } = await testApp();
     try {
       const res = await app.request("/health");
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ ok: true, dialect: "libsql" });
+      const body = await res.json();
+      expect(body).toEqual({ ok: true, dialect: jord.dialect });
+      expect(["libsql", "postgres"]).toContain(body.dialect);
+      expect(JSON.stringify(body)).not.toMatch(/postgres:\/\//);
+      expect(JSON.stringify(body)).not.toMatch(/file:/);
     } finally {
       await jord.close();
     }

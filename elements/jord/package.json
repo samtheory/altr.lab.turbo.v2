@@ -15,10 +15,12 @@
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
-    "drizzle-orm": "^0.44.5"
+    "drizzle-orm": "^0.44.5",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/node": "^22.16.5",
+    "@types/pg": "^8.23.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

@@ -1,6 +1,6 @@
 ---
 title: "Jord — architecture, dialects, and repo layout"
-description: "JordDriverPort, LibSqlAdapter, WAL checkpoints, records OCC version, 64-bit timestamps, dialect seams, Slice 0 mkdir"
+description: "JordDriverPort, LibSqlAdapter + PostgresAdapter, WAL, OCC, bigint ms on Postgres, dialect seams"
 created: 2026-10-18
 updated: 2026-10-18
 tags:
@@ -32,19 +32,19 @@ App and server code depend on a **unified port**, not on libSQL or Postgres APIs
 |-------|------|
 | `JordDriverPort` | Dialect-agnostic surface: open, query/execute through Drizzle, close. Specialized ops (e.g. `searchVectors`) declared on the port and implemented per adapter |
 | `LibSqlAdapter` | `file:` (local zero-infra) and later `libsql://` (Turso edge). Applies WAL pragmas. Later hosts local `sqlite-vec` |
-| `PostgresAdapter` | Future. `postgres://` / `postgresql://`. Connection pooling, native transactions, `pgvector`. **Uninstantiated in Slice 0** |
+| `PostgresAdapter` | `postgres://` / `postgresql://`. `pg` Pool, bigint ms timestamps, same port CRUD. **Shipped in Jord-S0010** · [[../../tech_space/jord/09-s0010-postgres]]. `pgvector` still later |
 
 ### Dynamic driver activation
 
-`createJordClient` (or equivalent) selects the adapter from the `DATABASE_URL` scheme:
+`createJordClient` selects the adapter from the `DATABASE_URL` scheme:
 
-| Scheme | Adapter | Slice 0 |
-|--------|---------|---------|
-| `file:` | `LibSqlAdapter` | **Implemented** |
-| `libsql:` | `LibSqlAdapter` | Scheme rejected until a later slice; same adapter class reserved |
-| `postgres:` / `postgresql:` | `PostgresAdapter` | Rejected; adapter not installed |
+| Scheme | Adapter | Status |
+|--------|---------|--------|
+| `file:` | `LibSqlAdapter` | **Implemented** (default `file:./data/jord.db`) |
+| `libsql:` | — | Rejected until a later hosted-libSQL slice |
+| `postgres:` / `postgresql:` | `PostgresAdapter` | **Implemented** (Jord-S0010) |
 
-**Slice 0 boundary:** only `LibSqlAdapter` is implemented and installed. `PostgresAdapter` exists as a typed seam (interface + “not implemented” path) so application code never imports libSQL-only types. A non-`file:` URL fails with an error that names the Slice 0 limit.
+Unsupported schemes throw `JordUrlError` / `JordSlice0UrlError`. Callers branch on `jord.dialect` (`"libsql" | "postgres"`); they do not import `@libsql/client` or `pg` outside the adapters.
 
 Drizzle owns one schema module. Adapters supply the connection. Table CRUD moves with the driver; plugins do not (see [Dialect seam](#dialect-seam-for-specialized-features)).
 
@@ -125,10 +125,11 @@ one product (Jord)
 
 ## Env
 
-| Variable | Slice 0 | Later |
-|----------|---------|--------|
-| `DATABASE_URL` | `file:…` only, default `file:./data/jord.db` | `libsql://…`, then `postgres://…` |
-| Auth / pool secrets | unused | Turso token, Postgres URL, Studio secrets |
+| Variable | Now | Later |
+|----------|-----|--------|
+| `DATABASE_URL` | `file:…` (default) or `postgres://` / `postgresql://` | `libsql://…` (hosted) |
+| `JORD_TEST_POSTGRES_URL` | Opt-in live adapter tests | — |
+| Auth / pool secrets | Studio / server tokens | Turso token, etc. |
 
 ## Links
 

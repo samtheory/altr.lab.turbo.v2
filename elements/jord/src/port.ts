@@ -270,19 +270,29 @@ export type UpdateTriggerInput = {
 
 export type JordDb = LibSQLDatabase<typeof schema>;
 
+export type JordDialect = "libsql" | "postgres";
+
 /**
- * Dialect-agnostic surface. Slice 0 installs only LibSqlAdapter.
- * PostgresAdapter is a reserved uninstantiated seam (not imported).
+ * Dialect-agnostic surface. LibSqlAdapter (`file:`) and PostgresAdapter
+ * (`postgres://` / `postgresql://`) both implement this.
  */
 export interface JordDriverPort {
-  readonly dialect: "libsql";
-  /** Raw libSQL client for pragmas / VACUUM INTO / checkpoints. */
-  readonly client: Client;
-  /** Drizzle handle over the same connection. */
-  readonly db: JordDb;
+  readonly dialect: JordDialect;
+  /**
+   * Raw libSQL client — present when `dialect === "libsql"`.
+   * Prefer port methods; only use for pragmas / dialect-specific SQL.
+   */
+  readonly client?: Client;
+  /**
+   * Drizzle over libSQL — present when `dialect === "libsql"`.
+   */
+  readonly db?: JordDb;
 
   close(): Promise<void>;
-  /** `PRAGMA wal_checkpoint(TRUNCATE)` — server owns periodic + shutdown calls. */
+  /**
+   * `PRAGMA wal_checkpoint(TRUNCATE)` on libSQL.
+   * No-op on Postgres (WAL hygiene is SQLite-only).
+   */
   checkpointTruncate(): Promise<void>;
 
   insertRecord(input: InsertRecordInput): Promise<JordRecord>;
@@ -357,8 +367,8 @@ export interface JordDriverPort {
   addColumn(input: AddColumnInput): Promise<AddColumnResult>;
 
   /**
-   * Consistent snapshot via SQLite `VACUUM INTO` (online backup substitute
-   * exposed through libSQL SQL). Returns the destination path.
+   * Consistent snapshot via SQLite `VACUUM INTO` (libSQL only).
+   * Postgres throws JordUnsupportedError.
    */
   snapshotTo(destPath: string): Promise<string>;
 }

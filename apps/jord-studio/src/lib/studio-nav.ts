@@ -77,6 +77,12 @@ export const STUDIO_NAV: StudioNavGroup[] = [
     items: [
       { id: "schema", label: "Schema visualizer", href: "/schema", status: "live" },
       {
+        id: "connection",
+        label: "Connection",
+        href: "/database/connection",
+        status: "live",
+      },
+      {
         id: "policies",
         label: "Policies",
         href: "/database/policies",

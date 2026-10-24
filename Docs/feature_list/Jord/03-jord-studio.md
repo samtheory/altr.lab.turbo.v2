@@ -2,7 +2,7 @@
 title: "Jord Studio — dashboard and control plane"
 description: "Jord Studio surfaces: tables, visualizer, jobs, auth, APIs, plus roadmap for realtime CDC, blobs, and vectors. Not Slice 0."
 created: 2026-10-18
-updated: 2026-10-23
+updated: 2026-10-24
 tags:
   - feature
   - jord
@@ -19,7 +19,7 @@ tags:
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S7 shipped:** through [[../../plan/Jord/Jord-S0009/README|Jord-S0009]] · as-built [[../../tech_space/jord/08-s0009-triggers-policies]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S8 shipped:** through [[../../plan/Jord/Jord-S0010/README|Jord-S0010]] · as-built [[../../tech_space/jord/09-s0010-postgres]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -102,7 +102,7 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 | S5 | Jobs / cron + logs | Server job runner — **done** ([[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]]) |
 | S6 | Custom + function APIs editor | S4 — **done** ([[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · [[../../tech_space/jord/07-s0008-custom-function-apis]]) |
 | S7 | Triggers, policies | S2 + dialect seam — **done** ([[../../plan/Jord/Jord-S0009/README|Jord-S0009]] · [[../../tech_space/jord/08-s0009-triggers-policies]]) |
-| S8 | Postgres connection (`PostgresAdapter`) | Postgres driver installed |
+| S8 | Postgres connection (`PostgresAdapter`) | Postgres driver — **done** ([[../../plan/Jord/Jord-S0010/README|Jord-S0010]] · [[../../tech_space/jord/09-s0010-postgres]]) |
 | S9 | Realtime subscriptions UI | CDC / SSE / WS on server |
 | S10 | Blob buckets UI | Local blob storage |
 | S11 | Vector / embedding ops UI | `searchVectors` + sqlite-vec or pgvector |
@@ -128,4 +128,5 @@ S3 plan (closed): [[../../plan/Jord/Jord-S0005/README]] · [[../../tech_space/jo
 S4 plan (closed): [[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]].  
 S5 plan (closed): [[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]].  
 S6 plan (closed): [[../../plan/Jord/Jord-S0008/README]] · [[../../tech_space/jord/07-s0008-custom-function-apis]].  
-S7 plan (closed): [[../../plan/Jord/Jord-S0009/README]] · [[../../tech_space/jord/08-s0009-triggers-policies]]. Later phases (S8+) get their own plan folders when opened by mimir.
+S7 plan (closed): [[../../plan/Jord/Jord-S0009/README]] · [[../../tech_space/jord/08-s0009-triggers-policies]].  
+S8 plan (closed): [[../../plan/Jord/Jord-S0010/README]] · [[../../tech_space/jord/09-s0010-postgres]]. Later phases (S9+) get their own plan folders when opened by mimir.

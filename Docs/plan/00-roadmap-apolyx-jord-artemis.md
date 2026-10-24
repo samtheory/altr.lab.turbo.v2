@@ -1,8 +1,8 @@
 ---
 title: "Roadmap — Apolyx → Jord → Artemis"
-description: "Sequencing plan: Apolyx + Jord S1–S7 done; Artemis next product gate"
+description: "Sequencing plan: Apolyx + Jord S1–S8 done; Artemis next product gate"
 created: 2026-10-21
-updated: 2026-10-23
+updated: 2026-10-24
 tags:
   - plan
   - roadmap
@@ -28,7 +28,8 @@ flowchart LR
   JS4 --> JS5[Jord Studio S5 done]
   JS5 --> JS6[Jord Studio S6 done]
   JS6 --> JS7[Jord Studio S7 done]
-  JS7 --> Art[Artemis sharpen → feature_list → plan → build]
+  JS7 --> JS8[Jord Studio S8 done]
+  JS8 --> Art[Artemis sharpen → feature_list → plan → build]
 ```
 
 | Order | Track | What “done” means | Docs |
@@ -43,6 +44,7 @@ flowchart LR
 | **3f** | **Jord Studio S5** (`Jord-S0007`) | In-process jobs / interval schedules + log ring + Studio Runtime panels | **Closed 2026-10-21** — [[../tech_space/jord/06-s0007-jobs-logs]] · Plan [[Jord/Jord-S0007/README]] |
 | **3g** | **Jord Studio S6** (`Jord-S0008`) | Custom APIs + function APIs (built-in steps, `/x/:slug`) | **Closed 2026-10-21** — [[../tech_space/jord/07-s0008-custom-function-apis]] · Plan [[Jord/Jord-S0008/README]] |
 | **3h** | **Jord Studio S7** (`Jord-S0009`) | Policies (server middleware) + AFTER write triggers; Studio Database panels | **Closed 2026-10-23** — [[../tech_space/jord/08-s0009-triggers-policies]] · Plan [[Jord/Jord-S0009/README]] |
+| **3i** | **Jord Studio S8** (`Jord-S0010`) | `PostgresAdapter` for `postgres://` / `postgresql://`; `file:` stays the default; Studio shows dialect | **Closed 2026-10-24** — [[../tech_space/jord/09-s0010-postgres]] · Plan [[Jord/Jord-S0010/README]] |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | **← next product gate** · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
@@ -51,7 +53,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–**S0009** are closed. **Next product gate:** Artemis (or open Studio S8+ `Jord-S000N` under mimir). Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–**S0010** are closed. **Next product gate:** Artemis. Optional Jord Studio S9+ when mimir opens a plan. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

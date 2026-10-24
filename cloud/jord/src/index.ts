@@ -98,22 +98,34 @@ export async function startJordServer(
     logs,
     scheduler,
   });
-  const hygiene = startWalHygiene(jord, resolveWalCheckpointMs(env));
+  const useWal = jord.dialect === "libsql";
+  const hygiene = useWal
+    ? startWalHygiene(jord, resolveWalCheckpointMs(env))
+    : { stop() {} };
 
   const port = Number(env.PORT) || DEFAULT_PORT;
   const server = serve({ fetch: app.fetch, port });
+
+  const scheme = jord.dialect === "postgres" ? "postgres" : "file";
+  console.log(
+    `[@altr/jord-server] dialect=${jord.dialect} scheme=${scheme}`,
+  );
 
   let shuttingDown = false;
   const shutdown = async (signal: string) => {
     if (shuttingDown) return;
     shuttingDown = true;
-    console.log(`[@altr/jord-server] ${signal} — wal_checkpoint(TRUNCATE)`);
     scheduler.stop();
     hygiene.stop();
-    try {
-      await truncateWalCheckpoint(jord);
-    } catch (err) {
-      console.error("[@altr/jord-server] shutdown checkpoint failed", err);
+    if (useWal) {
+      console.log(`[@altr/jord-server] ${signal} — wal_checkpoint(TRUNCATE)`);
+      try {
+        await truncateWalCheckpoint(jord);
+      } catch (err) {
+        console.error("[@altr/jord-server] shutdown checkpoint failed", err);
+      }
+    } else {
+      console.log(`[@altr/jord-server] ${signal} — shutting down`);
     }
     await jord.close();
     server.close();
@@ -129,7 +141,9 @@ export async function startJordServer(
     async close() {
       scheduler.stop();
       hygiene.stop();
-      await truncateWalCheckpoint(jord);
+      if (useWal) {
+        await truncateWalCheckpoint(jord);
+      }
       await jord.close();
       server.close();
     },

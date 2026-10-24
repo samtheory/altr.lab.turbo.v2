@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { createJordClient } from "../client.js";
-import { JordSlice0UrlError } from "../errors.js";
+import { JordUrlError } from "../errors.js";
 import { makeTempDir, rmTempDir } from "../test-temp.js";
-import { fsPathToFileUrl } from "../url.js";
+import { fsPathToFileUrl, resolveDatabaseUrl } from "../url.js";
 
 const temps: string[] = [];
 
@@ -31,6 +31,8 @@ describe("createJordClient / LibSqlAdapter", () => {
 
     const jord = await createJordClient({ url });
     try {
+      expect(jord.dialect).toBe("libsql");
+      if (!jord.client) throw new Error("expected libsql client");
       const mode = await jord.client.execute("PRAGMA journal_mode");
       const busy = await jord.client.execute("PRAGMA busy_timeout");
       const sync = await jord.client.execute("PRAGMA synchronous");
@@ -46,25 +48,30 @@ describe("createJordClient / LibSqlAdapter", () => {
     }
   });
 
-  it("rejects postgres: with a Slice 0 error", async () => {
-    await expect(
-      createJordClient({ url: "postgres://localhost/jord" }),
-    ).rejects.toBeInstanceOf(JordSlice0UrlError);
-
-    await expect(
-      createJordClient({ url: "postgres://localhost/jord" }),
-    ).rejects.toThrow(/Slice 0 accepts only file:/);
+  it("accepts postgres: and postgresql: at resolve time", () => {
+    expect(resolveDatabaseUrl("postgres://localhost/jord")).toEqual({
+      scheme: "postgres",
+      url: "postgres://localhost/jord",
+    });
+    expect(resolveDatabaseUrl("postgresql://localhost/jord")).toEqual({
+      scheme: "postgres",
+      url: "postgresql://localhost/jord",
+    });
   });
 
-  it("rejects libsql: with a Slice 0 error", async () => {
+  it("rejects libsql: as a later slice", async () => {
     await expect(
       createJordClient({ url: "libsql://example.turso.io" }),
-    ).rejects.toThrow(/Slice 0 accepts only file:/);
+    ).rejects.toBeInstanceOf(JordUrlError);
+    await expect(
+      createJordClient({ url: "libsql://example.turso.io" }),
+    ).rejects.toThrow(/hosted libsql/i);
   });
 
   it("opens a clean temp file: URL", async () => {
     const url = await tempFileUrl();
     const jord = await createJordClient({ url });
+    expect(jord.dialect).toBe("libsql");
     await jord.close();
   });
 });

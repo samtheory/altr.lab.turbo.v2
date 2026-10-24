@@ -1,5 +1,6 @@
 export { createJordClient, type CreateJordClientOptions } from "./client.js";
 export { LibSqlAdapter } from "./adapter/libsql.js";
+export { PostgresAdapter } from "./adapter/postgres.js";
 export {
   type AddColumnInput,
   type AddColumnResult,
@@ -16,6 +17,7 @@ export {
   type JordColumnType,
   type JordCustomApi,
   type JordDb,
+  type JordDialect,
   type JordDriverPort,
   type JordFunction,
   type JordHttpMethod,
@@ -39,6 +41,7 @@ export {
   type UpdateRecordResult,
   type UpdateTriggerInput,
 } from "./port.js";
+export { JORD_TABLE_NAMES, type JordTableName } from "./schema/table-names.js";
 export { records, schema, type NewRecordRow, type RecordRow } from "./schema/records.js";
 export {
   jordJobRuns,
@@ -73,11 +76,18 @@ export {
   JORD_COLUMN_TYPES,
   quoteIdent,
 } from "./schema/ddl.js";
-export { JordSlice0UrlError, JordVersionConflictError } from "./errors.js";
+export {
+  JordSlice0UrlError,
+  JordUnsupportedError,
+  JordUrlError,
+  JordVersionConflictError,
+} from "./errors.js";
 export {
   DEFAULT_DATABASE_URL,
   fileUrlToFsPath,
   fsPathToFileUrl,
   resolveDatabaseUrl,
+  type JordUrlScheme,
+  type ResolvedJordUrl,
 } from "./url.js";
 export { snapshotDatabase, type SnapshotOptions } from "./snapshot.js";

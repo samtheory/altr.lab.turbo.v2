@@ -1,10 +1,22 @@
-/** Slice 0 accepts only `file:` DATABASE_URL schemes. */
-export class JordSlice0UrlError extends Error {
-  readonly code = "JORD_SLICE0_URL" as const;
+/** Unsupported or not-yet-enabled DATABASE_URL scheme. */
+export class JordUrlError extends Error {
+  readonly code = "JORD_URL" as const;
 
+  constructor(url: string, detail: string) {
+    super(`[@altr/jord] ${detail} (got ${JSON.stringify(url)})`);
+    this.name = "JordUrlError";
+  }
+}
+
+/**
+ * @deprecated Prefer JordUrlError. Kept so existing tests/imports keep working.
+ * Thrown when a URL scheme is not accepted.
+ */
+export class JordSlice0UrlError extends JordUrlError {
   constructor(url: string) {
     super(
-      `[@altr/jord] Slice 0 accepts only file: DATABASE_URL (got ${JSON.stringify(url)}). libsql: and postgres: are reserved for later slices.`,
+      url,
+      "DATABASE_URL scheme is not accepted. Use file: (default) or postgres:/postgresql:. Hosted libsql: is reserved for a later slice",
     );
     this.name = "JordSlice0UrlError";
   }
@@ -19,5 +31,17 @@ export class JordVersionConflictError extends Error {
       `[@altr/jord] version conflict for record ${id} at version ${version}`,
     );
     this.name = "JordVersionConflictError";
+  }
+}
+
+/** Operation not supported on this dialect. */
+export class JordUnsupportedError extends Error {
+  readonly code = "JORD_UNSUPPORTED" as const;
+
+  constructor(operation: string, dialect: string) {
+    super(
+      `[@altr/jord] ${operation} is not supported on dialect ${JSON.stringify(dialect)}`,
+    );
+    this.name = "JordUnsupportedError";
   }
 }

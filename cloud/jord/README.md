@@ -1,6 +1,6 @@
 # `@altr/jord-server`
 
-Hono API over `@altr/jord` (write queue, WAL checkpoints, OCC). Studio and agents talk HTTP only — never open `data/jord.db` from the browser.
+Hono API over `@altr/jord` (write queue, OCC, dialect-aware health). Studio and agents talk HTTP only — never open `data/jord.db` from the browser. WAL checkpoints run for `file:` libSQL only.
 
 ## Dev
 
@@ -17,7 +17,7 @@ Default: [http://127.0.0.1:8787](http://127.0.0.1:8787). `startJordServer` loads
 |-----|----------|------|
 | `JORD_SERVER_TOKEN` | **yes** | Shared bearer / HMAC secret (S3) |
 | `JORD_DEFAULT_ROLE` | no (default `admin`) | Role when the raw secret is sent as `Authorization: Bearer …` |
-| `DATABASE_URL` | no | `file:` URL for libSQL (Slice 0) |
+| `DATABASE_URL` | no | `file:` (default) or `postgres://` / `postgresql://` |
 | `PORT` | no (default `8787`) | Listen port |
 | `JORD_WAL_CHECKPOINT_MS` | no | WAL truncate interval |
 

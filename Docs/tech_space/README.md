@@ -2,12 +2,13 @@
 title: "tech_space — as-built docs"
 description: "Technical implementation notes that grow with the codebase"
 created: 2026-09-19
-updated: 2026-10-21
+updated: 2026-10-24
 tags:
   - tech-space
   - readme
   - Jord-S0001
   - Jord-S0002
+  - Jord-S0010
 ---
 
 # tech_space
@@ -18,6 +19,8 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/09-s0010-postgres]] — **Jord-S0010** Studio S8 PostgresAdapter + Connection page (2026-10-24)
+- [[jord/08-s0009-triggers-policies]] — **Jord-S0009** Studio S7 triggers + policies (2026-10-23)
 - [[jord/07-s0008-custom-function-apis]] — **Jord-S0008** Studio S6 custom + function APIs (2026-10-21)
 - [[jord/06-s0007-jobs-logs]] — **Jord-S0007** Studio S5 jobs scheduler + log ring (2026-10-21)
 - [[jord/05-s0006-generated-api]] — **Jord-S0006** Studio S4 generated CRUD API catalog + DELETE (2026-10-21)
@@ -36,4 +39,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next Jord track:** Studio S7+ when mimir opens a new sprint — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/07-s0008-custom-function-apis]].
+**Next:** Artemis product gate, or Studio S9+ when mimir opens a plan — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/09-s0010-postgres]].

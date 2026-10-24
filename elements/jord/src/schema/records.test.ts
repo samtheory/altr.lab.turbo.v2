@@ -25,6 +25,8 @@ describe("records schema", () => {
     });
 
     try {
+      expect(jord.dialect).toBe("libsql");
+      if (!jord.client) throw new Error("expected libsql client");
       const info = await jord.client.execute("PRAGMA table_info(records)");
       const cols = new Map(
         info.rows.map((r) => [

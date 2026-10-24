@@ -1,18 +1,46 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { JordSlice0UrlError } from "./errors.js";
+import { JordSlice0UrlError, JordUrlError } from "./errors.js";
 
 export const DEFAULT_DATABASE_URL = "file:./data/jord.db";
 
-/** Resolve DATABASE_URL; Slice 0 allows only `file:`. */
-export function resolveDatabaseUrl(url?: string): string {
+export type JordUrlScheme = "file" | "postgres" | "postgresql";
+
+export type ResolvedJordUrl =
+  | { scheme: "file"; url: string }
+  | { scheme: "postgres"; url: string };
+
+/** Classify and validate DATABASE_URL. Accepts file: and postgres:/postgresql:. */
+export function resolveDatabaseUrl(url?: string): ResolvedJordUrl {
   const resolved =
     url ?? process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
-  if (!resolved.startsWith("file:")) {
-    throw new JordSlice0UrlError(resolved);
+
+  if (resolved.startsWith("file:")) {
+    return { scheme: "file", url: resolved };
   }
-  return resolved;
+  if (
+    resolved.startsWith("postgres://") ||
+    resolved.startsWith("postgresql://")
+  ) {
+    return { scheme: "postgres", url: resolved };
+  }
+  if (resolved.startsWith("libsql:")) {
+    throw new JordUrlError(
+      resolved,
+      "hosted libsql: DATABASE_URL is reserved for a later slice; use file: or postgres:/postgresql:",
+    );
+  }
+  throw new JordSlice0UrlError(resolved);
+}
+
+/** @deprecated Use resolveDatabaseUrl().url for file: only callers. */
+export function resolveFileDatabaseUrl(url?: string): string {
+  const resolved = resolveDatabaseUrl(url);
+  if (resolved.scheme !== "file") {
+    throw new JordSlice0UrlError(resolved.url);
+  }
+  return resolved.url;
 }
 
 /** Filesystem path for a `file:` URL (mkdir / snapshot target parent). */
