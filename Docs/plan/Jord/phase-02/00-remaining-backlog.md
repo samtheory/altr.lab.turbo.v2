@@ -1,6 +1,6 @@
 ---
 title: "Jord phase-02 — remaining backlog"
-description: "Unnumbered leftovers after phase-01; promote into phase-02 sprint folders only when needed"
+description: "Soft leftovers after the S0021–S0027 queue is defined; promote only if needed"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -12,42 +12,35 @@ tags:
 
 # Jord phase-02 — remaining backlog
 
-> Who: **mimir** if a product need promotes a row. Intent: [[../../../feature_list/Jord/01-phase-02-candidates]]. Phase hub: [[../README]] · This phase: [[README]]. Shipped review: [[../../../report/Jord-implemented-review]].
+> Who: **mimir**. Numbered queue: [[README]]. Features: [[../../../feature_list/Jord/03-phase-02-features]]. Soft candidates: [[../../../feature_list/Jord/01-phase-02-candidates]]. Prompt: [[../../../report/Jord-next-phase2-prompt]].
 
-**Last closed (phase-01):** [[../phase-01/Jord-S0020/README|Jord-S0020]] — hard vectors · as-built [[../../../tech_space/jord/vectors]].  
-**Numbered queue:** empty. New cards go under `plan/Jord/phase-02/`.
+**Active / next:** [[Jord-S0021/README|Jord-S0021]] Part A (after planning approval).  
+**Parallel-ok:** [[Jord-S0027/README|Jord-S0027]] CI.
 
-Rows below are **not** sprints until promoted. Artemis is a product fork, not a Jord sprint.
+## Numbered (do not duplicate)
 
-## Not numbered (promote only if needed)
+S0021 → S0027 are indexed on [[README]]. Track progress there.
 
-| Item | Source | Notes |
-|------|--------|-------|
-| Blob enhancements: multipart, larger limits, remote S3 | S0013 deferred | |
-| Redis-compatible cache | phase-02 candidates | When live state needs it |
-| Bot / second cloud process | phase-02 candidates | When the in-process writer is the wrong shape |
-| Hosted embed API · embedding CDC | S0014 / S0020 deferred | Search engines shipped; callers still supply floats |
+## Soft leftovers (not numbered)
+
+| Item | Notes |
+|------|-------|
+| Redis-compatible cache | When live state needs it |
+| Bot / second cloud process | When in-process writer is the wrong shape |
+| Hosted embed API · embedding CDC | Callers still supply floats after S0020 |
+| Embedded Turso replicas | S0019 deferred |
+| Functions v2 **implementation** | Only after [[Jord-S0026/README\|S0026]] ADR approval |
 
 ## Explicitly not Jord sprint cards
 
 | Item | Home |
 |------|------|
-| Artemis trading domain / terminal | Product fork — [[../../../idea/artemis/README]] |
+| Artemis trading domain / terminal | [[../../../idea/artemis/README]] |
 | Tia map engine | [[../../../feature_list/tia/README]] |
 | Apolyx kit carryovers | [[../../../feature_list/ui-kit/01-apolyx-s0001-carryovers]] |
-| CI pipeline / npm publish | Lab infra |
-
-## Carryovers already deferred inside phase-01 ships
-
-- S0009 — native SQL triggers on Postgres; column-level policies
-- S0010 — Studio URL editor; migrate file→Postgres wizard
-- S0011 / S0018 — true SQLite update hooks / PG LISTEN
-- S0012 — OCC editor for arbitrary tables
-- S0013 — full S3 / SigV4 / remote object store; blob CDC
-- S0014 / S0020 — hosted embed API; embedding CDC. Engine distance and `pgvector` **shipped**; cosine remains the fallback when the engine lacks them
-- S0017 — non-`records` RLS; drop middleware on Postgres
-- S0019 — embedded replicas; file→Turso wizard; Studio paste-URL UI
+| OAuth / magic links | Past S0021 |
+| npm publish | Lab infra |
 
 ## Rule
 
-**Do not invent a sprint id from this list automatically.** Promote one row into `Docs/plan/Jord/phase-02/<card>/` only when the product needs it. Artemis stays a product track.
+Prefer extending [[../../../feature_list/Jord/03-phase-02-features]] over inventing ad-hoc sprint ids from this list.

@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Jord phase-01 (S0001–S0020) shipped; phase-02 queue is empty"
+description: "Jord phase-01 shipped; phase-02 S0021–S0027 planned, awaiting approval to implement"
 created: 2026-09-19
 updated: 2026-10-24
 tags:
@@ -13,7 +13,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0020** (hard vectors) · **Phase-01 closed** · **Phase-02 queue empty** · Review: [[Jord-implemented-review]]
+Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0020** · **Phase-01 closed** · **Phase-02 planned (S0021–S0027)** · Review: [[Jord-implemented-review]] · Prompt: [[Jord-next-phase2-prompt]]
 
 ## Implemented
 
@@ -23,14 +23,20 @@ Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 
 ## In progress
 
-_(none)_
+_(none — planning approved pending)_
 
 ## Planned (repo)
 
-Phase-02 queue: [[../plan/Jord/phase-02/README]] · Seed: [[../plan/Jord/phase-02/00-remaining-backlog]] · Candidates: [[../feature_list/Jord/01-phase-02-candidates]]
+Phase-02 features: [[../feature_list/Jord/03-phase-02-features]] · Queue: [[../plan/Jord/phase-02/README]]
 
-1. Conditional only: remote blobs, Redis, bot process, hosted embed API
-2. Artemis product fork · Tia · CI
+1. **Jord-S0021** — migrations + principal auth + unified policies (3 session stops)
+2. **Jord-S0022** — Table API + OpenAPI
+3. **Jord-S0023** — Outbox CDC + realtime resume
+4. **Jord-S0024** — Studio power tools
+5. **Jord-S0025** — Storage v2 (S3)
+6. **Jord-S0026** — Functions v2 ADR only (no impl without approval)
+7. **Jord-S0027** — CI (parallel-ok with S0021)
+8. Soft leftovers: [[../feature_list/Jord/01-phase-02-candidates]] · Artemis · Tia
 
 ## Remaining (Apolyx)
 

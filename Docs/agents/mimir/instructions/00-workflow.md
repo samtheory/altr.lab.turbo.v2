@@ -40,13 +40,13 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 | Phase | Plans | As-built | Status |
 |-------|-------|----------|--------|
 | **01** | [[../../../plan/Jord/phase-01/README]] | [[../../../tech_space/jord/README]] (categories, not a phase folder) | **Closed** (S0001–S0020) |
-| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — backlog [[../../../plan/Jord/phase-02/00-remaining-backlog]] |
+| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — features [[../../../feature_list/Jord/03-phase-02-features]] · next [[../../../plan/Jord/phase-02/Jord-S0021/README]] |
 
-Do **not** put new sprint cards under phase-01. Phase-02 owns the next numbered work after the upcoming report.
+Do **not** put new sprint cards under phase-01. Phase-02 owns S0021+. Implement **session-sized** chunks (S0021 = Parts A→B→C); stop for review.
 
 ## Conductor rules
 
-1. **One active Jord sprint at a time.** Pick the first card not done under **phase-02**; finish “Done when” before the next.
+1. **One active Jord chunk at a time.** Under **phase-02**, finish the current card’s “Done when” (for S0021: one Part) before the next.
 2. **Stay mimir as the speaker of record.** When a card is UI, say you are acting as **mimir → apollo**, load [[../../apollo/instructions/00-workflow]] / apollo skill, and build with `@altr/apolyx` only.
 3. **Never invent kit primitives in `apps/jord-studio`.** Missing control → apollo builds in `elements/ui-kit` first, then import.
 4. **Never open `data/jord.db` from the browser.** Studio talks to `@altr/jord-server` (or the Next BFF that proxies it).

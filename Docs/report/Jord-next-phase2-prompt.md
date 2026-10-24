@@ -1,7 +1,9 @@
 ---
 title: "Prompt — Jord next phase (S0021+) feature list and plan"
+description: "External gap-analysis prompt; lab paths corrected to phase-02 + category tech_space"
 created: 2026-10-24
-tags: [prompt, jord, planning]
+updated: 2026-10-24
+tags: [prompt, jord, planning, phase-02]
 ---
 
 # Role
@@ -15,12 +17,26 @@ You are the planning and implementation agent for **Jord** in the `altr.lab` mon
 3. Ignore `00-intent.md` and `2026-10-18-sharpen.md` as status. They only describe Slice 0.
 4. Runtime is **Node >= 20** with pnpm and Turbo. It is NOT Bun. Do not introduce Bun-only APIs.
 
+# Lab path corrections (read this)
+
+This prompt originally assumed cards under `plan/Jord/phase-01/` and sprint files under `tech_space`. **Lab convention (2026-10-24):**
+
+| Instead of | Use |
+|------------|-----|
+| `Docs/plan/Jord/phase-01/Jord-S0021/…` | `Docs/plan/Jord/phase-02/Jord-S0021/…` |
+| `Docs/feature_list/Jord/03-next-phase.md` | `Docs/feature_list/Jord/03-phase-02-features.md` |
+| `tech_space` as `20-…md` sprint diaries | Update `Docs/tech_space/jord/<category>/README.md` |
+| CI “not a Jord card” | `Docs/plan/Jord/phase-02/Jord-S0027/` |
+
+**Planning status:** feature list + S0021–S0027 cards are written. Await approval → implement S0021 Part A only.
+
 # Output of the planning phase
 
 Create:
-- `Docs/feature_list/Jord/03-next-phase.md`: the feature list, with acceptance criteria per feature.
-- `Docs/plan/Jord/phase-01/Jord-S0021/README.md` … one card per sprint, in the same format as the existing cards.
-- Update `Docs/plan/Jord/phase-02/00-remaining-backlog.md`.
+
+- `Docs/feature_list/Jord/03-phase-02-features.md`: the feature list, with acceptance criteria per feature. ✅
+- `Docs/plan/Jord/phase-02/Jord-S0021/README.md` … one card per sprint. ✅
+- Update `Docs/plan/Jord/phase-02/00-remaining-backlog.md`. ✅
 
 Each card must contain: goal, in-scope, out-of-scope, file-level change list, schema changes, HTTP routes, tests required (dialect matrix: file libSQL always, Postgres opt-in via `JORD_TEST_POSTGRES_URL`), Studio changes, and a Definition of Done.
 
@@ -97,16 +113,19 @@ Each card must contain: goal, in-scope, out-of-scope, file-level change list, sc
 
 - Evaluate: (a) registered TypeScript handlers loaded from a directory, (b) `worker_threads` with a timeout and a restricted context, (c) `isolated-vm`. Recommend one, with the risk analysis. Default recommendation: (b). Do not pick (c) because of its native build.
 
+## S0027: CI for Jord packages
+
+- GitHub Action: typecheck + tests for `@altr/jord`, `@altr/jord-server`, `@altr/jord-studio`. Postgres opt-in stays secret-gated.
+
 # Cross-cutting requirements
 
-- Every sprint: unit tests, an integration test on file libSQL, an opt-in Postgres test, a `tech_space` as-built note (`20-…md` onward), and an update of the technical brief.
+- Every sprint: unit tests, an integration test on file libSQL, an opt-in Postgres test, update the matching `tech_space/jord/<category>/` note, and refresh STATUS when closed.
 - Typecheck must pass in `@altr/jord`, `@altr/jord-server`, and `@altr/jord-studio`.
 - No secrets in logs, health output, or Studio JSON.
-- Add a CI workflow (typecheck + tests) as a small standalone card. It is currently missing.
 - Keep each PR/sprint small and reviewable.
 
 # Process
 
-1. Do the planning phase and **stop for approval**.
+1. Do the planning phase and **stop for approval**. ← **you are here**
 2. After approval, implement S0021 Part A only and stop. Then Part B, then Part C. Report test results each time.
 3. If anything in the repo contradicts this prompt, say so and propose a fix instead of guessing.
