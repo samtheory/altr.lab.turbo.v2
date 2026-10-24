@@ -62,7 +62,7 @@ Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scrat
 | `postgres://` / `postgresql://` | **Done** | Same port CRUD; WAL skipped |
 | OCC `records` + HTTP 409 | **Done** | Single write queue |
 | Studio table editor for `records` | **Done** | |
-| Schema list / describe / ADD COLUMN / CREATE TABLE | **Done** | No DROP/RENAME yet |
+| Schema list / describe / ADD COLUMN / CREATE TABLE / DROP / RENAME / type | **Done** | [[../tech_space/jord/15-s0016-schema-drop-rename]] |
 | Browse non-`records` tables | **Done** | Read grid plus insert/update/delete (S0015) |
 | Auth + feature roles | **Done** | |
 | Generated API panel | **Done** | `records`-centric |
@@ -95,7 +95,7 @@ Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scrat
 - [ ] Confirm role gates on schema / blobs / vectors / jobs match Studio UI
 - [ ] Confirm `/health` never leaks connection strings
 - [ ] Confirm gitignore covers `data/*.db*` and `data/blobs/`
-- [ ] Agree next backlog card (user-table writes vs DROP/RENAME)
+- [ ] Agree next backlog card (Postgres RLS S0017)
 - [ ] Agree when to hard-require sqlite-vec / pgvector
 
 ---
@@ -103,4 +103,4 @@ Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scrat
 ## Links for deep dive
 
 - Track [[../plan/Jord/README]] · Backlog [[../plan/Jord/00-remaining-backlog]] · STATUS [[STATUS]]
-- Latest as-built [[../tech_space/jord/13-s0014-vectors]]
+- Latest as-built [[../tech_space/jord/15-s0016-schema-drop-rename]]

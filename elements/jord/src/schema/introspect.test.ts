@@ -180,4 +180,78 @@ describe("schema introspect + ADD COLUMN", () => {
       await jord.close();
     }
   });
+
+  it("drops, renames, and alters columns on user tables", async () => {
+    const dir = await makeTempDir("jord-ddl-alter-");
+    temps.push(dir);
+    const jord = await LibSqlAdapter.open(
+      fsPathToFileUrl(path.join(dir, "jord.db")),
+    );
+
+    try {
+      const created = await jord.createTable({
+        name: "lab_items",
+        columns: [
+          { name: "id", type: "TEXT", pk: true },
+          { name: "title", type: "TEXT" },
+          { name: "score", type: "INTEGER" },
+        ],
+      });
+      expect(created.ok).toBe(true);
+
+      await jord.insertTableRow({
+        table: "lab_items",
+        values: { id: "1", title: "a", score: 3 },
+      });
+
+      const renamedCol = await jord.alterColumn({
+        table: "lab_items",
+        column: "title",
+        name: "label",
+      });
+      expect(renamedCol.ok).toBe(true);
+
+      const typed = await jord.alterColumn({
+        table: "lab_items",
+        column: "score",
+        type: "REAL",
+      });
+      expect(typed.ok).toBe(true);
+
+      const droppedCol = await jord.dropColumn({
+        table: "lab_items",
+        column: "label",
+      });
+      expect(droppedCol.ok).toBe(true);
+
+      const pkDrop = await jord.dropColumn({
+        table: "lab_items",
+        column: "id",
+      });
+      expect(pkDrop.ok).toBe(false);
+      if (!pkDrop.ok) expect(pkDrop.error).toBe("pk_required");
+
+      const renamed = await jord.renameTable({
+        name: "lab_items",
+        newName: "lab_stuff",
+      });
+      expect(renamed.ok).toBe(true);
+      expect(await jord.describeTable("lab_items")).toBeNull();
+      expect(await jord.describeTable("lab_stuff")).not.toBeNull();
+
+      const reservedDrop = await jord.dropTable({ name: "records" });
+      expect(reservedDrop.ok).toBe(false);
+      if (!reservedDrop.ok) expect(reservedDrop.error).toBe("reserved");
+
+      const dropped = await jord.dropTable({ name: "lab_stuff" });
+      expect(dropped.ok).toBe(true);
+      expect(await jord.describeTable("lab_stuff")).toBeNull();
+
+      const missing = await jord.dropTable({ name: "lab_stuff" });
+      expect(missing.ok).toBe(false);
+      if (!missing.ok) expect(missing.error).toBe("table_not_found");
+    } finally {
+      await jord.close();
+    }
+  });
 });

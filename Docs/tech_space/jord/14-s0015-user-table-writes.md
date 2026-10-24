@@ -49,4 +49,4 @@ No OCC `version` on user tables. No generated API catalog per table.
 
 ## Not in this ship
 
-DROP / RENAME (S0016) · user-table OCC · realtime fanout · per-table OpenAPI.
+DROP / RENAME — **shipped** [[15-s0016-schema-drop-rename]] · user-table OCC · realtime fanout · per-table OpenAPI.

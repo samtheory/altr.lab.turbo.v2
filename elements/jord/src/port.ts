@@ -118,6 +118,36 @@ export type DeleteTableRowInput = {
   pk: string;
 };
 
+export type SchemaDdlError =
+  | "invalid_identifier"
+  | "reserved"
+  | "table_not_found"
+  | "table_exists"
+  | "column_not_found"
+  | "column_exists"
+  | "pk_required"
+  | "pk_type_change"
+  | "invalid_type"
+  | "empty_patch"
+  | "type_change_failed";
+
+export type SchemaDdlResult =
+  | { ok: true }
+  | { ok: false; error: SchemaDdlError; message: string };
+
+export type DropTableInput = { name: string };
+
+export type RenameTableInput = { name: string; newName: string };
+
+export type DropColumnInput = { table: string; column: string };
+
+export type AlterColumnInput = {
+  table: string;
+  column: string;
+  name?: string;
+  type?: JordColumnType;
+};
+
 export type JordBlob = {
   id: string;
   bucket: string;
@@ -523,6 +553,15 @@ export interface JordDriverPort {
   updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult>;
   /** Delete one user-table row by primary key. */
   deleteTableRow(input: DeleteTableRowInput): Promise<MutateTableRowResult>;
+
+  /** DROP TABLE for user tables. Rejects reserved names. */
+  dropTable(input: DropTableInput): Promise<SchemaDdlResult>;
+  /** RENAME TABLE for user tables. */
+  renameTable(input: RenameTableInput): Promise<SchemaDdlResult>;
+  /** DROP COLUMN (non-PK) on a user table. */
+  dropColumn(input: DropColumnInput): Promise<SchemaDdlResult>;
+  /** Rename and/or change type of a user-table column. */
+  alterColumn(input: AlterColumnInput): Promise<SchemaDdlResult>;
 
   /** Distinct blob buckets that have at least one object (metadata). */
   listBlobBuckets(): Promise<string[]>;

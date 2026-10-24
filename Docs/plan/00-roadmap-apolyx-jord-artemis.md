@@ -62,7 +62,8 @@ flowchart LR
 | **3l** | **Blob buckets** (`Jord-S0013`) | Local blob storage + Studio browser | **Closed 2026-10-24** — [[../tech_space/jord/12-s0013-blobs]] · [[Jord/Jord-S0013/README]] |
 | **3m** | **Vectors** (`Jord-S0014` / Studio S11) | Embedding / `searchVectors` + Studio panel | **Closed 2026-10-24** — [[../tech_space/jord/13-s0014-vectors]] · [[Jord/Jord-S0014/README]] |
 | **3n** | **User-table writes** (`Jord-S0015`) | Insert/update/delete on user tables + Studio grid | **Closed 2026-10-24** — [[../tech_space/jord/14-s0015-user-table-writes]] · [[Jord/Jord-S0015/README]] |
-| **3o** | **Numbered tail** | S0016 DROP/RENAME → S0017 PG RLS → S0018 WS → S0019 hosted libsql → **S0020 last** (vec hard path) | [[Jord/00-remaining-backlog]] |
+| **3o** | **Schema DDL** (`Jord-S0016`) | DROP / RENAME / type change (admin) | **Closed 2026-10-24** — [[../tech_space/jord/15-s0016-schema-drop-rename]] · [[Jord/Jord-S0016/README]] |
+| **3p** | **Numbered tail** | S0017 PG RLS → S0018 WS → S0019 hosted libsql → **S0020 last** (vec hard path) | [[Jord/00-remaining-backlog]] |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | Product fork · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
@@ -71,7 +72,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–**S0015** are closed. **Next Jord:** Jord-S0016 on [[Jord/00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–**S0016** are closed. **Next Jord:** Jord-S0017 on [[Jord/00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

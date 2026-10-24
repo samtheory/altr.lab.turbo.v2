@@ -6,9 +6,14 @@ import { JordUnsupportedError } from "../errors.js";
 import type {
   AddColumnInput,
   AddColumnResult,
+  AlterColumnInput,
   CreateTableInput,
   CreateTableResult,
   DeleteFunctionResult,
+  DropColumnInput,
+  DropTableInput,
+  RenameTableInput,
+  SchemaDdlResult,
   FinishJobRunInput,
   InsertCustomApiInput,
   InsertFunctionInput,
@@ -64,6 +69,16 @@ import {
   quoteIdent,
   toTableCell,
 } from "../schema/ddl.js";
+import {
+  buildRebuildCopySql,
+  buildRebuildCreateSql,
+  planAlterColumn,
+  planDropColumn,
+  planDropTable,
+  planRenameTable,
+  rebuildTempName,
+  requireUserTableName,
+} from "../schema/ddl-alter.js";
 import {
   planDeleteRow,
   planInsertRow,
@@ -1045,6 +1060,133 @@ export class PostgresAdapter implements JordDriverPort {
       return { ok: false, error: "not_found", message: "row not found" };
     }
     return { ok: true };
+  }
+
+  async dropTable(input: DropTableInput): Promise<SchemaDdlResult> {
+    const plan = planDropTable(input.name);
+    if (!plan.ok) return plan;
+    const existing = await this.describeTable(plan.name);
+    if (!existing) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${plan.name} not found`,
+      };
+    }
+    await this.pool.query(`DROP TABLE ${quoteIdent(plan.name)}`);
+    return { ok: true };
+  }
+
+  async renameTable(input: RenameTableInput): Promise<SchemaDdlResult> {
+    const plan = planRenameTable(input.name, input.newName);
+    if (!plan.ok) return plan;
+    const existing = await this.describeTable(plan.from);
+    if (!existing) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${plan.from} not found`,
+      };
+    }
+    const conflict = await this.describeTable(plan.to);
+    if (conflict) {
+      return {
+        ok: false,
+        error: "table_exists",
+        message: `table ${plan.to} already exists`,
+      };
+    }
+    await this.pool.query(
+      `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
+    );
+    return { ok: true };
+  }
+
+  async dropColumn(input: DropColumnInput): Promise<SchemaDdlResult> {
+    const gate = requireUserTableName(input.table);
+    if (!gate.ok) return gate;
+    const info = await this.describeTable(gate.name);
+    if (!info) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${gate.name} not found`,
+      };
+    }
+    const plan = planDropColumn(info, input.column);
+    if (!plan.ok) return plan;
+    await this.pool.query(
+      `ALTER TABLE ${quoteIdent(plan.table)} DROP COLUMN ${quoteIdent(plan.column)}`,
+    );
+    return { ok: true };
+  }
+
+  async alterColumn(input: AlterColumnInput): Promise<SchemaDdlResult> {
+    const gate = requireUserTableName(input.table);
+    if (!gate.ok) return gate;
+    const info = await this.describeTable(gate.name);
+    if (!info) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${gate.name} not found`,
+      };
+    }
+    const plan = planAlterColumn(info, input.column, {
+      name: input.name,
+      type: input.type,
+    });
+    if (!plan.ok) return plan;
+
+    if (plan.mode === "rename") {
+      await this.pool.query(
+        `ALTER TABLE ${quoteIdent(plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
+      );
+      return { ok: true };
+    }
+
+    const temp = rebuildTempName(plan.table);
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(buildRebuildCreateSql(temp, plan.columns, "postgres"));
+      await client.query(
+        buildRebuildCopySql(
+          plan.table,
+          temp,
+          info,
+          plan.from,
+          plan.to,
+          plan.nextType,
+          "postgres",
+        ),
+      );
+      await client.query(`DROP TABLE ${quoteIdent(plan.table)}`);
+      await client.query(
+        `ALTER TABLE ${quoteIdent(temp)} RENAME TO ${quoteIdent(plan.table)}`,
+      );
+      await client.query("COMMIT");
+      return { ok: true };
+    } catch (err) {
+      try {
+        await client.query("ROLLBACK");
+      } catch {
+        /* ignore */
+      }
+      try {
+        await this.pool.query(`DROP TABLE IF EXISTS ${quoteIdent(temp)}`);
+      } catch {
+        /* ignore cleanup */
+      }
+      return {
+        ok: false,
+        error: "type_change_failed",
+        message:
+          err instanceof Error ? err.message : "column type change failed",
+      };
+    } finally {
+      client.release();
+    }
   }
 
   private async openUserTable(

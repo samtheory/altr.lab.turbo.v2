@@ -1,20 +1,19 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0015 closed; next is S0016; last numbered sprint is S0020"
+description: "Jord-S0001–S0016 closed; next is S0017; last numbered sprint is S0020"
 created: 2026-10-18
 updated: 2026-10-24
 tags:
   - plan
   - jord
   - Jord-S0001
-  - Jord-S0013
-  - Jord-S0014
+  - Jord-S0016
   - readme
 ---
 
 # plan / Jord
 
-> **Closed through:** [[Jord-S0015/README]] (user-table row writes) · **Next:** Jord-S0016 on [[00-remaining-backlog]] · **Last numbered sprint:** Jord-S0020 · Review: [[../../report/Jord-implemented-review]]
+> **Closed through:** [[Jord-S0016/README]] (schema DROP / RENAME / type) · **Next:** Jord-S0017 on [[00-remaining-backlog]] · **Last numbered sprint:** Jord-S0020 · Review: [[../../report/Jord-implemented-review]]
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
@@ -33,7 +32,8 @@ tags:
 | [[Jord-S0013/README]] | Studio S10 blob buckets | **done** (2026-10-24) |
 | [[Jord-S0014/README]] | Studio S11 vectors / searchVectors | **done** (2026-10-24) |
 | [[Jord-S0015/README]] | User-table row writes | **done** (2026-10-24) |
+| [[Jord-S0016/README]] | Schema DROP / RENAME / type change | **done** (2026-10-24) |
 
-**Next:** Jord-S0016 (DROP / RENAME) from [[00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. Product fork: Artemis.
+**Next:** Jord-S0017 (native Postgres RLS) from [[00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. Product fork: Artemis.
 
 Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]

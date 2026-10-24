@@ -457,6 +457,93 @@ describe("jord-server routes", () => {
     }
   });
 
+  it("schema DDL: admin drop/rename/type; editor forbidden", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const created = await app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "lab_ddl",
+          columns: [
+            { name: "id", type: "TEXT", pk: true },
+            { name: "title", type: "TEXT" },
+            { name: "score", type: "INTEGER" },
+          ],
+        }),
+      });
+      expect(created.status).toBe(201);
+
+      const denied = await app.request("/schema/tables/lab_ddl", {
+        method: "DELETE",
+        headers: authHeaders("editor"),
+      });
+      expect(denied.status).toBe(403);
+
+      const renamedCol = await app.request(
+        "/schema/tables/lab_ddl/columns/title",
+        {
+          method: "PATCH",
+          headers: {
+            "content-type": "application/json",
+            ...authHeaders("admin"),
+          },
+          body: JSON.stringify({ name: "label" }),
+        },
+      );
+      expect(renamedCol.status).toBe(200);
+
+      const typed = await app.request("/schema/tables/lab_ddl/columns/score", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ type: "REAL" }),
+      });
+      expect(typed.status).toBe(200);
+
+      const dropCol = await app.request("/schema/tables/lab_ddl/columns/label", {
+        method: "DELETE",
+        headers: authHeaders("admin"),
+      });
+      expect(dropCol.status).toBe(200);
+
+      const renamed = await app.request("/schema/tables/lab_ddl", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ name: "lab_ddl_v2" }),
+      });
+      expect(renamed.status).toBe(200);
+
+      const reserved = await app.request("/schema/tables/records", {
+        method: "DELETE",
+        headers: authHeaders("admin"),
+      });
+      expect(reserved.status).toBe(400);
+
+      const dropped = await app.request("/schema/tables/lab_ddl_v2", {
+        method: "DELETE",
+        headers: authHeaders("admin"),
+      });
+      expect(dropped.status).toBe(200);
+
+      const missing = await app.request("/schema/tables/lab_ddl_v2", {
+        method: "DELETE",
+        headers: authHeaders("admin"),
+      });
+      expect(missing.status).toBe(404);
+    } finally {
+      await jord.close();
+    }
+  });
+
   it("truncateWalCheckpoint is callable (shutdown / interval path)", async () => {
     const { jord } = await testApp();
     try {

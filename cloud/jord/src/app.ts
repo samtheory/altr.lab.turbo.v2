@@ -299,6 +299,12 @@ function tableRowStatus(error: string): 400 | 404 | 409 {
   return 400;
 }
 
+function schemaDdlStatus(error: string): 400 | 404 | 409 {
+  if (error === "table_exists" || error === "column_exists") return 409;
+  if (error === "table_not_found" || error === "column_not_found") return 404;
+  return 400;
+}
+
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
   const requireAuth = createAuthMiddleware(deps.auth);
@@ -585,6 +591,118 @@ export function createJordApp(deps: JordAppDeps) {
 
       const info = await deps.jord.describeTable(table);
       return c.json({ ok: true as const, sql: preview, table: info }, 201);
+    },
+  );
+
+  protectedRoutes.delete(
+    "/schema/tables/:name",
+    requireAlterSchema(),
+    async (c) => {
+      const name = c.req.param("name");
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.dropTable({ name }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          schemaDdlStatus(result.error),
+        );
+      }
+      return c.json({ ok: true as const });
+    },
+  );
+
+  protectedRoutes.patch(
+    "/schema/tables/:name",
+    requireAlterSchema(),
+    async (c) => {
+      const name = c.req.param("name");
+      const body = (await c.req.json().catch(() => null)) as {
+        name?: unknown;
+      } | null;
+      if (!body || typeof body.name !== "string") {
+        throw new HTTPException(400, {
+          message: "name (string) is required",
+        });
+      }
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.renameTable({ name, newName: body.name as string }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          schemaDdlStatus(result.error),
+        );
+      }
+      const info = await deps.jord.describeTable(body.name as string);
+      return c.json({ ok: true as const, table: info });
+    },
+  );
+
+  protectedRoutes.patch(
+    "/schema/tables/:name/columns/:column",
+    requireAlterSchema(),
+    async (c) => {
+      const table = c.req.param("name");
+      const column = c.req.param("column");
+      const body = (await c.req.json().catch(() => null)) as {
+        name?: unknown;
+        type?: unknown;
+      } | null;
+      if (!body) {
+        throw new HTTPException(400, { message: "JSON body is required" });
+      }
+      const patch: { name?: string; type?: JordColumnType } = {};
+      if (body.name !== undefined) {
+        if (typeof body.name !== "string") {
+          throw new HTTPException(400, { message: "name must be a string" });
+        }
+        patch.name = body.name;
+      }
+      if (body.type !== undefined) {
+        if (typeof body.type !== "string" || !isJordColumnType(body.type)) {
+          throw new HTTPException(400, {
+            message: "type must be TEXT, INTEGER, REAL, or BLOB",
+          });
+        }
+        patch.type = body.type;
+      }
+      if (patch.name === undefined && patch.type === undefined) {
+        throw new HTTPException(400, {
+          message: "name and/or type is required",
+        });
+      }
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.alterColumn({ table, column, ...patch }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          schemaDdlStatus(result.error),
+        );
+      }
+      const info = await deps.jord.describeTable(table);
+      return c.json({ ok: true as const, table: info });
+    },
+  );
+
+  protectedRoutes.delete(
+    "/schema/tables/:name/columns/:column",
+    requireAlterSchema(),
+    async (c) => {
+      const table = c.req.param("name");
+      const column = c.req.param("column");
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.dropColumn({ table, column }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          schemaDdlStatus(result.error),
+        );
+      }
+      const info = await deps.jord.describeTable(table);
+      return c.json({ ok: true as const, table: info });
     },
   );
 

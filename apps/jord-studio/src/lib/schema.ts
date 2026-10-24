@@ -21,3 +21,14 @@ export function previewAddColumnSql(
 ): string {
   return `ALTER TABLE "${table}" ADD COLUMN "${column}" ${type};`;
 }
+
+/** Same reserved set as jord CREATE / DDL alter. */
+export function isAlterableUserTable(name: string): boolean {
+  const lower = name.toLowerCase();
+  return (
+    lower !== "records" &&
+    !lower.startsWith("jord_") &&
+    !lower.startsWith("sqlite_") &&
+    !lower.startsWith("pg_")
+  );
+}

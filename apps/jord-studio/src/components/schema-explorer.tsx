@@ -27,6 +27,7 @@ import {
 import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
 import {
   COLUMN_TYPES,
+  isAlterableUserTable,
   previewAddColumnSql,
   type ColumnType,
   type SchemaTable,
@@ -64,8 +65,17 @@ export function SchemaExplorer({ role }: Props) {
   ]);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createOk, setCreateOk] = useState<string | null>(null);
+  const [renameTableTo, setRenameTableTo] = useState("");
+  const [ddlMsg, setDdlMsg] = useState<string | null>(null);
+  const [ddlErr, setDdlErr] = useState<string | null>(null);
+  const [colEdits, setColEdits] = useState<
+    Record<string, { name: string; type: ColumnType }>
+  >({});
   const [isPending, startTransition] = useTransition();
   const [isCreating, startCreate] = useTransition();
+  const [isDdl, startDdl] = useTransition();
+
+  const canDdlTable = canAlter && isAlterableUserTable(selected);
 
   const loadTables = useCallback(async () => {
     setError(null);
@@ -135,6 +145,20 @@ export function SchemaExplorer({ role }: Props) {
       try {
         const info = await loadTable(selected);
         setTableInfo(info);
+        setRenameTableTo(info.name);
+        setColEdits(
+          Object.fromEntries(
+            info.columns.map((col) => [
+              col.name,
+              {
+                name: col.name,
+                type: (COLUMN_TYPES.includes(col.type as ColumnType)
+                  ? col.type
+                  : "TEXT") as ColumnType,
+              },
+            ]),
+          ),
+        );
         setAllTables((prev) => {
           const next = prev.filter((t) => t.name !== info.name);
           next.push(info);
@@ -194,6 +218,175 @@ export function SchemaExplorer({ role }: Props) {
         refreshAll(name);
       } catch {
         setCreateError("Network error talking to Studio BFF.");
+      }
+    });
+  }
+
+  function applyTableInfo(info: SchemaTable) {
+    setTableInfo(info);
+    setSelected(info.name);
+    setRenameTableTo(info.name);
+    setColEdits(
+      Object.fromEntries(
+        info.columns.map((col) => [
+          col.name,
+          {
+            name: col.name,
+            type: (COLUMN_TYPES.includes(col.type as ColumnType)
+              ? col.type
+              : "TEXT") as ColumnType,
+          },
+        ]),
+      ),
+    );
+    setAllTables((prev) => {
+      const next = prev.filter((t) => t.name !== info.name);
+      next.push(info);
+      return [...next].sort((a, b) => a.name.localeCompare(b.name));
+    });
+  }
+
+  function onRenameTable(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canDdlTable) return;
+    setDdlErr(null);
+    setDdlMsg(null);
+    const next = renameTableTo.trim();
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(next)) {
+      setDdlErr("New table name must match [a-zA-Z_][a-zA-Z0-9_]*");
+      return;
+    }
+    if (next === selected) {
+      setDdlErr("Pick a different table name.");
+      return;
+    }
+    startDdl(async () => {
+      try {
+        const res = await fetch(
+          `/api/schema/tables/${encodeURIComponent(selected)}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: next }),
+          },
+        );
+        const body = (await res.json().catch(() => ({}))) as ApiError & {
+          table?: SchemaTable;
+        };
+        if (!res.ok) {
+          setDdlErr(body.message ?? `RENAME TABLE failed (${res.status}).`);
+          return;
+        }
+        setDdlMsg(`Renamed to ${next}`);
+        if (body.table) applyTableInfo(body.table);
+        else refreshAll(next);
+      } catch {
+        setDdlErr("Network error talking to Studio BFF.");
+      }
+    });
+  }
+
+  function onDropTable() {
+    if (!canDdlTable) return;
+    if (
+      !window.confirm(
+        `Drop table "${selected}"? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    setDdlErr(null);
+    setDdlMsg(null);
+    startDdl(async () => {
+      try {
+        const res = await fetch(
+          `/api/schema/tables/${encodeURIComponent(selected)}`,
+          { method: "DELETE" },
+        );
+        const body = (await res.json().catch(() => ({}))) as ApiError;
+        if (!res.ok) {
+          setDdlErr(body.message ?? `DROP TABLE failed (${res.status}).`);
+          return;
+        }
+        setDdlMsg(`Dropped ${selected}`);
+        setTableInfo(null);
+        refreshAll();
+      } catch {
+        setDdlErr("Network error talking to Studio BFF.");
+      }
+    });
+  }
+
+  function onAlterColumn(column: string) {
+    if (!canDdlTable) return;
+    const edit = colEdits[column];
+    if (!edit) return;
+    setDdlErr(null);
+    setDdlMsg(null);
+    const patch: { name?: string; type?: ColumnType } = {};
+    if (edit.name.trim() !== column) patch.name = edit.name.trim();
+    const current = tableInfo?.columns.find((c) => c.name === column);
+    const currentType = (current?.type ?? "").toUpperCase();
+    if (edit.type !== currentType) patch.type = edit.type;
+    if (!patch.name && !patch.type) {
+      setDdlErr("Nothing to change on this column.");
+      return;
+    }
+    startDdl(async () => {
+      try {
+        const res = await fetch(
+          `/api/schema/tables/${encodeURIComponent(selected)}/columns/${encodeURIComponent(column)}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(patch),
+          },
+        );
+        const body = (await res.json().catch(() => ({}))) as ApiError & {
+          table?: SchemaTable;
+        };
+        if (!res.ok) {
+          setDdlErr(body.message ?? `ALTER COLUMN failed (${res.status}).`);
+          return;
+        }
+        setDdlMsg(`Updated column ${column}`);
+        if (body.table) applyTableInfo(body.table);
+        else refreshAll(selected);
+      } catch {
+        setDdlErr("Network error talking to Studio BFF.");
+      }
+    });
+  }
+
+  function onDropColumn(column: string) {
+    if (!canDdlTable) return;
+    if (
+      !window.confirm(
+        `Drop column "${column}" from "${selected}"? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    setDdlErr(null);
+    setDdlMsg(null);
+    startDdl(async () => {
+      try {
+        const res = await fetch(
+          `/api/schema/tables/${encodeURIComponent(selected)}/columns/${encodeURIComponent(column)}`,
+          { method: "DELETE" },
+        );
+        const body = (await res.json().catch(() => ({}))) as ApiError & {
+          table?: SchemaTable;
+        };
+        if (!res.ok) {
+          setDdlErr(body.message ?? `DROP COLUMN failed (${res.status}).`);
+          return;
+        }
+        setDdlMsg(`Dropped column ${column}`);
+        if (body.table) applyTableInfo(body.table);
+        else refreshAll(selected);
+      } catch {
+        setDdlErr("Network error talking to Studio BFF.");
       }
     });
   }
@@ -262,7 +455,8 @@ export function SchemaExplorer({ role }: Props) {
           </p>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Schema</h1>
           <p className="text-sm text-muted-foreground">
-            Catalog via jord-server. Create tables and add columns. No DROP or RENAME.
+            Catalog via jord-server. Create, add columns, rename, type-change, or drop
+            (admin). Reserved tables stay protected.
           </p>
         </div>
         <div className="flex gap-2">
@@ -282,7 +476,13 @@ export function SchemaExplorer({ role }: Props) {
           >
             Visualizer
           </Button>
-          <Button type="button" size="sm" variant="ghost" onClick={refreshAll} disabled={isPending}>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => refreshAll()}
+            disabled={isPending}
+          >
             Refresh
           </Button>
         </div>
@@ -457,6 +657,49 @@ export function SchemaExplorer({ role }: Props) {
             </div>
           </form>
 
+          {tableInfo && canDdlTable ? (
+            <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/20 p-4">
+              <div className="space-y-1">
+                <h2 className="font-display text-lg font-semibold">Alter table</h2>
+                <p className="text-sm text-muted-foreground">
+                  Rename or drop this user table. Confirm before drop.
+                </p>
+              </div>
+              {ddlErr ? (
+                <Alert variant="destructive">
+                  <AlertTitle>DDL failed</AlertTitle>
+                  <AlertDescription>{ddlErr}</AlertDescription>
+                </Alert>
+              ) : null}
+              {ddlMsg ? (
+                <Alert variant="success">
+                  <AlertTitle>Applied</AlertTitle>
+                  <AlertDescription className="font-mono text-xs">{ddlMsg}</AlertDescription>
+                </Alert>
+              ) : null}
+              <form onSubmit={onRenameTable} className="flex flex-wrap items-end gap-3">
+                <Field label="rename to" className="min-w-[12rem] flex-1">
+                  <FieldInput
+                    value={renameTableTo}
+                    onChange={(e) => setRenameTableTo(e.target.value)}
+                    className="font-mono text-sm"
+                  />
+                </Field>
+                <Button type="submit" variant="outline" disabled={isDdl}>
+                  Rename table
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={isDdl}
+                  onClick={onDropTable}
+                >
+                  Drop table
+                </Button>
+              </form>
+            </div>
+          ) : null}
+
           {tableInfo ? (
             <Table striped>
               <TableHeader>
@@ -466,20 +709,105 @@ export function SchemaExplorer({ role }: Props) {
                   <TableHead className="font-mono text-xs">pk</TableHead>
                   <TableHead className="font-mono text-xs">notnull</TableHead>
                   <TableHead className="font-mono text-xs">dflt_value</TableHead>
+                  {canDdlTable ? (
+                    <TableHead className="font-mono text-xs">actions</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tableInfo.columns.map((col) => (
-                  <TableRow key={col.name}>
-                    <TableCell className="font-mono text-xs">{col.name}</TableCell>
-                    <TableCell className="font-mono text-xs">{col.type || "—"}</TableCell>
-                    <TableCell className="font-mono text-xs">{col.pk ? "1" : "0"}</TableCell>
-                    <TableCell className="font-mono text-xs">{col.notnull ? "1" : "0"}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {col.dflt_value ?? "null"}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {tableInfo.columns.map((col) => {
+                  const edit = colEdits[col.name] ?? {
+                    name: col.name,
+                    type: "TEXT" as ColumnType,
+                  };
+                  return (
+                    <TableRow key={col.name}>
+                      <TableCell className="font-mono text-xs">
+                        {canDdlTable ? (
+                          <Field label={`rename ${col.name}`} className="gap-0">
+                            <FieldInput
+                              value={edit.name}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setColEdits((prev) => ({
+                                  ...prev,
+                                  [col.name]: { ...edit, name: value },
+                                }));
+                              }}
+                              className="font-mono text-xs"
+                              disabled={isDdl}
+                              aria-label={`Rename column ${col.name}`}
+                            />
+                          </Field>
+                        ) : (
+                          col.name
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {canDdlTable && !col.pk ? (
+                          <Select
+                            value={edit.type}
+                            onValueChange={(value) =>
+                              setColEdits((prev) => ({
+                                ...prev,
+                                [col.name]: {
+                                  ...edit,
+                                  type: value as ColumnType,
+                                },
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {COLUMN_TYPES.map((t) => (
+                                <SelectItem key={t} value={t}>
+                                  {t}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          col.type || "—"
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {col.pk ? "1" : "0"}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {col.notnull ? "1" : "0"}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {col.dflt_value ?? "null"}
+                      </TableCell>
+                      {canDdlTable ? (
+                        <TableCell className="space-x-1 whitespace-nowrap">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={isDdl}
+                            onClick={() => onAlterColumn(col.name)}
+                          >
+                            Save
+                          </Button>
+                          {!col.pk ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              disabled={isDdl}
+                              onClick={() => onDropColumn(col.name)}
+                            >
+                              Drop
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      ) : null}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : null}
@@ -491,7 +819,7 @@ export function SchemaExplorer({ role }: Props) {
             <div className="space-y-1">
               <h2 className="font-display text-lg font-semibold">Add column</h2>
               <p className="text-sm text-muted-foreground">
-                Additive live save on the selected table. No DROP or RENAME.
+                Additive live save on the selected table. Rename / type / drop are above.
               </p>
             </div>
 
