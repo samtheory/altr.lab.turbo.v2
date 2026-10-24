@@ -1,28 +1,44 @@
 /**
- * Studio S9 realtime contract (Jord-S0011).
- * Emit after a successful records write. SSE carries this JSON.
+ * Realtime change contract (S0011 + S0018).
+ * Emit after a successful write-queue mutation. SSE / WS carry this JSON.
  * Never include body, secrets, or DATABASE_URL.
  */
 
+import { isReservedCreateTableName, isValidSqlIdent } from "@altr/jord";
+
 export const REALTIME_V1_TABLE = "records" as const;
 
-export const MAX_REALTIME_SUBSCRIBERS = 32;
+/** Shared cap for SSE + WebSocket subscribers on one process. */
+export const MAX_REALTIME_SUBSCRIBERS = 48;
 
 export type JordChangeOp = "insert" | "update" | "delete";
 
 export type JordChangeEvent = {
   type: "jord.change";
-  table: typeof REALTIME_V1_TABLE;
+  table: string;
   op: JordChangeOp;
   id: string;
-  /** Omitted on delete when the row is gone. */
+  /** OCC version for `records` only; omitted on delete when the row is gone. */
   version?: number;
   at: number;
   dialect: "libsql" | "postgres";
 };
 
 export type JordChangeDraft = {
+  /** Defaults to `records` when omitted (legacy records emit sites). */
+  table?: string;
   op: JordChangeOp;
   id: string;
   version?: number;
 };
+
+/**
+ * Subscribe channel: `records` or a user-table ident (not reserved).
+ * Does not require the table to exist yet.
+ */
+export function isRealtimeSubscribeTable(name: string): boolean {
+  if (name === REALTIME_V1_TABLE) return true;
+  if (!isValidSqlIdent(name)) return false;
+  if (isReservedCreateTableName(name)) return false;
+  return true;
+}

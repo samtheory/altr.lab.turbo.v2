@@ -15,6 +15,7 @@ tags:
   - Jord-S0016
   - Jord-S0017
   - Jord-S0018
+  - Jord-S0019
 ---
 
 # mimir — workflow instructions
@@ -34,7 +35,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0017** closed. Next to open: **Jord-S0018**. Last numbered: **Jord-S0020** — [[../../../plan/Jord/00-remaining-backlog]]
+4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0018** closed. Next to open: **Jord-S0019**. Last numbered: **Jord-S0020** — [[../../../plan/Jord/00-remaining-backlog]]
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. Review of shipped work: [[../../../report/Jord-implemented-review]]
 7. This file
@@ -126,7 +127,11 @@ See [[../../../plan/Jord/Jord-S0016/README]] (done 2026-10-24). As-built: [[../.
 
 ### Closed — Jord-S0017 (native Postgres RLS)
 
-See [[../../../plan/Jord/Jord-S0017/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/16-s0017-postgres-rls]]. Next to open: Jord-S0018. **Last numbered sprint:** Jord-S0020.
+See [[../../../plan/Jord/Jord-S0017/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/16-s0017-postgres-rls]].
+
+### Closed — Jord-S0018 (realtime WebSockets + multi-table fanout)
+
+See [[../../../plan/Jord/Jord-S0018/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/17-s0018-realtime-ws]]. Next to open: Jord-S0019. **Last numbered sprint:** Jord-S0020.
 
 ## Skills discipline
 

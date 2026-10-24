@@ -72,7 +72,7 @@ None of these land in Slice 0. Build order: [[01-later]].
 
 | Area | What you see and do | Depends on engine pillar in [[01-later]] |
 |------|---------------------|------------------------------------------|
-| **Realtime** | Subscribe to table/row changes (CDC → SSE / WebSockets from `@altr/jord-server`) | Realtime layer |
+| **Realtime** | Subscribe to table/row changes (write-path CDC-equivalent → SSE + WebSockets) — **shipped** [[../../tech_space/jord/17-s0018-realtime-ws]] | Realtime layer |
 | **Blobs** | Browse and upload assets in Jord buckets (S3-shaped REST) — **shipped** [[../../tech_space/jord/12-s0013-blobs]] | Local blob storage |
 | **Vectors** | Upsert / search embeddings via `searchVectors` — **shipped** [[../../tech_space/jord/13-s0014-vectors]] | In-process cosine (v1) |
 

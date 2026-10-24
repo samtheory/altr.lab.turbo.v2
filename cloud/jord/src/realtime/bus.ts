@@ -5,6 +5,11 @@ import {
 
 export type RealtimeListener = (event: JordChangeEvent) => void;
 
+export type RealtimeSubscribeFilter = {
+  table: string;
+  id?: string | null;
+};
+
 /**
  * In-process fanout for one jord-server process. No Redis.
  * Listener throws are swallowed so a bad subscriber cannot roll back a write.
@@ -25,6 +30,20 @@ export class RealtimeBus {
     return () => {
       this.listeners.delete(listener);
     };
+  }
+
+  /**
+   * Subscribe with table / optional id filter applied before the listener runs.
+   */
+  trySubscribeFiltered(
+    filter: RealtimeSubscribeFilter,
+    listener: RealtimeListener,
+  ): (() => void) | null {
+    return this.trySubscribe((event) => {
+      if (event.table !== filter.table) return;
+      if (filter.id && event.id !== filter.id) return;
+      listener(event);
+    });
   }
 
   publish(event: JordChangeEvent): void {

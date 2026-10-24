@@ -20,6 +20,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/17-s0018-realtime-ws]] — **Jord-S0018** realtime WS + multi-table fanout (2026-10-24)
 - [[jord/16-s0017-postgres-rls]] — **Jord-S0017** native Postgres RLS from Jord policies (2026-10-24)
 - [[jord/15-s0016-schema-drop-rename]] — **Jord-S0016** schema DROP / RENAME / type (2026-10-24)
 - [[jord/12-s0013-blobs]] — **Jord-S0013** local blob buckets + Studio Storage (2026-10-24)

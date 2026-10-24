@@ -1,7 +1,10 @@
 import path from "node:path";
+import type { AddressInfo } from "node:net";
 
 import { createJordClient, fsPathToFileUrl } from "@altr/jord";
+import { serve } from "@hono/node-server";
 import { afterEach, describe, expect, it } from "vitest";
+import WebSocket from "ws";
 
 import { createJordApp } from "./app.js";
 import {
@@ -1008,16 +1011,88 @@ async function readSseUntil(
 }
 
 describe("jord realtime SSE", () => {
-  it("rejects realtime without auth and unknown tables", async () => {
+  it("rejects realtime without auth and reserved tables", async () => {
     const ctx = await testApp();
     try {
       const anon = await ctx.app.request("/realtime?table=records");
       expect(anon.status).toBe(401);
 
-      const badTable = await ctx.app.request("/realtime?table=orders", {
+      const reserved = await ctx.app.request("/realtime?table=jord_policies", {
         headers: authHeaders("admin"),
       });
-      expect(badTable.status).toBe(400);
+      expect(reserved.status).toBe(400);
+
+      const userTable = await ctx.app.request("/realtime?table=lab_notes", {
+        headers: {
+          Accept: "text/event-stream",
+          ...authHeaders("admin"),
+        },
+      });
+      expect(userTable.status).toBe(200);
+      await userTable.body?.cancel();
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
+  it("user-table insert fans out only to that table channel", async () => {
+    const ctx = await testApp();
+    try {
+      const created = await ctx.app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "lab_notes",
+          columns: [
+            { name: "id", type: "TEXT", pk: true },
+            { name: "body", type: "TEXT" },
+          ],
+        }),
+      });
+      expect(created.status).toBe(201);
+
+      const stream = await ctx.app.request("/realtime?table=lab_notes", {
+        headers: {
+          Accept: "text/event-stream",
+          ...authHeaders("readonly"),
+        },
+      });
+      expect(stream.status).toBe(200);
+      const reader = stream.body!.getReader();
+
+      const recordsStream = await ctx.app.request("/realtime?table=records", {
+        headers: {
+          Accept: "text/event-stream",
+          ...authHeaders("readonly"),
+        },
+      });
+      expect(recordsStream.status).toBe(200);
+      const recordsReader = recordsStream.body!.getReader();
+
+      const insert = await ctx.app.request("/schema/tables/lab_notes/rows", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ values: { id: "n1", body: "hi" } }),
+      });
+      expect(insert.status).toBe(201);
+
+      const buf = await readSseUntil(reader, "jord.change", 3000);
+      expect(buf).toContain('"table":"lab_notes"');
+      expect(buf).toContain('"id":"n1"');
+      expect(buf).toContain('"op":"insert"');
+
+      const recordsBuf = await readSseUntil(recordsReader, "lab_notes", 400);
+      expect(recordsBuf).not.toContain("lab_notes");
+
+      await reader.cancel();
+      await recordsReader.cancel();
     } finally {
       ctx.stop();
       await ctx.jord.close();
@@ -1104,6 +1179,75 @@ describe("jord realtime SSE", () => {
       const body = (await stream.json()) as { error: string };
       expect(body.error).toBe("policy_denied");
     } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
+  it("WebSocket receives jord.change after records insert", async () => {
+    const ctx = await testApp();
+    const server = serve({
+      fetch: ctx.app.fetch,
+      port: 0,
+      hostname: "127.0.0.1",
+    });
+    ctx.app.injectWebSocket(server);
+    await new Promise<void>((resolve) => {
+      if (server.address()) resolve();
+      else server.once("listening", () => resolve());
+    });
+    const addr = server.address() as AddressInfo | null;
+    if (!addr || typeof addr === "string") {
+      throw new Error("server did not bind a TCP port");
+    }
+    const token = signSessionToken("readonly", TEST_AUTH.secret);
+    try {
+      const message = await new Promise<string>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("ws timeout")), 4000);
+        const ws = new WebSocket(
+          `ws://127.0.0.1:${addr.port}/realtime/ws?table=records`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        ws.on("message", (data) => {
+          const text = String(data);
+          if (text.includes("jord.change")) {
+            clearTimeout(timer);
+            ws.close();
+            resolve(text);
+          }
+        });
+        ws.on("error", (err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+        ws.on("open", () => {
+          void (async () => {
+            try {
+              const res = await ctx.app.request("/records", {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                  ...authHeaders("editor"),
+                },
+                body: JSON.stringify({ bucket: "lab", body: "{\"ws\":1}" }),
+              });
+              if (res.status !== 201) {
+                clearTimeout(timer);
+                reject(new Error(`insert status ${res.status}`));
+              }
+            } catch (err) {
+              clearTimeout(timer);
+              reject(err);
+            }
+          })();
+        });
+      });
+      expect(message).toContain('"type":"jord.change"');
+      expect(message).toContain('"table":"records"');
+      expect(message).toContain('"op":"insert"');
+      expect(message).not.toContain('"body"');
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
       ctx.stop();
       await ctx.jord.close();
     }

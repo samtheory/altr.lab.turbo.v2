@@ -1,17 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import { RealtimeBus } from "./bus.js";
-import { MAX_REALTIME_SUBSCRIBERS, type JordChangeEvent } from "./types.js";
+import {
+  isRealtimeSubscribeTable,
+  MAX_REALTIME_SUBSCRIBERS,
+  type JordChangeEvent,
+} from "./types.js";
 
-function sample(id = "row-1"): JordChangeEvent {
+function sample(
+  partial: Partial<JordChangeEvent> & Pick<JordChangeEvent, "id" | "table">,
+): JordChangeEvent {
   return {
     type: "jord.change",
-    table: "records",
     op: "insert",
-    id,
     version: 1,
     at: 1,
     dialect: "libsql",
+    ...partial,
   };
 }
 
@@ -25,8 +30,23 @@ describe("RealtimeBus", () => {
     bus.trySubscribe((event) => {
       seen.push(event.id);
     });
-    bus.publish(sample("a"));
+    bus.publish(sample({ id: "a", table: "records" }));
     expect(seen).toEqual(["a"]);
+  });
+
+  it("filters by table and id", () => {
+    const bus = new RealtimeBus();
+    const seen: string[] = [];
+    bus.trySubscribeFiltered({ table: "notes" }, (event) => {
+      seen.push(`${event.table}:${event.id}`);
+    });
+    bus.trySubscribeFiltered({ table: "notes", id: "2" }, (event) => {
+      seen.push(`id2:${event.id}`);
+    });
+    bus.publish(sample({ id: "1", table: "records" }));
+    bus.publish(sample({ id: "1", table: "notes" }));
+    bus.publish(sample({ id: "2", table: "notes", op: "update" }));
+    expect(seen).toEqual(["notes:1", "notes:2", "id2:2"]);
   });
 
   it("returns null once the subscriber cap is reached", () => {
@@ -36,5 +56,15 @@ describe("RealtimeBus", () => {
     }
     expect(bus.trySubscribe(() => {})).toBeNull();
     expect(bus.size).toBe(MAX_REALTIME_SUBSCRIBERS);
+  });
+});
+
+describe("isRealtimeSubscribeTable", () => {
+  it("allows records and user tables; rejects reserved", () => {
+    expect(isRealtimeSubscribeTable("records")).toBe(true);
+    expect(isRealtimeSubscribeTable("lab_notes")).toBe(true);
+    expect(isRealtimeSubscribeTable("jord_policies")).toBe(false);
+    expect(isRealtimeSubscribeTable("sqlite_master")).toBe(false);
+    expect(isRealtimeSubscribeTable("bad-name")).toBe(false);
   });
 });

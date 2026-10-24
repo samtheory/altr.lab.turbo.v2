@@ -39,7 +39,7 @@ These are first-class later pillars, not Slice 0 packages.
 
 | Pillar | Outcome | Home |
 |--------|---------|------|
-| **Realtime (CDC)** | Change Data Capture from SQLite hooks (libSQL) or equivalent; push via SSE and/or WebSockets on `@altr/jord-server` | Server + Studio live views |
+| **Realtime (CDC)** | Write-path emit + SSE + WebSockets — **shipped** [[../../tech_space/jord/17-s0018-realtime-ws]] (true SQLite hooks / LISTEN still later) | Server + Studio live views |
 | **Local blob storage** | Lightweight asset / file buckets (S3-shaped REST + local disk; full S3 later) — **shipped** [[../../tech_space/jord/12-s0013-blobs]] | `@altr/jord-server` (+ Studio browser) |
 | **In-process vector pipelines** | Semantic memory via `searchVectors` on `JordDriverPort` — **shipped** [[../../tech_space/jord/13-s0014-vectors]] | `@altr/jord` + server; hard sqlite-vec / `pgvector` later |
 

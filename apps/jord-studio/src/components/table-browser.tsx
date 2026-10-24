@@ -6,9 +6,11 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Field,
   FieldInput,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -75,6 +77,10 @@ export function TableBrowser({ table, role }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [editingPk, setEditingPk] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
+  const [liveState, setLiveState] = useState<
+    "off" | "connecting" | "live" | "reconnecting"
+  >("off");
   const [isPending, startTransition] = useTransition();
 
   const load = useCallback(
@@ -115,6 +121,37 @@ export function TableBrowser({ table, role }: Props) {
   useEffect(() => {
     load(offset);
   }, [load, offset]);
+
+  useEffect(() => {
+    if (!live) {
+      setLiveState("off");
+      return;
+    }
+
+    const source = new EventSource(
+      `/api/realtime?table=${encodeURIComponent(table)}`,
+    );
+    setLiveState("connecting");
+
+    source.addEventListener("jord.change", () => {
+      setLiveState("live");
+      load(offset);
+    });
+    source.onopen = () => setLiveState("live");
+    source.onerror = () => {
+      if (source.readyState === EventSource.CLOSED) {
+        setLive(false);
+        setLiveState("off");
+        setError("Live updates closed.");
+        return;
+      }
+      setLiveState("reconnecting");
+    };
+
+    return () => {
+      source.close();
+    };
+  }, [live, table, load, offset]);
 
   const pkName = columns.find((col) => col.pk)?.name ?? "id";
   const gridColumns = page?.columns ?? columns.map((col) => col.name);
@@ -204,9 +241,23 @@ export function TableBrowser({ table, role }: Props) {
               : "Read-only for this role."}
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/tables">All tables</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={live}
+              onCheckedChange={setLive}
+              aria-label="Live updates"
+              size="sm"
+            />
+            <span className="text-sm text-muted-foreground">Live</span>
+            <Badge variant="secondary" className="font-mono text-[10px] uppercase">
+              {liveState}
+            </Badge>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/tables">All tables</Link>
+          </Button>
+        </div>
       </div>
 
       {error ? (

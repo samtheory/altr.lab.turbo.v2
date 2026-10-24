@@ -81,6 +81,7 @@ export {
 } from "./jobs/index.js";
 export { createWriteQueue } from "./queue.js";
 export {
+  isRealtimeSubscribeTable,
   MAX_REALTIME_SUBSCRIBERS,
   RealtimeBus,
   REALTIME_V1_TABLE,
@@ -121,6 +122,7 @@ export async function startJordServer(
 
   const port = Number(env.PORT) || DEFAULT_PORT;
   const server = serve({ fetch: app.fetch, port });
+  app.injectWebSocket(server);
 
   const scheme = jord.dialect === "postgres" ? "postgres" : "file";
   console.log(

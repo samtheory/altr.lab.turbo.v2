@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth/session";
 import { canSubscribeRealtime } from "@/lib/auth/roles";
 import { getJordServerUrl } from "@/lib/jord-proxy";
+import { isRealtimeSubscribeTable } from "@/lib/realtime-table";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,6 +28,16 @@ export async function GET(request: Request) {
 
   const incoming = new URL(request.url);
   const table = incoming.searchParams.get("table") ?? "records";
+  if (!isRealtimeSubscribeTable(table)) {
+    return Response.json(
+      {
+        error: "invalid_table",
+        message:
+          'table must be "records" or a valid non-reserved user-table identifier',
+      },
+      { status: 400 },
+    );
+  }
   const id = incoming.searchParams.get("id");
   const qs = new URLSearchParams({ table });
   if (id) qs.set("id", id);

@@ -18,6 +18,7 @@ import {
   isJordColumnType,
   isValidSqlIdent,
 } from "@altr/jord";
+import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
@@ -69,7 +70,13 @@ import {
 } from "./blobs/index.js";
 import type { WriteQueue } from "./queue.js";
 import { registerVectorRoutes } from "./vectors/index.js";
-import { RealtimeBus, MAX_REALTIME_SUBSCRIBERS, REALTIME_V1_TABLE, type JordChangeDraft } from "./realtime/index.js";
+import {
+  isRealtimeSubscribeTable,
+  MAX_REALTIME_SUBSCRIBERS,
+  REALTIME_V1_TABLE,
+  RealtimeBus,
+  type JordChangeDraft,
+} from "./realtime/index.js";
 import {
   isBuiltinTriggerActionKind,
   parseActionsJson,
@@ -307,17 +314,18 @@ function schemaDdlStatus(error: string): 400 | 404 | 409 {
 
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
+  const { upgradeWebSocket, injectWebSocket } = createNodeWebSocket({ app });
   const requireAuth = createAuthMiddleware(deps.auth);
   const generatedApi =
     deps.generatedApi ?? createGeneratedApiRegistry(process.env);
   const logs = deps.logs ?? new LogRing();
   const realtime = deps.realtime ?? new RealtimeBus();
 
-  function publishRecordChange(draft: JordChangeDraft): void {
+  function publishChange(draft: JordChangeDraft): void {
     try {
       realtime.publish({
         type: "jord.change",
-        table: REALTIME_V1_TABLE,
+        table: draft.table ?? REALTIME_V1_TABLE,
         op: draft.op,
         id: draft.id,
         version: draft.version,
@@ -328,6 +336,9 @@ export function createJordApp(deps: JordAppDeps) {
       console.error("[@altr/jord-server] realtime publish failed", err);
     }
   }
+
+  /** @deprecated alias — records emit sites */
+  const publishRecordChange = publishChange;
 
   app.get("/health", (c) =>
     c.json({ ok: true as const, dialect: deps.jord.dialect }),
@@ -481,10 +492,11 @@ export function createJordApp(deps: JordAppDeps) {
       if (!body || body.values == null || typeof body.values !== "object") {
         throw new HTTPException(400, { message: "values object is required" });
       }
+      const values = body.values as Record<string, unknown>;
       const result = await deps.enqueueWrite(() =>
         deps.jord.insertTableRow({
           table: name,
-          values: body.values as Record<string, unknown>,
+          values,
         }),
       );
       if (!result.ok) {
@@ -493,6 +505,14 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
+      const info = await deps.jord.describeTable(name);
+      const pkCol = info?.columns.find((col) => col.pk)?.name ?? "id";
+      const pkRaw = values[pkCol];
+      publishChange({
+        table: name,
+        op: "insert",
+        id: pkRaw == null ? "" : String(pkRaw),
+      });
       return c.json({ ok: true as const }, 201);
     },
   );
@@ -522,6 +542,7 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
+      publishChange({ table: name, op: "update", id: pk });
       return c.json({ ok: true as const });
     },
   );
@@ -541,6 +562,7 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
+      publishChange({ table: name, op: "delete", id: pk });
       return c.json({ ok: true as const });
     },
   );
@@ -940,21 +962,24 @@ export function createJordApp(deps: JordAppDeps) {
     requireSubscribeRealtime(),
     async (c) => {
       const table = c.req.query("table") ?? REALTIME_V1_TABLE;
-      if (table !== REALTIME_V1_TABLE) {
+      if (!isRealtimeSubscribeTable(table)) {
         throw new HTTPException(400, {
-          message: `table must be "${REALTIME_V1_TABLE}"`,
+          message:
+            'table must be "records" or a valid non-reserved user-table identifier',
         });
       }
       const idFilter = c.req.query("id")?.trim() || null;
-      const decision = await evaluatePolicies({
-        jord: deps.jord,
-        tableName: REALTIME_V1_TABLE,
-        operation: "select",
-        role: c.get("jordRole"),
-        disabled: policiesOff,
-      });
-      if (!decision.allowed) {
-        return c.json(policyDeniedBody(decision.policy, "select"), 403);
+      if (table === REALTIME_V1_TABLE) {
+        const decision = await evaluatePolicies({
+          jord: deps.jord,
+          tableName: REALTIME_V1_TABLE,
+          operation: "select",
+          role: c.get("jordRole"),
+          disabled: policiesOff,
+        });
+        if (!decision.allowed) {
+          return c.json(policyDeniedBody(decision.policy, "select"), 403);
+        }
       }
       if (realtime.size >= MAX_REALTIME_SUBSCRIBERS) {
         return c.json(
@@ -967,13 +992,15 @@ export function createJordApp(deps: JordAppDeps) {
       }
 
       return streamSSE(c, async (stream) => {
-        const unsubscribe = realtime.trySubscribe((event) => {
-          if (idFilter && event.id !== idFilter) return;
-          void stream.writeSSE({
-            event: "jord.change",
-            data: JSON.stringify(event),
-          });
-        });
+        const unsubscribe = realtime.trySubscribeFiltered(
+          { table, id: idFilter },
+          (event) => {
+            void stream.writeSSE({
+              event: "jord.change",
+              data: JSON.stringify(event),
+            });
+          },
+        );
         if (!unsubscribe) return;
 
         const timer = setInterval(() => {
@@ -990,6 +1017,89 @@ export function createJordApp(deps: JordAppDeps) {
         }
       });
     },
+  );
+
+  protectedRoutes.get(
+    "/realtime/ws",
+    requireSubscribeRealtime(),
+    async (c, next) => {
+      const table = c.req.query("table") ?? REALTIME_V1_TABLE;
+      if (!isRealtimeSubscribeTable(table)) {
+        throw new HTTPException(400, {
+          message:
+            'table must be "records" or a valid non-reserved user-table identifier',
+        });
+      }
+      if (table === REALTIME_V1_TABLE) {
+        const decision = await evaluatePolicies({
+          jord: deps.jord,
+          tableName: REALTIME_V1_TABLE,
+          operation: "select",
+          role: c.get("jordRole"),
+          disabled: policiesOff,
+        });
+        if (!decision.allowed) {
+          return c.json(policyDeniedBody(decision.policy, "select"), 403);
+        }
+      }
+      if (realtime.size >= MAX_REALTIME_SUBSCRIBERS) {
+        return c.json(
+          {
+            error: "realtime_full",
+            message: "too many realtime subscribers",
+          },
+          503,
+        );
+      }
+      await next();
+    },
+    upgradeWebSocket((c) => {
+      const table =
+        (c.req.query("table") as string | undefined) ?? REALTIME_V1_TABLE;
+      const idFilter = c.req.query("id")?.trim() || null;
+      let unsubscribe: (() => void) | null = null;
+      let pingTimer: ReturnType<typeof setInterval> | null = null;
+
+      return {
+        onOpen(_evt, ws) {
+          unsubscribe = realtime.trySubscribeFiltered(
+            { table, id: idFilter },
+            (event) => {
+              try {
+                ws.send(JSON.stringify(event));
+              } catch (err) {
+                console.error("[@altr/jord-server] ws send failed", err);
+              }
+            },
+          );
+          if (!unsubscribe) {
+            ws.close(1013, "realtime_full");
+            return;
+          }
+          pingTimer = setInterval(() => {
+            try {
+              ws.send(JSON.stringify({ type: "ping" }));
+            } catch {
+              /* closed */
+            }
+          }, 15_000);
+        },
+        onMessage(evt, ws) {
+          const raw = typeof evt.data === "string" ? evt.data : "";
+          if (raw.includes("pong")) return;
+          // v1: ignore other client messages
+          void ws;
+        },
+        onClose() {
+          if (pingTimer) clearInterval(pingTimer);
+          unsubscribe?.();
+        },
+        onError() {
+          if (pingTimer) clearInterval(pingTimer);
+          unsubscribe?.();
+        },
+      };
+    }),
   );
 
   protectedRoutes.route("/records", recordsRoutes);
@@ -1859,7 +1969,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   app.route("/", protectedRoutes);
 
-  return app;
+  return Object.assign(app, { injectWebSocket });
 }
 
 export type JordApp = ReturnType<typeof createJordApp>;

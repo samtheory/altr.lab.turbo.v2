@@ -1,19 +1,19 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0017 closed; next is S0018; last numbered sprint is S0020"
+description: "Jord-S0001–S0018 closed; next is S0019; last numbered sprint is S0020"
 created: 2026-10-18
 updated: 2026-10-24
 tags:
   - plan
   - jord
   - Jord-S0001
-  - Jord-S0017
+  - Jord-S0018
   - readme
 ---
 
 # plan / Jord
 
-> **Closed through:** [[Jord-S0017/README]] (Postgres RLS) · **Next:** Jord-S0018 on [[00-remaining-backlog]] · **Last numbered sprint:** Jord-S0020 · Review: [[../../report/Jord-implemented-review]]
+> **Closed through:** [[Jord-S0018/README]] (realtime WS + multi-table) · **Next:** Jord-S0019 on [[00-remaining-backlog]] · **Last numbered sprint:** Jord-S0020 · Review: [[../../report/Jord-implemented-review]]
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
@@ -34,7 +34,8 @@ tags:
 | [[Jord-S0015/README]] | User-table row writes | **done** (2026-10-24) |
 | [[Jord-S0016/README]] | Schema DROP / RENAME / type change | **done** (2026-10-24) |
 | [[Jord-S0017/README]] | Native Postgres RLS from Jord policies | **done** (2026-10-24) |
+| [[Jord-S0018/README]] | Realtime WebSockets + multi-table fanout | **done** (2026-10-24) |
 
-**Next:** Jord-S0018 (realtime WebSockets / multi-table fanout) from [[00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. Product fork: Artemis.
+**Next:** Jord-S0019 (hosted `libsql://`) from [[00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. Product fork: Artemis.
 
 Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]
