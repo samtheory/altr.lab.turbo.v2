@@ -19,7 +19,7 @@ When something ships, **edit the category** (or add a note inside that category)
 
 | Open this | When you need |
 |-----------|----------------|
-| [[overview/README]] | Packages, boot, request path, invariants |
+| [[overview/README]] | Packages, boot, request path, invariants, **CI** (`.github/workflows/jord.yml`) |
 | [[dialects/README]] | `file:` / `libsql://` / `postgres://`, WAL, health |
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
 | [[schema/README]] | Introspect, CREATE, ADD, DROP, RENAME, type change |
