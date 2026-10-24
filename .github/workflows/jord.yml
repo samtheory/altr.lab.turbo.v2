@@ -1,0 +1,85 @@
+# Jord packages: typecheck + tests (file libSQL always; Postgres opt-in).
+# Required branch-protection check target: job name `jord` (exact GitHub
+# check string is a manual admin step after the first Actions run).
+name: jord
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jord-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jord:
+    name: jord
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck @altr/jord
+        run: pnpm --filter @altr/jord typecheck
+
+      - name: Test @altr/jord
+        run: pnpm --filter @altr/jord test
+
+      - name: Typecheck @altr/jord-server
+        run: pnpm --filter @altr/jord-server typecheck
+
+      - name: Test @altr/jord-server
+        run: pnpm --filter @altr/jord-server test
+
+      - name: Typecheck @altr/jord-studio
+        run: pnpm --filter @altr/jord-studio typecheck
+
+  # secrets cannot be used in a job-level if. Bind into env; live steps run
+  # only when the secret is set. A green jord-postgres with skipped steps does
+  # not prove Postgres was tested.
+  jord-postgres:
+    name: jord-postgres
+    runs-on: ubuntu-latest
+    env:
+      JORD_TEST_POSTGRES_URL: ${{ secrets.JORD_TEST_POSTGRES_URL }}
+    steps:
+      - name: Checkout
+        if: env.JORD_TEST_POSTGRES_URL != ''
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        if: env.JORD_TEST_POSTGRES_URL != ''
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - name: Setup Node
+        if: env.JORD_TEST_POSTGRES_URL != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        if: env.JORD_TEST_POSTGRES_URL != ''
+        run: pnpm install --frozen-lockfile
+
+      - name: Test @altr/jord (Postgres live)
+        if: env.JORD_TEST_POSTGRES_URL != ''
+        run: pnpm --filter @altr/jord test
