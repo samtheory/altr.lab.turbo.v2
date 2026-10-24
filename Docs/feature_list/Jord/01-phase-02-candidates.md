@@ -32,7 +32,7 @@ Architecture: [[02-architecture]]. Studio: [[03-jord-studio]]. Shipped: [[04-pha
 |-----|-----|
 | Remote blob store / multipart / S3 | [[../plan/Jord/phase-02/Jord-S0025/README\|Jord-S0025]] |
 | True CDC / PG LISTEN / resume | [[../plan/Jord/phase-02/Jord-S0023/README\|Jord-S0023]] |
-| Studio URL editor · migrate wizard | [[../plan/Jord/phase-02/Jord-S0024/README\|Jord-S0024]] |
+| Migrate wizard. Connection URL editor is **cut** | [[../plan/Jord/phase-02/Jord-S0024/README\|Jord-S0024]] |
 | Non-`records` RLS / owner policies | [[../plan/Jord/phase-02/Jord-S0021/README\|Jord-S0021]] Part C |
 | CI for Jord packages | [[../plan/Jord/phase-02/Jord-S0027/README\|Jord-S0027]] |
 

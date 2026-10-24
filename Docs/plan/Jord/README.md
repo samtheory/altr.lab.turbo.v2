@@ -22,7 +22,7 @@ Intent: [[../../feature_list/Jord/README]] · Capabilities: [[../../feature_list
 | Phase | Folder | Status | Entry |
 |-------|--------|--------|-------|
 | **01** | [[phase-01/README]] | **Closed** — Jord-S0001 … Jord-S0020 | Lab data plane + Studio through hard vectors |
-| **02** | [[phase-02/README]] | **Open** — S0021–S0027 planned; next = S0021 Part A | Features: [[../../feature_list/Jord/03-phase-02-features]] |
+| **02** | [[phase-02/README]] | **Open** — hardening addendum awaiting approval; first code = S0027 then S0021-A | Features: [[../../feature_list/Jord/03-phase-02-features]] |
 
 ```mermaid
 flowchart LR

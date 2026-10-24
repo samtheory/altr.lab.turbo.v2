@@ -1,6 +1,6 @@
 ---
 title: "Jord-S0023 — Outbox CDC + realtime upgrade"
-description: "Transactional jord_changes; PG LISTEN; resume by seq; policy-filtered fanout"
+description: "Tracked tables, commit watermark, notify-by-seq, 410 on expired since, single emit path"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -14,52 +14,51 @@ tags:
 
 # Jord-S0023 — Outbox CDC + realtime upgrade
 
-> Who: **mimir**. **Status: planned** (blocked on S0021; prefers S0022 for table-write coverage). Feature F5. Prior: [[../Jord-S0022/README]]. Next: [[../Jord-S0024/README]].
+> Who: **mimir**. **Status: planned.** **Execution #8.** Blocked by [[../Jord-S0022/README]]. Next: [[../Jord-S0029/README]].
 
 **Sprint id:** `Jord-S0023`  
-**Hats:** **sindri** · **saga** · **heimdall** · **apollo** · **docs_man**
+**Hats:** **sindri** · **saga** · **heimdall** · **docs_man**
 
 ## Goal
 
-Durable change log written in the same transaction as data; realtime resumes with `?since=seq`; Postgres also captures external writers.
+One transactional change log. Clients resume without skipping rows. The phase-01 in-process producer is **replaced** by the outbox fanout. The event name stays `jord.change`.
 
 ## In scope
 
-- `jord_changes(seq, table_name, op, pk, old, new, actor, ts)` — transactional outbox (not SQLite update hooks)
-- Postgres: triggers → `jord_changes` + `pg_notify`; dedicated LISTEN connection with reconnect/backoff
-- libSQL: API-path writes only — document the limit in UI + docs
-- Fanout reads `jord_changes`; `?since=<seq>`; retention prune job
-- Realtime respects S0021 policies (filter per principal)
-- Optional second half: ephemeral broadcast/presence (in-memory, single-node, non-durable) — mark clearly
+- `jord_changes(seq, table_name, op, pk, old, new, actor, ts)` inserted **in the same transaction** as the data change
+- **`jord_tracked_tables`** — capture is **opt-in per table**. Install triggers when a table is created or marked tracked, including tables the S0024 wizard creates on the target
+- Do **not** use SQLite update hooks
+- **Replace** the phase-01 in-process producer. One path only (outbox → fanout). Keep the client event name `jord.change` so Studio subscribers stay valid. Do not emit on both paths
+- Postgres external writers: triggers insert `jord_changes` and `pg_notify`. **Payload is the seq only** (8 KB notify limit). The LISTEN loop reads the row by seq. Dedicated connection, reconnect, backoff
+- **Resume watermark**
+  - **libSQL:** the single write queue already orders commits. The API path cannot commit a higher seq first. The reader watermark is `max(seq)` after the queue finishes the transaction. There is no `xmin`
+  - **Postgres:** commits can reorder. The reader returns only rows with `seq` at or below the watermark (no older seq still in flight). API writers also take an advisory transaction lock. External trigger writers rely on the watermark, not the lock
+- Test that **reproduces the race**: higher seq commits first; a resume must not skip the lower seq (withheld until the watermark advances)
+- Retention default: **7 days and 100_000 rows**, both configurable (`JORD_CHANGES_RETENTION_DAYS`, `JORD_CHANGES_RETENTION_ROWS`). Prune job deletes past either cap
+- Indexes: `jord_changes(seq)` and `jord_changes(table_name, seq)`
+- `?since=` older than the retained range → **410 Gone** with a resync hint (not an empty 200)
+- Policy filter **at delivery**, using the subscriber's policies on the **new** row (and the **old** row for deletes)
+- Large BLOB / bytea values are **omitted or replaced with a reference**, not inlined
+- Document: **raw SQL from the Studio editor on libSQL is not captured**
+- Optional: ephemeral broadcast/presence (in-memory, single-node, non-durable)
 
 ## Out of scope
 
-Claiming Turso/libSQL captures external writers · multi-node presence · Redis
-
-## File-level change list (expected)
-
-| Area | Paths |
-|------|-------|
-| Server | write path outbox insert; realtime resume; LISTEN supervisor; prune job |
-| Engine | dialect-specific trigger DDL helpers if needed |
-| Studio | document libSQL capture limit; optional channel UI if presence ships |
-| Docs | `tech_space/jord/realtime` (+ `jobs`, `writes`) |
+Turso external-writer capture · dual emit · multi-node presence
 
 ## Schema
 
-`jord_changes` as above. Retention via job (reuse `jord_jobs`).
-
-## HTTP / realtime
-
-Existing `/realtime` + `/realtime/ws` gain `since` resume semantics; payload remains policy-filtered.
+`jord_changes`, `jord_tracked_tables`. Prune via `jord_jobs`.
 
 ## Tests required
 
-Same-tx outbox with insert/update/delete; resume from seq; policy filter; PG LISTEN path when URL set; document libSQL limit assertion in docs/tests comments.
+Same-tx outbox; watermark race on Postgres; 410 when `since` is pruned; notify payload is seq-only; policy filter on new vs old; BLOB omitted; file libSQL API-path test; no second emit path.
 
 ## Definition of Done
 
-- [ ] No reliance on unsupported SQLite update hooks
-- [ ] PG external writer captured in test
-- [ ] Retention job exists
+- [ ] 410 + resync hint for expired `since`
+- [ ] In-process producer replaced; event name `jord.change` unchanged; no second path
+- [ ] Retention defaults (7 days and 100_000 rows) and both indexes exist
+- [ ] libSQL test shows queue order; Postgres test shows the watermark race does not skip
+- [ ] libSQL raw-SQL gap documented in `tech_space/jord/realtime` and Studio
 - [ ] Category `realtime` updated

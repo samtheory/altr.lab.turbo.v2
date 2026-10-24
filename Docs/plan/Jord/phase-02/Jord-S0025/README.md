@@ -1,6 +1,6 @@
 ---
 title: "Jord-S0025 — Storage v2 (S3 / R2 / MinIO)"
-description: "JordStoragePort; Local + S3 adapters; presign; multipart; principal bucket policies"
+description: "Sign-time policy, pending/finalize GC, HMAC local URLs, local-to-S3 copy plan"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -14,40 +14,33 @@ tags:
 
 # Jord-S0025 — Storage v2
 
-> Who: **mimir**. **Status: planned** (after S0021 for principal policies). Feature F7. Prior: [[../Jord-S0024/README]]. Next: [[../Jord-S0026/README]].
+> Who: **mimir**. **Status: planned.** **Execution #11.** Blocked by [[../Jord-S0024/README]]. Next in queue docs: [[../Jord-S0026/README]] (ADR only; no product dependency).
 
 **Sprint id:** `Jord-S0025`  
-**Hats:** **sindri** · **heimdall** · **apollo** · **docs_man**
+**Hats:** **sindri** · **heimdall** · **docs_man**
 
 ## Goal
 
-Keep local blobs; add S3-compatible remote storage with presigned URLs and multipart, policies tied to principals.
+Same HTTP shape for local and S3. Policy is checked when the URL is signed, not only when it is later fetched.
 
 ## In scope
 
-- `JordStoragePort`; keep `LocalStorageAdapter`; add `S3StorageAdapter` via `@aws-sdk/client-s3` (S3 / R2 / MinIO)
-- Presigned upload/download; multipart; configurable size limits
-- Bucket policies tied to S0021 principals
+- `JordStoragePort`; keep `LocalStorageAdapter`; add `S3StorageAdapter` (`@aws-sdk/client-s3` — S3, R2, MinIO)
+- **Policy check at sign time.** Short TTLs (default 15m, cap 1h)
+- Lifecycle: object row is **`pending`**, client uploads, **`finalize`** promotes it. A GC job deletes stale pending rows and orphaned bytes
+- **Local adapter issues HMAC-signed URLs** so clients use the same presign API as S3
+- Multipart; configurable size limits
 - Metadata stays in `jord_blobs`
+- **Move plan (this sprint writes the steps and a dry-run command; switch is explicit):** copy local bytes to the bucket, verify checksums, then flip the adapter. Do not delete local bytes in the same step as the flip
 
 ## Out of scope
 
-Hosted embed API · blob CDC beyond existing change paths · new native deps
-
-## File-level change list (expected)
-
-| Area | Paths |
-|------|-------|
-| Engine/server | storage port + adapters; presign routes |
-| Studio | storage settings (endpoint/bucket via server, no secret echo) |
-| Docs | `tech_space/jord/blobs` |
-
-## Tests required
-
-Local still default; S3 adapter unit with mocked client; policy deny; size limit; no secrets in health/Studio JSON.
+A hosted embed API · new native deps · automatic cutover without an operator flag
 
 ## Definition of Done
 
-- [ ] Local path unchanged for default `file:` labs
-- [ ] `@aws-sdk/client-s3` only (no node-gyp)
-- [ ] Category `blobs` updated
+- [ ] Sign denied when policy denies, even if the object exists
+- [ ] GC removes pending rows past TTL and unreferenced bytes
+- [ ] Local HMAC URL and S3 presign share one client shape
+- [ ] Copy/verify plan documented in `tech_space/jord/blobs`; local remains the default
+- [ ] No secrets in Studio JSON

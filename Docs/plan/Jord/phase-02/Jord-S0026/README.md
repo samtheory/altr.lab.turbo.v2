@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0026 — Functions v2 (plan only)
 
-> Who: **mimir**. **Status: planned — ADR only. Do not implement without explicit approval.** Feature F8. Prior: [[../Jord-S0025/README]].
+> Who: **mimir**. **Status: planned — ADR only. Do not implement without explicit approval.** **Execution #12.** **No product blocker** — may be written any time; queue position is documentation order only. No product code in this card.
 
 **Sprint id:** `Jord-S0026`  
 **Hats:** **sindri** · **heimdall** · **docs_man**
@@ -29,7 +29,7 @@ Choose a safe execution model for user TypeScript handlers. Write the decision; 
 |--------|-------|
 | (a) Registered TS handlers from a directory | Simple; weak isolation |
 | (b) `worker_threads` + timeout + restricted context | **Default recommendation** |
-| (c) `isolated-vm` | Reject for native/node-gyp build cost |
+| (c) `isolated-vm` | **Rejected.** Native/node-gyp build. Not a candidate |
 
 ## Deliverable
 

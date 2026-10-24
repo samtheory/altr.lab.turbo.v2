@@ -1,6 +1,6 @@
 ---
 title: "Jord — phase-02 features (to implement)"
-description: "Ordered phase-02 feature list with acceptance criteria; source gap analysis from Jord-next-phase2-prompt"
+description: "Phase-02 features after the hardening addendum: CI first, principal model, then public API"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -12,112 +12,120 @@ tags:
 
 # Jord — phase-02 features
 
-> **What to build next.** Gap analysis source: [[../../report/Jord-next-phase2-prompt]]. Shipped baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]].
+> **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Review brief: [[../../report/Jord-phase-02-plan-review]].
 
-**Process lock:** roadmap the whole phase once (this note + sprint cards). Implement **one session-sized chunk at a time**, stop for review. Do not implement the whole phase in one run.
+**Process lock:** plan is amended. Implement **one stop at a time**. Do not start code until this addendum is approved. First code is **S0027**, then **S0021 Part A**.
 
-## Planning corrections vs the review prompt
+## Execution order
 
-| Prompt said | Lab truth |
-|-------------|-----------|
-| Cards under `plan/Jord/phase-01/Jord-S0021…` | **Wrong.** Phase-01 is closed archive. Cards live under [[../../plan/Jord/phase-02/README]] |
-| As-built as `tech_space/jord/20-…md` | Update the matching **category** under [[../../tech_space/jord/README]] |
-| Bun | **Node ≥ 20** + pnpm + Turbo only |
+| Order | Id | Feature |
+|-------|-----|---------|
+| 1 | S0027 | F9 CI |
+| 2 | S0021-A | F1 Migrations |
+| 3 | S0021-B | F2 Principals |
+| 4 | S0021 ADR | Threat model (doc; before C) |
+| 5 | S0021-C | F3 Policies |
+| 6 | S0028 | F10 HTTP hardening |
+| 7 | S0022 | F4 Table API |
+| 8 | S0023 | F5 CDC |
+| 9 | S0029 | F11 Client SDK |
+| 10 | S0024 | F6 Studio tools |
+| 11 | S0025 | F7 Storage |
+| 12 | S0026 | F8 Functions ADR only |
 
-## Ordered features
+Sprint **ids are stable**. Execution order is not numeric order.
 
-### F1 — Migration foundation
-
-| | |
-|--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0021/README\|Jord-S0021]] Part A |
-| **Why** | Ad-hoc `CREATE TABLE IF NOT EXISTS` cannot evolve schema safely across dialects |
-| **What** | `jord_migrations` + ordered idempotent runner + baseline that adopts existing tables |
-| **Acceptance** | Fresh DB and existing phase-01 DB both reach the same schema; re-run is a no-op; file libSQL + opt-in Postgres covered |
-
-### F2 — Principal auth (users / sessions / JWT)
-
-| | |
-|--|--|
-| **Sprint** | Jord-S0021 Part B |
-| **Why** | Shared-secret roles (`admin` / `editor` / `readonly`) are enough for Studio ops, not for end-user apps |
-| **What** | `jord_users`, `jord_sessions`; scrypt passwords; HS256 access JWT (15m); opaque hashed refresh with rotation + family revoke; routes signup/signin/refresh/logout/me; rate limits; roles `anon` / `authenticated` / keep Studio roles; legacy secret → `service_role` |
-| **Acceptance** | Timing-safe verify; refresh reuse kills family; Studio shared-secret still works; no OAuth / magic links |
-
-### F3 — Unified policy model (owner + claims)
+## F1 — Migration foundation (`jord-s0021-a`)
 
 | | |
 |--|--|
-| **Sprint** | Jord-S0021 Part C |
-| **Why** | Policies today are middleware rules; row ownership (`auth.uid()`) is missing; Postgres RLS is incomplete defense-in-depth |
-| **What** | AST: `owner_eq(column)`, `claim_eq`; inject parameterized `WHERE` on select/update/delete; insert check + force owner column; PG `set_config('jord.uid', …, true)` **inside transactions only**; identical results on libSQL vs Postgres |
-| **Acceptance** | Same policy fixture → same allow/deny on both dialects; pooled PG never leaks uid across requests |
+| **Why** | Ad-hoc `CREATE TABLE IF NOT EXISTS` cannot evolve schema safely |
+| **What** | Forward-only `jord_migrations`; baseline adopt; checksum = SHA-256 hex lowercase of LF-normalized SQL bytes; mismatch **refuses boot**; baseline body frozen. Postgres **advisory lock** on concurrent boot. Fixture from commit `eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c` via `git worktree add ../jord-p01` that commit, `pnpm install --frozen-lockfile`, dump script created in S0021-A, header `-- source: eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c`, copy back, `git worktree remove`. Re-run dump diffs empty |
+| **Acceptance** | Fresh DB and the fixture converge; seed row survives; stored checksum equals the file; re-run is a no-op; bad checksum does not boot; two PG boots do not double-apply |
 
-### F4 — Table API (PostgREST-lite) + OpenAPI
-
-| | |
-|--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0022/README\|Jord-S0022]] |
-| **Why** | Generated `/records` is not a portable table CRUD for app clients |
-| **What** | `/api/v1/:table` GET/POST/PATCH/DELETE; filter ops; `select`/`order`/`limit`/`offset`; Prefer count; identifier validation + bound params; optional OCC on `version`; OpenAPI from introspection; Studio docs + playground |
-| **Acceptance** | No embeds/joins; every route role+policy gated; openapi.json matches live schema |
-
-### F5 — Outbox CDC + realtime resume
+## F2 — Principals (`jord-s0021-b`)
 
 | | |
 |--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0023/README\|Jord-S0023]] |
-| **Why** | Write-path emit alone cannot resume; SQLite update hooks unsupported on `@libsql/client` |
-| **What** | Transactional `jord_changes` outbox; PG triggers + `LISTEN` for external writers; fanout `?since=seq`; retention job; policy-filtered events; optional ephemeral broadcast/presence (non-durable) |
-| **Acceptance** | libSQL documents API-path-only capture; PG captures external writers; clients resume by seq |
+| **Why** | Shared-secret roles are Studio ops, not end-user identity |
+| **What** | `Principal { kind: service \| user \| anon \| operator, uid?, role, claims }`. Operator = admin/editor/readonly HMAC tokens (**stay valid**). `JORD_LEGACY_SECRET_ROLE`: **default `admin` for the S0021-B transition**, then **flip default to `service`** before the card closes; update curl / README / `.env.example` / `authHeaders("raw")` in the same sprint. User = JWT. Anon = long-lived JWT minted from `JORD_JWT_SECRET`. Async scrypt + maxmem; no email enumeration; `MailerPort` console adapter; JWT HS256 only, iss/aud/sub/role/iat/exp, kid rotation, 60s skew. SSE/WS close at exp |
+| **Acceptance** | Route-group matrix documented and tested; HMAC stays operator; tests for both switch modes; caller list on the S0021-B card; docs/helpers updated before flip; refresh reuse kills family; enumeration tests; console mail only |
 
-### F6 — Studio power tools
-
-| | |
-|--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0024/README\|Jord-S0024]] |
-| **Why** | Operators still need SQL, connection editing, migrate wizards, auth admin, durable logs |
-| **What** | Admin SQL editor (timeout, row cap, history); server-side URL editor (never echo); file→Turso/Postgres migrate wizard; auth admin; `jord_logs` + retention |
-| **Acceptance** | Apolyx-first; browser never sees tokens/URL secrets; migrate is resumable and never deletes source |
-
-### F7 — Storage v2 (S3 / R2 / MinIO)
+## F3 — Policies (`jord-s0021-c`)
 
 | | |
 |--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0025/README\|Jord-S0025]] |
-| **Why** | Local `data/blobs/` does not scale |
-| **What** | `JordStoragePort`; keep Local; add S3 adapter (`@aws-sdk/client-s3`); presign + multipart; size limits; bucket policies on F2 principals; metadata stays in `jord_blobs` |
-| **Acceptance** | Local still default; no secrets in Studio JSON |
+| **Why** | Middleware rules do not express ownership, and a side route can bypass them |
+| **What** | Deny overrides allow. No policy → default-deny for anon and user. `rls_enabled` per table. UPDATE USING + WITH CHECK. Owner column immutable for non-service. Route inventory test. PG: **FORCE ROW LEVEL SECURITY** and non-owner role `jord_app`. Grants from `JORD_MIGRATE_URL`: create with `CREATEROLE`, or verify-only fallback (role exists, no `BYPASSRLS`, non-owner) then grants. Refuse boot if migrate and runtime URLs match (parsed host/port/db/user). Runtime stays **`DATABASE_URL`**. Startup refuses a Postgres role that owns tables or has `BYPASSRLS`. `file:` ignores the migrate URL. `SET LOCAL` in-transaction only. Shared dialect conformance suite. Threat model: [[../../plan/Jord/phase-02/Jord-S0021/ADR-threat-model]] |
+| **Acceptance** | Identical fixtures on libSQL and Postgres; pool uid-leak test; inventory test fails closed; migrate≠runtime URL test; CREATEROLE fallback verify path |
 
-### F8 — Functions v2 (plan only)
-
-| | |
-|--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0026/README\|Jord-S0026]] — **plan / ADR only** |
-| **Why** | Built-in function steps are not enough for user TS handlers |
-| **What** | Evaluate (a) directory-loaded handlers (b) `worker_threads` (c) `isolated-vm`; recommend (b); risk note; **do not implement without approval** |
-| **Acceptance** | Written recommendation + risks; no native `isolated-vm` pick |
-
-### F9 — CI for Jord packages
+## F4 — Table API (`Jord-S0022`)
 
 | | |
 |--|--|
-| **Sprint** | [[../../plan/Jord/phase-02/Jord-S0027/README\|Jord-S0027]] |
-| **Why** | Typecheck + tests are not gated in CI today |
-| **What** | GitHub Action: typecheck + unit/integration for `@altr/jord`, `@altr/jord-server`, `@altr/jord-studio`; Postgres opt-in stays manual/secret |
-| **Acceptance** | PR fails on type/test break; no secrets in logs |
+| **What** | `/api/v1/:table`. Coerce query values by column type. libSQL `ilike` = `lower()`. Caps: limit default 100 / max 1000, `in` max 100, body 1 MiB. PATCH/DELETE without filter rejected; `?all=true` **service only**. Composite PKs supported; no stable key → no PATCH/DELETE. `count=planned` default-ish; `count=exact` documented as costly. `Prefer: return=representation` via RETURNING |
+| **Acceptance** | Caps, all=true, coerce, RETURNING, and ilike documented and tested. Test-folder fetch helper does not import `@altr/jord` (S0029 promotes it). No embeds |
 
-## Invariants (every feature)
+## F5 — CDC (`Jord-S0023`)
+
+| | |
+|--|--|
+| **What** | Opt-in `jord_tracked_tables`. Same-transaction outbox. Watermark: libSQL relies on the write queue; Postgres withholds seqs that are ahead of an in-flight lower seq. Indexes on `seq` and `(table_name, seq)`. Retention default 7 days and 100_000 rows. `pg_notify` carries **seq only**. `since` past retention → **410**. Delivery-time policy filter. **Replace** the in-process producer; keep the event name `jord.change`. BLOBs omitted or referenced. libSQL Studio raw SQL is not captured |
+| **Acceptance** | Postgres race test does not skip; libSQL queue-order test; 410 test; one producer path |
+
+## F6 — Studio tools (`Jord-S0024`)
+
+| | |
+|--|--|
+| **What** | SQL editor: reads off the write queue; read-only via `PRAGMA query_only` or `BEGIN READ ONLY` + `statement_timeout`; writes queued; audit log. **No connection URL editor** — read-only labels + env restart docs. Wizard type map TEXT/INTEGER/REAL/BLOB → text/bigint/double/bytea; skip `jord_vix_*` and rebuild; resumable; never delete source. Logs batched **outside** the hot queue, redacted, no read-loop |
+| **Acceptance** | Engine-level read-only test; no secret URL field; type-map test; log redaction |
+
+## F7 — Storage (`Jord-S0025`)
+
+| | |
+|--|--|
+| **What** | S3 adapter. Policy at **sign time**, short TTL. pending → finalize → GC. Local HMAC-signed URLs match the S3 shape. Copy/verify/switch plan for existing local bytes (no silent delete) |
+| **Acceptance** | Denied principal cannot mint a URL; GC test; local and S3 share the client shape |
+
+## F8 — Functions v2 (`Jord-S0026`, ADR only)
+
+| | |
+|--|--|
+| **What** | Recommend `worker_threads`. Reject `isolated-vm`. No implementation without approval |
+| **Acceptance** | Written ADR only |
+
+## F9 — CI (`Jord-S0027`, runs first)
+
+| | |
+|--|--|
+| **What** | GitHub Action typecheck + tests for jord, jord-server, jord-studio. Postgres opt-in |
+| **Acceptance** | Workflow green on current tree before S0021-A starts |
+
+## F10 — HTTP hardening (`Jord-S0028`, before public data API)
+
+| | |
+|--|--|
+| **What** | CORS allow-list, data-route rate limits, body limit, shutdown drains the write queue, optional Idempotency-Key |
+| **Acceptance** | 413, CORS deny, drain test, idempotency replay — all green before S0022 |
+
+## F11 — Client SDK (`Jord-S0029`, after CDC)
+
+| | |
+|--|--|
+| **What** | Private `@altr/jord-client` (fetch). Auto refresh, table API, realtime `since`. On 410, surface resync. **Must not depend on `@altr/jord`** |
+| **Acceptance** | Mock-fetch tests; CI includes the package; no engine dependency |
+
+## Invariants
 
 1. Studio / browser never import `@altr/jord`, open the DB, or see connection strings / tokens.
-2. libSQL hot writes → one in-process queue. Postgres: `JORD_PG_WRITE_CONCURRENCY` (default **1**).
-3. `records` OCC → **409**. Never silent overwrite.
+2. libSQL hot writes → one in-process queue. Postgres: `JORD_PG_WRITE_CONCURRENCY` default 1. SQL **reads** use a different connection (F6).
+3. `records` OCC → 409.
 4. WAL / checkpoints only for `file:`.
 5. `@altr/base` stays a leaf. Studio = `@altr/apolyx` only.
 6. Artemis domain tables never in `records.body`.
 7. No new node-gyp / native deps.
-8. Every new route: role check + policy check + tests (file libSQL always; Postgres via `JORD_TEST_POSTGRES_URL`).
+8. Every new route: declared access rule + tests (file libSQL always; Postgres via `JORD_TEST_POSTGRES_URL`).
 
-## Explicitly out of phase-02 (unless re-opened)
+## Out of phase-02
 
-OAuth / magic links · embeds/joins in table API · hosted embed API · Redis cache · Artemis trading domain · Bun · `isolated-vm` implementation
+OAuth / magic links · real mail provider · embeds/joins · writable DB URL in Studio · hosted embed API · Redis · Artemis trading tables · Bun · `isolated-vm` · dual realtime emit

@@ -40,9 +40,9 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 | Phase | Plans | As-built | Status |
 |-------|-------|----------|--------|
 | **01** | [[../../../plan/Jord/phase-01/README]] | [[../../../tech_space/jord/README]] (categories, not a phase folder) | **Closed** (S0001–S0020) |
-| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — features [[../../../feature_list/Jord/03-phase-02-features]] · next [[../../../plan/Jord/phase-02/Jord-S0021/README]] |
+| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — features [[../../../feature_list/Jord/03-phase-02-features]] · first code [[../../../plan/Jord/phase-02/Jord-S0027/README]] then S0021-A |
 
-Do **not** put new sprint cards under phase-01. Phase-02 owns S0021+. Implement **session-sized** chunks (S0021 = Parts A→B→C); stop for review.
+Do **not** put new sprint cards under phase-01. Phase-02 execution order is the numbered list on the phase-02 README (S0027, then S0021 A, B, ADR, C, then S0028, S0022, S0023, S0029, S0024, S0025, S0026). One stop, then review.
 
 ## Conductor rules
 

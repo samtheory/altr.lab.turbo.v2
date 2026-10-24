@@ -1,6 +1,6 @@
 ---
 title: "Jord-S0024 — Studio power tools"
-description: "SQL editor, connection URL editor, migrate wizard, auth admin, durable logs"
+description: "Engine-enforced SQL editor, no URL editor, type-mapped migrate wizard, batched redacted logs"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -13,47 +13,73 @@ tags:
 
 # Jord-S0024 — Studio power tools
 
-> Who: **mimir → apollo**. **Status: planned** (after S0021; migrate wizard benefits from S0023 optional). Feature F6. Prior: [[../Jord-S0023/README]]. Next: [[../Jord-S0025/README]].
+> Who: **mimir → apollo**. **Status: planned.** **Execution #10.** Blocked by [[../Jord-S0029/README]]. Next: [[../Jord-S0025/README]].
 
 **Sprint id:** `Jord-S0024`  
 **Hats:** **apollo** · **sindri** · **heimdall** · **docs_man**
 
 ## Goal
 
-Operator surfaces that were deferred in phase-01: SQL, connection editing, migrate wizard, auth admin, durable logs.
+Operator tools that do not weaken the secret-in-env invariant or the write queue.
 
-## In scope
+## SQL editor (admin operator only)
 
-- SQL editor (admin only): textarea or CodeMirror — **not Monaco** unless Apolyx already has an editor; statement timeout; row cap; read-only toggle; query history; execution time
-- Connection page: URL editor stored **server-side only**, never echoed
-- Migration wizard: file → Turso/Postgres; copy schema + batched data; verify counts; resumable; never delete source
-- Auth admin: list users, revoke sessions, disable user (needs S0021)
-- Log explorer: `jord_logs` table + retention (replace memory-only ring)
+- Textarea or CodeMirror. **Monaco is rejected** for this sprint (bundle size). A later card may adopt an Apolyx editor if one exists then
+- **Reads use a separate read connection and never enter the write queue.** libSQL cannot interrupt a running statement; a queued read would block writers until it finishes
+- Read-only is **engine-enforced**, not parsed:
+  - libSQL: `PRAGMA query_only=ON` on that dedicated connection
+  - Postgres: `BEGIN READ ONLY` plus `SET LOCAL statement_timeout`
+- Writes (when the read-only toggle is off) go **through the write queue**
+- Statement timeout, row cap, history, execution time
+- **Every statement is audit-logged**
+- Document: raw SQL **bypasses migrations** and, on libSQL, **bypasses the outbox**
+
+## Connection page — URL editor is cut
+
+The connection URL editor is **cut**, not deferred. Editing `DATABASE_URL` in Studio conflicts with secrets staying in process env.
+
+**Ship instead:** a read-only labels page (dialect, file vs hosted, vector backend) plus documented env vars and a restart step.
+
+A writable editor needs a new ADR. This sprint does not build one.
+
+## Migration wizard
+
+File → Turso or Postgres. Resumable. Verify row counts. **Never delete the source.** Postgres advisory lock around the copy.
+
+Type map:
+
+| SQLite | Postgres |
+|--------|----------|
+| TEXT | text |
+| INTEGER | bigint (ms timestamps stay bigint) |
+| REAL | double precision |
+| BLOB | bytea |
+
+Do **not** copy `jord_vix_*` shadow tables. Rebuild vector indexes on the target (S0020 rules).
+
+History stays the S0021 forward-only runner (checksum mismatch refuses boot; that behavior is Part A, not a second system).
+
+## Auth admin
+
+List users, revoke sessions, disable a user (needs S0021).
+
+## Logs
+
+- Persist to `jord_logs` with retention
+- **Buffer and batch** inserts **outside** the hot write queue
+- **Redact** `Authorization` and token-shaped strings
+- Reading logs must **not** write another log row (no loop)
 
 ## Out of scope
 
-Monaco unless already in kit · deleting source DB · exposing secrets to browser
-
-## File-level change list (expected)
-
-| Area | Paths |
-|------|-------|
-| Studio | `apps/jord-studio` — pages/panels above |
-| Server | SQL exec endpoint (admin); connection update; migrate job; auth admin routes; log persist |
-| Kit | Missing controls → `elements/ui-kit` first |
-| Docs | `tech_space/jord/studio` (+ `auth`, `jobs`, `dialects`) |
-
-## Schema
-
-`jord_logs(...)` + retention policy (exact columns chosen at implement; document in category).
-
-## Tests required
-
-Admin-only SQL gates; readonly mode; migrate dry-run/resume unit; auth admin revoke; logs retention job; no secret echo in Studio JSON fixtures.
+Writable connection URLs (cut) · Monaco (rejected) · deleting the source DB
 
 ## Definition of Done
 
-- [ ] Apolyx-first — no local Dialog/Select/Table forks
-- [ ] URL/token never returned to client
-- [ ] Migrate never deletes source
+- [ ] Read-only proven by engine pragma / `BEGIN READ ONLY`, including a statement the parser would miss
+- [ ] Reads do not take the write queue
+- [ ] No URL field that posts a connection string
+- [ ] Type-map test for the four SQLite affinities; `jord_vix_*` not copied
+- [ ] Log batch skips the hot queue; redaction test; log-read does not recurse
+- [ ] Apolyx-first
 - [ ] Category `studio` updated

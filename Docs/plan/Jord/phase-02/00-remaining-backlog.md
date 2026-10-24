@@ -14,8 +14,8 @@ tags:
 
 > Who: **mimir**. Numbered queue: [[README]]. Features: [[../../../feature_list/Jord/03-phase-02-features]]. Soft candidates: [[../../../feature_list/Jord/01-phase-02-candidates]]. Prompt: [[../../../report/Jord-next-phase2-prompt]].
 
-**Active / next:** [[Jord-S0021/README|Jord-S0021]] Part A (after planning approval).  
-**Parallel-ok:** [[Jord-S0027/README|Jord-S0027]] CI.
+**Next when approved:** [[Jord-S0027/README|Jord-S0027]] CI, then [[Jord-S0021/README|Jord-S0021]] Part A.  
+**New cards:** [[Jord-S0028/README|Jord-S0028]] hardening (before the table API) · [[Jord-S0029/README|Jord-S0029]] client (after CDC).
 
 ## Numbered (do not duplicate)
 

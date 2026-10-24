@@ -26,9 +26,10 @@ This prompt originally assumed cards under `plan/Jord/phase-01/` and sprint file
 | `Docs/plan/Jord/phase-01/Jord-S0021/…` | `Docs/plan/Jord/phase-02/Jord-S0021/…` |
 | `Docs/feature_list/Jord/03-next-phase.md` | `Docs/feature_list/Jord/03-phase-02-features.md` |
 | `tech_space` as `20-…md` sprint diaries | Update `Docs/tech_space/jord/<category>/README.md` |
-| CI “not a Jord card” | `Docs/plan/Jord/phase-02/Jord-S0027/` |
+| CI “not a Jord card” | `Docs/plan/Jord/phase-02/Jord-S0027/` runs first |
+| Connection URL editor in S0024 below | **Cut.** Read-only labels plus env restart |
 
-**Planning status:** feature list + S0021–S0027 cards are written. Await approval → implement S0021 Part A only.
+**Planning status:** superseded by `Docs/plan/Jord/phase-02/README.md` and `Docs/report/Jord-phase-02-plan-review.md`. Do not implement from this prompt's sprint order.
 
 # Output of the planning phase
 
@@ -97,8 +98,8 @@ Each card must contain: goal, in-scope, out-of-scope, file-level change list, sc
 
 ## S0024: Studio power tools
 
-- SQL editor (admin only). Use a plain textarea or CodeMirror, not Monaco, unless Apolyx already has an editor. Add statement timeout, row cap, a read-only mode toggle, and query history. Show execution time.
-- Connection page: URL editor. The URL is stored server-side, never echoed.
+- SQL editor (admin only). Textarea or CodeMirror. Monaco is rejected for this sprint. Statement timeout, row cap, read-only toggle, query history, execution time.
+- Connection page: URL editor is **cut**. Read-only labels plus env restart. Do not store a URL from Studio.
 - Migration wizard: file -> Turso/Postgres. Copy schema and data in batches, verify row counts, and make it resumable. Never delete the source.
 - Auth admin: list users, revoke sessions, disable a user.
 - Log explorer: persist logs to a `jord_logs` table with retention (replace the memory-only ring).
@@ -111,7 +112,7 @@ Each card must contain: goal, in-scope, out-of-scope, file-level change list, sc
 
 ## S0026 (deferred; plan only, do not implement without approval): Functions v2
 
-- Evaluate: (a) registered TypeScript handlers loaded from a directory, (b) `worker_threads` with a timeout and a restricted context, (c) `isolated-vm`. Recommend one, with the risk analysis. Default recommendation: (b). Do not pick (c) because of its native build.
+- Evaluate: (a) registered TypeScript handlers loaded from a directory, (b) `worker_threads` with a timeout and a restricted context, (c) `isolated-vm` (**rejected**, native build). Recommend (b). No implementation in this phase.
 
 ## S0027: CI for Jord packages
 

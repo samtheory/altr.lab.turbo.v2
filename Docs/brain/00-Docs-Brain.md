@@ -120,7 +120,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Data plane (**Jord**) | `elements/jord` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` (gitignored) | Manual: [[../tech_space/jord/README]] · Intent: [[../feature_list/Jord/README]] · Plans [[../plan/Jord/README]] · Review [[../report/Jord-implemented-review]] · Builder: [[../agents/mimir/00-index]] |
 | Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02** S0021–S0027 (**planned**; next = S0021 Part A).
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02** (**planned**, hardening addendum; first code = S0027 then S0021-A).
 
 Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane through phase-01. Intent [[../feature_list/Jord/README]] · Phase-02 features [[../feature_list/Jord/03-phase-02-features]] · Plans [[../plan/Jord/README]]. PocketBase stays optional.
 
@@ -133,7 +133,7 @@ Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane throug
 | `idea/` | Raw R&D before promotion | Catalog v2.3: [[../idea/2026-10-18-product-catalog]]. Apolyx · Jord · API client · Search · **Tia** ([[../idea/Tia (Map Engine)/README]], promoted). Sharpen: [[../idea/Tia (Map Engine)/2026-10-19-sharpen]] |
 | `feature_list/` | Intent / what to build | [[../feature_list/ui-kit/README]] · **Jord:** [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · phase-02 features [[../feature_list/Jord/03-phase-02-features]] · soft [[../feature_list/Jord/01-phase-02-candidates]] · **Tia:** [[../feature_list/tia/README]] |
 | `plan/` | Checkbox overlay + next steps | Jord: [[../plan/Jord/README]] · [[../plan/Jord/phase-01/README\|phase-01]] · [[../plan/Jord/phase-02/README\|phase-02]] (S0021–S0027) · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] |
-| `report/` | Audited complete vs remaining | [[../report/STATUS]] · **Review:** [[../report/Jord-implemented-review]] · **Handoff:** [[../report/Jord-technical-brief]] · **Phase-02 prompt:** [[../report/Jord-next-phase2-prompt]] |
+| `report/` | Audited complete vs remaining | [[../report/STATUS]] · **Shipped review:** [[../report/Jord-implemented-review]] · **Handoff:** [[../report/Jord-technical-brief]] · **Phase-02 plan review:** [[../report/Jord-phase-02-plan-review]] · **Phase-02 prompt:** [[../report/Jord-next-phase2-prompt]] |
 | `tech_space/` | Living system manuals by category | Jord: [[../tech_space/jord/README]] · Apolyx: [[../tech_space/ui-kit/10-s0005-product-gate]] · index [[../tech_space/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |

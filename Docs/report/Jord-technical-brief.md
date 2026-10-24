@@ -271,7 +271,7 @@ Carryovers inside closed sprints (still true in code):
 | From | Still missing |
 |------|----------------|
 | S0009 | Native SQL triggers on Postgres; column-level policies |
-| S0010 | Studio URL editor; file→Postgres migration wizard |
+| S0010 | Studio URL editor; file→Postgres migration wizard. **Phase-02 cuts the URL editor** (S0024). The wizard stays |
 | S0011 / S0018 | True SQLite update hooks; Postgres `LISTEN/NOTIFY` |
 | S0012 | OCC editor for arbitrary user tables |
 | S0013 | Remote object store; blob CDC |
@@ -333,6 +333,6 @@ The numbered Jord queue is empty on purpose. A useful plan names **one** promoti
 2. A stable public API for user tables (today's generated API is the `records` catalog).
 3. Durable logs, jobs, and realtime that survive another SQL writer (today they are in-process and write-path only).
 4. Object storage beyond one disk and 10 MiB.
-5. Hosting and migration UX (URL editor, file→Turso, file→Postgres) so the dialect port is operable.
+5. Hosting and migration UX (file→Turso, file→Postgres). The Studio URL editor is **cut** in phase-02 S0024; change `DATABASE_URL` in env and restart.
 
 Local-file ergonomics, the dialect port, OCC, and the Studio shell are already the parts to keep while those are designed.
