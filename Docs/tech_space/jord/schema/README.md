@@ -2,7 +2,7 @@
 title: "Jord — schema"
 description: "List and describe tables, CREATE TABLE, ADD COLUMN, and admin DROP / RENAME / type change"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
@@ -60,4 +60,4 @@ Jord creates `notes` with a generated `id` primary key plus `title TEXT`. Open i
 
 ## Not in Jord yet
 
-Arbitrary SQL, column-level policies, a migration history UI.
+Arbitrary SQL, column-level policies, a Studio migration-history UI. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].

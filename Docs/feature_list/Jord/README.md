@@ -2,7 +2,7 @@
 title: "feature_list/Jord — intent map"
 description: "Valid Jord intent: Slice 0, phase-01 capabilities, phase-02 features + soft candidates"
 created: 2026-10-18
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - feature
   - jord
@@ -25,7 +25,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 | [[04-phase-01-capabilities]] | What we have after phase-01 | **Authoritative shipped intent** |
 | [[02-architecture]] | Ports, dialects, concurrency, seams | Current (matches phase-01 code) |
 | [[03-jord-studio]] | Studio surfaces and build order | Phase-01 Studio **shipped** |
-| [[03-phase-02-features]] | **What to implement in phase-02** (acceptance criteria) | **Active** — hardening addendum; first code S0027 then S0021-A |
+| [[03-phase-02-features]] | **What to implement in phase-02** (acceptance criteria) | **Active** — S0027 and S0021-A in tree; next S0021-B |
 | [[01-phase-02-candidates]] | Soft leftovers not in the numbered queue | Conditional only |
 
 ## Truth map (phase-aware)
@@ -34,7 +34,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 |-------|------|-------|
 | Intent (this folder) | `feature_list/Jord/` | Living |
 | Shipped plans | [[../../plan/Jord/phase-01/README\|plan/Jord/phase-01]] | **phase-01 done** (S0001–S0020) |
-| Next plans | [[../../plan/Jord/phase-02/README\|plan/Jord/phase-02]] | **S0027 then S0021…S0029 planned** |
+| Next plans | [[../../plan/Jord/phase-02/README\|plan/Jord/phase-02]] | **S0027 and S0021-A in tree**; B…S0029 still planned |
 | As-built | [[../../tech_space/jord/README]] | Living categories |
 | Code | `elements/jord` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` | Source of truth |
 

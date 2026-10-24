@@ -2,7 +2,7 @@
 title: "Jord phase-02 plan — review brief"
 description: "Self-contained phase-02 plan + as-built context + pre-approval checks for an outside reviewer"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - report
   - jord
@@ -15,7 +15,7 @@ tags:
 
 > **Audience:** a model or human that has **not** seen this planning session or the repo.  
 > **As of:** 2026-10-24.  
-> **Status:** plan complete, **not implemented.** Awaiting human approval before any code (first code = S0027).  
+> **Status:** review snapshot from 2026-10-24. **Since then:** S0027 (CI workflow) and S0021-A (file libSQL migration runner) are in the tree. Postgres advisory-lock tests for A were not run. As-built: `Docs/tech_space/jord/overview/README.md`. The sections below are the pre-implementation review.  
 > **Truth order:** code > `Docs/tech_space/jord/<category>/` > this report > `Docs/plan/Jord/phase-02/` > `Docs/feature_list/Jord/`.  
 > **As-built baseline (phase-01):** `Docs/report/Jord-technical-brief.md` (S0001–S0020).  
 > **This file is the handoff.** Section 5 is the plan. Section 9 is the only execution order. Section 11 = locked decisions. Section 12 = mimir recommendations. Section 13 = pre-approval checks with recorded command output. Appendices do not override section 5.

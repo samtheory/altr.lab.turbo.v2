@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-02 — next Jord sprints"
 description: "Execution order after the hardening addendum: S0027 first, then S0021, S0028, S0022…"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -16,8 +16,8 @@ tags:
 
 | Item | Status |
 |------|--------|
-| Active sprint | **None** — S0021 resolutions R1–R4 **approved**; do not start S0027 until told to go |
-| First code when approved | [[Jord-S0027/README\|Jord-S0027]] CI, then [[Jord-S0021/01-migration\|S0021 Part A]] |
+| Active sprint | **S0021-A landed locally** (file libSQL). Next stop is [[Jord-S0021/02-auth\|S0021-B]] after review. Postgres advisory-lock tests skipped: `JORD_TEST_POSTGRES_URL` unset |
+| Done in tree | [[Jord-S0027/README\|S0027]] CI workflow · [[Jord-S0021/01-migration\|S0021 Part A]] migration runner |
 | Soft backlog | [[00-remaining-backlog]] |
 
 Ids are **not** execution order. S0027 runs first. S0028 and S0029 are new.
@@ -42,5 +42,5 @@ Ids are **not** execution order. S0027 runs first. S0028 and S0029 are new.
 ## Process
 
 1. One stop per session. Stop for review.
-2. Do not start S0027 or S0021 code until this addendum is approved.
+2. S0027 and S0021-A are in the tree. Do not start S0021-B until Part A is reviewed.
 3. Each card's PR updates its own `tech_space/jord/*` page. Verify reconciles links, ticks features, and refreshes STATUS. It writes no new content.

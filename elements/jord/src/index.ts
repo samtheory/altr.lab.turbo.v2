@@ -151,6 +151,7 @@ export {
   type RlsSessionContext,
 } from "./schema/ddl-rls.js";
 export {
+  JordMigrationChecksumError,
   JordSlice0UrlError,
   JordUnsupportedError,
   JordUrlError,

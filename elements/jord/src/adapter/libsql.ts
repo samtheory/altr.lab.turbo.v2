@@ -100,6 +100,7 @@ import { jordPolicies } from "../schema/policies.js";
 import { records, schema } from "../schema/records.js";
 import { jordTriggers } from "../schema/triggers.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
+import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
   fileUrlToFsPath,
   requireLibsqlAuthToken,
@@ -345,22 +346,31 @@ export class LibSqlAdapter implements JordDriverPort {
     if (url.startsWith("libsql:")) {
       const authToken = requireLibsqlAuthToken(url, options.authToken);
       const client = createClient({ url, authToken });
-      await ensureRecordsSchema(client);
-      const vectorBackend = await probeLibsqlVectorBackend(client);
-      return new LibSqlAdapter(client, "libsql", vectorBackend);
+      try {
+        await ensureRecordsSchema(client, migrationLockKey(url));
+        const vectorBackend = await probeLibsqlVectorBackend(client);
+        return new LibSqlAdapter(client, "libsql", vectorBackend);
+      } catch (err) {
+        client.close();
+        throw err;
+      }
     }
 
     const fsPath = fileUrlToFsPath(url);
     await mkdir(path.dirname(fsPath), { recursive: true });
 
     const client = createClient({ url });
-    for (const pragma of WAL_PRAGMAS) {
-      await client.execute(pragma);
+    try {
+      for (const pragma of WAL_PRAGMAS) {
+        await client.execute(pragma);
+      }
+      await ensureRecordsSchema(client, migrationLockKey(url));
+      const vectorBackend = await probeLibsqlVectorBackend(client);
+      return new LibSqlAdapter(client, "file", vectorBackend);
+    } catch (err) {
+      client.close();
+      throw err;
     }
-    await ensureRecordsSchema(client);
-
-    const vectorBackend = await probeLibsqlVectorBackend(client);
-    return new LibSqlAdapter(client, "file", vectorBackend);
   }
 
   async close(): Promise<void> {

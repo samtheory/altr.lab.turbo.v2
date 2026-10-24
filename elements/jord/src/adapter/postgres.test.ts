@@ -1,23 +1,18 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { describe, expect, it } from "vitest";
 
 import { createJordClient } from "../client.js";
 import { JordUnsupportedError } from "../errors.js";
+import { loadSqlMigrations } from "../schema/migrations/catalog.js";
 import { JORD_TABLE_NAMES } from "../schema/table-names.js";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const schemaDir = path.join(here, "..", "schema");
-
 describe("Postgres migrate parity", () => {
-  it("lists the same control-plane tables in both migrate modules", () => {
-    const sqlite = readFileSync(path.join(schemaDir, "migrate.ts"), "utf8");
-    const postgres = readFileSync(
-      path.join(schemaDir, "migrate-postgres.ts"),
-      "utf8",
-    );
+  it("lists the same control-plane tables in both baseline migrations", () => {
+    const sqlite = loadSqlMigrations("libsql")
+      .map((migration) => migration.sql)
+      .join("\n");
+    const postgres = loadSqlMigrations("postgres")
+      .map((migration) => migration.sql)
+      .join("\n");
     for (const name of JORD_TABLE_NAMES) {
       expect(sqlite).toContain(`CREATE TABLE IF NOT EXISTS ${name}`);
       expect(postgres).toContain(`CREATE TABLE IF NOT EXISTS ${name}`);

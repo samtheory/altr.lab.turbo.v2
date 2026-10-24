@@ -2,7 +2,7 @@
 title: "S0021 Part A — migration foundation"
 description: "Forward-only jord_migrations runner, baseline adopt, checksum refuse, Postgres boot lock"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -17,7 +17,7 @@ tags:
 
 ## Status
 
-**planned** (blocked on [[../Jord-S0027/README]])
+**implemented locally** for file libSQL (2026-10-25). Postgres advisory-lock tests are in `elements/jord/src/schema/migrations/migrations.test.ts` and were **skipped** (`JORD_TEST_POSTGRES_URL` unset; Docker daemon not running). Stop for review before Part B.
 
 ## Lock
 
@@ -90,11 +90,11 @@ Execution **#2**. Blocked by [[../Jord-S0027/README]] only.
 
 ## Definition of Done (`jord-s0021-a`)
 
-- [ ] Fresh DB applies the full chain
-- [ ] Checksum is SHA-256 hex lowercase of LF-normalized SQL bytes; fixture test matches the stored checksum; editing the frozen baseline refuses boot
-- [ ] Fixture from commit `eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c` via the worktree steps in R3; header `-- source: eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c`; second dump diffs empty
-- [ ] Fixture test: baseline migration against `phase-01-baseline.sql` keeps the seed row
-- [ ] Second boot applies nothing
-- [ ] `Docs/tech_space/jord/overview/README.md` updated in this PR
-- [ ] Two concurrent Postgres boots do not double-apply (advisory lock)
-- [ ] File libSQL tests green; Postgres opt-in via `JORD_TEST_POSTGRES_URL`
+- [x] Fresh DB applies the full chain
+- [x] Checksum is SHA-256 hex lowercase of LF-normalized SQL bytes; fixture test matches the stored checksum; editing the frozen baseline refuses boot
+- [x] Fixture from commit `eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c` via the worktree steps in R3; header `-- source: eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c`; second dump diffs empty (`fc.exe`: no differences)
+- [x] Fixture test: baseline migration against `phase-01-baseline.sql` keeps the seed row
+- [x] Second boot applies nothing
+- [x] `Docs/tech_space/jord/overview/README.md` updated in this change
+- [ ] Two concurrent Postgres boots do not double-apply (advisory lock) — **UNVERIFIED** here. Test exists; `JORD_TEST_POSTGRES_URL` was unset
+- [x] File libSQL tests green; Postgres opt-in via `JORD_TEST_POSTGRES_URL` (skipped on this host)

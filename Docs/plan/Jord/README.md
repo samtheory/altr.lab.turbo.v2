@@ -2,7 +2,7 @@
 title: "plan/Jord — phase hub"
 description: "Jord plan root: phase-01 archive (S0001–S0020) and phase-02 queue (S0021–S0027)"
 created: 2026-10-18
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -22,7 +22,7 @@ Intent: [[../../feature_list/Jord/README]] · Capabilities: [[../../feature_list
 | Phase | Folder | Status | Entry |
 |-------|--------|--------|-------|
 | **01** | [[phase-01/README]] | **Closed** — Jord-S0001 … Jord-S0020 | Lab data plane + Studio through hard vectors |
-| **02** | [[phase-02/README]] | **Open** — hardening addendum awaiting approval; first code = S0027 then S0021-A | Features: [[../../feature_list/Jord/03-phase-02-features]] |
+| **02** | [[phase-02/README]] | **Open** — S0027 and S0021-A in tree; next S0021-B after review | Features: [[../../feature_list/Jord/03-phase-02-features]] |
 
 ```mermaid
 flowchart LR

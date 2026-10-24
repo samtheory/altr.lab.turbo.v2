@@ -2,7 +2,7 @@
 title: "tech_space/jord — system manual"
 description: "Living as-built categories for Jord: why, what, how. Update a category when code changes; do not add sprint folders"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
@@ -19,7 +19,7 @@ When something ships, **edit the category** (or add a note inside that category)
 
 | Open this | When you need |
 |-----------|----------------|
-| [[overview/README]] | Packages, boot, request path, invariants, **CI** (`.github/workflows/jord.yml`) |
+| [[overview/README]] | Packages, boot, **migration runner**, request path, invariants, **CI** (`.github/workflows/jord.yml`) |
 | [[dialects/README]] | `file:` / `libsql://` / `postgres://`, WAL, health |
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
 | [[schema/README]] | Introspect, CREATE, ADD, DROP, RENAME, type change |

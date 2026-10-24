@@ -93,6 +93,7 @@ import {
   planUpdateRow,
 } from "../schema/row-write.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
+import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
   clampSearchLimit,
   packF32,
@@ -325,7 +326,7 @@ export class PostgresAdapter implements JordDriverPort {
     const pool = new Pool({ connectionString });
     try {
       await pool.query("SELECT 1");
-      await ensurePostgresSchema(pool);
+      await ensurePostgresSchema(pool, migrationLockKey(connectionString));
       const vectorBackend = await probePgvector(pool);
       const adapter = new PostgresAdapter(pool, vectorBackend);
       await adapter.syncRecordsPoliciesRls();

@@ -2,7 +2,7 @@
 title: "Jord — phase-02 features (to implement)"
 description: "Phase-02 features after the hardening addendum: CI first, principal model, then public API"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - feature
   - jord
@@ -14,7 +14,7 @@ tags:
 
 > **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Review brief: [[../../report/Jord-phase-02-plan-review]].
 
-**Process lock:** plan is amended. Implement **one stop at a time**. Do not start code until this addendum is approved. First code is **S0027**, then **S0021 Part A**.
+**Process lock:** implement **one stop at a time**. **S0027** and **S0021-A** are in the tree (file libSQL). Postgres advisory-lock tests for A were not run (`JORD_TEST_POSTGRES_URL` unset). Next code is **S0021 Part B** after A is reviewed.
 
 ## Execution order
 
@@ -41,6 +41,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 |--|--|
 | **Why** | Ad-hoc `CREATE TABLE IF NOT EXISTS` cannot evolve schema safely |
 | **What** | Forward-only `jord_migrations`; baseline adopt; checksum = SHA-256 hex lowercase of LF-normalized SQL bytes; mismatch **refuses boot**; baseline body frozen. Postgres **advisory lock** on concurrent boot. Fixture from commit `eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c` via `git worktree add ../jord-p01` that commit, `pnpm install --frozen-lockfile`, dump script created in S0021-A, header `-- source: eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c`, copy back, `git worktree remove`. Re-run dump diffs empty |
+| **Status** | In tree for file libSQL (2026-10-25). Postgres double-apply test is written and skipped until `JORD_TEST_POSTGRES_URL` is set |
 | **Acceptance** | Fresh DB and the fixture converge; seed row survives; stored checksum equals the file; re-run is a no-op; bad checksum does not boot; two PG boots do not double-apply |
 
 ## F2 — Principals (`jord-s0021-b`)

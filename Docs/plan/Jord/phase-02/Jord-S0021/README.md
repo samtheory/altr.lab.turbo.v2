@@ -2,7 +2,7 @@
 title: "Jord-S0021 — migration foundation + principal auth + unified policies"
 description: "Three tagged stops (A/B/C) after CI; threat-model ADR before Part C"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0021 — migration + principal auth + policies
 
-> Who: **mimir**. **Status: planned.** Resolutions **R1–R4 approved** (2026-10-24; secret-pattern grep `exit=1`; no TBD). Implementation still waits for an explicit go. Features: [[../../../../feature_list/Jord/03-phase-02-features]]. **Blocked by** [[../Jord-S0027/README]] (execution #1). **Next after C:** [[../Jord-S0028/README]] (execution #6).
+> Who: **mimir**. **Status: Part A implemented locally** (file libSQL, 2026-10-25). Part B not started. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]]. **S0027** is in tree. **Next:** [[02-auth]] after Part A review. **Next after C:** [[../Jord-S0028/README]] (execution #6).
 
 **Sprint id:** `Jord-S0021`  
 **Owner:** mimir  

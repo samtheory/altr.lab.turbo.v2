@@ -34,6 +34,25 @@ export class JordVersionConflictError extends Error {
   }
 }
 
+/**
+ * A stored `jord_migrations` checksum does not match the SQL file.
+ * Boot stops. The migration is not re-applied or skipped.
+ */
+export class JordMigrationChecksumError extends Error {
+  readonly code = "JORD_MIGRATION_CHECKSUM" as const;
+  readonly migrationId: string;
+  readonly migrationName: string;
+
+  constructor(migrationId: string, migrationName: string) {
+    super(
+      `[@altr/jord] migration checksum mismatch for ${migrationId}_${migrationName}; refusing to boot`,
+    );
+    this.name = "JordMigrationChecksumError";
+    this.migrationId = migrationId;
+    this.migrationName = migrationName;
+  }
+}
+
 /** Operation not supported on this dialect. */
 export class JordUnsupportedError extends Error {
   readonly code = "JORD_UNSUPPORTED" as const;

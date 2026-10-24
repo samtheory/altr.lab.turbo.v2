@@ -2,12 +2,13 @@
 title: "Jord — overview"
 description: "What Jord is, the three packages, the request path, and the invariants that still hold"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
   - overview
   - ci
+  - migrations
 ---
 
 # Jord — overview
@@ -41,7 +42,7 @@ Studio browser
           → LibSqlAdapter | PostgresAdapter
 ```
 
-`createJordClient({ url })` picks the adapter from `DATABASE_URL`. Boot migrates control-plane tables (`records`, `jord_*`). `GET /health` returns `ok`, `dialect`, `urlScheme`, and `vectorBackend`. It never returns a URL or token.
+`createJordClient({ url })` picks the adapter from `DATABASE_URL`. Boot runs the forward-only migration runner (below). `GET /health` returns `ok`, `dialect`, `urlScheme`, and `vectorBackend`. It never returns a URL or token.
 
 ## Example
 
@@ -51,6 +52,30 @@ curl -s http://127.0.0.1:8787/health
 ```
 
 A file install answers `dialect: "libsql"` and `urlScheme: "file"`.
+
+## Boot migrations
+
+Ad-hoc `CREATE TABLE IF NOT EXISTS` at boot cannot tell a changed file from a database that already adopted phase-01. The runner records what ran.
+
+| Piece | Contract |
+|-------|----------|
+| History | `jord_migrations(id, name, checksum, applied_at)`. The runner creates this table. It is not part of the baseline file. |
+| Files | `elements/jord/migrations/libsql/*.sql` and `elements/jord/migrations/postgres/*.sql`, ordered by `NNNN_name.sql` |
+| Baseline | `0001_baseline` uses `CREATE TABLE IF NOT EXISTS` for the phase-01 control-plane tables. Existing rows stay. |
+| Checksum | SHA-256 hex, lowercase, of the file after CRLF is turned into LF. Stored value must match the file. |
+| Mismatch | `JordMigrationChecksumError` names the migration (`0001_baseline`) and boot stops. The SQL is not re-applied or skipped. |
+| Second boot | Applied ids are skipped. `applied_at` stays the same. |
+| libSQL lock | In-process mutex. The key is a SHA-256 of the database URL (the raw URL is not kept on the mutex map). |
+| Postgres lock | `pg_advisory_lock(872021001)` on one pooled connection for the whole run, then unlock. |
+| WAL | Unchanged: pragmas and truncate checkpoints run only for `file:`, before migrations. Hosted `libsql://` and Postgres do not. |
+
+Code: `elements/jord/src/schema/migrations/runner.ts`. `ensureRecordsSchema` and `ensurePostgresSchema` call that runner from adapter `open`.
+
+Fixture: `cloud/jord/fixtures/phase-01-baseline.sql`. Header `-- source: eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c`. It is a text dump from that commit (phase-01 `CREATE TABLE` path plus seed `records.id = phase-01-seed`). Regenerate with `pnpm --filter @altr/jord-server dump:phase-01-baseline` only inside a worktree of that commit. The script refuses when `jord_migrations` already exists.
+
+Opening that fixture and then booting keeps the seed row and writes one `jord_migrations` row whose checksum equals the baseline file.
+
+Postgres lock tests live in `elements/jord/src/schema/migrations/migrations.test.ts` and run only when `JORD_TEST_POSTGRES_URL` is set. They were not executed on the machine that landed this note.
 
 ## CI
 
@@ -79,4 +104,4 @@ Branch protection: requiring status check **`jord`** is a **manual admin** step 
 
 ## Not in Jord yet
 
-Redis, a second bot process, remote S3, hosted embed APIs. Those stay candidates in [[../../../feature_list/Jord/01-phase-02-candidates]].
+Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/01-phase-02-candidates]] or later phase-02 cards (Studio tools are S0024).

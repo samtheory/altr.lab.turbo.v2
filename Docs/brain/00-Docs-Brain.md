@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - brain
   - index
@@ -120,7 +120,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Data plane (**Jord**) | `elements/jord` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` (gitignored) | Manual: [[../tech_space/jord/README]] · Intent: [[../feature_list/Jord/README]] · Plans [[../plan/Jord/README]] · Review [[../report/Jord-implemented-review]] · Builder: [[../agents/mimir/00-index]] |
 | Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02**: **S0027** CI workflow in tree ([[../tech_space/jord/overview/README#ci]]; Actions / branch-protection still UNVERIFIED) → next **S0021-A**.
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02**: **S0027** CI workflow in tree ([[../tech_space/jord/overview/README#ci]]; Actions / branch-protection still UNVERIFIED) → **S0021-A** migration runner in tree ([[../tech_space/jord/overview/README#boot-migrations]]; Postgres lock tests not run here) → next **S0021-B**.
 
 Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane through phase-01. Intent [[../feature_list/Jord/README]] · Phase-02 features [[../feature_list/Jord/03-phase-02-features]] · Plans [[../plan/Jord/README]]. PocketBase stays optional.
 
