@@ -13,6 +13,7 @@ type HealthBody = {
   ok?: boolean;
   dialect?: string;
   urlScheme?: string;
+  vectorBackend?: string;
   error?: string;
   message?: string;
 };
@@ -22,6 +23,7 @@ export function ConnectionPanel() {
   const [error, setError] = useState<string | null>(null);
   const [dialect, setDialect] = useState<string | null>(null);
   const [urlScheme, setUrlScheme] = useState<string | null>(null);
+  const [vectorBackend, setVectorBackend] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,12 +41,14 @@ export function ConnectionPanel() {
           );
           setDialect(null);
           setUrlScheme(null);
+          setVectorBackend(null);
           return;
         }
         if (body.dialect !== "libsql" && body.dialect !== "postgres") {
           setError("Unexpected health payload.");
           setDialect(null);
           setUrlScheme(null);
+          setVectorBackend(null);
           return;
         }
         setDialect(body.dialect);
@@ -55,12 +59,20 @@ export function ConnectionPanel() {
             ? body.urlScheme
             : null,
         );
+        setVectorBackend(
+          body.vectorBackend === "libsql-vector" ||
+            body.vectorBackend === "pgvector" ||
+            body.vectorBackend === "cosine"
+            ? body.vectorBackend
+            : null,
+        );
         setError(null);
       } catch {
         if (!cancelled) {
           setError("Cannot reach Studio health proxy.");
           setDialect(null);
           setUrlScheme(null);
+          setVectorBackend(null);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -108,6 +120,14 @@ export function ConnectionPanel() {
               <span className="text-sm text-muted-foreground">Scheme</span>
               <Badge variant="outline" className="font-mono uppercase">
                 {urlScheme}
+              </Badge>
+            </>
+          ) : null}
+          {vectorBackend ? (
+            <>
+              <span className="text-sm text-muted-foreground">Vectors</span>
+              <Badge variant="outline" className="font-mono">
+                {vectorBackend}
               </Badge>
             </>
           ) : null}

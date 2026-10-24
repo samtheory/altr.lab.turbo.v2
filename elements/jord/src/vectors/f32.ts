@@ -1,4 +1,4 @@
-/** Pack / unpack Float32 LE embeddings + cosine similarity (lab search fallback). */
+/** Pack / unpack Float32 LE embeddings + cosine similarity (fallback when the engine has no vector index). */
 
 export const MIN_EMBEDDING_DIMS = 8;
 export const MAX_EMBEDDING_DIMS = 1536;

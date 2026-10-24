@@ -55,8 +55,35 @@ describe("jord embeddings", () => {
       });
       expect(search.ok).toBe(true);
       if (search.ok) {
+        expect(search.backend).toBe(jord.vectorBackend);
+        expect(search.backend).toBe("libsql-vector");
         expect(search.hits[0]?.id).toBe("a");
+        expect(search.hits[0]!.score).toBeCloseTo(1, 5);
         expect(search.hits[0]!.score).toBeGreaterThan(search.hits[1]!.score);
+      }
+      if (jord.client) {
+        const indexed = await jord.client.execute(
+          `SELECT COUNT(*) AS n FROM "jord_vix_lab"`,
+        );
+        expect(Number(indexed.rows[0]?.n)).toBe(2);
+      }
+      await jord.upsertEmbedding({
+        id: "h",
+        namespace: "lab-notes",
+        embedding: a,
+      });
+      if (jord.client) {
+        const hyphen = await jord.client.execute(
+          `SELECT COUNT(*) AS n FROM "jord_vix_lab-notes"`,
+        );
+        expect(Number(hyphen.rows[0]?.n)).toBe(1);
+      }
+      expect(await jord.deleteEmbedding("lab", "b")).toBe(true);
+      if (jord.client) {
+        const left = await jord.client.execute(
+          `SELECT COUNT(*) AS n FROM "jord_vix_lab"`,
+        );
+        expect(Number(left.rows[0]?.n)).toBe(1);
       }
     } finally {
       await jord.close();

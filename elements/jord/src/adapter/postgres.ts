@@ -49,6 +49,8 @@ import type {
   ListTableRowsResult,
   SearchVectorsInput,
   SearchVectorsResult,
+  VectorBackend,
+  VectorSearchHit,
   UpsertBlobMetaInput,
   UpsertEmbeddingInput,
   UpsertEmbeddingResult,
@@ -91,7 +93,18 @@ import {
   planUpdateRow,
 } from "../schema/row-write.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
-import { packF32, validateEmbeddingArray } from "../vectors/f32.js";
+import {
+  clampSearchLimit,
+  packF32,
+  unpackF32,
+  validateEmbeddingArray,
+} from "../vectors/f32.js";
+import {
+  padEmbedding,
+  PGVECTOR_HNSW_SQL,
+  pgvectorColumnSql,
+  toVectorLiteral,
+} from "../vectors/hard.js";
 import { isValidVectorNamespace } from "../vectors/names.js";
 import { rankByCosine } from "../vectors/search.js";
 
@@ -282,13 +295,30 @@ function mapTrigger(row: QueryResultRow): JordTrigger {
 
 const rlsSession = new AsyncLocalStorage<RlsSessionContext>();
 
+async function probePgvector(pool: Pool): Promise<VectorBackend> {
+  try {
+    await pool.query("CREATE EXTENSION IF NOT EXISTS vector");
+    await pool.query(pgvectorColumnSql());
+    try {
+      await pool.query(PGVECTOR_HNSW_SQL);
+    } catch {
+      // Exact `<=>` still ranks when HNSW is unavailable.
+    }
+    return "pgvector";
+  } catch {
+    return "cosine";
+  }
+}
+
 export class PostgresAdapter implements JordDriverPort {
   readonly dialect = "postgres" as const;
   readonly urlScheme = "postgres" as const;
+  readonly vectorBackend: VectorBackend;
   private readonly pool: Pool;
 
-  private constructor(pool: Pool) {
+  private constructor(pool: Pool, vectorBackend: VectorBackend) {
     this.pool = pool;
+    this.vectorBackend = vectorBackend;
   }
 
   static async open(connectionString: string): Promise<PostgresAdapter> {
@@ -296,7 +326,8 @@ export class PostgresAdapter implements JordDriverPort {
     try {
       await pool.query("SELECT 1");
       await ensurePostgresSchema(pool);
-      const adapter = new PostgresAdapter(pool);
+      const vectorBackend = await probePgvector(pool);
+      const adapter = new PostgresAdapter(pool, vectorBackend);
       await adapter.syncRecordsPoliciesRls();
       return adapter;
     } catch (err) {
@@ -1422,41 +1453,81 @@ export class PostgresAdapter implements JordDriverPort {
     }
     const now = Date.now();
     const blob = packF32(checked.values);
+    const vec =
+      this.vectorBackend === "pgvector"
+        ? toVectorLiteral(padEmbedding(checked.values))
+        : null;
     const existing = await this.getEmbedding(input.namespace, input.id);
     if (existing) {
-      const result = await this.pool.query(
-        `UPDATE jord_embeddings SET
-           ref_id = $1, dims = $2, embedding = $3, metadata = $4, updated_at = $5
-         WHERE namespace = $6 AND id = $7
-         RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
-        [
-          input.refId !== undefined ? input.refId : existing.refId,
-          dims,
-          blob,
-          input.metadata !== undefined ? input.metadata : existing.metadata,
-          now,
-          input.namespace,
-          input.id,
-        ],
-      );
+      const result = vec
+        ? await this.pool.query(
+            `UPDATE jord_embeddings SET
+               ref_id = $1, dims = $2, embedding = $3, metadata = $4, updated_at = $5,
+               embedding_vec = $6::vector
+             WHERE namespace = $7 AND id = $8
+             RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
+            [
+              input.refId !== undefined ? input.refId : existing.refId,
+              dims,
+              blob,
+              input.metadata !== undefined ? input.metadata : existing.metadata,
+              now,
+              vec,
+              input.namespace,
+              input.id,
+            ],
+          )
+        : await this.pool.query(
+            `UPDATE jord_embeddings SET
+               ref_id = $1, dims = $2, embedding = $3, metadata = $4, updated_at = $5
+             WHERE namespace = $6 AND id = $7
+             RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
+            [
+              input.refId !== undefined ? input.refId : existing.refId,
+              dims,
+              blob,
+              input.metadata !== undefined ? input.metadata : existing.metadata,
+              now,
+              input.namespace,
+              input.id,
+            ],
+          );
       return { ok: true, row: mapEmbeddingMeta(result.rows[0]!) };
     }
-    const result = await this.pool.query(
-      `INSERT INTO jord_embeddings (
-         id, namespace, ref_id, dims, embedding, metadata, created_at, updated_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-       RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
-      [
-        input.id,
-        input.namespace,
-        input.refId ?? null,
-        dims,
-        blob,
-        input.metadata ?? null,
-        now,
-        now,
-      ],
-    );
+    const result = vec
+      ? await this.pool.query(
+          `INSERT INTO jord_embeddings (
+             id, namespace, ref_id, dims, embedding, metadata, created_at, updated_at, embedding_vec
+           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::vector)
+           RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
+          [
+            input.id,
+            input.namespace,
+            input.refId ?? null,
+            dims,
+            blob,
+            input.metadata ?? null,
+            now,
+            now,
+            vec,
+          ],
+        )
+      : await this.pool.query(
+          `INSERT INTO jord_embeddings (
+             id, namespace, ref_id, dims, embedding, metadata, created_at, updated_at
+           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
+          [
+            input.id,
+            input.namespace,
+            input.refId ?? null,
+            dims,
+            blob,
+            input.metadata ?? null,
+            now,
+            now,
+          ],
+        );
     return { ok: true, row: mapEmbeddingMeta(result.rows[0]!) };
   }
 
@@ -1480,20 +1551,37 @@ export class PostgresAdapter implements JordDriverPort {
     if (!checked.ok) {
       return { ok: false, error: "invalid_embedding", message: checked.message };
     }
+    const sample = await this.pool.query(
+      `SELECT dims FROM jord_embeddings WHERE namespace = $1 LIMIT 1`,
+      [input.namespace],
+    );
+    if (sample.rows.length === 0) {
+      return { ok: true, hits: [], backend: this.vectorBackend };
+    }
+    const dims = num(sample.rows[0]!.dims);
+    if (dims !== checked.values.length) {
+      return {
+        ok: false,
+        error: "dims_mismatch",
+        message: `namespace ${input.namespace} expects dims ${dims}, got ${checked.values.length}`,
+      };
+    }
+    if (this.vectorBackend === "pgvector") {
+      try {
+        const hits = await this.searchWithPgvector(
+          input.namespace,
+          checked.values,
+          input.limit,
+        );
+        return { ok: true, hits, backend: "pgvector" };
+      } catch {
+        // Extension or column missing — rank blobs in process.
+      }
+    }
     const result = await this.pool.query(
       `SELECT id, ref_id, dims, embedding, metadata FROM jord_embeddings WHERE namespace = $1`,
       [input.namespace],
     );
-    if (
-      result.rows.length > 0 &&
-      num(result.rows[0]!.dims) !== checked.values.length
-    ) {
-      return {
-        ok: false,
-        error: "dims_mismatch",
-        message: `namespace ${input.namespace} expects dims ${num(result.rows[0]!.dims)}, got ${checked.values.length}`,
-      };
-    }
     const hits = rankByCosine(
       checked.values,
       result.rows.map((r) => ({
@@ -1505,7 +1593,52 @@ export class PostgresAdapter implements JordDriverPort {
       })),
       input.limit,
     );
-    return { ok: true, hits };
+    return { ok: true, hits, backend: "cosine" };
+  }
+
+  private mapPgHit(row: QueryResultRow): VectorSearchHit {
+    return {
+      id: String(row.id),
+      refId: row.ref_id == null ? null : String(row.ref_id),
+      score: num(row.score),
+      metadata: row.metadata == null ? null : String(row.metadata),
+      dims: num(row.dims),
+    };
+  }
+
+  private async backfillPgvector(namespace: string): Promise<void> {
+    const missing = await this.pool.query(
+      `SELECT id, embedding FROM jord_embeddings
+       WHERE namespace = $1 AND embedding_vec IS NULL`,
+      [namespace],
+    );
+    for (const row of missing.rows) {
+      const values = unpackF32(asBuffer(row.embedding));
+      await this.pool.query(
+        `UPDATE jord_embeddings SET embedding_vec = $1::vector WHERE id = $2`,
+        [toVectorLiteral(padEmbedding(values)), row.id],
+      );
+    }
+  }
+
+  private async searchWithPgvector(
+    namespace: string,
+    values: number[],
+    limit: number | undefined,
+  ): Promise<VectorSearchHit[]> {
+    await this.backfillPgvector(namespace);
+    const literal = toVectorLiteral(padEmbedding(values));
+    const top = clampSearchLimit(limit);
+    const result = await this.pool.query(
+      `SELECT id, ref_id, dims, metadata,
+              1 - (embedding_vec <=> $1::vector) AS score
+       FROM jord_embeddings
+       WHERE namespace = $2 AND embedding_vec IS NOT NULL
+       ORDER BY embedding_vec <=> $1::vector
+       LIMIT $3`,
+      [literal, namespace, top],
+    );
+    return result.rows.map((row) => this.mapPgHit(row));
   }
 
   async snapshotTo(_destPath: string): Promise<string> {

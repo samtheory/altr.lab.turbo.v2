@@ -105,9 +105,11 @@ describe("jord-server routes", () => {
         ok: true,
         dialect: jord.dialect,
         urlScheme: jord.urlScheme,
+        vectorBackend: jord.vectorBackend,
       });
       expect(["libsql", "postgres"]).toContain(body.dialect);
       expect(["file", "libsql", "postgres"]).toContain(body.urlScheme);
+      expect(["libsql-vector", "pgvector", "cosine"]).toContain(body.vectorBackend);
       expect(JSON.stringify(body)).not.toMatch(/postgres:\/\//);
       expect(JSON.stringify(body)).not.toMatch(/file:/);
       expect(JSON.stringify(body)).not.toMatch(/libsql:\/\//);
@@ -1364,8 +1366,10 @@ describe("jord realtime SSE", () => {
       });
       expect(search.status).toBe(200);
       const body = (await search.json()) as {
+        backend: string;
         hits: Array<{ id: string; score: number }>;
       };
+      expect(["libsql-vector", "pgvector", "cosine"]).toContain(body.backend);
       expect(body.hits[0]?.id).toBe("demo-a");
       expect(body.hits[0]!.score).toBeGreaterThan(body.hits[1]!.score);
 

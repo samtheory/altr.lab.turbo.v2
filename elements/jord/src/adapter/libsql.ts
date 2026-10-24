@@ -52,6 +52,8 @@ import type {
   ListTableRowsResult,
   SearchVectorsInput,
   SearchVectorsResult,
+  VectorBackend,
+  VectorSearchHit,
   UpsertBlobMetaInput,
   UpsertEmbeddingInput,
   UpsertEmbeddingResult,
@@ -103,7 +105,17 @@ import {
   requireLibsqlAuthToken,
   type JordUrlScheme,
 } from "../url.js";
-import { packF32, validateEmbeddingArray } from "../vectors/f32.js";
+import { clampSearchLimit, packF32, validateEmbeddingArray } from "../vectors/f32.js";
+import {
+  LIBSQL_VECTOR_PROBE_SQL,
+  libsqlProbeOk,
+  quoteShadowIdent,
+  shadowIndexDdl,
+  shadowIndexName,
+  shadowTableDdl,
+  shadowTableName,
+  useLibsqlAnn,
+} from "../vectors/hard.js";
 import { isValidVectorNamespace } from "../vectors/names.js";
 import { rankByCosine } from "../vectors/search.js";
 
@@ -298,18 +310,31 @@ function mapTrigger(row: typeof jordTriggers.$inferSelect): JordTrigger {
   };
 }
 
+async function probeLibsqlVectorBackend(client: Client): Promise<VectorBackend> {
+  try {
+    const rs = await client.execute(LIBSQL_VECTOR_PROBE_SQL);
+    if (libsqlProbeOk(rs.rows[0]?.d)) return "libsql-vector";
+  } catch {
+    // Older engines have no vector_distance_cos — cosine search still works.
+  }
+  return "cosine";
+}
+
 export class LibSqlAdapter implements JordDriverPort {
   readonly dialect = "libsql" as const;
   readonly urlScheme: Extract<JordUrlScheme, "file" | "libsql">;
+  readonly vectorBackend: VectorBackend;
   readonly client: Client;
   readonly db: JordDb;
 
   private constructor(
     client: Client,
     urlScheme: Extract<JordUrlScheme, "file" | "libsql">,
+    vectorBackend: VectorBackend,
   ) {
     this.client = client;
     this.urlScheme = urlScheme;
+    this.vectorBackend = vectorBackend;
     this.db = drizzle(client, { schema });
   }
 
@@ -321,7 +346,8 @@ export class LibSqlAdapter implements JordDriverPort {
       const authToken = requireLibsqlAuthToken(url, options.authToken);
       const client = createClient({ url, authToken });
       await ensureRecordsSchema(client);
-      return new LibSqlAdapter(client, "libsql");
+      const vectorBackend = await probeLibsqlVectorBackend(client);
+      return new LibSqlAdapter(client, "libsql", vectorBackend);
     }
 
     const fsPath = fileUrlToFsPath(url);
@@ -333,7 +359,8 @@ export class LibSqlAdapter implements JordDriverPort {
     }
     await ensureRecordsSchema(client);
 
-    return new LibSqlAdapter(client, "file");
+    const vectorBackend = await probeLibsqlVectorBackend(client);
+    return new LibSqlAdapter(client, "file", vectorBackend);
   }
 
   async close(): Promise<void> {
@@ -1386,6 +1413,7 @@ export class LibSqlAdapter implements JordDriverPort {
           updatedAt: now,
         })
         .where(eq(jordEmbeddings.id, input.id));
+      await this.tryIndexEmbedding(input.namespace, input.id, blob, dims);
       const row = await this.getEmbedding(input.namespace, input.id);
       return { ok: true, row: row! };
     }
@@ -1400,6 +1428,7 @@ export class LibSqlAdapter implements JordDriverPort {
       updatedAt: now,
     };
     await this.db.insert(jordEmbeddings).values(row);
+    await this.tryIndexEmbedding(input.namespace, input.id, blob, dims);
     return { ok: true, row: mapEmbeddingMeta(row) };
   }
 
@@ -1407,6 +1436,7 @@ export class LibSqlAdapter implements JordDriverPort {
     const existing = await this.getEmbedding(namespace, id);
     if (!existing) return false;
     await this.db.delete(jordEmbeddings).where(eq(jordEmbeddings.id, id));
+    await this.tryUnindexEmbedding(namespace, id);
     return true;
   }
 
@@ -1422,17 +1452,37 @@ export class LibSqlAdapter implements JordDriverPort {
     if (!checked.ok) {
       return { ok: false, error: "invalid_embedding", message: checked.message };
     }
+    const sample = await this.client.execute({
+      sql: `SELECT dims FROM jord_embeddings WHERE namespace = ? LIMIT 1`,
+      args: [input.namespace],
+    });
+    if (sample.rows.length === 0) {
+      return { ok: true, hits: [], backend: this.vectorBackend };
+    }
+    const dims = Number(sample.rows[0]!.dims);
+    if (dims !== checked.values.length) {
+      return {
+        ok: false,
+        error: "dims_mismatch",
+        message: `namespace ${input.namespace} expects dims ${dims}, got ${checked.values.length}`,
+      };
+    }
+    if (this.vectorBackend === "libsql-vector") {
+      try {
+        const hits = await this.searchWithLibsqlVector(
+          input.namespace,
+          checked.values,
+          input.limit,
+        );
+        return { ok: true, hits, backend: "libsql-vector" };
+      } catch {
+        // Engine vector SQL failed — rank the stored blobs in process.
+      }
+    }
     const rows = await this.db
       .select()
       .from(jordEmbeddings)
       .where(eq(jordEmbeddings.namespace, input.namespace));
-    if (rows.length > 0 && rows[0]!.dims !== checked.values.length) {
-      return {
-        ok: false,
-        error: "dims_mismatch",
-        message: `namespace ${input.namespace} expects dims ${rows[0]!.dims}, got ${checked.values.length}`,
-      };
-    }
     const hits = rankByCosine(
       checked.values,
       rows.map((r) => ({
@@ -1444,7 +1494,135 @@ export class LibSqlAdapter implements JordDriverPort {
       })),
       input.limit,
     );
-    return { ok: true, hits };
+    return { ok: true, hits, backend: "cosine" };
+  }
+
+  private async tryIndexEmbedding(
+    namespace: string,
+    id: string,
+    blob: Buffer,
+    dims: number,
+  ): Promise<void> {
+    if (this.vectorBackend !== "libsql-vector") return;
+    try {
+      await this.ensureVectorShadow(namespace, dims);
+      const table = quoteShadowIdent(shadowTableName(namespace));
+      await this.client.execute({
+        sql: `INSERT INTO ${table} (id, embedding) VALUES (?, ?)
+              ON CONFLICT(id) DO UPDATE SET embedding = excluded.embedding`,
+        args: [id, blob],
+      });
+    } catch {
+      // Exact vector_distance_cos on jord_embeddings still ranks the row.
+    }
+  }
+
+  private async tryUnindexEmbedding(namespace: string, id: string): Promise<void> {
+    if (this.vectorBackend !== "libsql-vector") return;
+    try {
+      const table = quoteShadowIdent(shadowTableName(namespace));
+      await this.client.execute({
+        sql: `DELETE FROM ${table} WHERE id = ?`,
+        args: [id],
+      });
+    } catch {
+      // Shadow table may not exist yet.
+    }
+  }
+
+  private async ensureVectorShadow(namespace: string, dims: number): Promise<void> {
+    await this.client.execute(shadowTableDdl(namespace, dims));
+    await this.client.execute(shadowIndexDdl(namespace));
+  }
+
+  private async syncVectorShadow(namespace: string, dims: number): Promise<void> {
+    await this.ensureVectorShadow(namespace, dims);
+    const table = quoteShadowIdent(shadowTableName(namespace));
+    await this.client.execute({
+      sql: `INSERT INTO ${table} (id, embedding)
+            SELECT id, embedding FROM jord_embeddings WHERE namespace = ?
+            ON CONFLICT(id) DO UPDATE SET embedding = excluded.embedding`,
+      args: [namespace],
+    });
+    await this.client.execute({
+      sql: `DELETE FROM ${table}
+            WHERE id NOT IN (
+              SELECT id FROM jord_embeddings WHERE namespace = ?
+            )`,
+      args: [namespace],
+    });
+  }
+
+  private async searchWithLibsqlVector(
+    namespace: string,
+    values: number[],
+    limit: number | undefined,
+  ): Promise<VectorSearchHit[]> {
+    const top = clampSearchLimit(limit);
+    const countRs = await this.client.execute({
+      sql: `SELECT COUNT(*) AS n FROM jord_embeddings WHERE namespace = ?`,
+      args: [namespace],
+    });
+    const rowCount = Number(countRs.rows[0]?.n ?? 0);
+    if (rowCount === 0) return [];
+    const query = JSON.stringify(values);
+    if (useLibsqlAnn(rowCount)) {
+      try {
+        await this.syncVectorShadow(namespace, values.length);
+        const ann = await this.searchLibsqlAnn(namespace, query, top);
+        if (ann.length >= Math.min(top, rowCount)) return ann;
+      } catch {
+        // ANN index missing or stale — exact engine distance below.
+      }
+    }
+    return this.searchLibsqlExact(namespace, query, top);
+  }
+
+  private mapVectorHit(row: Record<string, unknown>): VectorSearchHit {
+    return {
+      id: String(row.id),
+      refId: row.ref_id == null ? null : String(row.ref_id),
+      score: Number(row.score),
+      metadata: row.metadata == null ? null : String(row.metadata),
+      dims: Number(row.dims),
+    };
+  }
+
+  private async searchLibsqlExact(
+    namespace: string,
+    queryJson: string,
+    limit: number,
+  ): Promise<VectorSearchHit[]> {
+    const rs = await this.client.execute({
+      sql: `SELECT id, ref_id, dims, metadata,
+              (1.0 - vector_distance_cos(embedding, vector32(?))) AS score
+            FROM jord_embeddings
+            WHERE namespace = ?
+            ORDER BY vector_distance_cos(embedding, vector32(?)) ASC
+            LIMIT ?`,
+      args: [queryJson, namespace, queryJson, limit],
+    });
+    return rs.rows.map((row) => this.mapVectorHit(row));
+  }
+
+  private async searchLibsqlAnn(
+    namespace: string,
+    queryJson: string,
+    limit: number,
+  ): Promise<VectorSearchHit[]> {
+    const table = quoteShadowIdent(shadowTableName(namespace));
+    const index = shadowIndexName(namespace);
+    const rs = await this.client.execute({
+      sql: `SELECT e.id AS id, e.ref_id AS ref_id, e.dims AS dims,
+              e.metadata AS metadata,
+              (1.0 - vector_distance_cos(e.embedding, vector32(?))) AS score
+            FROM vector_top_k(?, vector32(?), ?) AS k
+            JOIN ${table} AS v ON v.rowid = k.id
+            JOIN jord_embeddings AS e ON e.id = v.id
+            ORDER BY score DESC`,
+      args: [queryJson, index, queryJson, limit],
+    });
+    return rs.rows.map((row) => this.mapVectorHit(row));
   }
 
   async snapshotTo(destPath: string): Promise<string> {

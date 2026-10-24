@@ -51,4 +51,6 @@ tags:
 
 ## Not in this ship
 
-Hosted embed APIs · hard sqlite-vec/pgvector deps · embedding CDC on realtime · namespace wipe admin API · Artemis retrieval product screens.
+Hosted embed APIs · embedding CDC on realtime · namespace wipe admin API · Artemis retrieval product screens.
+
+Engine ranking shipped later: [[19-s0020-hard-vectors]] (libSQL `vector_distance_cos` and optional `pgvector`; cosine stays the fallback). `sqlite-vec` is not loaded.

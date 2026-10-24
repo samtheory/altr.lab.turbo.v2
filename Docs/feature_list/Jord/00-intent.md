@@ -2,7 +2,7 @@
 title: "Jord — libSQL file, first slice"
 description: "Slice 0: LibSqlAdapter, WAL checkpoints, records OCC version, 64-bit timestamps, mkdir data/, snapshot."
 created: 2026-10-18
-updated: 2026-10-21
+updated: 2026-10-24
 tags:
   - feature
   - jord
@@ -77,7 +77,7 @@ Checkpointing stays inside the one server process. Slice 0 does not add a second
 
 Generic **JSON document / key-value / agent scratchpad**. Buckets namespace apps (`lab`, later `artemis` for agent notes).
 
-**Boundary:** Artemis trading domain tables (`orders`, `positions`, `trades`, …) must **not** be stuffed into `records.body`. They get typed Drizzle relations in later slices. Slice 0 does not create them. sqlite-vec is not installed; the column set is only ready for a later vector attachment.
+**Boundary:** Artemis trading domain tables (`orders`, `positions`, `trades`, …) must **not** be stuffed into `records.body`. They get typed Drizzle relations in later slices. Slice 0 does not create them. Slice 0 does not install sqlite-vec. Embeddings live in `jord_embeddings` (S0014); engine ranking is Jord-S0020 ([[../../tech_space/jord/19-s0020-hard-vectors]]).
 
 ### `records` — columns
 

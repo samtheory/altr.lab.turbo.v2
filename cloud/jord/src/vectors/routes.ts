@@ -44,7 +44,7 @@ export function registerVectorRoutes(
 ): void {
   protectedRoutes.get("/vectors/namespaces", async (c) => {
     const namespaces = await deps.jord.listVectorNamespaces();
-    return c.json({ namespaces });
+    return c.json({ namespaces, backend: deps.jord.vectorBackend });
   });
 
   protectedRoutes.get("/vectors/:namespace", async (c) => {
@@ -82,7 +82,11 @@ export function registerVectorRoutes(
       const status = result.error === "dims_mismatch" ? 409 : 400;
       throw new HTTPException(status, { message: result.message });
     }
-    return c.json({ namespace, hits: result.hits.map(publicHit) });
+    return c.json({
+      namespace,
+      backend: result.backend,
+      hits: result.hits.map(publicHit),
+    });
   });
 
   protectedRoutes.put(

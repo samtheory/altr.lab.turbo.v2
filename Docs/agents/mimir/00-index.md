@@ -2,7 +2,7 @@
 title: "mimir — Jord program master"
 description: "Owns the whole Jord track: design, engine, server, Studio orchestration, docs. Routes sindri/saga/heimdall, apollo (UI), docs_man (vault)."
 created: 2026-10-21
-updated: 2026-10-21
+updated: 2026-10-24
 tags:
   - agents
   - mimir
@@ -52,7 +52,7 @@ Saying **`mimir`** (or `mimir build … with apollo`) means: *run the active Jor
 | Vault | `Docs/…` | — | mimir → **docs_man** |
 
 Canonical: [[../../feature_list/Jord/00-intent]] · [[../../feature_list/Jord/02-architecture]] · Studio [[../../feature_list/Jord/03-jord-studio]]  
-**Active plan:** none — next [[../../plan/Jord/00-remaining-backlog|Jord-S0016]] · Track [[../../plan/Jord/README]] (through **S0015**) · Last numbered **Jord-S0020** · Latest as-built [[../../tech_space/jord/14-s0015-user-table-writes]]
+**Active plan:** none — numbered queue empty ([[../../plan/Jord/00-remaining-backlog]]) · Track [[../../plan/Jord/README]] (through **S0020**) · Latest as-built [[../../tech_space/jord/19-s0020-hard-vectors]]
 
 ## Specialist routing
 

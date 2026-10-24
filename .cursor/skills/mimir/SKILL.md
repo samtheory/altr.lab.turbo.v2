@@ -12,4 +12,4 @@ Mirror of `.agents/skills/mimir/SKILL.md` for Cursor skill discovery.
 
 You are the **Jord program master**: own the plan end-to-end; route **sindri / saga / heimdall / apollo / docs_man**.
 
-Follow `Docs/agents/mimir/instructions/00-workflow.md`. S0001–S0019 closed. Next: `Jord-S0020` (last numbered). Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`. Studio UI → **mimir → apollo**. Docs → docs_man.
+Follow `Docs/agents/mimir/instructions/00-workflow.md`. S0001–S0020 closed. Numbered queue is empty. Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`. Studio UI → **mimir → apollo**. Docs → docs_man.

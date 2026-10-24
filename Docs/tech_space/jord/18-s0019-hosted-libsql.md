@@ -54,4 +54,4 @@ tags:
 
 ## Explicitly out / next
 
-Embedded replicas · file→Turso wizard · Studio paste-URL · hard sqlite-vec / `pgvector` (**[[../../plan/Jord/00-remaining-backlog|Jord-S0020]] — last numbered**).
+Embedded replicas · file→Turso wizard · Studio paste-URL. Hard vectors later shipped in [[19-s0020-hard-vectors]].

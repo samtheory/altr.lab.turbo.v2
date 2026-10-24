@@ -11,14 +11,12 @@
             "id": "83951ac55895cc18",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "feature_list/Jord/00-intent.md",
-                "mode": "source",
-                "source": false
+                "file": "report/assets/apolyx-timeline/timeline-progress-default-dark.png"
               },
-              "icon": "lucide-file",
-              "title": "00-intent"
+              "icon": "lucide-image",
+              "title": "timeline-progress-default-dark"
             }
           }
         ]
@@ -188,8 +186,24 @@
       "graph-styler:Graph Styler": false
     }
   },
-  "active": "83951ac55895cc18",
+  "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
+    "tech_space/jord/19-s0020-hard-vectors.md",
+    "plan/Jord/Jord-S0020/04-verify.md",
+    "plan/Jord/Jord-S0020/03-surfaces.md",
+    "plan/Jord/Jord-S0020/02-engine.md",
+    "plan/Jord/Jord-S0020/01-contract.md",
+    "plan/Jord/Jord-S0020/README.md",
+    "plan/Jord/Jord-S0020",
+    "report/assets/apolyx-timeline/timeline-horizontal-default-dark.png",
+    "report/assets/apolyx-sidebar/sidebar-open.png",
+    "report/assets/apolyx-s0004/popover-notifications-dark.png",
+    "report/assets/apolyx-s0001/docs-home-power-blue-dark.png",
+    "report/assets/apolyx-s0001/docs-home-default-light.png",
+    "report/assets/apolyx-s0001/docs-button-power-blue-dark.png",
+    "report/assets/apolyx-s0001/docs-button-default-light.png",
+    "report/Jord-implemented-review.md",
+    "feature_list/Jord/00-intent.md",
     "tech_space/jord/18-s0019-hosted-libsql.md",
     "plan/Jord/Jord-S0019/05-verify.md",
     "plan/Jord/Jord-S0019/04-studio-connection.md",
@@ -210,31 +224,15 @@
     "plan/Jord/Jord-S0017/05-verify.md",
     "plan/Jord/Jord-S0017/04-studio-hint.md",
     "plan/Jord/Jord-S0017/03-server-session-sync.md",
-    "plan/Jord/Jord-S0017/02-engine-compile.md",
-    "plan/Jord/Jord-S0017/01-contract.md",
-    "plan/Jord/Jord-S0017/README.md",
     "plan/Jord/Jord-S0017",
-    "tech_space/jord/15-s0016-schema-drop-rename.md",
-    "plan/Jord/Jord-S0016/06-verify.md",
-    "plan/Jord/Jord-S0016/05-role-gates.md",
-    "plan/Jord/Jord-S0016/04-studio-schema.md",
-    "plan/Jord/Jord-S0016/03-server-routes.md",
     "plan/Jord/Jord-S0016",
     "plan/Jord/Jord-S0015",
     "plan/Jord/Jord-S0014",
     "plan/Jord/Jord-S0013",
     "plan/Jord/Jord-S0011",
     "plan/Jord/Jord-S0010",
-    "plan/Jord/Jord-S0012",
     "report/assets/apolyx-s0004/popover-slide-dark.png",
     "report/assets/apolyx-s0004/popover-pop-light.png",
-    "report/assets/apolyx-s0004/popover-notifications-dark.png",
-    "report/assets/apolyx-s0004/popover-pop-dark.png",
-    "report/assets/apolyx-s0003/input-otp-default-light.png",
-    "report/assets/apolyx-s0003/form-patterns-dark.png",
-    "report/assets/apolyx-s0003/forms-sidebar-dark.png",
-    "report/assets/apolyx-s0003/input-group-default-light.png",
-    "report/assets/apolyx-s0003/switch-power-blue-light.png",
-    "report/assets/apolyx-s0003/switch-default-dark.png"
+    "report/assets/apolyx-s0004/popover-pop-dark.png"
   ]
 }

@@ -22,6 +22,7 @@ export {
   type UpdateTableRowInput,
   type SearchVectorsInput,
   type SearchVectorsResult,
+  type VectorBackend,
   type TableCell,
   type UpsertBlobMetaInput,
   type UpsertEmbeddingInput,
@@ -124,6 +125,7 @@ export {
   validateEmbeddingArray,
 } from "./vectors/f32.js";
 export { isValidVectorNamespace } from "./vectors/names.js";
+export { LIBSQL_EXACT_MAX_ROWS } from "./vectors/hard.js";
 export {
   buildAddColumnSql,
   buildCreateTableSql,

@@ -36,7 +36,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0019** closed. Next to open: **Jord-S0020** (last numbered) — [[../../../plan/Jord/00-remaining-backlog]]
+4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0020** closed. Numbered queue is empty — [[../../../plan/Jord/00-remaining-backlog]]
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. Review of shipped work: [[../../../report/Jord-implemented-review]]
 7. This file
@@ -57,7 +57,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 3. OCC on `records.version` → HTTP **409**.
 4. WAL pragmas + truncate checkpoints on **file libSQL only** (skip hosted `libsql://` and Postgres).
 5. Timestamps = ms integers; Postgres uses **`bigint`**.
-6. No Redis / Mongo; hard sqlite-vec / `pgvector` wait for a later card (S0014 ships lab cosine).
+6. No Redis / Mongo. Vector search uses libSQL engine distance or `pgvector` when present; cosine is the fallback (S0020). `sqlite-vec` is not loaded.
 7. `@altr/base` is a **leaf** — [[../../../feature_list/00-elements-dependency-rules]].
 
 ## Active sprint routing
@@ -136,7 +136,11 @@ See [[../../../plan/Jord/Jord-S0018/README]] (done 2026-10-24). As-built: [[../.
 
 ### Closed — Jord-S0019 (hosted libsql:// / Turso)
 
-See [[../../../plan/Jord/Jord-S0019/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/18-s0019-hosted-libsql]]. Next to open: **Jord-S0020** (last numbered).
+See [[../../../plan/Jord/Jord-S0019/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/18-s0019-hosted-libsql]].
+
+### Closed — Jord-S0020 (hard vectors) — last numbered
+
+See [[../../../plan/Jord/Jord-S0020/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/19-s0020-hard-vectors]]. Numbered queue is empty. Do not open S0021 unless [[../../../plan/Jord/00-remaining-backlog]] promotes a row.
 
 ## Skills discipline
 

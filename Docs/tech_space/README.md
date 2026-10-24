@@ -20,6 +20,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/19-s0020-hard-vectors]] — **Jord-S0020** libSQL engine vectors + optional `pgvector` (2026-10-24)
 - [[jord/18-s0019-hosted-libsql]] — **Jord-S0019** hosted `libsql://` (Turso) + token env (2026-10-24)
 - [[jord/17-s0018-realtime-ws]] — **Jord-S0018** realtime WS + multi-table fanout (2026-10-24)
 - [[jord/16-s0017-postgres-rls]] — **Jord-S0017** native Postgres RLS from Jord policies (2026-10-24)
@@ -49,4 +50,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next:** Jord-S0020 (last numbered) on [[../plan/Jord/00-remaining-backlog]] or Artemis. Latest as-built: [[jord/18-s0019-hosted-libsql]].
+**Numbered Jord queue is empty** after [[jord/19-s0020-hard-vectors]]. Unnumbered leftovers: [[../plan/Jord/00-remaining-backlog]]. Product fork: Artemis.

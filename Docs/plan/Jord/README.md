@@ -1,6 +1,6 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0019 closed; next is S0020 (last numbered sprint)"
+description: "Jord-S0001–S0020 closed; numbered queue is empty"
 created: 2026-10-18
 updated: 2026-10-24
 tags:
@@ -8,12 +8,13 @@ tags:
   - jord
   - Jord-S0001
   - Jord-S0019
+  - Jord-S0020
   - readme
 ---
 
 # plan / Jord
 
-> **Closed through:** [[Jord-S0019/README]] (hosted `libsql://`) · **Next:** Jord-S0020 on [[00-remaining-backlog]] · **Last numbered sprint:** Jord-S0020 · Review: [[../../report/Jord-implemented-review]]
+> **Closed through:** [[Jord-S0020/README]] (hard vectors) · **Numbered queue:** empty · Unnumbered leftovers: [[00-remaining-backlog]] · Review: [[../../report/Jord-implemented-review]]
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
@@ -36,7 +37,8 @@ tags:
 | [[Jord-S0017/README]] | Native Postgres RLS from Jord policies | **done** (2026-10-24) |
 | [[Jord-S0018/README]] | Realtime WebSockets + multi-table fanout | **done** (2026-10-24) |
 | [[Jord-S0019/README]] | Hosted `libsql://` (Turso) | **done** (2026-10-24) |
+| [[Jord-S0020/README]] | Hard vectors (libSQL engine + pgvector) | **done** (2026-10-24) |
 
-**Next:** Jord-S0020 (`pgvector` / sqlite-vec hard path) from [[00-remaining-backlog]] — **last numbered sprint**. Product fork: Artemis.
+**Numbered sprints are closed** through Jord-S0020. Do not open S0021 unless a backlog row is promoted. Product fork: Artemis.
 
 Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]

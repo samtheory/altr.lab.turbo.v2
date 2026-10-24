@@ -6,6 +6,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   FieldInput,
 } from "@altr/apolyx";
@@ -41,6 +42,7 @@ export function VectorsPanel({ role }: Props) {
   const [embJson, setEmbJson] = useState(SAMPLE_8);
   const [queryJson, setQueryJson] = useState(SAMPLE_8);
   const [hits, setHits] = useState<Hit[]>([]);
+  const [backend, setBackend] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -48,10 +50,18 @@ export function VectorsPanel({ role }: Props) {
     const res = await fetch("/api/vectors/namespaces", { cache: "no-store" });
     const body = (await res.json()) as {
       namespaces?: string[];
+      backend?: string;
       message?: string;
     };
     if (!res.ok) throw new Error(body.message ?? `Failed (${res.status})`);
     setNamespaces(body.namespaces ?? []);
+    if (
+      body.backend === "libsql-vector" ||
+      body.backend === "pgvector" ||
+      body.backend === "cosine"
+    ) {
+      setBackend(body.backend);
+    }
   }, []);
 
   const refreshList = useCallback(async (ns: string) => {
@@ -150,6 +160,7 @@ export function VectorsPanel({ role }: Props) {
         );
         const body = (await res.json()) as {
           hits?: Hit[];
+          backend?: string;
           message?: string;
         };
         if (!res.ok) {
@@ -157,6 +168,7 @@ export function VectorsPanel({ role }: Props) {
           return;
         }
         setHits(body.hits ?? []);
+        if (typeof body.backend === "string") setBackend(body.backend);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Search failed");
@@ -184,12 +196,20 @@ export function VectorsPanel({ role }: Props) {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="space-y-1">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Vectors
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            Vectors
+          </h1>
+          {backend ? (
+            <Badge variant="outline" className="font-mono">
+              {backend}
+            </Badge>
+          ) : null}
+        </div>
         <p className="text-sm text-muted-foreground">
-          Local lab embeddings. You supply float arrays — Jord does not call an
-          embed model. Search uses cosine similarity.
+          You supply float arrays — Jord does not call an embed model. Search
+          uses the database vector engine when it is available, and in-process
+          cosine similarity otherwise.
         </p>
       </div>
 

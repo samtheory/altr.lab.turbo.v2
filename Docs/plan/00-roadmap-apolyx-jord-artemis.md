@@ -1,6 +1,6 @@
 ---
 title: "Roadmap — Apolyx → Jord → Artemis"
-description: "Sequencing: Jord-S0014 vectors done; next from Jord backlog"
+description: "Sequencing: Jord-S0001–S0020 closed; next product fork is Artemis"
 created: 2026-10-21
 updated: 2026-10-24
 tags:
@@ -65,7 +65,7 @@ flowchart LR
 | **3o** | **Schema DDL** (`Jord-S0016`) | DROP / RENAME / type change (admin) | **Closed 2026-10-24** — [[../tech_space/jord/15-s0016-schema-drop-rename]] · [[Jord/Jord-S0016/README]] |
 | **3p** | **Postgres RLS** (`Jord-S0017`) | Compile `jord_policies` → native RLS on `records` | **Closed 2026-10-24** — [[../tech_space/jord/16-s0017-postgres-rls]] · [[Jord/Jord-S0017/README]] |
 | **3q** | **Realtime WS** (`Jord-S0018`) | Multi-table fanout + WebSocket; SSE stays | **Closed 2026-10-24** — [[../tech_space/jord/17-s0018-realtime-ws]] · [[Jord/Jord-S0018/README]] |
-| **3r** | **Numbered tail** | S0019 hosted libsql → **S0020 last** (vec hard path) | [[Jord/00-remaining-backlog]] |
+| **3r** | **Numbered tail** (`Jord-S0019`–`Jord-S0020`) | Hosted libsql, then hard vectors. **Queue empty** | **Closed 2026-10-24** — [[../tech_space/jord/19-s0020-hard-vectors]] · [[Jord/Jord-S0020/README]] |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | Product fork · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
@@ -74,7 +74,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–**S0018** are closed. **Next Jord:** Jord-S0019 on [[Jord/00-remaining-backlog]]. **Last numbered sprint:** Jord-S0020. **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–**S0020** are closed. The numbered Jord queue is empty ([[Jord/00-remaining-backlog]]). **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

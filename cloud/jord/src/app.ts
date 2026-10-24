@@ -345,6 +345,7 @@ export function createJordApp(deps: JordAppDeps) {
       ok: true as const,
       dialect: deps.jord.dialect,
       urlScheme: deps.jord.urlScheme,
+      vectorBackend: deps.jord.vectorBackend,
     }),
   );
 

@@ -82,4 +82,48 @@ describe.runIf(Boolean(liveUrl))("PostgresAdapter live", () => {
       await jord.close();
     }
   });
+
+  it("ranks embeddings with pgvector or cosine", async () => {
+    const jord = await createJordClient({ url: liveUrl });
+    try {
+      expect(["pgvector", "cosine"]).toContain(jord.vectorBackend);
+      const a = Array(8).fill(0);
+      a[0] = 1;
+      const b = Array(8).fill(0);
+      b[1] = 1;
+      const ns = `s0020_${Date.now().toString(36)}`;
+      expect(
+        (
+          await jord.upsertEmbedding({
+            id: "a",
+            namespace: ns,
+            embedding: a,
+          })
+        ).ok,
+      ).toBe(true);
+      expect(
+        (
+          await jord.upsertEmbedding({
+            id: "b",
+            namespace: ns,
+            embedding: b,
+          })
+        ).ok,
+      ).toBe(true);
+      const search = await jord.searchVectors({
+        namespace: ns,
+        embedding: a,
+        limit: 2,
+      });
+      expect(search.ok).toBe(true);
+      if (!search.ok) return;
+      expect(search.backend).toBe(jord.vectorBackend);
+      expect(search.hits[0]?.id).toBe("a");
+      expect(search.hits[0]!.score).toBeGreaterThan(search.hits[1]!.score);
+      await jord.deleteEmbedding(ns, "a");
+      await jord.deleteEmbedding(ns, "b");
+    } finally {
+      await jord.close();
+    }
+  });
 });

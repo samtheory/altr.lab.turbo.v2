@@ -2,7 +2,7 @@
 title: "Jord — architecture, dialects, and repo layout"
 description: "JordDriverPort, LibSqlAdapter + PostgresAdapter, WAL, OCC, bigint ms on Postgres, dialect seams"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-24
 tags:
   - feature
   - jord
@@ -31,8 +31,8 @@ App and server code depend on a **unified port**, not on libSQL or Postgres APIs
 | Piece | Role |
 |-------|------|
 | `JordDriverPort` | Dialect-agnostic surface: open, query/execute through Drizzle, close. Specialized ops (e.g. `searchVectors`) declared on the port and implemented per adapter |
-| `LibSqlAdapter` | `file:` (local zero-infra) and `libsql://` (Turso edge, S0019). WAL pragmas on `file:` only. Later hosts local `sqlite-vec` |
-| `PostgresAdapter` | `postgres://` / `postgresql://`. `pg` Pool, bigint ms timestamps, same port CRUD. **Shipped in Jord-S0010** · [[../../tech_space/jord/09-s0010-postgres]]. `pgvector` still later |
+| `LibSqlAdapter` | `file:` (local zero-infra) and `libsql://` (Turso edge, S0019). WAL pragmas on `file:` only. Engine vectors when `vector_distance_cos` exists (S0020) |
+| `PostgresAdapter` | `postgres://` / `postgresql://`. `pg` Pool, bigint ms timestamps, same port CRUD. **Shipped in Jord-S0010** · [[../../tech_space/jord/09-s0010-postgres]]. `pgvector` when the extension loads (S0020) |
 
 ### Dynamic driver activation
 
@@ -41,7 +41,7 @@ App and server code depend on a **unified port**, not on libSQL or Postgres APIs
 | Scheme | Adapter | Status |
 |--------|---------|--------|
 | `file:` | `LibSqlAdapter` | **Implemented** (default `file:./data/jord.db`) |
-| `libsql:` | — | Rejected until a later hosted-libSQL slice |
+| `libsql:` | `LibSqlAdapter` | **Implemented** (Jord-S0019, token env) |
 | `postgres:` / `postgresql:` | `PostgresAdapter` | **Implemented** (Jord-S0010) |
 
 Unsupported schemes throw `JordUrlError` / `JordSlice0UrlError`. Callers branch on `jord.dialect` (`"libsql" | "postgres"`); they do not import `@libsql/client` or `pg` outside the adapters.
@@ -81,7 +81,7 @@ Native MVCC and row-level locks. High-concurrency writers do **not** require the
 
 | Capability | Unified signature / idea | libSQL | Postgres |
 |------------|--------------------------|--------|----------|
-| Vector search | `searchVectors(embedding, options)` on the port | `sqlite-vec` (not Slice 0) | `pgvector` |
+| Vector search | `searchVectors(embedding, options)` on the port | libSQL `vector_distance_cos` + `libsql_vector_idx` (S0020); cosine if the function is absent. `sqlite-vec` is not loaded | `pgvector` `<=>` when `CREATE EXTENSION vector` succeeds; else cosine |
 | Row-level security | “Policies” as a Jord feature | Application middleware in `@altr/jord-server` | Native RLS on `records` compiled from `jord_policies` ([[../../tech_space/jord/16-s0017-postgres-rls]]); middleware remains HTTP 403 authority |
 | Triggers / functions | Jord definitions | Dialect SQL emitter | Dialect SQL emitter |
 | Boring columns | Prefer `text` / JSON-as-text in Slice 0 | Same | Same |

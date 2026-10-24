@@ -208,8 +208,11 @@ export type VectorSearchHit = {
   dims: number;
 };
 
+/** Which engine ranked `searchVectors`. `cosine` is the in-process fallback. */
+export type VectorBackend = "libsql-vector" | "pgvector" | "cosine";
+
 export type SearchVectorsResult =
-  | { ok: true; hits: VectorSearchHit[] }
+  | { ok: true; hits: VectorSearchHit[]; backend: VectorBackend }
   | {
       ok: false;
       error: "invalid_namespace" | "invalid_embedding" | "dims_mismatch";
@@ -464,6 +467,11 @@ export interface JordDriverPort {
    * Use for WAL gating and /health — never expose the raw URL.
    */
   readonly urlScheme: JordUrlSchemeLabel;
+  /**
+   * Vector engine probed at open: `libsql-vector`, `pgvector`, or `cosine`.
+   * A single search may still fall back to cosine; that result's `backend` says which ran.
+   */
+  readonly vectorBackend: VectorBackend;
   /**
    * Raw libSQL client — present when `dialect === "libsql"`.
    * Prefer port methods; only use for pragmas / dialect-specific SQL.
