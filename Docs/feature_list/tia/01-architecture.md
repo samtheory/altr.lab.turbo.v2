@@ -11,7 +11,7 @@ tags:
 
 # Tia — architecture
 
-> Index: [[README]]. Product: [[00-intent]]. Jord: [[../Jord/00-intent]] · [[../Jord/02-architecture]] · [[../Jord/01-later]].
+> Index: [[README]]. Product: [[00-intent]]. Jord: [[../Jord/00-intent]] · [[../Jord/02-architecture]] · [[../Jord/01-phase-02-candidates]].
 
 ## Actual repository integration points (**Verified repo** 2026-10-19)
 
@@ -34,7 +34,7 @@ Stack narrative: [[../../Altr.lab/stack]].
 | PostGIS types, spatial indexes, road geometries | **Tia schemas** on Postgres | **Proposed**; PostGIS not in Jord docs |
 | Provisioning / naming a **dedicated** DB instance for Tia | Jord (when multi-DB / Postgres exists) | **Proposed** product rule; **Unresolved** mechanization |
 | Jobs, retries, ack, replay, DLQ, backpressure | Jord later pillars / Studio S5 | **Deferred** — not available |
-| CDC / SSE / WebSocket fan-out infrastructure | Jord later ([[../Jord/01-later]]) | **Deferred** |
+| CDC / SSE / WebSocket fan-out infrastructure | Jord later ([[../Jord/01-phase-02-candidates]]) | **Deferred** |
 | Redis-compatible ephemeral store | Jord “Cache” later row | **Deferred**; Tia may introduce a Redis URL as **Proposed** interim |
 | Object storage (traces, tiles, graphs) | Jord blob pillar later **or** Tia-configured S3-compatible | **Proposed** env for Tia until Jord blobs exist |
 | Routing engine (Valhalla), map matching, traffic ML | **Tia** | **Proposed** |

@@ -48,8 +48,8 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Tia (Map Engine)/README
 | Jord Slice 0 = libSQL `file:` + `LibSqlAdapter` + `records` CRUD | **Verified intent** ([[../Jord/00-intent]]); **not verified in code** |
 | Jord `PostgresAdapter` | **Proposed seam / later** — reserved, uninstantiated ([[../Jord/02-architecture]]) |
 | PostGIS through Jord | **Unresolved** — not mentioned in Jord intent; Tia needs it as **Proposed** dependency on a future Jord Postgres+PostGIS capability or an explicitly Tia-owned Postgres until Jord catches up |
-| Jord jobs, retries, ack, replay, DLQ, backpressure, WebSocket | **Deferred later** in Jord ([[../Jord/01-later]], Studio S5/S9). **Not in Slice 0.** Do not treat as available runtime |
-| Redis / cache via Jord | **Deferred later** ([[../Jord/01-later]]) |
+| Jord jobs, retries, ack, replay, DLQ, backpressure, WebSocket | **Deferred later** in Jord ([[../Jord/01-phase-02-candidates]], Studio S5/S9). **Not in Slice 0.** Do not treat as available runtime |
+| Redis / cache via Jord | **Deferred later** ([[../Jord/01-phase-02-candidates]]) |
 | Jord local blob storage | **Deferred later** pillar |
 | Dedicated Jord-managed DB instance for Tia | **Proposed** product rule once Jord can provision/select Postgres URLs |
 

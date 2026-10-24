@@ -64,4 +64,4 @@ Screenshots under `Docs/report/assets/apolyx-s0005/` were not captured at close 
 
 ## Next
 
-Implement **Jord-S0001** — [[../../plan/Jord/Jord-S0001/README]] (start [[../../plan/Jord/Jord-S0001/01-packages]]).
+Implement **Jord-S0001** — [[../../plan/Jord/phase-01/Jord-S0001/README]] (start [[../../plan/Jord/phase-01/Jord-S0001/01-packages]]).

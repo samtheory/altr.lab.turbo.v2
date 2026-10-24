@@ -2,7 +2,7 @@
 title: "feature_list — product intent"
 description: "Raw feature instructions awaiting implementation"
 created: 2026-09-19
-updated: 2026-10-21
+updated: 2026-10-24
 tags:
   - feature
   - readme
@@ -24,7 +24,7 @@ App-scoped tracks live under `feature_list/<app>/` (e.g. [[ui-kit/README]]). Spr
 |-------|-------|--------|
 | **Elements deps** | — | [[00-elements-dependency-rules]] — `@altr/base` leaf; peer elements stay independent |
 | **Apolyx UI kit** | [[ui-kit/README]] | [[ui-kit/00-intent]] — S0001–**S0005** closed · latest [[ui-kit/06-apolyx-s0005-product-gate]] |
-| **Jord** | [[Jord/README]] | [[Jord/00-intent]] — **implement next** · Plan [[../plan/Jord/Jord-S0001/README]] · Architecture [[Jord/02-architecture]] · Studio [[Jord/03-jord-studio]] |
+| **Jord** | [[Jord/README]] | Phase-01 **shipped** [[Jord/04-phase-01-capabilities]] · Phase-02 [[Jord/01-phase-02-candidates]] · Plans [[../plan/Jord/README]] · As-built [[../tech_space/jord/README]] |
 | **Tia** | [[tia/README]] | [[tia/00-intent]] — promoted; **no code**; plan not started |
 | **Artemis** | — | Still [[../idea/artemis/README]] only. Promote after Jord-S0001 |
 

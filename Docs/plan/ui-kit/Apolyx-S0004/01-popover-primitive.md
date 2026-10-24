@@ -24,7 +24,7 @@ Follow the WAI-ARIA **dialog (non-modal)** pattern. This is not the menu-button 
 
 | Part | Role |
 |------|------|
-| `Popover` | Root. `open` / `defaultOpen` / `onOpenChange`. `trigger?: "click" \| "hover"` default `"click"` |
+| `Popover` | Root. `open` / `defaultOpen` / `onOpenChange`. `trigger?: "click" | "hover"` default `"click"` |
 | `PopoverTrigger` | Button by default. `asChild` via Apolyx `Slot`. Sets `aria-expanded` and `aria-controls` |
 | `PopoverAnchor` | Optional positioning element when the trigger is not the anchor. If omitted, the trigger is the anchor |
 | `PopoverContent` | Portaled panel. `side`, `align`, `sideOffset` (default 8), `className`. `role="dialog"`, `aria-modal="false"` |

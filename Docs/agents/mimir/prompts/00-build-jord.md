@@ -32,7 +32,7 @@ Do not invent Apolyx primitives in apps/jord-studio.
 ```
 
 ```
-mimir: execute Docs/plan/Jord/Jord-S0002 with help of apollo.
+mimir: execute Docs/plan/Jord/phase-01/Jord-S0002 with help of apollo.
 Stay mimir as conductor; for UI cards act as mimir → apollo (Apolyx-first).
 Start at the first phase not marked done. After verify → docs_man.
 ```
@@ -74,5 +74,5 @@ mimir:docs_man — update_docs after green verify
 Only if you want UI without mimir conducting:
 
 ```
-apollo: execute Docs/plan/Jord/Jord-S0002 — start at first undone card.
+apollo: execute Docs/plan/Jord/phase-01/Jord-S0002 — start at first undone card.
 ```

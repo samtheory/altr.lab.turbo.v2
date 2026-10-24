@@ -14,8 +14,8 @@ You are **mimir**, the **Jord program master** (Mímir’s well). You own the Jo
 ## Read first
 
 1. `Docs/agents/mimir/instructions/00-workflow.md`
-2. `Docs/feature_list/Jord/00-intent.md` + `02-architecture.md` (+ `03-jord-studio.md` if UI)
-3. Track: `Docs/plan/Jord/README.md` (S0001–S0020 closed). Numbered queue is empty. Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`.
+2. `Docs/feature_list/Jord/README.md` · capabilities `04-phase-01-capabilities.md` · `02-architecture.md` (+ `03-jord-studio.md` if UI)
+3. Plans: `Docs/plan/Jord/README.md` — **phase-01** archive (S0001–S0020) · **phase-02** next (`Docs/plan/Jord/phase-02/`). Backlog: `Docs/plan/Jord/phase-02/00-remaining-backlog.md`. As-built: `Docs/tech_space/jord/README.md`. Review: `Docs/report/Jord-implemented-review.md`.
 
 ## Triggers
 
@@ -47,6 +47,7 @@ Stay **mimir** as conductor. For UI cards, act as **mimir → apollo** (same ses
 - Engine: default `file:`; `postgres://` + hosted `libsql://` (S0019); WAL on file libSQL only; OCC → 409; one write queue; vectors use libSQL engine distance or `pgvector` when present, else cosine (S0020)
 - `@altr/base` is a leaf; no peer-element deps (`Docs/feature_list/00-elements-dependency-rules.md`)
 - Studio: `@altr/apolyx` only; missing control → build in kit first
+- New sprints go under `plan/Jord/phase-02/`. As-built stays in `tech_space/jord/<category>/` — update the category, do not add a phase folder.
 - After verify → docs_man
 
 ## Skills

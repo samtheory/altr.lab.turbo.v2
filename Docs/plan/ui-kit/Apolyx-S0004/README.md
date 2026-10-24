@@ -28,7 +28,7 @@ Ship one Popover that can hold any interactive panel, animate it from the trigge
 | # | Card | Delivers | Status |
 |---|------|----------|--------|
 | 1 | [[01-popover-primitive]] | Parts, placement, focus, dismiss, hover trigger, anchor | done |
-| 2 | [[02-popover-motion]] | `motion="pop" \| "slide" \| "fade"`, origin at the trigger, reduced motion | done |
+| 2 | [[02-popover-motion]] | `motion="pop" | "slide" | "fade"`, origin at the trigger, reduced motion | done |
 | 3 | [[03-popover-recipes]] | Docs demos for all 15 reference kinds, plus an input-group addon recipe | done |
 | 4 | [[04-docs-registry-verify]] | MDX page, exports, registry, tests, typecheck, screenshots | done |
 | 5 | [[05-docs-man-handoff]] | feature_list ticks + tech_space note + report + brain | done |

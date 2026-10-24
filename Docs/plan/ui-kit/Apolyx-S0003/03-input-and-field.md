@@ -45,8 +45,8 @@ States: `disabled`, `readOnly` (muted background, no focus ring change), `aria-i
 |-------------|---------|
 | `labelAside?: ReactNode` | Content at the end of the label row in `top` layout: a link ("Forgot password?"), a `Tooltip` info icon, or a `Badge`. Ignored in `floating` / `inline` |
 | `optional?: boolean` | Shows a muted "(optional)" after the label. Mutually exclusive with `required` in practice; if both are set, `required` wins |
-| `orientation?: "vertical" \| "horizontal"` | `horizontal` puts label + description in a left column (`labelWidth`, default `12rem`) and the control + error on the right. Collapses to vertical below `sm` with a container query |
-| `error?: ReactNode \| ReactNode[]` | An array renders a `<ul>` of messages, each with a small icon; still one `role="alert"` region |
+| `orientation?: "vertical" | "horizontal"` | `horizontal` puts label + description in a left column (`labelWidth`, default `12rem`) and the control + error on the right. Collapses to vertical below `sm` with a container query |
+| `error?: ReactNode | ReactNode[]` | An array renders a `<ul>` of messages, each with a small icon; still one `role="alert"` region |
 | `FieldCounter` | `<FieldCounter max={160} />` inside `Field` reads the control's length from context (Field tracks `length` alongside `filled`). Text `12 / 160`; turns `warning` at 90%, `destructive` over `max` and sets the field invalid. `aria-live="polite"` only when within 10% of `max` |
 | `size` | Passes `sm` / `md` / `lg` to `FieldInput` heights |
 

@@ -116,7 +116,7 @@ Requires Strix CLI/cloud credentials per https://docs.strix.ai — skills teach 
 
 **Implement Jord Slice 0**
 
-> Use `mimir`. Read `Docs/feature_list/Jord/00-intent.md` and execute `Docs/plan/Jord/Jord-S0001` from the first undone card. Say `mimir:sindri` / `mimir:saga` / `mimir:heimdall` for specialists. Studio UI later → `apollo`.
+> Use `mimir`. Read `Docs/feature_list/Jord/00-intent.md` and execute `Docs/plan/Jord/phase-01/Jord-S0001` from the first undone card. Say `mimir:sindri` / `mimir:saga` / `mimir:heimdall` for specialists. Studio UI later → `apollo`.
 
 **Image to 3D**
 

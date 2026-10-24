@@ -47,25 +47,25 @@ flowchart LR
 | Order | Track | What “done” means | Docs |
 |-------|--------|-------------------|------|
 | **1** | **Apolyx-S0005** | Select, Combobox, Pagination, Accordion, Scroll Area, Progress, Radio Group shipped | **Closed 2026-10-21** — [[../feature_list/ui-kit/06-apolyx-s0005-product-gate]] · [[../tech_space/ui-kit/10-s0005-product-gate]] |
-| **2** | **Jord-S0001** | `data/jord.db`, `@altr/jord`, `@altr/jord-server`, OCC `records`, WAL + snapshot | **Closed 2026-10-21** — [[../tech_space/jord/00-s0001-slice0]] · Plan [[Jord/Jord-S0001/README]] |
-| **3** | **Jord Studio S1** (`Jord-S0002`) | `apps/jord-studio` lists / browses / mutates `records` via server; UI by **apollo** | **Closed 2026-10-21** — [[../tech_space/jord/01-s0002-studio-s1]] · Plan [[Jord/Jord-S0002/README]] |
-| **3b** | **Jord Studio S1.5** (`Jord-S0003`) | Categorized side nav + Supabase-like Insert/edit for `records` | **Closed 2026-10-21** — [[../tech_space/jord/02-s0003-studio-shell]] · Plan [[Jord/Jord-S0003/README]] |
-| **3c** | **Jord Studio S2** (`Jord-S0004`) | Schema introspect + visualizer + additive `ADD COLUMN` live save | **Closed 2026-10-21** — [[../tech_space/jord/03-s0004-schema]] · Plan [[Jord/Jord-S0004/README]] |
-| **3d** | **Jord Studio S3** (`Jord-S0005`) | Auth sessions + feature roles (`admin` / `editor` / `readonly`); protect jord-server | **Closed 2026-10-21** — [[../tech_space/jord/04-s0005-auth]] · Plan [[Jord/Jord-S0005/README]] |
-| **3e** | **Jord Studio S4** (`Jord-S0006`) | Generated CRUD API catalog + Studio inspect/toggle panel (+ `records` DELETE) | **Closed 2026-10-21** — [[../tech_space/jord/05-s0006-generated-api]] · Plan [[Jord/Jord-S0006/README]] |
-| **3f** | **Jord Studio S5** (`Jord-S0007`) | In-process jobs / interval schedules + log ring + Studio Runtime panels | **Closed 2026-10-21** — [[../tech_space/jord/06-s0007-jobs-logs]] · Plan [[Jord/Jord-S0007/README]] |
-| **3g** | **Jord Studio S6** (`Jord-S0008`) | Custom APIs + function APIs (built-in steps, `/x/:slug`) | **Closed 2026-10-21** — [[../tech_space/jord/07-s0008-custom-function-apis]] · Plan [[Jord/Jord-S0008/README]] |
-| **3h** | **Jord Studio S7** (`Jord-S0009`) | Policies (server middleware) + AFTER write triggers; Studio Database panels | **Closed 2026-10-23** — [[../tech_space/jord/08-s0009-triggers-policies]] · Plan [[Jord/Jord-S0009/README]] |
-| **3i** | **Jord Studio S8** (`Jord-S0010`) | `PostgresAdapter` for `postgres://` / `postgresql://`; `file:` stays the default; Studio shows dialect | **Closed 2026-10-24** — [[../tech_space/jord/09-s0010-postgres]] · Plan [[Jord/Jord-S0010/README]] |
-| **3j** | **Jord Studio S9** (`Jord-S0011`) | Realtime: write-path emit → SSE; Studio Live on `records` | **Closed 2026-10-24** — [[../tech_space/jord/10-s0011-realtime]] · Plan [[Jord/Jord-S0011/README]] |
-| **3k** | **Multi-table + CREATE TABLE** (`Jord-S0012`) | Create user tables; open/browse beyond hardcoded `records` | **Closed 2026-10-24** — [[../tech_space/jord/11-s0012-multi-table]] · Plan [[Jord/Jord-S0012/README]] |
-| **3l** | **Blob buckets** (`Jord-S0013`) | Local blob storage + Studio browser | **Closed 2026-10-24** — [[../tech_space/jord/12-s0013-blobs]] · [[Jord/Jord-S0013/README]] |
-| **3m** | **Vectors** (`Jord-S0014` / Studio S11) | Embedding / `searchVectors` + Studio panel | **Closed 2026-10-24** — [[../tech_space/jord/13-s0014-vectors]] · [[Jord/Jord-S0014/README]] |
-| **3n** | **User-table writes** (`Jord-S0015`) | Insert/update/delete on user tables + Studio grid | **Closed 2026-10-24** — [[../tech_space/jord/14-s0015-user-table-writes]] · [[Jord/Jord-S0015/README]] |
-| **3o** | **Schema DDL** (`Jord-S0016`) | DROP / RENAME / type change (admin) | **Closed 2026-10-24** — [[../tech_space/jord/15-s0016-schema-drop-rename]] · [[Jord/Jord-S0016/README]] |
-| **3p** | **Postgres RLS** (`Jord-S0017`) | Compile `jord_policies` → native RLS on `records` | **Closed 2026-10-24** — [[../tech_space/jord/16-s0017-postgres-rls]] · [[Jord/Jord-S0017/README]] |
-| **3q** | **Realtime WS** (`Jord-S0018`) | Multi-table fanout + WebSocket; SSE stays | **Closed 2026-10-24** — [[../tech_space/jord/17-s0018-realtime-ws]] · [[Jord/Jord-S0018/README]] |
-| **3r** | **Numbered tail** (`Jord-S0019`–`Jord-S0020`) | Hosted libsql, then hard vectors. **Queue empty** | **Closed 2026-10-24** — [[../tech_space/jord/19-s0020-hard-vectors]] · [[Jord/Jord-S0020/README]] |
+| **2** | **Jord-S0001** | `data/jord.db`, `@altr/jord`, `@altr/jord-server`, OCC `records`, WAL + snapshot | **Closed 2026-10-21** — [[../tech_space/jord/overview]] · Plan [[Jord/phase-01/Jord-S0001/README]] |
+| **3** | **Jord Studio S1** (`Jord-S0002`) | `apps/jord-studio` lists / browses / mutates `records` via server; UI by **apollo** | **Closed 2026-10-21** — [[../tech_space/jord/studio]] · Plan [[Jord/phase-01/Jord-S0002/README]] |
+| **3b** | **Jord Studio S1.5** (`Jord-S0003`) | Categorized side nav + Supabase-like Insert/edit for `records` | **Closed 2026-10-21** — [[../tech_space/jord/studio]] · Plan [[Jord/phase-01/Jord-S0003/README]] |
+| **3c** | **Jord Studio S2** (`Jord-S0004`) | Schema introspect + visualizer + additive `ADD COLUMN` live save | **Closed 2026-10-21** — [[../tech_space/jord/schema]] · Plan [[Jord/phase-01/Jord-S0004/README]] |
+| **3d** | **Jord Studio S3** (`Jord-S0005`) | Auth sessions + feature roles (`admin` / `editor` / `readonly`); protect jord-server | **Closed 2026-10-21** — [[../tech_space/jord/auth]] · Plan [[Jord/phase-01/Jord-S0005/README]] |
+| **3e** | **Jord Studio S4** (`Jord-S0006`) | Generated CRUD API catalog + Studio inspect/toggle panel (+ `records` DELETE) | **Closed 2026-10-21** — [[../tech_space/jord/apis]] · Plan [[Jord/phase-01/Jord-S0006/README]] |
+| **3f** | **Jord Studio S5** (`Jord-S0007`) | In-process jobs / interval schedules + log ring + Studio Runtime panels | **Closed 2026-10-21** — [[../tech_space/jord/jobs]] · Plan [[Jord/phase-01/Jord-S0007/README]] |
+| **3g** | **Jord Studio S6** (`Jord-S0008`) | Custom APIs + function APIs (built-in steps, `/x/:slug`) | **Closed 2026-10-21** — [[../tech_space/jord/apis]] · Plan [[Jord/phase-01/Jord-S0008/README]] |
+| **3h** | **Jord Studio S7** (`Jord-S0009`) | Policies (server middleware) + AFTER write triggers; Studio Database panels | **Closed 2026-10-23** — [[../tech_space/jord/policies]] · Plan [[Jord/phase-01/Jord-S0009/README]] |
+| **3i** | **Jord Studio S8** (`Jord-S0010`) | `PostgresAdapter` for `postgres://` / `postgresql://`; `file:` stays the default; Studio shows dialect | **Closed 2026-10-24** — [[../tech_space/jord/dialects]] · Plan [[Jord/phase-01/Jord-S0010/README]] |
+| **3j** | **Jord Studio S9** (`Jord-S0011`) | Realtime: write-path emit → SSE; Studio Live on `records` | **Closed 2026-10-24** — [[../tech_space/jord/realtime]] · Plan [[Jord/phase-01/Jord-S0011/README]] |
+| **3k** | **Multi-table + CREATE TABLE** (`Jord-S0012`) | Create user tables; open/browse beyond hardcoded `records` | **Closed 2026-10-24** — [[../tech_space/jord/schema]] · Plan [[Jord/phase-01/Jord-S0012/README]] |
+| **3l** | **Blob buckets** (`Jord-S0013`) | Local blob storage + Studio browser | **Closed 2026-10-24** — [[../tech_space/jord/blobs]] · [[Jord/phase-01/Jord-S0013/README]] |
+| **3m** | **Vectors** (`Jord-S0014` / Studio S11) | Embedding / `searchVectors` + Studio panel | **Closed 2026-10-24** — [[../tech_space/jord/vectors]] · [[Jord/phase-01/Jord-S0014/README]] |
+| **3n** | **User-table writes** (`Jord-S0015`) | Insert/update/delete on user tables + Studio grid | **Closed 2026-10-24** — [[../tech_space/jord/writes]] · [[Jord/phase-01/Jord-S0015/README]] |
+| **3o** | **Schema DDL** (`Jord-S0016`) | DROP / RENAME / type change (admin) | **Closed 2026-10-24** — [[../tech_space/jord/schema]] · [[Jord/phase-01/Jord-S0016/README]] |
+| **3p** | **Postgres RLS** (`Jord-S0017`) | Compile `jord_policies` → native RLS on `records` | **Closed 2026-10-24** — [[../tech_space/jord/policies]] · [[Jord/phase-01/Jord-S0017/README]] |
+| **3q** | **Realtime WS** (`Jord-S0018`) | Multi-table fanout + WebSocket; SSE stays | **Closed 2026-10-24** — [[../tech_space/jord/realtime]] · [[Jord/phase-01/Jord-S0018/README]] |
+| **3r** | **Numbered tail** (`Jord-S0019`–`Jord-S0020`) | Hosted libsql, then hard vectors. **Queue empty** | **Closed 2026-10-24** — [[../tech_space/jord/vectors]] · [[Jord/phase-01/Jord-S0020/README]] |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | Product fork · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
@@ -74,7 +74,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–**S0020** are closed. The numbered Jord queue is empty ([[Jord/00-remaining-backlog]]). **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–**S0020** are closed. The numbered Jord queue is empty ([[Jord/phase-02/00-remaining-backlog]]). **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

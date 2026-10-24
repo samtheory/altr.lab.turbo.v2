@@ -50,4 +50,4 @@ tags:
 | Data grid engine, Command palette | Artemis / Studio density |
 | Dropdown submenus, candlestick, remote registry | Deferred |
 
-**Next lab implement track:** [[../../plan/Jord/Jord-S0001/README]] (not another Apolyx sprint unless a missing control blocks an app — see `.cursor/rules/apolyx-first.mdc`).
+**Next lab implement track:** [[../../plan/Jord/phase-01/Jord-S0001/README]] (not another Apolyx sprint unless a missing control blocks an app — see `.cursor/rules/apolyx-first.mdc`).

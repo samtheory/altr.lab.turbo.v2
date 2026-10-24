@@ -15,10 +15,10 @@ tags:
 |-------|--------|
 | Frontends | React / Next.js. Today that is the Apolyx docs app (`apps/apolyx`) plus Tailwind and `@altr/apolyx` |
 | API | Hono on Node (`engines.node` >= 20). `@altr/jord-server` in `cloud/jord` (default port 8787) |
-| Primary DB | **Jord** — libSQL file `data/jord.db` via `@altr/jord`. Drizzle on libSQL. Intent: [[../feature_list/Jord/00-intent]] · as-built: [[../tech_space/jord/00-s0001-slice0]] · layout: [[../feature_list/Jord/02-architecture]] |
+| Primary DB | **Jord** — libSQL file `data/jord.db` via `@altr/jord`. Drizzle on libSQL. Intent: [[../feature_list/Jord/00-intent]] · as-built: [[../tech_space/jord/overview]] · layout: [[../feature_list/Jord/02-architecture]] |
 | Studio | Planned `@altr/jord-studio` in `apps/jord-studio` — [[../feature_list/Jord/03-jord-studio]] |
 | Optional | PocketBase for a quick admin side path. It is not Jord |
-| Later | Hosted Turso URL, then Postgres as a second Drizzle driver. Plugins need dialect adapters. See [[../feature_list/Jord/01-later]] |
+| Later | Hosted Turso URL, then Postgres as a second Drizzle driver. Plugins need dialect adapters. See [[../feature_list/Jord/01-phase-02-candidates]] |
 
 ## Why a libSQL file first
 

@@ -74,5 +74,5 @@ elements/*  (jord, apolyx, …)  ──may depend on──►  @altr/base
 
 - Package: `elements/base/README.md`
 - Structure: [[../Altr.lab/structure]]
-- Jord: [[Jord/00-intent]] · [[Jord/02-architecture]]
+- Jord: [[Jord/README]] · [[Jord/00-intent]] · [[Jord/02-architecture]] · [[Jord/04-phase-01-capabilities]]
 - Apolyx: [[ui-kit/00-intent]]

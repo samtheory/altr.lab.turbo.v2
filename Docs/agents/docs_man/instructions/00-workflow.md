@@ -2,7 +2,7 @@
 title: "docs_man workflow — document order"
 description: "Standing instructions for how docs_man updates the altr.lab Docs vault"
 created: 2026-09-19
-updated: 2026-09-19
+updated: 2026-10-24
 tags:
   - agents
   - docs_man
@@ -65,6 +65,28 @@ tags:
 7. **PDF** — If the user provides or requests PDF, follow `.agents/skills/pdf/SKILL.md`.
 8. **Large new specs** — Offer `.agents/skills/doc-coauthoring/` three-stage loop (context → refine → reader test).
 9. **Summarize** — Tell the user what files changed and what remains.
+
+## tech_space shape (living categories)
+
+`plan/` is the sprint archive and the next queue (`phase-01`, `phase-02`, …).
+
+`tech_space/` is the **system manual**: what the code does now. Group it by **category**, not by sprint and not by phase folder.
+
+| Layer | Holds | Agent opens it for |
+|-------|--------|-------------------|
+| `feature_list/` | Intent — what we mean to build | Scope and non-goals |
+| `plan/` | Sprint cards, phased | History and the next checkbox |
+| `tech_space/<product>/<category>/` | Current why / what / how / one example | How to change the code |
+| `report/` | Shipped vs remaining | Status only |
+
+Rules:
+
+1. One category answers one concern. Jord’s map is [[../../tech_space/jord/README]].
+2. Each category entry is `README.md` with: **why**, **what** (contract), **how** (code paths), **example**, **not in yet**.
+3. On ship, **edit that category**. Add another file in the same folder only when the note would mix two concerns.
+4. Do not add `tech_space/<product>/phase-NN/` or `s00xx-*.md` sprint diaries. Point at `plan/` for the card that landed the change.
+5. Keep the note short enough to load alone. Name files and HTTP. Do not paste implementations. Do not repeat sibling categories — link them.
+6. Code wins. If a category and a plan card disagree, fix the category from the code.
 
 ## Structured MD layout rules
 

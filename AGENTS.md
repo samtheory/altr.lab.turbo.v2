@@ -29,8 +29,8 @@ For building the design system (`apollo`, `build apolyx`, `elements/ui-kit`, `ap
 For anything Jord (`mimir`, `build jord`, `elements/jord`, `cloud/jord`, `apps/jord-studio`):
 
 - Follow **mimir** as **program master**: `Docs/agents/mimir/00-index.md`
-- Intent: `Docs/feature_list/Jord/00-intent.md` · Architecture: `Docs/feature_list/Jord/02-architecture.md` · Studio: `Docs/feature_list/Jord/03-jord-studio.md`
-- Active plan: `Docs/plan/Jord/README.md`
+- Intent map: `Docs/feature_list/Jord/README.md` · Capabilities: `Docs/feature_list/Jord/04-phase-01-capabilities.md` · Architecture: `Docs/feature_list/Jord/02-architecture.md` · Studio: `Docs/feature_list/Jord/03-jord-studio.md`
+- Plans: `Docs/plan/Jord/README.md` (phase-01 archive · phase-02 next) · As-built: `Docs/tech_space/jord/README.md`
 - Hats: **sindri** (engine), **saga** (schema), **heimdall** (security), **apollo** (Studio UI / kit), **docs_man** (vault)
 - Say `mimir … with apollo` to run Studio under mimir’s conduct; mimir still owns the outcome
 - Skills: `.agents/skills/mimir/` · companion list in `Docs/agents/mimir/skills/README.md`

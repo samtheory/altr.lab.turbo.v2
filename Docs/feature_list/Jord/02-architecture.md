@@ -13,7 +13,7 @@ tags:
 
 # Jord — architecture, dialects, and repo layout
 
-> Placement, ports, and concurrency. Slice 0 contract: [[00-intent]]. Studio: [[03-jord-studio]]. Later: [[01-later]]. Decisions: [[../../idea/Jord/2026-10-18-sharpen]].
+> Placement, ports, and concurrency. Slice 0 contract: [[00-intent]]. Studio: [[03-jord-studio]]. Later: [[01-phase-02-candidates]]. Decisions: [[../../idea/Jord/2026-10-18-sharpen]].
 
 ## Dual-engine dialect port (hexagonal)
 
@@ -24,15 +24,15 @@ App and server code depend on a **unified port**, not on libSQL or Postgres APIs
         │
         ▼
   JordDriverPort          ← interface only
-   ├── LibSqlAdapter      ← Slice 0: implemented
-   └── PostgresAdapter    ← reserved seam: specified, not installed in Slice 0
+   ├── LibSqlAdapter      ← file: (Slice 0) and libsql:// (S0019)
+   └── PostgresAdapter    ← postgres:// / postgresql:// (S0010)
 ```
 
 | Piece | Role |
 |-------|------|
 | `JordDriverPort` | Dialect-agnostic surface: open, query/execute through Drizzle, close. Specialized ops (e.g. `searchVectors`) declared on the port and implemented per adapter |
 | `LibSqlAdapter` | `file:` (local zero-infra) and `libsql://` (Turso edge, S0019). WAL pragmas on `file:` only. Engine vectors when `vector_distance_cos` exists (S0020) |
-| `PostgresAdapter` | `postgres://` / `postgresql://`. `pg` Pool, bigint ms timestamps, same port CRUD. **Shipped in Jord-S0010** · [[../../tech_space/jord/09-s0010-postgres]]. `pgvector` when the extension loads (S0020) |
+| `PostgresAdapter` | `postgres://` / `postgresql://`. `pg` Pool, bigint ms timestamps, same port CRUD. **Shipped in Jord-S0010** · [[../../tech_space/jord/dialects]]. `pgvector` when the extension loads (S0020) |
 
 ### Dynamic driver activation
 
@@ -82,7 +82,7 @@ Native MVCC and row-level locks. High-concurrency writers do **not** require the
 | Capability | Unified signature / idea | libSQL | Postgres |
 |------------|--------------------------|--------|----------|
 | Vector search | `searchVectors(embedding, options)` on the port | libSQL `vector_distance_cos` + `libsql_vector_idx` (S0020); cosine if the function is absent. `sqlite-vec` is not loaded | `pgvector` `<=>` when `CREATE EXTENSION vector` succeeds; else cosine |
-| Row-level security | “Policies” as a Jord feature | Application middleware in `@altr/jord-server` | Native RLS on `records` compiled from `jord_policies` ([[../../tech_space/jord/16-s0017-postgres-rls]]); middleware remains HTTP 403 authority |
+| Row-level security | “Policies” as a Jord feature | Application middleware in `@altr/jord-server` | Native RLS on `records` compiled from `jord_policies` ([[../../tech_space/jord/policies]]); middleware remains HTTP 403 authority |
 | Triggers / functions | Jord definitions | Dialect SQL emitter | Dialect SQL emitter |
 | Boring columns | Prefer `text` / JSON-as-text in Slice 0 | Same | Same |
 | Timestamps | `created_at` / `updated_at` as 64-bit-safe integers: Drizzle `integer({ mode: 'number' })` or equivalent. Not a 32-bit signed mode | Same 64-bit integer | Unix ms must not overflow |
@@ -134,5 +134,5 @@ one product (Jord)
 
 ## Links
 
-- Slice 0: [[00-intent]] · Studio: [[03-jord-studio]] · Later: [[01-later]]
+- Slice 0: [[00-intent]] · Studio: [[03-jord-studio]] · Later: [[01-phase-02-candidates]]
 - Stack: [[../../Altr.lab/stack]] · Structure: [[../../Altr.lab/structure]]

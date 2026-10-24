@@ -39,7 +39,7 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
 
-**Jord** (S0001–**S0020** done; numbered queue empty): intent [[../feature_list/Jord/00-intent]] · latest [[../tech_space/jord/19-s0020-hard-vectors]] · backlog [[../plan/Jord/00-remaining-backlog]] · **review** [[../report/Jord-implemented-review]] · track [[../plan/Jord/README]].
+**Jord** (phase-01 S0001–**S0020** done; phase-02 queue empty): intent [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · as-built [[../tech_space/jord/README]] · plans [[../plan/Jord/README]] ([[../plan/Jord/phase-01/README|phase-01]] · [[../plan/Jord/phase-02/README|phase-02]]) · **review** [[../report/Jord-implemented-review]] · **handoff** [[../report/Jord-technical-brief]].
 
 ## Agent of record
 

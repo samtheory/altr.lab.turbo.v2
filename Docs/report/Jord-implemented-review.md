@@ -1,6 +1,6 @@
 ---
 title: "Jord — implemented work review (S0001–S0020)"
-description: "Review packet: everything shipped in Jord engine + Studio through hard vectors"
+description: "Review packet: Jord engine + Studio through S0020, one row per closed sprint"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -14,7 +14,7 @@ tags:
 
 # Jord — implemented work review (S0001–S0020)
 
-> **Audience:** reviewers (human or agent). **Scope:** all Jord work closed through 2026-10-24. Truth order: **code** > tech_space > this report. Living map: [[../brain/00-Docs-Brain]]. Track: [[../plan/Jord/README]]. **Numbered queue:** empty — [[../plan/Jord/00-remaining-backlog]].
+> **Audience:** reviewers (human or agent). **Scope:** Jord **phase-01** closed through 2026-10-24. Truth order: **code** > tech_space > this report. Living map: [[../brain/00-Docs-Brain]]. Plans: [[../plan/Jord/README]] · archive [[../plan/Jord/phase-01/README]]. **Phase-02 queue:** empty — [[../plan/Jord/phase-02/README]]. Capabilities: [[../feature_list/Jord/04-phase-01-capabilities]].
 
 **Packages:** `elements/jord` (`@altr/jord`) · `cloud/jord` (`@altr/jord-server`) · `apps/jord-studio` · data: `data/jord.db`, `data/blobs/` (gitignored)
 
@@ -35,13 +35,30 @@ Jord is the lab **data plane**: dialect port (libSQL file + hosted Turso + Postg
 
 ## Shipped by sprint
 
+Scope matches [[../plan/Jord/phase-01/README]]. Each row is closed.
+
 | ID | Scope | Closed | As-built |
 |----|--------|--------|----------|
-| S0001–S0016 | See prior review rows | 2026-10-21…24 | [[../tech_space/jord/00-s0001-slice0]] … [[../tech_space/jord/15-s0016-schema-drop-rename]] |
-| S0017 | Native Postgres RLS from Jord policies | 2026-10-24 | [[../tech_space/jord/16-s0017-postgres-rls]] |
-| S0018 | Realtime WebSockets + multi-table fanout | 2026-10-24 | [[../tech_space/jord/17-s0018-realtime-ws]] |
-| S0019 | Hosted `libsql://` (Turso) | 2026-10-24 | [[../tech_space/jord/18-s0019-hosted-libsql]] |
-| S0020 | Hard vectors (libSQL engine + pgvector) | 2026-10-24 | [[../tech_space/jord/19-s0020-hard-vectors]] |
+| S0001 | Slice 0: `file:` libSQL, WAL, OCC `records`, snapshot | 2026-10-21 | [[../tech_space/jord/overview]] |
+| S0002 | Studio S1 records browser | 2026-10-21 | [[../tech_space/jord/studio]] |
+| S0003 | Side nav + table-editor UX | 2026-10-21 | [[../tech_space/jord/studio]] |
+| S0004 | Schema introspect, visualizer, ADD COLUMN | 2026-10-21 | [[../tech_space/jord/schema]] |
+| S0005 | Studio S3 auth + feature roles | 2026-10-21 | [[../tech_space/jord/auth]] |
+| S0006 | Studio S4 generated CRUD API panel | 2026-10-21 | [[../tech_space/jord/apis]] |
+| S0007 | Studio S5 jobs / cron + logs | 2026-10-21 | [[../tech_space/jord/jobs]] |
+| S0008 | Studio S6 custom + function APIs | 2026-10-21 | [[../tech_space/jord/apis]] |
+| S0009 | Studio S7 triggers + policies | 2026-10-23 | [[../tech_space/jord/policies]] |
+| S0010 | Studio S8 Postgres connection | 2026-10-24 | [[../tech_space/jord/dialects]] |
+| S0011 | Studio S9 realtime (SSE) | 2026-10-24 | [[../tech_space/jord/realtime]] |
+| S0012 | Multi-table browse + CREATE TABLE | 2026-10-24 | [[../tech_space/jord/schema]] |
+| S0013 | Studio S10 local blob buckets | 2026-10-24 | [[../tech_space/jord/blobs]] |
+| S0014 | Studio S11 vectors (caller floats + cosine) | 2026-10-24 | [[../tech_space/jord/vectors]] |
+| S0015 | User-table row writes | 2026-10-24 | [[../tech_space/jord/writes]] |
+| S0016 | Schema DROP / RENAME / type change | 2026-10-24 | [[../tech_space/jord/schema]] |
+| S0017 | Native Postgres RLS from Jord policies (`records`) | 2026-10-24 | [[../tech_space/jord/policies]] |
+| S0018 | Realtime WebSockets + multi-table fanout | 2026-10-24 | [[../tech_space/jord/realtime]] |
+| S0019 | Hosted `libsql://` (Turso) | 2026-10-24 | [[../tech_space/jord/dialects]] |
+| S0020 | Hard vectors (libSQL engine + pgvector) | 2026-10-24 | [[../tech_space/jord/vectors]] |
 
 ---
 
@@ -56,9 +73,11 @@ Jord is the lab **data plane**: dialect port (libSQL file + hosted Turso + Postg
 | Auth + feature roles | **Done** | |
 | Policies + triggers | **Done** | Middleware; Postgres also RLS on `records` |
 | Realtime SSE + WebSocket | **Done** | Write-path emit; `records` + user tables |
-| Local blobs / vectors | **Done** | Engine distance or `pgvector` when present; cosine fallback (S0014 + S0020) |
-| Hosted `libsql://` | **Done** | Same LibSqlAdapter + token env (S0019) |
-| Hard libSQL vectors / pgvector | **Done** | `vector_distance_cos` + optional `pgvector`; `sqlite-vec` is not loaded |
+| Local blobs | **Done** | Disk bytes + `jord_blobs` metadata (S0013). Remote S3 is backlog |
+| Vectors | **Done** | Caller-supplied floats. `vectorBackend`: `libsql-vector`, `pgvector`, or `cosine` (S0014 + S0020) |
+| Hosted `libsql://` | **Done** | Same LibSqlAdapter + token env. WAL only for `file:` (S0019) |
+| Hard libSQL vectors | **Done** | Exact `vector_distance_cos` at ≤ 200 rows; DiskANN shadow above that. Index names encode `-` as `__`. `sqlite-vec` is not loaded |
+| Postgres `pgvector` | **Done** | Best-effort extension, `embedding_vec vector(1536)`, HNSW, `<=>`. Probe failure keeps cosine |
 | Redis / bot process | Not started | |
 | Artemis product | Idea only | |
 
@@ -85,5 +104,5 @@ Jord is the lab **data plane**: dialect port (libSQL file + hosted Turso + Postg
 
 ## Links for deep dive
 
-- Track [[../plan/Jord/README]] · Backlog [[../plan/Jord/00-remaining-backlog]] · STATUS [[STATUS]]
-- Latest as-built [[../tech_space/jord/19-s0020-hard-vectors]]
+- Plans [[../plan/Jord/README]] · Archive [[../plan/Jord/phase-01/README]] · Phase-02 [[../plan/Jord/phase-02/README]] · STATUS [[STATUS]] · Handoff [[Jord-technical-brief]]
+- Capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · Latest as-built [[../tech_space/jord/vectors]]

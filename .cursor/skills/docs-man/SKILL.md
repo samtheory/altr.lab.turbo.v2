@@ -13,3 +13,5 @@ description: >-
 Mirror of `.agents/skills/docs-man/SKILL.md` for Cursor skill discovery.
 
 Follow `Docs/agents/docs_man/instructions/00-workflow.md` and keep `Docs/brain/00-Docs-Brain.md` accurate after durable doc changes.
+
+`tech_space/` is a living system manual by **category** (why / what / how / one example). `plan/` keeps sprint phases. On ship, update the category note. Do not add `tech_space/<product>/phase-NN/` or per-sprint diaries. Jord map: `Docs/tech_space/jord/README.md`.

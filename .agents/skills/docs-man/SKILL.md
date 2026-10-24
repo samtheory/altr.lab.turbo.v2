@@ -50,6 +50,14 @@ Template: `Docs/agents/templates/structured-note.md`
 
 **code** (`apps/`, `cloud/`, `elements/`) > **tech_space** > **report/plan** > **feature_list**. Spec wins for intent.
 
+## tech_space vs plan
+
+- `plan/<product>/phase-NN/` = sprint cards (archive + next queue).
+- `tech_space/<product>/<category>/README.md` = living manual: **why, what, how, one example, not-yet**.
+- On ship, update the category. Do not add sprint files or `phase-NN` folders under `tech_space/`.
+- Load one category. Link siblings. Do not paste their contracts.
+- Jord map: `Docs/tech_space/jord/README.md`.
+
 ## Checklist
 
 - [ ] Correct folder only (no parallel trees)

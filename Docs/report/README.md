@@ -6,7 +6,7 @@ updated: 2026-10-24
 tags:
   - report
   - readme
-  - Jord-S0014
+  - Jord-S0020
 ---
 
 # report
@@ -14,5 +14,6 @@ tags:
 Status sum-up across feature_list, plan, and tech_space.
 
 - Latest audit: [[STATUS]]
-- **Jord review packet (S0001–S0015):** [[Jord-implemented-review]]
+- **Jord review packet (S0001–S0020):** [[Jord-implemented-review]]
+- **Handoff brief (external):** [[Jord-technical-brief]]
 - Living map: [[../brain/00-Docs-Brain]]

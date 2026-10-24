@@ -13,9 +13,11 @@ tags:
 
 # Jord — libSQL file, first slice
 
-> Contract for [[../../plan/Jord/Jord-S0001/README|Jord-S0001]] (Slice 0). Product: **Jord**. Admin app: **Jord Studio** (not this slice). Decisions: [[../../idea/Jord/2026-10-18-sharpen]]. Layout: [[02-architecture]]. Studio: [[03-jord-studio]].
+> **Slice 0 foundation only** (locked). Full shipped inventory after phase-01: [[04-phase-01-capabilities]]. Phase hub: [[../../plan/Jord/README]].
 
-Later: [[01-later]] · Stack: [[../../Altr.lab/stack]]
+> Contract for [[../../plan/Jord/phase-01/Jord-S0001/README|Jord-S0001]] (Slice 0). Product: **Jord**. Admin app: **Jord Studio** (not this slice). Decisions: [[../../idea/Jord/2026-10-18-sharpen]]. Layout: [[02-architecture]]. Studio: [[03-jord-studio]].
+
+Phase-02 candidates: [[01-phase-02-candidates]] · Stack: [[../../Altr.lab/stack]]
 
 ## Why
 
@@ -77,7 +79,7 @@ Checkpointing stays inside the one server process. Slice 0 does not add a second
 
 Generic **JSON document / key-value / agent scratchpad**. Buckets namespace apps (`lab`, later `artemis` for agent notes).
 
-**Boundary:** Artemis trading domain tables (`orders`, `positions`, `trades`, …) must **not** be stuffed into `records.body`. They get typed Drizzle relations in later slices. Slice 0 does not create them. Slice 0 does not install sqlite-vec. Embeddings live in `jord_embeddings` (S0014); engine ranking is Jord-S0020 ([[../../tech_space/jord/19-s0020-hard-vectors]]).
+**Boundary:** Artemis trading domain tables (`orders`, `positions`, `trades`, …) must **not** be stuffed into `records.body`. They get typed Drizzle relations in later slices. Slice 0 does not create them. Slice 0 does not install sqlite-vec. Embeddings live in `jord_embeddings` (S0014); engine ranking is Jord-S0020 ([[../../tech_space/jord/vectors]]).
 
 ### `records` — columns
 
@@ -136,7 +138,7 @@ Zero rows updated → **409 Conflict**. Inserts start at `version = 1`. Reads re
 
 ## Acceptance
 
-Verified 2026-10-21 against code + tests ([[../../tech_space/jord/00-s0001-slice0]]):
+Verified 2026-10-21 against code + tests ([[../../tech_space/jord/overview]]):
 
 - [x] `createJordClient` recursively creates `data/` then creates `data/jord.db` and `records` with the columns and `(bucket, created_at)` index above
 - [x] Client exposes `JordDriverPort`; only `LibSqlAdapter` is installed; `PostgresAdapter` is not a runtime dependency

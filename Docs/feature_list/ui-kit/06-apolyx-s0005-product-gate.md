@@ -81,5 +81,5 @@ Determinate + indeterminate.
 - Plan: [[../../plan/ui-kit/Apolyx-S0005/README]]
 - As-built: [[../../tech_space/ui-kit/10-s0005-product-gate]]
 - Roadmap: [[../../plan/00-roadmap-apolyx-jord-artemis]]
-- Next implement: [[../../plan/Jord/Jord-S0001/README]]
+- Next implement: [[../../plan/Jord/phase-01/Jord-S0001/README]]
 - Reference: https://shadcnstudio.com/components

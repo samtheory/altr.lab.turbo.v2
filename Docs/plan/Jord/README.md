@@ -1,44 +1,43 @@
 ---
-title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0020 closed; numbered queue is empty"
+title: "plan/Jord — phase hub"
+description: "Jord plan root: phase-01 archive (S0001–S0020) and phase-02 queue for next work"
 created: 2026-10-18
 updated: 2026-10-24
 tags:
   - plan
   - jord
-  - Jord-S0001
-  - Jord-S0019
-  - Jord-S0020
   - readme
+  - phase-01
+  - phase-02
 ---
 
 # plan / Jord
 
-> **Closed through:** [[Jord-S0020/README]] (hard vectors) · **Numbered queue:** empty · Unnumbered leftovers: [[00-remaining-backlog]] · Review: [[../../report/Jord-implemented-review]]
+> Sprint cards for Jord. **phase-01** is closed archive. **phase-02** is where the next numbered work goes after the upcoming report.
 
-| Sprint | Scope | Status |
-|--------|-------|--------|
-| [[Jord-S0001/README]] | Slice 0 engine | **done** (2026-10-21) |
-| [[Jord-S0002/README]] | Studio S1 records browser | **done** (2026-10-21) |
-| [[Jord-S0003/README]] | Side nav + table-editor UX | **done** (2026-10-21) |
-| [[Jord-S0004/README]] | Schema introspect + visualizer + ADD COLUMN | **done** (2026-10-21) |
-| [[Jord-S0005/README]] | Studio S3 auth + feature roles | **done** (2026-10-21) |
-| [[Jord-S0006/README]] | Studio S4 generated CRUD API panel | **done** (2026-10-21) |
-| [[Jord-S0007/README]] | Studio S5 jobs / cron + logs | **done** (2026-10-21) |
-| [[Jord-S0008/README]] | Studio S6 custom + function APIs | **done** (2026-10-21) |
-| [[Jord-S0009/README]] | Studio S7 triggers + policies | **done** (2026-10-23) |
-| [[Jord-S0010/README]] | Studio S8 Postgres connection | **done** (2026-10-24) |
-| [[Jord-S0011/README]] | Studio S9 realtime subscriptions | **done** (2026-10-24) |
-| [[Jord-S0012/README]] | Multi-table browse + CREATE TABLE | **done** (2026-10-24) |
-| [[Jord-S0013/README]] | Studio S10 blob buckets | **done** (2026-10-24) |
-| [[Jord-S0014/README]] | Studio S11 vectors / searchVectors | **done** (2026-10-24) |
-| [[Jord-S0015/README]] | User-table row writes | **done** (2026-10-24) |
-| [[Jord-S0016/README]] | Schema DROP / RENAME / type change | **done** (2026-10-24) |
-| [[Jord-S0017/README]] | Native Postgres RLS from Jord policies | **done** (2026-10-24) |
-| [[Jord-S0018/README]] | Realtime WebSockets + multi-table fanout | **done** (2026-10-24) |
-| [[Jord-S0019/README]] | Hosted `libsql://` (Turso) | **done** (2026-10-24) |
-| [[Jord-S0020/README]] | Hard vectors (libSQL engine + pgvector) | **done** (2026-10-24) |
+Intent: [[../../feature_list/Jord/README]] · Capabilities: [[../../feature_list/Jord/04-phase-01-capabilities]] · As-built: [[../../tech_space/jord/README]] · Review: [[../../report/Jord-implemented-review]] · Status: [[../../report/STATUS]]
 
-**Numbered sprints are closed** through Jord-S0020. Do not open S0021 unless a backlog row is promoted. Product fork: Artemis.
+## Phases
 
-Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]
+| Phase | Folder | Status | Entry |
+|-------|--------|--------|-------|
+| **01** | [[phase-01/README]] | **Closed** — Jord-S0001 … Jord-S0020 | Lab data plane + Studio through hard vectors |
+| **02** | [[phase-02/README]] | **Open queue** — no active sprint yet | Seed: [[phase-02/00-remaining-backlog]] |
+
+```mermaid
+flowchart LR
+  FL[feature_list] --> P1[phase-01 archive]
+  FL --> P2[phase-02 next]
+  P1 --> TS[tech_space/jord categories]
+  P2 -->|implement| CODE[code]
+  CODE -->|update category| TS
+```
+
+## Conductor rule
+
+1. Do not reopen phase-01 cards for new scope — archive only.
+2. New sprints land under `plan/Jord/phase-02/`.
+3. Promote from [[../../feature_list/Jord/01-phase-02-candidates]] or [[phase-02/00-remaining-backlog]] only when a product need opens them.
+4. After ship → update the matching note under `tech_space/jord/<category>/` → docs_man refreshes report + brain.
+
+Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Agent: [[../../agents/mimir/00-index|mimir]]

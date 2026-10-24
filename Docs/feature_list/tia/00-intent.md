@@ -104,4 +104,4 @@ Do not show a single confident ETA when provenance is mixed without labeling sou
 ## Links
 
 - Architecture: [[01-architecture]] · Backlog: [[11-backlog-roadmap]] · Risks: [[13-risks]]
-- Jord truth: [[../Jord/00-intent]] · [[../Jord/01-later]] · [[../Jord/02-architecture]]
+- Jord truth: [[../Jord/00-intent]] · [[../Jord/01-phase-02-candidates]] · [[../Jord/02-architecture]]

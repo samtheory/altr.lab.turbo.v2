@@ -29,6 +29,6 @@ tags:
 | [[09-s0004-popover]] | Popover parts, click/hover, origin-aware motion (67 registry, 149 tests) |
 | [[10-s0005-product-gate]] | **S0005:** Select, Combobox, Pagination, Scroll Area, Progress, Accordion, Radio Group (74 registry, 163 tests) |
 
-Intent: [[../../feature_list/ui-kit/00-intent]] · Sprint plans: [[../../plan/ui-kit/README]] · Carry-overs: [[../../feature_list/ui-kit/01-apolyx-s0001-carryovers]] · **Next implement:** [[../../plan/Jord/Jord-S0001/README]]
+Intent: [[../../feature_list/ui-kit/00-intent]] · Sprint plans: [[../../plan/ui-kit/README]] · Carry-overs: [[../../feature_list/ui-kit/01-apolyx-s0001-carryovers]] · **Next implement:** [[../../plan/Jord/phase-01/Jord-S0001/README]]
 
 Prior notes (historical names): [[../01-hub-ui-kit-base]] · [[../02-ui-kit-storybook]]

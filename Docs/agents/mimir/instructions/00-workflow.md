@@ -8,15 +8,8 @@ tags:
   - mimir
   - jord
   - workflow
-  - Jord-S0011
-  - Jord-S0012
-  - Jord-S0013
-  - Jord-S0014
-  - Jord-S0016
-  - Jord-S0017
-  - Jord-S0018
-  - Jord-S0019
-  - Jord-S0020
+  - phase-01
+  - phase-02
 ---
 
 # mimir — workflow instructions
@@ -33,21 +26,31 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 
 ## Read first
 
-1. [[../../../feature_list/Jord/00-intent]] — engine contract
-2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
-3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0020** closed. Numbered queue is empty — [[../../../plan/Jord/00-remaining-backlog]]
-5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
-6. Review of shipped work: [[../../../report/Jord-implemented-review]]
-7. This file
+1. [[../../../feature_list/Jord/README]] — intent map
+2. [[../../../feature_list/Jord/04-phase-01-capabilities]] — what phase-01 shipped
+3. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
+4. [[../../../feature_list/Jord/03-jord-studio]] — Studio (when UI)
+5. Plan hub [[../../../plan/Jord/README]] — **phase-01** archive · **phase-02** next queue [[../../../plan/Jord/phase-02/README]]
+6. As-built [[../../../tech_space/jord/README]]
+7. Review [[../../../report/Jord-implemented-review]]
+8. This file
+
+## Phases
+
+| Phase | Plans | As-built | Status |
+|-------|-------|----------|--------|
+| **01** | [[../../../plan/Jord/phase-01/README]] | [[../../../tech_space/jord/README]] (categories, not a phase folder) | **Closed** (S0001–S0020) |
+| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — backlog [[../../../plan/Jord/phase-02/00-remaining-backlog]] |
+
+Do **not** put new sprint cards under phase-01. Phase-02 owns the next numbered work after the upcoming report.
 
 ## Conductor rules
 
-1. **One active Jord sprint at a time.** Pick the first card not done; finish “Done when” before the next.
+1. **One active Jord sprint at a time.** Pick the first card not done under **phase-02**; finish “Done when” before the next.
 2. **Stay mimir as the speaker of record.** When a card is UI, say you are acting as **mimir → apollo**, load [[../../apollo/instructions/00-workflow]] / apollo skill, and build with `@altr/apolyx` only.
 3. **Never invent kit primitives in `apps/jord-studio`.** Missing control → apollo builds in `elements/ui-kit` first, then import.
 4. **Never open `data/jord.db` from the browser.** Studio talks to `@altr/jord-server` (or the Next BFF that proxies it).
-5. **After verify → docs_man.** Tick intent/plan acceptance from command proof; write `tech_space`; refresh STATUS + brain.
+5. **After verify → docs_man.** Tick intent/plan acceptance from command proof; update the matching `tech_space/jord/<category>/README.md`; refresh STATUS + brain.
 6. Pure Apolyx work with **no** Jord surface → user should call **apollo** alone. Vault-only → **docs_man** alone.
 
 ## Hard constraints (engine — still true)
@@ -60,87 +63,9 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 6. No Redis / Mongo. Vector search uses libSQL engine distance or `pgvector` when present; cosine is the fallback (S0020). `sqlite-vec` is not loaded.
 7. `@altr/base` is a **leaf** — [[../../../feature_list/00-elements-dependency-rules]].
 
-## Active sprint routing
+## Closed — phase-01
 
-### Closed — Jord-S0001 (engine)
-
-See [[../../../plan/Jord/Jord-S0001/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/00-s0001-slice0]].
-
-### Closed — Jord-S0002 (Studio S1)
-
-See [[../../../plan/Jord/Jord-S0002/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/01-s0002-studio-s1]].
-
-### Closed — Jord-S0003 (Studio shell + table-editor UX)
-
-See [[../../../plan/Jord/Jord-S0003/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/02-s0003-studio-shell]].
-
-### Closed — Jord-S0004 (Studio S2 schema foundation)
-
-See [[../../../plan/Jord/Jord-S0004/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/03-s0004-schema]].
-
-### Closed — Jord-S0005 (Studio S3 auth + feature roles)
-
-See [[../../../plan/Jord/Jord-S0005/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/04-s0005-auth]].
-
-### Closed — Jord-S0006 (Studio S4 generated CRUD API)
-
-See [[../../../plan/Jord/Jord-S0006/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/05-s0006-generated-api]].
-
-### Closed — Jord-S0007 (Studio S5 jobs / cron + logs)
-
-See [[../../../plan/Jord/Jord-S0007/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/06-s0007-jobs-logs]].
-
-### Closed — Jord-S0008 (Studio S6 custom + function APIs)
-
-See [[../../../plan/Jord/Jord-S0008/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/07-s0008-custom-function-apis]].
-
-### Closed — Jord-S0009 (Studio S7 triggers + policies)
-
-See [[../../../plan/Jord/Jord-S0009/README]] (done 2026-10-23). As-built: [[../../../tech_space/jord/08-s0009-triggers-policies]].
-
-### Closed — Jord-S0010 (Studio S8 Postgres connection)
-
-See [[../../../plan/Jord/Jord-S0010/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/09-s0010-postgres]].
-
-### Closed — Jord-S0011 (Studio S9 realtime)
-
-See [[../../../plan/Jord/Jord-S0011/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/10-s0011-realtime]].
-
-### Closed — Jord-S0012 (multi-table + CREATE TABLE)
-
-See [[../../../plan/Jord/Jord-S0012/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/11-s0012-multi-table]].
-
-### Closed — Jord-S0013 (Studio S10 blob buckets)
-
-See [[../../../plan/Jord/Jord-S0013/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/12-s0013-blobs]].
-
-### Closed — Jord-S0014 (Studio S11 vectors)
-
-See [[../../../plan/Jord/Jord-S0014/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/13-s0014-vectors]].
-
-### Closed — Jord-S0015 (user-table row writes)
-
-See [[../../../plan/Jord/Jord-S0015/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/14-s0015-user-table-writes]].
-
-### Closed — Jord-S0016 (schema DROP / RENAME / type change)
-
-See [[../../../plan/Jord/Jord-S0016/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/15-s0016-schema-drop-rename]].
-
-### Closed — Jord-S0017 (native Postgres RLS)
-
-See [[../../../plan/Jord/Jord-S0017/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/16-s0017-postgres-rls]].
-
-### Closed — Jord-S0018 (realtime WebSockets + multi-table fanout)
-
-See [[../../../plan/Jord/Jord-S0018/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/17-s0018-realtime-ws]].
-
-### Closed — Jord-S0019 (hosted libsql:// / Turso)
-
-See [[../../../plan/Jord/Jord-S0019/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/18-s0019-hosted-libsql]].
-
-### Closed — Jord-S0020 (hard vectors) — last numbered
-
-See [[../../../plan/Jord/Jord-S0020/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/19-s0020-hard-vectors]]. Numbered queue is empty. Do not open S0021 unless [[../../../plan/Jord/00-remaining-backlog]] promotes a row.
+Full table: [[../../../plan/Jord/phase-01/README]]. System manual: [[../../../tech_space/jord/README]]. Capability inventory: [[../../../feature_list/Jord/04-phase-01-capabilities]].
 
 ## Skills discipline
 

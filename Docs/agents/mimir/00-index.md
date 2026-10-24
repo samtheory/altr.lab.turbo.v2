@@ -51,8 +51,8 @@ Saying **`mimir`** (or `mimir build … with apollo`) means: *run the active Jor
 | Studio | `apps/jord-studio` | `@altr/jord-studio` | mimir → **apollo** (UI) |
 | Vault | `Docs/…` | — | mimir → **docs_man** |
 
-Canonical: [[../../feature_list/Jord/00-intent]] · [[../../feature_list/Jord/02-architecture]] · Studio [[../../feature_list/Jord/03-jord-studio]]  
-**Active plan:** none — numbered queue empty ([[../../plan/Jord/00-remaining-backlog]]) · Track [[../../plan/Jord/README]] (through **S0020**) · Latest as-built [[../../tech_space/jord/19-s0020-hard-vectors]]
+Canonical: [[../../feature_list/Jord/README]] · capabilities [[../../feature_list/Jord/04-phase-01-capabilities]] · [[../../feature_list/Jord/02-architecture]] · Studio [[../../feature_list/Jord/03-jord-studio]]  
+**Active plan:** none — **phase-02** queue empty ([[../../plan/Jord/phase-02/README]]) · Archive [[../../plan/Jord/phase-01/README]] · As-built [[../../tech_space/jord/README]]
 
 ## Specialist routing
 

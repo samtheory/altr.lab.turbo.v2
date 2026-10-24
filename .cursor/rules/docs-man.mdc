@@ -12,7 +12,8 @@ When the user says **`update_docs`**, **`document it`**, **`docs_man`**, or clea
 3. Place notes in the correct folder (`idea` → `feature_list` → `plan` → `tech_space` → `report` → refresh `brain`)
 4. Use YAML frontmatter (`title`, `description`, `created`, `updated`, `tags`) per `Docs/agents/templates/structured-note.md`
 5. Prefer code truth over stale report/plan text
-6. For PDFs, use `.agents/skills/pdf/`; for large new specs, use `.agents/skills/doc-coauthoring/`
-7. Summarize which Docs files changed
+6. `tech_space/` is category manuals (why / what / how / example). Update the category on ship. Sprint history stays in `plan/<product>/phase-NN/`. Do not add phase or `s00xx` folders under `tech_space/`
+7. For PDFs, use `.agents/skills/pdf/`; for large new specs, use `.agents/skills/doc-coauthoring/`
+8. Summarize which Docs files changed
 
 Do not invent parallel doc trees. Prefer updating indexes over new top-level folders.

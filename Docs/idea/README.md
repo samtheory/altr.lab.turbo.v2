@@ -40,7 +40,7 @@ Master index: [[2026-10-18-product-catalog]]. Pick one folder, sharpen it, then 
 | Co-Op Sphere | [[co-op-sphere/README]] |
 | PantryYield | [[pantry-yield/README]] |
 | ForgeRealm / CardCraft | [[forge-realm/README]] |
-| Jord | [[Jord/README]] · intent [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/Jord-S0001/README]] |
+| Jord | [[Jord/README]] · intent [[../feature_list/Jord/00-intent]] · plan [[../plan/Jord/phase-01/Jord-S0001/README]] |
 | API client | [[api-client/README]] |
 | Search | [[search/README]] |
 | Tia (Map Engine) | [[Tia (Map Engine)/README]] · intent [[../feature_list/tia/README]] |

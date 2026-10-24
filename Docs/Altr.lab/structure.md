@@ -39,7 +39,7 @@ Full contract: [[../feature_list/00-elements-dependency-rules]].
 
 ## Planned Jord packages (not in the tree yet)
 
-Intent: [[../feature_list/Jord/02-architecture]]. S0001: [[../plan/Jord/Jord-S0001/README]].
+Intent: [[../feature_list/Jord/02-architecture]]. S0001: [[../plan/Jord/phase-01/Jord-S0001/README]].
 
 | Path | Package | Role |
 |------|---------|------|

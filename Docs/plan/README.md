@@ -6,15 +6,8 @@ updated: 2026-10-24
 tags:
   - plan
   - readme
-  - Jord-S0006
-  - Jord-S0007
-  - Jord-S0008
-  - Jord-S0009
-  - Jord-S0010
-  - Jord-S0011
-  - Jord-S0012
-  - Jord-S0013
-  - Jord-S0014
+  - jord
+  - phase-02
 ---
 
 # plan
@@ -31,24 +24,14 @@ After shipping, move narrative to `tech_space/` and refresh `report/` — do not
 
 | Plan | Track | Opened | Owner | Status |
 |------|-------|--------|-------|--------|
-| [[Jord/Jord-S0014/README]] | Jord-S0014 — Studio S11 vectors / searchVectors | 2026-10-24 | mimir | **active** |
-| [[Jord/Jord-S0013/README]] | Jord-S0013 — Studio S10 blob buckets | 2026-10-24 | mimir | closed (2026-10-24) |
-| [[Jord/Jord-S0012/README]] | Jord-S0012 — multi-table browse + CREATE TABLE | 2026-10-24 | mimir | closed (2026-10-24) |
-| [[Jord/Jord-S0011/README]] | Jord-S0011 — Studio S9 realtime subscriptions | 2026-10-24 | mimir | closed (2026-10-24) |
-| [[Jord/Jord-S0010/README]] | Jord-S0010 — Studio S8 Postgres connection | 2026-10-24 | mimir | closed (2026-10-24) |
-| [[Jord/Jord-S0009/README]] | Jord-S0009 — Studio S7 triggers + policies | 2026-10-23 | mimir | closed (2026-10-23) |
-| [[Jord/Jord-S0008/README]] | Jord-S0008 — Studio S6 custom + function APIs | 2026-10-21 | mimir | closed (2026-10-21) |
-| [[Jord/Jord-S0007/README]] | Jord-S0007 — Studio S5 jobs / cron + logs | 2026-10-21 | mimir | closed (2026-10-21) |
-| [[Jord/Jord-S0006/README]] | Jord-S0006 — Studio S4 generated CRUD API | 2026-10-21 | mimir | closed (2026-10-21) |
-| [[Jord/Jord-S0005/README]] | Jord-S0005 — Studio S3 auth + feature roles | 2026-10-21 | mimir | closed (2026-10-21) |
-| [[Jord/Jord-S0004/README]] | Jord-S0004 — Studio S2 schema introspect + visualizer + ADD COLUMN | 2026-10-21 | mimir | closed (2026-10-21) |
-| [[Jord/Jord-S0003/README]] | Jord-S0003 — Studio side nav + table-editor Insert/edit | 2026-10-21 | apollo (mimir) | closed (2026-10-21) |
-| [[Jord/Jord-S0002/README]] | Jord-S0002 — Studio S1 records browser | 2026-10-21 | apollo (mimir) | closed (2026-10-21) |
-| [[Jord/Jord-S0001/README]] | Jord-S0001 — Slice 0 engine | 2026-10-18 | mimir | closed (2026-10-21) |
+| [[Jord/phase-02/README]] | Jord **phase-02** (next numbered queue) | 2026-10-24 | mimir | **open / empty** |
+| [[Jord/phase-01/README]] | Jord **phase-01** archive (S0001–S0020) | 2026-10-18 | mimir | **closed** |
 | [[ui-kit/Apolyx-S0005/README]] | Apolyx-S0005 — product gate | 2026-10-21 | apollo | closed (2026-10-21) |
 | [[ui-kit/Apolyx-S0004/README]] | Apolyx-S0004 — Popover | 2026-10-18 | apollo | closed |
 | [[ui-kit/Apolyx-S0003/README]] | Apolyx-S0003 — Switch + input catalog | 2026-10-14 | apollo | closed |
 | [[ui-kit/Apolyx-S0002/README]] | Apolyx-S0002 — contrast, nav, Field, data | 2026-10-11 | apollo | closed |
 | [[ui-kit/Apolyx-S0001/README]] | Apolyx-S0001 — v1 infra | 2026-10-11 | apollo | closed |
+
+Jord phase-01 sprint folders live under [[Jord/phase-01/README]]. Do not open new Jord cards there — use [[Jord/phase-02/README]].
 
 Track indexes: [[Jord/README]] · [[ui-kit/README]] · Roadmap: [[00-roadmap-apolyx-jord-artemis]]

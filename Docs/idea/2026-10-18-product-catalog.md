@@ -32,7 +32,7 @@ Earlier brainstorm prompt (still useful, especially Artemis on Hyperliquid): [[2
 
 | # | Track | Folder | Vault stage |
 |---|--------|--------|-------------|
-| 7 | **Jord** — libSQL file now, other engines later. Admin: Jord Studio | [[Jord/README]] | Intent + architecture + Studio documented. Plan [[../plan/Jord/Jord-S0001/README]] ready. Implement **after** Apolyx-S0005 per [[../plan/00-roadmap-apolyx-jord-artemis]]. |
+| 7 | **Jord** — libSQL file now, other engines later. Admin: Jord Studio | [[Jord/README]] | Intent + architecture + Studio documented. Plan [[../plan/Jord/phase-01/Jord-S0001/README]] ready. Implement **after** Apolyx-S0005 per [[../plan/00-roadmap-apolyx-jord-artemis]]. |
 
 ## Life systems
 
