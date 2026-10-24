@@ -65,7 +65,7 @@ None of these land in Slice 0. Build order: [[01-later]].
 | Area | What you see and do |
 |------|---------------------|
 | Functions / triggers | Jord definitions; SQL emitted per adapter ([[02-architecture]]) |
-| Policies | On libSQL: enforced in `@altr/jord-server` middleware. On Postgres: compiled to native RLS |
+| Policies | On libSQL: enforced in `@altr/jord-server` middleware. On Postgres: same middleware **plus** compiled native RLS ([[../../tech_space/jord/16-s0017-postgres-rls]]) |
 | Roles | Schema edit, job manage, read-only |
 
 ### Supabase-parity surfaces (roadmap)

@@ -49,6 +49,7 @@ export function PoliciesPanel({ role }: Props) {
   const [rules, setRules] = useState(DEFAULT_RULES);
   const [editRules, setEditRules] = useState(DEFAULT_RULES);
   const [isPending, startTransition] = useTransition();
+  const [dialect, setDialect] = useState<"libsql" | "postgres" | null>(null);
 
   const selected = rows?.find((r) => r.id === selectedId) ?? null;
 
@@ -74,6 +75,22 @@ export function PoliciesPanel({ role }: Props) {
       );
     }
     return data.policies;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/health", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body: { dialect?: string } | null) => {
+        if (cancelled || !body) return;
+        if (body.dialect === "postgres" || body.dialect === "libsql") {
+          setDialect(body.dialect);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -195,6 +212,27 @@ export function PoliciesPanel({ role }: Props) {
           allow when nothing matches. Admin manages; all roles may inspect.
         </p>
       </div>
+
+      {dialect === "postgres" ? (
+        <Alert>
+          <AlertTitle>Postgres RLS</AlertTitle>
+          <AlertDescription>
+            These policies are enforced in the API and compiled to row-level
+            security on <code>records</code>. The API still returns 403 when a
+            policy denies a request.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {dialect === "libsql" ? (
+        <Alert>
+          <AlertTitle>Server middleware</AlertTitle>
+          <AlertDescription>
+            This database enforces policies in jord-server before each records
+            request. Native Postgres RLS is not used on the file database.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       {error ? (
         <Alert variant="destructive">

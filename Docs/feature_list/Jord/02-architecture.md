@@ -82,7 +82,7 @@ Native MVCC and row-level locks. High-concurrency writers do **not** require the
 | Capability | Unified signature / idea | libSQL | Postgres |
 |------------|--------------------------|--------|----------|
 | Vector search | `searchVectors(embedding, options)` on the port | `sqlite-vec` (not Slice 0) | `pgvector` |
-| Row-level security | “Policies” as a Jord feature | Application middleware in `@altr/jord-server` | Compiled to native Postgres RLS when that adapter is live |
+| Row-level security | “Policies” as a Jord feature | Application middleware in `@altr/jord-server` | Native RLS on `records` compiled from `jord_policies` ([[../../tech_space/jord/16-s0017-postgres-rls]]); middleware remains HTTP 403 authority |
 | Triggers / functions | Jord definitions | Dialect SQL emitter | Dialect SQL emitter |
 | Boring columns | Prefer `text` / JSON-as-text in Slice 0 | Same | Same |
 | Timestamps | `created_at` / `updated_at` as 64-bit-safe integers: Drizzle `integer({ mode: 'number' })` or equivalent. Not a 32-bit signed mode | Same 64-bit integer | Unix ms must not overflow |

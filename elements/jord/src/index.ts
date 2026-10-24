@@ -137,6 +137,17 @@ export {
   toTableCell,
 } from "./schema/ddl.js";
 export {
+  buildOperationExpr,
+  compilePolicySql,
+  planSyncRecordsRls,
+  policyMatchExpr,
+  quoteSqlLiteral,
+  rlsPolicyName,
+  RLS_OPERATIONS,
+  type RecordsRlsPlan,
+  type RlsSessionContext,
+} from "./schema/ddl-rls.js";
+export {
   JordSlice0UrlError,
   JordUnsupportedError,
   JordUrlError,

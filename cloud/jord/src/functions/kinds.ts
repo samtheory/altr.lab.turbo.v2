@@ -133,6 +133,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       typeof limitRaw === "number" && Number.isFinite(limitRaw)
         ? Math.max(1, Math.min(Math.floor(limitRaw), 500))
         : 100;
+    jord.bindRlsSession?.({ role, bucket });
     const rows = await jord.listRecordsByBucket(bucket);
     return {
       result: {
@@ -228,9 +229,10 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         ? (body.metadata as string | null)
         : undefined;
 
-    const row = await enqueueWrite(() =>
-      jord.insertRecord({ bucket, body: recordBody, metadata }),
-    );
+    const row = await enqueueWrite(() => {
+      jord.bindRlsSession?.({ role, bucket });
+      return jord.insertRecord({ bucket, body: recordBody, metadata });
+    });
     if (logs) {
       // Dynamic import avoids kinds ↔ triggers ↔ runner cycle.
       const { runTriggersAfterWrite, triggersDisabledFromEnv } = await import(
@@ -272,6 +274,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         `policy ${decision.policy.id} denied select`,
       );
     }
+    jord.bindRlsSession?.({ role, bucket });
     const rows = await jord.listRecordsByBucket(bucket);
     return { result: { bucket, count: rows.length } };
   },

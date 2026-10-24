@@ -71,6 +71,8 @@ describe("jord policies + triggers schema", () => {
         trigger,
       ]);
       expect(jord.compileTriggerSql?.(trigger)).toBeNull();
+      expect(jord.compilePolicySql?.(policy)).toBeNull();
+      await jord.syncRecordsPoliciesRls?.();
 
       expect(await jord.deletePolicy(policy.id)).toBe(true);
       expect(await jord.deleteTrigger(trigger.id)).toBe(true);

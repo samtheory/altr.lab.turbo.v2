@@ -1,6 +1,6 @@
 ---
-title: "Jord — implemented work review (S0001–S0015)"
-description: "Review packet: everything shipped in Jord engine + Studio through vectors; for human/agent review"
+title: "Jord — implemented work review (S0001–S0017)"
+description: "Review packet: everything shipped in Jord engine + Studio through Postgres RLS"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -8,12 +8,12 @@ tags:
   - jord
   - review
   - Jord-S0001
-  - Jord-S0014
+  - Jord-S0017
 ---
 
-# Jord — implemented work review (S0001–S0015)
+# Jord — implemented work review (S0001–S0017)
 
-> **Audience:** reviewers (human or agent). **Scope:** all Jord work closed through 2026-10-24. Truth order: **code** > tech_space > this report. Living map: [[../brain/00-Docs-Brain]]. Track: [[../plan/Jord/README]]. **Next:** Jord-S0016 on [[../plan/Jord/00-remaining-backlog]].
+> **Audience:** reviewers (human or agent). **Scope:** all Jord work closed through 2026-10-24. Truth order: **code** > tech_space > this report. Living map: [[../brain/00-Docs-Brain]]. Track: [[../plan/Jord/README]]. **Next:** Jord-S0018 on [[../plan/Jord/00-remaining-backlog]].
 
 **Packages:** `elements/jord` (`@altr/jord`) · `cloud/jord` (`@altr/jord-server`) · `apps/jord-studio` · data: `data/jord.db`, `data/blobs/` (gitignored)
 
@@ -21,11 +21,11 @@ tags:
 
 ## Executive summary
 
-Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scratchpad `records`, write queue, auth roles, Studio control plane (tables, schema, APIs, jobs, policies, triggers, realtime SSE, multi-table create/browse, user-table row writes, local blobs, vectors). **15 sprints closed.**
+Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scratchpad `records`, write queue, auth roles, Studio control plane (tables, schema, APIs, jobs, policies/triggers, realtime SSE, multi-table create/browse, user-table row writes, local blobs, vectors, Postgres RLS compile). **17 sprints closed.**
 
 | Metric | Value |
 |--------|-------|
-| Closed sprints | Jord-S0001 … Jord-S0015 |
+| Closed sprints | Jord-S0001 … Jord-S0017 |
 | Studio phases | S1–S11 (+ S9.5 multi-table) |
 | Active Jord sprint | _(none — pick from backlog)_ |
 | Product fork (not Jord) | Artemis (idea only) |
@@ -51,6 +51,8 @@ Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scrat
 | S0013 | Local blob buckets + Studio Storage | 2026-10-24 | [[../tech_space/jord/12-s0013-blobs]] |
 | S0014 | Vectors / `searchVectors` + Studio Vectors | 2026-10-24 | [[../tech_space/jord/13-s0014-vectors]] |
 | S0015 | User-table row insert/update/delete | 2026-10-24 | [[../tech_space/jord/14-s0015-user-table-writes]] |
+| S0016 | Schema DROP / RENAME / type change | 2026-10-24 | [[../tech_space/jord/15-s0016-schema-drop-rename]] |
+| S0017 | Native Postgres RLS from Jord policies | 2026-10-24 | [[../tech_space/jord/16-s0017-postgres-rls]] |
 
 ---
 
@@ -68,7 +70,7 @@ Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scrat
 | Generated API panel | **Done** | `records`-centric |
 | Jobs + logs | **Done** | In-process |
 | Custom / function APIs | **Done** | Built-in steps |
-| Policies + triggers | **Done** | App middleware; not native PG RLS |
+| Policies + triggers | **Done** | Middleware both dialects; Postgres also RLS on `records` |
 | Realtime SSE | **Done** | Emit on write path; `records` channel |
 | Local blobs | **Done** | Disk + `jord_blobs`; S3-shaped REST |
 | Vectors / `searchVectors` | **Done** | `jord_embeddings` + cosine lab path |
@@ -91,16 +93,16 @@ Jord is the lab **data plane**: dialect port (libSQL file + Postgres), OCC scrat
 
 ## Suggested review checklist
 
-- [ ] Spot-check as-built notes vs code for S0012–S0014 (newest)
+- [ ] Spot-check as-built notes vs code for S0015–S0017 (newest)
 - [ ] Confirm role gates on schema / blobs / vectors / jobs match Studio UI
 - [ ] Confirm `/health` never leaks connection strings
 - [ ] Confirm gitignore covers `data/*.db*` and `data/blobs/`
-- [ ] Agree next backlog card (Postgres RLS S0017)
-- [ ] Agree when to hard-require sqlite-vec / pgvector
+- [ ] Agree next backlog card (realtime WebSockets S0018)
+- [ ] Agree when to hard-require sqlite-vec / pgvector (S0020 — last numbered)
 
 ---
 
 ## Links for deep dive
 
 - Track [[../plan/Jord/README]] · Backlog [[../plan/Jord/00-remaining-backlog]] · STATUS [[STATUS]]
-- Latest as-built [[../tech_space/jord/15-s0016-schema-drop-rename]]
+- Latest as-built [[../tech_space/jord/16-s0017-postgres-rls]]

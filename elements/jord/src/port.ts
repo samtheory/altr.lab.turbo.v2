@@ -537,6 +537,25 @@ export interface JordDriverPort {
    */
   compileTriggerSql?(def: JordTrigger): string | null;
 
+  /**
+   * Bind request role/bucket for Postgres RLS GUCs (`jord.role`, `jord.bucket`).
+   * No-op on libSQL. Uses async context — call inside the request (and again
+   * inside a write-queue callback) before records SQL.
+   */
+  bindRlsSession?(input: { role: string; bucket?: string | null }): void;
+
+  /**
+   * Native CREATE POLICY for one Jord policy, or null when this dialect
+   * does not compile it (libSQL) or the policy is not compilable.
+   */
+  compilePolicySql?(policy: JordPolicy): string | null;
+
+  /**
+   * Rebuild Postgres RLS on `records` from `jord_policies`.
+   * No-op on libSQL. Throws if DDL fails.
+   */
+  syncRecordsPoliciesRls?(): Promise<void>;
+
   /** User tables from sqlite_master (excludes sqlite_*). */
   listTables(): Promise<string[]>;
   /** Columns via PRAGMA table_info; null if table missing. */

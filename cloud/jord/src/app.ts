@@ -336,6 +336,13 @@ export function createJordApp(deps: JordAppDeps) {
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
   protectedRoutes.use("*", requireAuth);
   protectedRoutes.use("*", async (c, next) => {
+    deps.jord.bindRlsSession?.({
+      role: c.get("jordRole"),
+      bucket: c.req.query("bucket") ?? "",
+    });
+    await next();
+  });
+  protectedRoutes.use("*", async (c, next) => {
     const started = Date.now();
     await next();
     const path = c.req.path;
@@ -715,6 +722,16 @@ export function createJordApp(deps: JordAppDeps) {
     console.warn("[@altr/jord-server] JORD_TRIGGERS_DISABLED — skipping trigger hooks");
   }
 
+  async function syncPoliciesRls(): Promise<void> {
+    if (policiesOff || deps.jord.dialect !== "postgres") return;
+    try {
+      await deps.jord.syncRecordsPoliciesRls?.();
+    } catch (err) {
+      console.error("[@altr/jord-server] rls sync failed", err);
+      throw new HTTPException(500, { message: "rls_sync_failed" });
+    }
+  }
+
   const recordsRoutes = new Hono<{ Variables: JordAuthVariables }>();
   recordsRoutes.use("*", requireGeneratedEnabled(generatedApi, "records"));
 
@@ -743,13 +760,14 @@ export function createJordApp(deps: JordAppDeps) {
       return c.json(policyDeniedBody(decision.policy, "insert"), 403);
     }
 
-    const row = await deps.enqueueWrite(() =>
-      deps.jord.insertRecord({
+    const row = await deps.enqueueWrite(() => {
+      deps.jord.bindRlsSession?.({ role, bucket: body.bucket });
+      return deps.jord.insertRecord({
         bucket: body.bucket!,
         body: body.body!,
         metadata: body.metadata,
-      }),
-    );
+      });
+    });
     await runTriggersAfterWrite({
       jord: deps.jord,
       logs,
@@ -781,6 +799,7 @@ export function createJordApp(deps: JordAppDeps) {
     if (!decision.allowed) {
       return c.json(policyDeniedBody(decision.policy, "select"), 403);
     }
+    deps.jord.bindRlsSession?.({ role: c.get("jordRole"), bucket });
     const rows = await deps.jord.listRecordsByBucket(bucket);
     return c.json(rows.map(publicRecord));
   });
@@ -835,15 +854,19 @@ export function createJordApp(deps: JordAppDeps) {
       return c.json(policyDeniedBody(decision.policy, "update"), 403);
     }
 
-    const result = await deps.enqueueWrite(() =>
-      deps.jord.updateRecord({
+    const result = await deps.enqueueWrite(() => {
+      deps.jord.bindRlsSession?.({
+        role,
+        bucket: body.bucket ?? existing.bucket,
+      });
+      return deps.jord.updateRecord({
         id,
         version: body.version!,
         body: body.body,
         metadata: body.metadata,
         bucket: body.bucket,
-      }),
-    );
+      });
+    });
 
     if (!result.ok) {
       return c.json(
@@ -889,7 +912,10 @@ export function createJordApp(deps: JordAppDeps) {
     if (!decision.allowed) {
       return c.json(policyDeniedBody(decision.policy, "delete"), 403);
     }
-    const deleted = await deps.enqueueWrite(() => deps.jord.deleteRecord(id));
+    const deleted = await deps.enqueueWrite(() => {
+      deps.jord.bindRlsSession?.({ role, bucket: existing.bucket });
+      return deps.jord.deleteRecord(id);
+    });
     if (!deleted) {
       throw new HTTPException(404, { message: "record not found" });
     }
@@ -1593,8 +1619,8 @@ export function createJordApp(deps: JordAppDeps) {
         ? Math.floor(body.priority)
         : 0;
 
-    const row = await deps.enqueueWrite(() =>
-      deps.jord.insertPolicy({
+    const row = await deps.enqueueWrite(async () => {
+      const created = await deps.jord.insertPolicy({
         name: body.name!.trim(),
         tableName,
         operation: body.operation as JordPolicyOperation,
@@ -1602,8 +1628,10 @@ export function createJordApp(deps: JordAppDeps) {
         rules,
         priority,
         enabled: body.enabled,
-      }),
-    );
+      });
+      await syncPoliciesRls();
+      return created;
+    });
     return c.json(publicPolicy(row), 201);
   });
 
@@ -1650,8 +1678,8 @@ export function createJordApp(deps: JordAppDeps) {
       if (rulesErr) throw new HTTPException(400, { message: rulesErr });
     }
 
-    const row = await deps.enqueueWrite(() =>
-      deps.jord.updatePolicy({
+    const row = await deps.enqueueWrite(async () => {
+      const updated = await deps.jord.updatePolicy({
         id,
         name: body.name,
         tableName: body.table_name,
@@ -1660,15 +1688,21 @@ export function createJordApp(deps: JordAppDeps) {
         rules: body.rules,
         priority: body.priority,
         enabled: body.enabled,
-      }),
-    );
+      });
+      if (updated) await syncPoliciesRls();
+      return updated;
+    });
     if (!row) throw new HTTPException(404, { message: "policy not found" });
     return c.json(publicPolicy(row));
   });
 
   protectedRoutes.delete("/policies/:id", requireAlterSchema(), async (c) => {
     const id = c.req.param("id");
-    const deleted = await deps.enqueueWrite(() => deps.jord.deletePolicy(id));
+    const deleted = await deps.enqueueWrite(async () => {
+      const removed = await deps.jord.deletePolicy(id);
+      if (removed) await syncPoliciesRls();
+      return removed;
+    });
     if (!deleted) throw new HTTPException(404, { message: "policy not found" });
     return c.json({ ok: true as const, id });
   });

@@ -1,6 +1,7 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 
-import { Pool, type QueryResultRow } from "pg";
+import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
 import { JordUnsupportedError } from "../errors.js";
 import type {
@@ -59,6 +60,11 @@ import type {
   UpdateRecordResult,
   UpdateTriggerInput,
 } from "../port.js";
+import {
+  compilePolicySql as compilePolicySqlText,
+  planSyncRecordsRls,
+  type RlsSessionContext,
+} from "../schema/ddl-rls.js";
 import {
   buildCreateTableSql,
   clampRowWindow,
@@ -274,6 +280,8 @@ function mapTrigger(row: QueryResultRow): JordTrigger {
   };
 }
 
+const rlsSession = new AsyncLocalStorage<RlsSessionContext>();
+
 export class PostgresAdapter implements JordDriverPort {
   readonly dialect = "postgres" as const;
   private readonly pool: Pool;
@@ -287,11 +295,80 @@ export class PostgresAdapter implements JordDriverPort {
     try {
       await pool.query("SELECT 1");
       await ensurePostgresSchema(pool);
+      const adapter = new PostgresAdapter(pool);
+      await adapter.syncRecordsPoliciesRls();
+      return adapter;
     } catch (err) {
       await pool.end().catch(() => undefined);
       throw err;
     }
-    return new PostgresAdapter(pool);
+  }
+
+  bindRlsSession(input: { role: string; bucket?: string | null }): void {
+    rlsSession.enterWith({
+      role: input.role,
+      bucket: input.bucket ?? "",
+    });
+  }
+
+  compilePolicySql(policy: JordPolicy): string | null {
+    return compilePolicySqlText(policy);
+  }
+
+  async syncRecordsPoliciesRls(): Promise<void> {
+    const policies = await this.listPolicies();
+    const plan = planSyncRecordsRls(policies);
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      for (const sql of plan.statements) {
+        await client.query(sql);
+      }
+      await client.query("COMMIT");
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Records SQL. When a request bound a session, set GUCs in the same
+   * transaction so FORCE RLS sees `jord.role` / `jord.bucket`.
+   * `bypass` turns row_security off (table owner only) so get-by-id can
+   * still return the row for the middleware 403 path.
+   */
+  private async queryRecords(
+    text: string,
+    params: unknown[] = [],
+    mode: "enforce" | "bypass" = "enforce",
+  ): Promise<QueryResult> {
+    const ctx = rlsSession.getStore();
+    if (!ctx && mode === "enforce") {
+      return this.pool.query(text, params);
+    }
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      if (ctx) {
+        await client.query(
+          "SELECT set_config('jord.role', $1, true), set_config('jord.bucket', $2, true)",
+          [ctx.role, ctx.bucket],
+        );
+      }
+      if (mode === "bypass") {
+        await client.query("SET LOCAL row_security = off");
+      }
+      const result = await client.query(text, params);
+      await client.query("COMMIT");
+      return result;
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async close(): Promise<void> {
@@ -305,7 +382,7 @@ export class PostgresAdapter implements JordDriverPort {
   async insertRecord(input: InsertRecordInput): Promise<JordRecord> {
     const now = Date.now();
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.queryRecords(
       `INSERT INTO records (id, bucket, body, metadata, created_at, updated_at, version)
        VALUES ($1, $2, $3, $4, $5, $6, 1)
        RETURNING *`,
@@ -315,16 +392,17 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async getRecord(id: string): Promise<JordRecord | null> {
-    const result = await this.pool.query(
+    const result = await this.queryRecords(
       `SELECT * FROM records WHERE id = $1 LIMIT 1`,
       [id],
+      "bypass",
     );
     const row = result.rows[0];
     return row ? mapRecord(row) : null;
   }
 
   async listRecordsByBucket(bucket: string): Promise<JordRecord[]> {
-    const result = await this.pool.query(
+    const result = await this.queryRecords(
       `SELECT * FROM records WHERE bucket = $1 ORDER BY created_at DESC`,
       [bucket],
     );
@@ -349,7 +427,7 @@ export class PostgresAdapter implements JordDriverPort {
       args.push(input.bucket);
     }
     args.push(input.id, input.version);
-    const result = await this.pool.query(
+    const result = await this.queryRecords(
       `UPDATE records SET ${sets.join(", ")}
        WHERE id = $${i++} AND version = $${i}
        RETURNING *`,
@@ -360,7 +438,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteRecord(id: string): Promise<boolean> {
-    const result = await this.pool.query(`DELETE FROM records WHERE id = $1`, [
+    const result = await this.queryRecords(`DELETE FROM records WHERE id = $1`, [
       id,
     ]);
     return (result.rowCount ?? 0) > 0;

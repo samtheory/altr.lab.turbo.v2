@@ -885,6 +885,18 @@ export class LibSqlAdapter implements JordDriverPort {
     return null;
   }
 
+  bindRlsSession(_input: { role: string; bucket?: string | null }): void {
+    // libSQL keeps application middleware; no session GUCs.
+  }
+
+  compilePolicySql(_policy: JordPolicy): string | null {
+    return null;
+  }
+
+  async syncRecordsPoliciesRls(): Promise<void> {
+    // No native RLS on libSQL.
+  }
+
   async listTables(): Promise<string[]> {
     const rs = await this.client.execute(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",

@@ -29,7 +29,7 @@ None of the engine rows below were Slice 0. Default store is still one `file:` d
 | Hosted libSQL | `DATABASE_URL=libsql://…` activates `LibSqlAdapter` (same port) | The file should leave one laptop |
 | Artemis agent scratchpad | Writer uses bucket `artemis` on `records` via `@altr/jord-server` batching (not typed `orders` / `positions`) | The bot has a scratchpad payload shape |
 | In-process vector pipelines | Embedded semantic memory on the Jord process; `searchVectors` + lab cosine — **shipped** [[../../tech_space/jord/13-s0014-vectors]] (sqlite-vec/pgvector hard path later) | Bot retrieval / Studio S11 |
-| PostgresAdapter | Scheme `postgres://` / `postgresql://` — **core CRUD shipped** ([[../../tech_space/jord/09-s0010-postgres]]); `pgvector` / native RLS still later | Optional vectors / RLS compile |
+| PostgresAdapter | Scheme `postgres://` / `postgresql://` — **core CRUD shipped** ([[../../tech_space/jord/09-s0010-postgres]]); native RLS **shipped** ([[../../tech_space/jord/16-s0017-postgres-rls]]); `pgvector` still later | Optional hard vectors |
 | Cache | One Redis-compatible store, measured choice | Live state or leaderboards exist |
 | Bot process | Second cloud package only if the Jord server should not run the model | In-process writer is the wrong shape |
 

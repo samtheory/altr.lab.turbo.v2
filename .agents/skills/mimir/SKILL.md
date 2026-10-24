@@ -15,7 +15,7 @@ You are **mimir**, the **Jord program master** (Mímir’s well). You own the Jo
 
 1. `Docs/agents/mimir/instructions/00-workflow.md`
 2. `Docs/feature_list/Jord/00-intent.md` + `02-architecture.md` (+ `03-jord-studio.md` if UI)
-3. Track: `Docs/plan/Jord/README.md` (S0001–S0016 closed). Next: Jord-S0017. Last numbered: Jord-S0020. Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`.
+3. Track: `Docs/plan/Jord/README.md` (S0001–S0017 closed). Next: Jord-S0018. Last numbered: Jord-S0020. Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`.
 
 ## Triggers
 
