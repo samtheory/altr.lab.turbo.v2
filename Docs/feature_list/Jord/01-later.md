@@ -12,6 +12,7 @@ tags:
   - Jord-S0006
   - Jord-S0007
   - Jord-S0009
+  - Jord-S0013
 ---
 
 # Jord — later slices
@@ -38,7 +39,7 @@ These are first-class later pillars, not Slice 0 packages.
 | Pillar | Outcome | Home |
 |--------|---------|------|
 | **Realtime (CDC)** | Change Data Capture from SQLite hooks (libSQL) or equivalent; push via SSE and/or WebSockets on `@altr/jord-server` | Server + Studio live views |
-| **Local blob storage** | Lightweight asset / file buckets (S3-compatible API or a simple static file server behind Jord) | `@altr/jord-server` (+ Studio browser) |
+| **Local blob storage** | Lightweight asset / file buckets (S3-shaped REST + local disk; full S3 later) — **shipped** [[../../tech_space/jord/12-s0013-blobs]] | `@altr/jord-server` (+ Studio browser) |
 | **In-process vector pipelines** | Semantic memory pipelines using `sqlite-vec` through `searchVectors` on `JordDriverPort` | `@altr/jord` + server; Postgres maps to `pgvector` later |
 
 ## Jord Studio slices
@@ -58,7 +59,7 @@ Detail: [[03-jord-studio]].
 | Studio S8 | Postgres connection (`PostgresAdapter`) — **done** [[../../plan/Jord/Jord-S0010/README|Jord-S0010]] · [[../../tech_space/jord/09-s0010-postgres]] |
 | Studio S9 | Realtime subscriptions UI (CDC-equivalent + SSE) — **done** [[../../plan/Jord/Jord-S0011/README|Jord-S0011]] · [[../../tech_space/jord/10-s0011-realtime]] |
 | Studio S9.5 | Multi-table browse + CREATE TABLE — **done** [[../../plan/Jord/Jord-S0012/README|Jord-S0012]] · [[../../tech_space/jord/11-s0012-multi-table]] |
-| Studio S10 | Blob buckets browser |
+| Studio S10 | Blob buckets browser — **done** [[../../plan/Jord/Jord-S0013/README|Jord-S0013]] · [[../../tech_space/jord/12-s0013-blobs]] |
 | Studio S11 | Vector / embedding ops surfaced in Studio |
 
 The first Studio plan opens only after Slice 0 acceptance is true.

@@ -1,5 +1,6 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+import { jordBlobs } from "./blobs.js";
 import { jordCustomApis, jordFunctions } from "./functions.js";
 import { jordJobRuns, jordJobs } from "./jobs.js";
 import { jordPolicies } from "./policies.js";
@@ -36,4 +37,5 @@ export const schema = {
   jordCustomApis,
   jordPolicies,
   jordTriggers,
+  jordBlobs,
 };

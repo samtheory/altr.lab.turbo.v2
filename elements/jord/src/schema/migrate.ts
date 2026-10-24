@@ -21,6 +21,7 @@ export async function ensureRecordsSchema(client: Client): Promise<void> {
   await ensureFunctionsSchema(client);
   await ensurePoliciesSchema(client);
   await ensureTriggersSchema(client);
+  await ensureBlobsSchema(client);
 }
 
 /** Studio S5 job definitions + run history. */
@@ -142,5 +143,29 @@ export async function ensureTriggersSchema(client: Client): Promise<void> {
   await client.execute(`
     CREATE INDEX IF NOT EXISTS jord_triggers_table_event_idx
     ON jord_triggers (table_name, event)
+  `);
+}
+
+/** Studio S10 blob object metadata. */
+export async function ensureBlobsSchema(client: Client): Promise<void> {
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_blobs (
+      id TEXT PRIMARY KEY NOT NULL,
+      bucket TEXT NOT NULL,
+      key TEXT NOT NULL,
+      content_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      etag TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE UNIQUE INDEX IF NOT EXISTS jord_blobs_bucket_key_uidx
+    ON jord_blobs (bucket, key)
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_blobs_bucket_key_idx
+    ON jord_blobs (bucket, key)
   `);
 }

@@ -17,6 +17,7 @@ import type {
   InsertPolicyInput,
   InsertRecordInput,
   InsertTriggerInput,
+  JordBlob,
   JordColumnInfo,
   JordCustomApi,
   JordDriverPort,
@@ -35,6 +36,7 @@ import type {
   JordTriggerTiming,
   ListTableRowsInput,
   ListTableRowsResult,
+  UpsertBlobMetaInput,
   UpdateCustomApiInput,
   UpdateFunctionInput,
   UpdateJobInput,
@@ -114,6 +116,19 @@ function mapRecord(row: QueryResultRow): JordRecord {
     createdAt: num(row.created_at),
     updatedAt: num(row.updated_at),
     version: num(row.version),
+  };
+}
+
+function mapBlob(row: QueryResultRow): JordBlob {
+  return {
+    id: String(row.id),
+    bucket: String(row.bucket),
+    key: String(row.key),
+    contentType: String(row.content_type),
+    size: num(row.size),
+    etag: String(row.etag),
+    createdAt: num(row.created_at),
+    updatedAt: num(row.updated_at),
   };
 }
 
@@ -936,6 +951,71 @@ export class PostgresAdapter implements JordDriverPort {
       return out;
     });
     return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
+  }
+
+  async listBlobBuckets(): Promise<string[]> {
+    const result = await this.pool.query(
+      `SELECT DISTINCT bucket FROM jord_blobs ORDER BY bucket ASC`,
+    );
+    return result.rows.map((row) => String(row.bucket));
+  }
+
+  async listBlobs(bucket: string): Promise<JordBlob[]> {
+    const result = await this.pool.query(
+      `SELECT * FROM jord_blobs WHERE bucket = $1 ORDER BY key ASC`,
+      [bucket],
+    );
+    return result.rows.map(mapBlob);
+  }
+
+  async getBlobMeta(bucket: string, key: string): Promise<JordBlob | null> {
+    const result = await this.pool.query(
+      `SELECT * FROM jord_blobs WHERE bucket = $1 AND key = $2 LIMIT 1`,
+      [bucket, key],
+    );
+    const row = result.rows[0];
+    return row ? mapBlob(row) : null;
+  }
+
+  async upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob> {
+    const existing = await this.getBlobMeta(input.bucket, input.key);
+    const now = Date.now();
+    if (existing) {
+      const result = await this.pool.query(
+        `UPDATE jord_blobs SET
+           content_type = $1, size = $2, etag = $3, updated_at = $4
+         WHERE id = $5
+         RETURNING *`,
+        [input.contentType, input.size, input.etag, now, existing.id],
+      );
+      return mapBlob(result.rows[0]!);
+    }
+    const id = randomUUID();
+    const result = await this.pool.query(
+      `INSERT INTO jord_blobs (
+         id, bucket, key, content_type, size, etag, created_at, updated_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       RETURNING *`,
+      [
+        id,
+        input.bucket,
+        input.key,
+        input.contentType,
+        input.size,
+        input.etag,
+        now,
+        now,
+      ],
+    );
+    return mapBlob(result.rows[0]!);
+  }
+
+  async deleteBlobMeta(bucket: string, key: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `DELETE FROM jord_blobs WHERE bucket = $1 AND key = $2`,
+      [bucket, key],
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   async snapshotTo(_destPath: string): Promise<string> {

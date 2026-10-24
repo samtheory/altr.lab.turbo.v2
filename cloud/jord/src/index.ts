@@ -21,8 +21,10 @@ export {
   canAlterSchema,
   canInvokeApis,
   canManageApis,
+  canManageBlobs,
   canManageJobs,
   canSubscribeRealtime,
+  canWriteBlobs,
   canWriteRecords,
   DEFAULT_SESSION_TTL_MS,
   isJordRole,
@@ -35,6 +37,11 @@ export {
   type JordRole,
   type JordSessionClaims,
 } from "./auth/index.js";
+export {
+  createBlobDiskStore,
+  resolveBlobsRoot,
+  type BlobDiskStore,
+} from "./blobs/index.js";
 export {
   BUILTIN_STEP_KINDS,
   isBuiltinStepKind,

@@ -6,9 +6,11 @@ export {
   type AddColumnResult,
   type CreateTableInput,
   type CreateTableResult,
+  type JordBlob,
   type ListTableRowsInput,
   type ListTableRowsResult,
   type TableCell,
+  type UpsertBlobMetaInput,
   type DeleteFunctionResult,
   type FinishJobRunInput,
   type InsertCustomApiInput,
@@ -74,6 +76,19 @@ export {
   type JordTriggerRow,
   type NewJordTriggerRow,
 } from "./schema/triggers.js";
+export {
+  jordBlobs,
+  type JordBlobRow,
+  type NewJordBlobRow,
+} from "./schema/blobs.js";
+export {
+  DEFAULT_MAX_BLOB_BYTES,
+  isValidBlobBucket,
+  isValidBlobKey,
+  MAX_BLOB_KEY_LENGTH,
+  MAX_CONTENT_TYPE_LENGTH,
+  normalizeContentType,
+} from "./blobs/names.js";
 export {
   buildAddColumnSql,
   buildCreateTableSql,

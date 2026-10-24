@@ -61,6 +61,11 @@ import {
   isBuiltinPolicyRuleKind,
   policiesDisabledFromEnv,
 } from "./policies/index.js";
+import {
+  createBlobDiskStore,
+  registerBlobRoutes,
+  resolveBlobsRoot,
+} from "./blobs/index.js";
 import type { WriteQueue } from "./queue.js";
 import { RealtimeBus, MAX_REALTIME_SUBSCRIBERS, REALTIME_V1_TABLE, type JordChangeDraft } from "./realtime/index.js";
 import {
@@ -94,6 +99,10 @@ export type JordAppDeps = {
   scheduler?: JobScheduler;
   /** In-process change fanout. Created when omitted. */
   realtime?: RealtimeBus;
+  /** Absolute or relative blob disk root. Defaults to data/blobs or JORD_BLOBS_ROOT. */
+  blobsRoot?: string;
+  /** Max upload bytes (default 10 MiB). */
+  maxBlobBytes?: number;
 };
 
 function publicRecord(row: JordRecord) {
@@ -1598,6 +1607,14 @@ export function createJordApp(deps: JordAppDeps) {
       throw new HTTPException(404, { message: "trigger not found" });
     }
     return c.json({ ok: true as const, id });
+  });
+
+  const blobsRoot = resolveBlobsRoot(process.env, deps.blobsRoot);
+  registerBlobRoutes(protectedRoutes, {
+    jord: deps.jord,
+    enqueueWrite: deps.enqueueWrite,
+    disk: createBlobDiskStore(blobsRoot),
+    maxBytes: deps.maxBlobBytes,
   });
 
   app.route("/", protectedRoutes);

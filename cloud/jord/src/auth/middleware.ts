@@ -6,8 +6,10 @@ import {
   canAlterSchema,
   canInvokeApis,
   canManageApis,
+  canManageBlobs,
   canManageJobs,
   canSubscribeRealtime,
+  canWriteBlobs,
   canWriteRecords,
   type JordRole,
 } from "./roles.js";
@@ -126,6 +128,34 @@ export function requireInvokeApis() {
       if (!canInvokeApis(role)) {
         throw new HTTPException(403, {
           message: "role cannot invoke custom or function APIs",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireManageBlobs() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canManageBlobs(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot manage blob buckets",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireWriteBlobs() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canWriteBlobs(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot write blobs",
         });
       }
       await next();

@@ -84,6 +84,25 @@ export type ListTableRowsResult =
       message: string;
     };
 
+export type JordBlob = {
+  id: string;
+  bucket: string;
+  key: string;
+  contentType: string;
+  size: number;
+  etag: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type UpsertBlobMetaInput = {
+  bucket: string;
+  key: string;
+  contentType: string;
+  size: number;
+  etag: string;
+};
+
 export type JordRecord = {
   id: string;
   bucket: string;
@@ -415,6 +434,15 @@ export interface JordDriverPort {
   createTable(input: CreateTableInput): Promise<CreateTableResult>;
   /** Read-only page of rows. Limit is clamped to 1–100. */
   listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult>;
+
+  /** Distinct blob buckets that have at least one object (metadata). */
+  listBlobBuckets(): Promise<string[]>;
+  listBlobs(bucket: string): Promise<JordBlob[]>;
+  getBlobMeta(bucket: string, key: string): Promise<JordBlob | null>;
+  /** Insert or replace metadata for (bucket, key). */
+  upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob>;
+  /** Delete metadata row. Returns true if a row was removed. */
+  deleteBlobMeta(bucket: string, key: string): Promise<boolean>;
 
   /**
    * Consistent snapshot via SQLite `VACUUM INTO` (libSQL only).

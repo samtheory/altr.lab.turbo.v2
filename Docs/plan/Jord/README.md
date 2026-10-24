@@ -1,6 +1,6 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0012 closed; next blob buckets or Artemis"
+description: "Jord-S0001–S0013 closed; next vectors or Artemis"
 created: 2026-10-18
 updated: 2026-10-24
 tags:
@@ -18,12 +18,13 @@ tags:
   - Jord-S0010
   - Jord-S0011
   - Jord-S0012
+  - Jord-S0013
   - readme
 ---
 
 # plan / Jord
 
-> **Active:** none · **Closed:** [[Jord-S0012/README]] … [[Jord-S0001/README]] · As-built through [[../../tech_space/jord/11-s0012-multi-table]] · Intent: [[../../feature_list/Jord/03-jord-studio]]
+> **Active:** none · **Closed:** [[Jord-S0013/README]] … [[Jord-S0001/README]] · As-built through [[../../tech_space/jord/12-s0013-blobs]] · Intent: [[../../feature_list/Jord/03-jord-studio]]
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
@@ -39,7 +40,8 @@ tags:
 | [[Jord-S0010/README]] | Studio S8 Postgres connection | **done** (2026-10-24) |
 | [[Jord-S0011/README]] | Studio S9 realtime subscriptions | **done** (2026-10-24) |
 | [[Jord-S0012/README]] | Multi-table browse + CREATE TABLE | **done** (2026-10-24) |
+| [[Jord-S0013/README]] | Studio S10 blob buckets | **done** (2026-10-24) |
 
-**Not opened (plan next):** blob buckets · vectors · hosted `libsql://` · `pgvector` / native RLS. Product fork: Artemis.
+**Not opened (plan next):** vectors (Studio S11) · hosted `libsql://` · `pgvector` / native RLS. Product fork: Artemis.
 
 Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]

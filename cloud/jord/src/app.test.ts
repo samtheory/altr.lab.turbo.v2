@@ -68,6 +68,7 @@ async function testApp(opts?: { generatedApi?: GeneratedApiRegistry }) {
     logs,
     autostart: false,
   });
+  const blobsRoot = path.join(dir, "blobs");
   const app = createJordApp({
     jord,
     enqueueWrite,
@@ -75,10 +76,12 @@ async function testApp(opts?: { generatedApi?: GeneratedApiRegistry }) {
     generatedApi,
     logs,
     scheduler,
+    blobsRoot,
   });
   return {
     app,
     jord,
+    blobsRoot,
     generatedApi,
     logs,
     scheduler,
@@ -931,6 +934,117 @@ describe("jord realtime SSE", () => {
       expect(stream.status).toBe(403);
       const body = (await stream.json()) as { error: string };
       expect(body.error).toBe("policy_denied");
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
+  it("blob buckets: create, upload, list, download, delete", async () => {
+    const ctx = await testApp();
+    try {
+      const create = await ctx.app.request("/blobs/buckets", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ name: "lab" }),
+      });
+      expect(create.status).toBe(201);
+
+      const key = encodeURIComponent("notes/hello.txt");
+      const put = await ctx.app.request(`/blobs/lab/objects/${key}`, {
+        method: "PUT",
+        headers: {
+          "content-type": "text/plain",
+          ...authHeaders("editor"),
+        },
+        body: "hello jord",
+      });
+      expect(put.status).toBe(200);
+      const putBody = (await put.json()) as {
+        key: string;
+        size: number;
+        etag: string;
+      };
+      expect(putBody.key).toBe("notes/hello.txt");
+      expect(putBody.size).toBe(10);
+
+      const list = await ctx.app.request("/blobs/lab", {
+        headers: authHeaders("readonly"),
+      });
+      expect(list.status).toBe(200);
+      const listed = (await list.json()) as {
+        objects: Array<{ key: string }>;
+      };
+      expect(listed.objects.map((o) => o.key)).toContain("notes/hello.txt");
+
+      const get = await ctx.app.request(`/blobs/lab/objects/${key}`, {
+        headers: authHeaders("readonly"),
+      });
+      expect(get.status).toBe(200);
+      expect(await get.text()).toBe("hello jord");
+      expect(get.headers.get("content-type")).toMatch(/text\/plain/);
+
+      const forbidden = await ctx.app.request(`/blobs/lab/objects/${key}`, {
+        method: "PUT",
+        headers: {
+          "content-type": "text/plain",
+          ...authHeaders("readonly"),
+        },
+        body: "nope",
+      });
+      expect(forbidden.status).toBe(403);
+
+      const del = await ctx.app.request(`/blobs/lab/objects/${key}`, {
+        method: "DELETE",
+        headers: authHeaders("editor"),
+      });
+      expect(del.status).toBe(200);
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
+  it("blob upload rejects oversize and traversal keys", async () => {
+    const ctx = await testApp();
+    try {
+      await ctx.app.request("/blobs/buckets", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ name: "lab" }),
+      });
+
+      const big = await ctx.app.request(
+        `/blobs/lab/objects/${encodeURIComponent("big.bin")}`,
+        {
+          method: "PUT",
+          headers: {
+            "content-type": "application/octet-stream",
+            ...authHeaders("admin"),
+          },
+          body: new Uint8Array(11 * 1024 * 1024),
+        },
+      );
+      expect(big.status).toBe(413);
+
+      const bad = await ctx.app.request(
+        `/blobs/lab/objects/${encodeURIComponent("../escape.txt")}`,
+        {
+          method: "PUT",
+          headers: {
+            "content-type": "text/plain",
+            ...authHeaders("admin"),
+          },
+          body: "x",
+        },
+      );
+      expect(bad.status).toBe(400);
     } finally {
       ctx.stop();
       await ctx.jord.close();

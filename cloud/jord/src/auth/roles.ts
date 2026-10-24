@@ -35,3 +35,13 @@ export function canInvokeApis(role: JordRole): boolean {
 export function canSubscribeRealtime(role: JordRole): boolean {
   return role === "admin" || role === "editor" || role === "readonly";
 }
+
+/** Create blob buckets (Studio S10). Admin only. */
+export function canManageBlobs(role: JordRole): boolean {
+  return role === "admin";
+}
+
+/** Upload / delete blob objects (Studio S10). Same as write records. */
+export function canWriteBlobs(role: JordRole): boolean {
+  return role === "admin" || role === "editor";
+}

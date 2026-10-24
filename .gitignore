@@ -54,4 +54,6 @@ data/*.db-wal
 data/*.db-shm
 data/**/*.db-wal
 data/**/*.db-shm
+# Jord-S0013 local blob store (bytes; metadata lives in jord.db)
+data/blobs/
 

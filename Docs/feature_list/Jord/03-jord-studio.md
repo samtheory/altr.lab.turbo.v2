@@ -15,11 +15,13 @@ tags:
   - Jord-S0006
   - Jord-S0007
   - Jord-S0009
+  - Jord-S0012
+  - Jord-S0013
 ---
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S9 shipped:** through [[../../plan/Jord/Jord-S0011/README|Jord-S0011]] · as-built [[../../tech_space/jord/10-s0011-realtime]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S10 shipped** through [[../../plan/Jord/Jord-S0013/README|Jord-S0013]] · as-built [[../../tech_space/jord/12-s0013-blobs]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -70,7 +72,7 @@ None of these land in Slice 0. Build order: [[01-later]].
 | Area | What you see and do | Depends on engine pillar in [[01-later]] |
 |------|---------------------|------------------------------------------|
 | **Realtime** | Subscribe to table/row changes (CDC → SSE / WebSockets from `@altr/jord-server`) | Realtime layer |
-| **Blobs** | Browse and upload assets in Jord buckets (S3-shaped or static file API) | Local blob storage |
+| **Blobs** | Browse and upload assets in Jord buckets (S3-shaped REST) — **shipped** [[../../tech_space/jord/12-s0013-blobs]] | Local blob storage |
 | **Vectors** | Trigger or inspect embedding / `searchVectors` jobs for semantic memory | In-process vector pipelines |
 
 ### Docs inside Studio
@@ -105,7 +107,7 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 | S8 | Postgres connection (`PostgresAdapter`) | Postgres driver — **done** ([[../../plan/Jord/Jord-S0010/README|Jord-S0010]] · [[../../tech_space/jord/09-s0010-postgres]]) |
 | S9 | Realtime subscriptions UI | CDC-equivalent emit + SSE — **done** ([[../../plan/Jord/Jord-S0011/README|Jord-S0011]] · [[../../tech_space/jord/10-s0011-realtime]]) |
 | **S9.5** | **Multi-table browse + CREATE TABLE** | Schema create + open beyond `records` — **done** ([[../../plan/Jord/Jord-S0012/README|Jord-S0012]] · [[../../tech_space/jord/11-s0012-multi-table]]) |
-| S10 | Blob buckets UI | Local blob storage |
+| S10 | Blob buckets UI — **done** [[../../plan/Jord/Jord-S0013/README|Jord-S0013]] · [[../../tech_space/jord/12-s0013-blobs]] | Local blob storage |
 | S11 | Vector / embedding ops UI | `searchVectors` + sqlite-vec or pgvector |
 
 ## Out of scope for Studio S1
@@ -132,4 +134,4 @@ S6 plan (closed): [[../../plan/Jord/Jord-S0008/README]] · [[../../tech_space/jo
 S7 plan (closed): [[../../plan/Jord/Jord-S0009/README]] · [[../../tech_space/jord/08-s0009-triggers-policies]].  
 S8 plan (closed): [[../../plan/Jord/Jord-S0010/README]] · [[../../tech_space/jord/09-s0010-postgres]].  
 S9 plan (closed): [[../../plan/Jord/Jord-S0011/README]] · [[../../tech_space/jord/10-s0011-realtime]].  
-**Closed:** [[../../plan/Jord/Jord-S0012/README|Jord-S0012]] (multi-table + CREATE TABLE) · as-built [[../../tech_space/jord/11-s0012-multi-table]]. S10–S11 open when mimir plans them.
+**Closed:** through [[../../plan/Jord/Jord-S0013/README|Jord-S0013]] (blobs) · as-built [[../../tech_space/jord/12-s0013-blobs]]. S11 vectors open when mimir plans them.

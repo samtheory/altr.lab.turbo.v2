@@ -37,8 +37,10 @@ import type {
   JordTrigger,
   JordTriggerEvent,
   JordTriggerTiming,
+  JordBlob,
   ListTableRowsInput,
   ListTableRowsResult,
+  UpsertBlobMetaInput,
   UpdateCustomApiInput,
   UpdateFunctionInput,
   UpdateJobInput,
@@ -57,6 +59,7 @@ import {
   quoteIdent,
   toTableCell,
 } from "../schema/ddl.js";
+import { jordBlobs } from "../schema/blobs.js";
 import { jordCustomApis, jordFunctions } from "../schema/functions.js";
 import { jordJobRuns, jordJobs } from "../schema/jobs.js";
 import { jordPolicies } from "../schema/policies.js";
@@ -129,6 +132,19 @@ function mapRow(row: typeof records.$inferSelect): JordRecord {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
+  };
+}
+
+function mapBlob(row: typeof jordBlobs.$inferSelect): JordBlob {
+  return {
+    id: row.id,
+    bucket: row.bucket,
+    key: row.key,
+    contentType: row.contentType,
+    size: row.size,
+    etag: row.etag,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -935,6 +951,74 @@ export class LibSqlAdapter implements JordDriverPort {
       return out;
     });
     return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
+  }
+
+  async listBlobBuckets(): Promise<string[]> {
+    const rs = await this.client.execute(
+      `SELECT DISTINCT bucket FROM jord_blobs ORDER BY bucket ASC`,
+    );
+    return rs.rows.map((row) => String(row.bucket));
+  }
+
+  async listBlobs(bucket: string): Promise<JordBlob[]> {
+    const rows = await this.db
+      .select()
+      .from(jordBlobs)
+      .where(eq(jordBlobs.bucket, bucket))
+      .orderBy(jordBlobs.key);
+    return rows.map(mapBlob);
+  }
+
+  async getBlobMeta(bucket: string, key: string): Promise<JordBlob | null> {
+    const rows = await this.db
+      .select()
+      .from(jordBlobs)
+      .where(and(eq(jordBlobs.bucket, bucket), eq(jordBlobs.key, key)))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapBlob(row) : null;
+  }
+
+  async upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob> {
+    const existing = await this.getBlobMeta(input.bucket, input.key);
+    const now = Date.now();
+    if (existing) {
+      await this.db
+        .update(jordBlobs)
+        .set({
+          contentType: input.contentType,
+          size: input.size,
+          etag: input.etag,
+          updatedAt: now,
+        })
+        .where(eq(jordBlobs.id, existing.id));
+      return {
+        ...existing,
+        contentType: input.contentType,
+        size: input.size,
+        etag: input.etag,
+        updatedAt: now,
+      };
+    }
+    const row = {
+      id: randomUUID(),
+      bucket: input.bucket,
+      key: input.key,
+      contentType: input.contentType,
+      size: input.size,
+      etag: input.etag,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.db.insert(jordBlobs).values(row);
+    return mapBlob(row);
+  }
+
+  async deleteBlobMeta(bucket: string, key: string): Promise<boolean> {
+    const existing = await this.getBlobMeta(bucket, key);
+    if (!existing) return false;
+    await this.db.delete(jordBlobs).where(eq(jordBlobs.id, existing.id));
+    return true;
   }
 
   async snapshotTo(destPath: string): Promise<string> {

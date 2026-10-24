@@ -127,4 +127,25 @@ export async function ensurePostgresSchema(pool: Pool): Promise<void> {
     CREATE INDEX IF NOT EXISTS jord_triggers_table_event_idx
     ON jord_triggers (table_name, event)
   `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS jord_blobs (
+      id TEXT PRIMARY KEY NOT NULL,
+      bucket TEXT NOT NULL,
+      key TEXT NOT NULL,
+      content_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      etag TEXT NOT NULL,
+      created_at BIGINT NOT NULL,
+      updated_at BIGINT NOT NULL
+    )
+  `);
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS jord_blobs_bucket_key_uidx
+    ON jord_blobs (bucket, key)
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS jord_blobs_bucket_key_idx
+    ON jord_blobs (bucket, key)
+  `);
 }

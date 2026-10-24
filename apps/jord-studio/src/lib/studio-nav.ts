@@ -38,6 +38,12 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         status: "live",
         requiresWrite: true,
       },
+      {
+        id: "storage",
+        label: "Storage",
+        href: "/storage",
+        status: "live",
+      },
     ],
   },
   {
