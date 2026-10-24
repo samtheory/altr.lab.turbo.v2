@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot: Jord-S0001–S0011 shipped; next S10 blobs or Artemis"
+description: "Audited snapshot: Jord-S0001–S0012 shipped; next blob buckets or Artemis"
 created: 2026-09-19
 updated: 2026-10-24
 tags:
@@ -18,11 +18,12 @@ tags:
   - Jord-S0009
   - Jord-S0010
   - Jord-S0011
+  - Jord-S0012
 ---
 
 # Status
 
-Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0011** (Studio S9 realtime) · **Active Jord sprint:** none · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
+Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0012** (multi-table + CREATE TABLE) · **Active Jord sprint:** none · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Implemented
 
@@ -36,12 +37,16 @@ Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
   - `RealtimeBus` after successful `records` writes
   - `GET /realtime` SSE; select-deny → 403; 32-subscriber cap
   - Studio records **Live** switch via `/api/realtime` (no browser DB)
+- **Jord-S0012** — [[../tech_space/jord/11-s0012-multi-table]]
+  - `createTable` + `listTableRows` on libSQL and Postgres
+  - `POST /schema/tables` (admin) and `GET /schema/tables/:name/rows`
+  - Studio Schema create form, `/tables` list, generic browse; `records` stays the OCC editor
 - **`@altr/apolyx`** through **S0005** · Apolyx-first · docs_man / apollo / mimir
 
 ## Planned (repo) — **do next**
 
-1. **Jord Studio S10** — blob buckets (plan not opened) · [[../feature_list/Jord/03-jord-studio]]
-2. **Jord Studio S11** — vector ops UI (plan not opened)
+1. **Blob buckets** — plan not opened · [[../feature_list/Jord/03-jord-studio]]
+2. **Vector ops UI** — after blobs (plan not opened)
 3. Engine later: hosted `libsql://`, `pgvector` / native RLS, Redis, bot process · [[../feature_list/Jord/01-later]]
 4. Artemis — idea [[../idea/artemis/README]] (product fork)
 5. Tia — intent [[../feature_list/tia/README]]

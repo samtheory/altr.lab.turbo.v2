@@ -15,13 +15,13 @@ export default function HomePage() {
         </p>
         <p className="max-w-xl text-lg text-muted-foreground text-pretty">
           Local control plane for <strong className="font-medium text-foreground">libSQL</strong>{" "}
-          table <code className="font-mono text-foreground">records</code>. Browse and edit SQL
-          columns through jord-server — the browser never opens the database file.
+          table catalog. Browse SQL columns through jord-server — the browser never opens the
+          database file.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/records">
-              Open table <ArrowRight className="size-4" aria-hidden />
+            <Link href="/tables">
+              Open tables <ArrowRight className="size-4" aria-hidden />
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline">

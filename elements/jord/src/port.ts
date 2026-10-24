@@ -38,6 +38,52 @@ export type AddColumnResult =
       message: string;
     };
 
+export type CreateTableInput = {
+  name: string;
+  columns: Array<{
+    name: string;
+    type: JordColumnType;
+    pk?: boolean;
+  }>;
+};
+
+export type CreateTableResult =
+  | { ok: true; sql: string }
+  | {
+      ok: false;
+      error:
+        | "invalid_identifier"
+        | "invalid_type"
+        | "no_columns"
+        | "duplicate_column"
+        | "multiple_pk"
+        | "reserved"
+        | "table_exists";
+      message: string;
+    };
+
+export type TableCell = string | number | boolean | null;
+
+export type ListTableRowsInput = {
+  table: string;
+  limit: number;
+  offset: number;
+};
+
+export type ListTableRowsResult =
+  | {
+      ok: true;
+      columns: string[];
+      rows: Array<Record<string, TableCell>>;
+      limit: number;
+      offset: number;
+    }
+  | {
+      ok: false;
+      error: "invalid_identifier" | "table_not_found";
+      message: string;
+    };
+
 export type JordRecord = {
   id: string;
   bucket: string;
@@ -365,6 +411,10 @@ export interface JordDriverPort {
   describeTable(name: string): Promise<JordTableInfo | null>;
   /** Additive DDL only — ADD COLUMN with type whitelist. */
   addColumn(input: AddColumnInput): Promise<AddColumnResult>;
+  /** CREATE TABLE for user tables. Rejects reserved names and existing tables. */
+  createTable(input: CreateTableInput): Promise<CreateTableResult>;
+  /** Read-only page of rows. Limit is clamped to 1–100. */
+  listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult>;
 
   /**
    * Consistent snapshot via SQLite `VACUUM INTO` (libSQL only).

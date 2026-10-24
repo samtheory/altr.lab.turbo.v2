@@ -9,6 +9,7 @@ tags:
   - jord
   - workflow
   - Jord-S0011
+  - Jord-S0012
 ---
 
 # mimir — workflow instructions
@@ -28,7 +29,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. **Active** sprint under [[../../../plan/Jord/README]] — none after S0011; next card is Studio S10 or Artemis via mimir
+4. **Active** sprint under [[../../../plan/Jord/README]] — none after S0012; next card is blob buckets or Artemis via mimir
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. This file
 
@@ -97,9 +98,13 @@ See [[../../../plan/Jord/Jord-S0010/README]] (done 2026-10-24). As-built: [[../.
 
 See [[../../../plan/Jord/Jord-S0011/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/10-s0011-realtime]].
 
+### Closed — Jord-S0012 (multi-table + CREATE TABLE)
+
+See [[../../../plan/Jord/Jord-S0012/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/11-s0012-multi-table]].
+
 ### Active
 
-None. Next Jord card to open: Studio S10 blobs. Product fork: Artemis.
+None. Next Jord card to open: blob buckets. Product fork: Artemis.
 
 ## Skills discipline
 

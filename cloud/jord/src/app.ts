@@ -368,6 +368,78 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json({ tables });
   });
 
+  protectedRoutes.post("/schema/tables", requireAlterSchema(), async (c) => {
+    const body = await c.req.json<{
+      name?: unknown;
+      columns?: unknown;
+    }>();
+    if (typeof body.name !== "string" || !Array.isArray(body.columns)) {
+      throw new HTTPException(400, {
+        message: "name (string) and columns (array) are required",
+      });
+    }
+    const columns: Array<{
+      name: string;
+      type: JordColumnType;
+      pk?: boolean;
+    }> = [];
+    for (const raw of body.columns) {
+      if (!raw || typeof raw !== "object") {
+        throw new HTTPException(400, {
+          message: "each column needs name and type",
+        });
+      }
+      const col = raw as { name?: unknown; type?: unknown; pk?: unknown };
+      if (typeof col.name !== "string" || typeof col.type !== "string") {
+        throw new HTTPException(400, {
+          message: "each column needs name and type",
+        });
+      }
+      if (!isJordColumnType(col.type)) {
+        throw new HTTPException(400, {
+          message: "type must be TEXT, INTEGER, REAL, or BLOB",
+        });
+      }
+      columns.push({
+        name: col.name,
+        type: col.type,
+        pk: col.pk === true,
+      });
+    }
+
+    const result = await deps.enqueueWrite(() =>
+      deps.jord.createTable({ name: body.name as string, columns }),
+    );
+    if (!result.ok) {
+      const status = result.error === "table_exists" ? 409 : 400;
+      return c.json(
+        { error: result.error, message: result.message },
+        status,
+      );
+    }
+    const info = await deps.jord.describeTable(body.name);
+    return c.json({ ok: true as const, sql: result.sql, table: info }, 201);
+  });
+
+  protectedRoutes.get("/schema/tables/:name/rows", async (c) => {
+    const name = c.req.param("name");
+    const limit = Number(c.req.query("limit") ?? "50");
+    const offset = Number(c.req.query("offset") ?? "0");
+    const result = await deps.jord.listTableRows({
+      table: name,
+      limit: Number.isFinite(limit) ? limit : 50,
+      offset: Number.isFinite(offset) ? offset : 0,
+    });
+    if (!result.ok) {
+      const status = result.error === "table_not_found" ? 404 : 400;
+      return c.json(
+        { error: result.error, message: result.message },
+        status,
+      );
+    }
+    return c.json(result);
+  });
+
   protectedRoutes.get("/schema/tables/:name", async (c) => {
     const name = c.req.param("name");
     if (!isValidSqlIdent(name)) {

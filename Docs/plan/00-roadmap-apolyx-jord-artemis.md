@@ -1,6 +1,6 @@
 ---
 title: "Roadmap — Apolyx → Jord → Artemis"
-description: "Sequencing plan: Apolyx + Jord S1–S9 done; next S10 or Artemis"
+description: "Sequencing: Jord-S0012 closed; next blob buckets or Artemis"
 created: 2026-10-21
 updated: 2026-10-24
 tags:
@@ -13,6 +13,7 @@ tags:
   - Jord-S0008
   - Jord-S0009
   - Jord-S0011
+  - Jord-S0012
 ---
 
 # Roadmap — Apolyx → Jord → Artemis
@@ -31,7 +32,8 @@ flowchart LR
   JS6 --> JS7[Jord Studio S7 done]
   JS7 --> JS8[Jord Studio S8 done]
   JS8 --> JS9[Jord-S0011 Studio S9 done]
-  JS9 --> S10[Studio S10 blobs — not opened]
+  JS9 --> S12[Jord-S0012 multi-table done]
+  S12 --> Blobs[Blob buckets — not opened]
   JS9 -.->|product fork| Art[Artemis]
 ```
 
@@ -49,6 +51,8 @@ flowchart LR
 | **3h** | **Jord Studio S7** (`Jord-S0009`) | Policies (server middleware) + AFTER write triggers; Studio Database panels | **Closed 2026-10-23** — [[../tech_space/jord/08-s0009-triggers-policies]] · Plan [[Jord/Jord-S0009/README]] |
 | **3i** | **Jord Studio S8** (`Jord-S0010`) | `PostgresAdapter` for `postgres://` / `postgresql://`; `file:` stays the default; Studio shows dialect | **Closed 2026-10-24** — [[../tech_space/jord/09-s0010-postgres]] · Plan [[Jord/Jord-S0010/README]] |
 | **3j** | **Jord Studio S9** (`Jord-S0011`) | Realtime: write-path emit → SSE; Studio Live on `records` | **Closed 2026-10-24** — [[../tech_space/jord/10-s0011-realtime]] · Plan [[Jord/Jord-S0011/README]] |
+| **3k** | **Multi-table + CREATE TABLE** (`Jord-S0012`) | Create user tables; open/browse beyond hardcoded `records` | **Closed 2026-10-24** — [[../tech_space/jord/11-s0012-multi-table]] · Plan [[Jord/Jord-S0012/README]] |
+| **3l** | **Blob buckets** | Local blob storage + Studio browser | Not opened |
 | **4** | **Artemis** | Sharpen idea → promote `feature_list/artemis/` → plan → terminal shell | Product fork · Idea [[../idea/artemis/README]] |
 
 ## Why Apolyx before Jord engine?
@@ -57,7 +61,7 @@ flowchart LR
 
 **Product coupling:** Jord Studio and Artemis both consume `@altr/apolyx`. Shipping the **product gate** first avoids building Studio / terminal screens on missing Select / Combobox / Pagination / Scroll Area, then ripping them up.
 
-Apolyx gate and Jord-S0001–**S0011** are closed. **No active Jord card.** Next Jord plan to open: Studio S10 blobs. **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
+Apolyx gate and Jord-S0001–**S0012** are closed. **No active Jord card.** Next Jord plan to open: blob buckets, then vectors. **Product fork:** Artemis. Product apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).
 
 ## Apolyx after S0005 (not blocking Jord)
 

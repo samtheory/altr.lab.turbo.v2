@@ -57,6 +57,7 @@ Detail: [[03-jord-studio]].
 | Studio S7 | Triggers, policies (libSQL middleware; Postgres RLS compile deferred to S8) — **done** [[../../plan/Jord/Jord-S0009/README|Jord-S0009]] · [[../../tech_space/jord/08-s0009-triggers-policies]] |
 | Studio S8 | Postgres connection (`PostgresAdapter`) — **done** [[../../plan/Jord/Jord-S0010/README|Jord-S0010]] · [[../../tech_space/jord/09-s0010-postgres]] |
 | Studio S9 | Realtime subscriptions UI (CDC-equivalent + SSE) — **done** [[../../plan/Jord/Jord-S0011/README|Jord-S0011]] · [[../../tech_space/jord/10-s0011-realtime]] |
+| Studio S9.5 | Multi-table browse + CREATE TABLE — **done** [[../../plan/Jord/Jord-S0012/README|Jord-S0012]] · [[../../tech_space/jord/11-s0012-multi-table]] |
 | Studio S10 | Blob buckets browser |
 | Studio S11 | Vector / embedding ops surfaced in Studio |
 

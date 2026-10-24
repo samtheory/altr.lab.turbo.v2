@@ -6,6 +6,8 @@ import { JordUnsupportedError } from "../errors.js";
 import type {
   AddColumnInput,
   AddColumnResult,
+  CreateTableInput,
+  CreateTableResult,
   DeleteFunctionResult,
   FinishJobRunInput,
   InsertCustomApiInput,
@@ -31,6 +33,8 @@ import type {
   JordTrigger,
   JordTriggerEvent,
   JordTriggerTiming,
+  ListTableRowsInput,
+  ListTableRowsResult,
   UpdateCustomApiInput,
   UpdateFunctionInput,
   UpdateJobInput,
@@ -40,9 +44,13 @@ import type {
   UpdateTriggerInput,
 } from "../port.js";
 import {
+  buildCreateTableSql,
+  clampRowWindow,
   isJordColumnType,
   isValidSqlIdent,
+  planCreateTable,
   quoteIdent,
+  toTableCell,
 } from "../schema/ddl.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
 
@@ -880,6 +888,54 @@ export class PostgresAdapter implements JordDriverPort {
       `ALTER TABLE ${quoteIdent(input.table)} ADD COLUMN ${quoteIdent(input.name)} ${pgType}`,
     );
     return { ok: true };
+  }
+
+  async createTable(input: CreateTableInput): Promise<CreateTableResult> {
+    const plan = planCreateTable(input);
+    if (!plan.ok) return plan;
+    const existing = await this.describeTable(plan.name);
+    if (existing) {
+      return {
+        ok: false,
+        error: "table_exists",
+        message: `table ${plan.name} already exists`,
+      };
+    }
+    const sql = buildCreateTableSql(plan.name, plan.columns, "postgres");
+    await this.pool.query(sql);
+    return { ok: true, sql };
+  }
+
+  async listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult> {
+    if (!isValidSqlIdent(input.table)) {
+      return {
+        ok: false,
+        error: "invalid_identifier",
+        message: "table name must match [a-zA-Z_][a-zA-Z0-9_]*",
+      };
+    }
+    const described = await this.describeTable(input.table);
+    if (!described) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${input.table} not found`,
+      };
+    }
+    const window = clampRowWindow(input.limit, input.offset);
+    const result = await this.pool.query(
+      `SELECT * FROM ${quoteIdent(input.table)} LIMIT $1 OFFSET $2`,
+      [window.limit, window.offset],
+    );
+    const columns = described.columns.map((col) => col.name);
+    const rows = result.rows.map((row) => {
+      const out: Record<string, ReturnType<typeof toTableCell>> = {};
+      for (const name of columns) {
+        out[name] = toTableCell(row[name]);
+      }
+      return out;
+    });
+    return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
   }
 
   async snapshotTo(_destPath: string): Promise<string> {

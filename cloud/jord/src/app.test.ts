@@ -303,6 +303,75 @@ describe("jord-server routes", () => {
     }
   });
 
+  it("CREATE TABLE is admin-only and user tables can be browsed", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const denied = await app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("readonly"),
+        },
+        body: JSON.stringify({
+          name: "lab_notes",
+          columns: [{ name: "title", type: "TEXT" }],
+        }),
+      });
+      expect(denied.status).toBe(403);
+
+      const reserved = await app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "records",
+          columns: [{ name: "title", type: "TEXT" }],
+        }),
+      });
+      expect(reserved.status).toBe(400);
+
+      const created = await app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "lab_notes",
+          columns: [{ name: "title", type: "TEXT" }],
+        }),
+      });
+      expect(created.status).toBe(201);
+      const createdBody = (await created.json()) as { sql: string };
+      expect(createdBody.sql).toContain("lab_notes");
+
+      const rows = await app.request("/schema/tables/lab_notes/rows?limit=10", {
+        headers: authHeaders("readonly"),
+      });
+      expect(rows.status).toBe(200);
+      const page = (await rows.json()) as { columns: string[]; rows: unknown[] };
+      expect(page.columns).toEqual(["id", "title"]);
+      expect(page.rows).toEqual([]);
+
+      const dup = await app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "lab_notes",
+          columns: [{ name: "title", type: "TEXT" }],
+        }),
+      });
+      expect(dup.status).toBe(409);
+    } finally {
+      await jord.close();
+    }
+  });
+
   it("truncateWalCheckpoint is callable (shutdown / interval path)", async () => {
     const { jord } = await testApp();
     try {

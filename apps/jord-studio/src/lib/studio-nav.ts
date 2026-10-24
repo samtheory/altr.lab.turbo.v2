@@ -29,7 +29,8 @@ export const STUDIO_NAV: StudioNavGroup[] = [
     id: "data",
     label: "Data",
     items: [
-      { id: "tables", label: "Tables · records", href: "/records", status: "live" },
+      { id: "tables", label: "Tables", href: "/tables", status: "live" },
+      { id: "records", label: "Records editor", href: "/records", status: "live" },
       {
         id: "insert",
         label: "Insert row",

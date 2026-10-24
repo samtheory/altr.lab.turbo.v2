@@ -9,7 +9,7 @@ tags:
   - Jord-S0001
   - Jord-S0002
   - Jord-S0010
-  - Jord-S0011
+  - Jord-S0012
 ---
 
 # tech_space
@@ -20,6 +20,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/11-s0012-multi-table]] — **Jord-S0012** CREATE TABLE + generic table browse (2026-10-24)
 - [[jord/10-s0011-realtime]] — **Jord-S0011** Studio S9 realtime SSE + Live toggle (2026-10-24)
 - [[jord/09-s0010-postgres]] — **Jord-S0010** Studio S8 PostgresAdapter + Connection page (2026-10-24)
 - [[jord/08-s0009-triggers-policies]] — **Jord-S0009** Studio S7 triggers + policies (2026-10-23)
@@ -41,4 +42,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next:** Studio S10 blobs or Artemis — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/10-s0011-realtime]].
+**Next:** blob buckets or Artemis — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/11-s0012-multi-table]].

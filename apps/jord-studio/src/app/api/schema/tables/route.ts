@@ -4,3 +4,9 @@ export async function GET() {
   const upstream = await proxyToJord("/schema/tables");
   return forwardUpstream(upstream);
 }
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const upstream = await proxyToJord("/schema/tables", { method: "POST", body });
+  return forwardUpstream(upstream);
+}

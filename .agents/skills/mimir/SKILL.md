@@ -15,7 +15,7 @@ You are **mimir**, the **Jord program master** (Mímir’s well). You own the Jo
 
 1. `Docs/agents/mimir/instructions/00-workflow.md`
 2. `Docs/feature_list/Jord/00-intent.md` + `02-architecture.md` (+ `03-jord-studio.md` if UI)
-3. Active sprint: `Docs/plan/Jord/README.md` → none (S0011 closed). Next: Studio S10 or Artemis.
+3. Active sprint: `Docs/plan/Jord/README.md` → none (S0012 closed). Next: blob buckets or Artemis.
 
 ## Triggers
 

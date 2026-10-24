@@ -25,6 +25,23 @@ describe("Postgres migrate parity", () => {
     expect(postgres).toMatch(/created_at BIGINT/);
     expect(postgres).toMatch(/updated_at BIGINT/);
   });
+
+  it("maps CREATE TABLE types for Postgres", async () => {
+    const { buildCreateTableSql, planCreateTable } = await import("../schema/ddl.js");
+    const plan = planCreateTable({
+      name: "lab_notes",
+      columns: [
+        { name: "title", type: "TEXT" },
+        { name: "score", type: "REAL", pk: true },
+        { name: "blob", type: "BLOB" },
+      ],
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(buildCreateTableSql(plan.name, plan.columns, "postgres")).toBe(
+      'CREATE TABLE "lab_notes" ("title" TEXT, "score" DOUBLE PRECISION PRIMARY KEY, "blob" BYTEA)',
+    );
+  });
 });
 
 const liveUrl = process.env.JORD_TEST_POSTGRES_URL?.trim();

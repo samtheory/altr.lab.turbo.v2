@@ -9,6 +9,8 @@ import { drizzle } from "drizzle-orm/libsql";
 import type {
   AddColumnInput,
   AddColumnResult,
+  CreateTableInput,
+  CreateTableResult,
   DeleteFunctionResult,
   FinishJobRunInput,
   InsertCustomApiInput,
@@ -35,6 +37,8 @@ import type {
   JordTrigger,
   JordTriggerEvent,
   JordTriggerTiming,
+  ListTableRowsInput,
+  ListTableRowsResult,
   UpdateCustomApiInput,
   UpdateFunctionInput,
   UpdateJobInput,
@@ -45,9 +49,13 @@ import type {
 } from "../port.js";
 import {
   buildAddColumnSql,
+  buildCreateTableSql,
+  clampRowWindow,
   isJordColumnType,
   isValidSqlIdent,
+  planCreateTable,
   quoteIdent,
+  toTableCell,
 } from "../schema/ddl.js";
 import { jordCustomApis, jordFunctions } from "../schema/functions.js";
 import { jordJobRuns, jordJobs } from "../schema/jobs.js";
@@ -879,6 +887,54 @@ export class LibSqlAdapter implements JordDriverPort {
       buildAddColumnSql(input.table, input.name, input.type),
     );
     return { ok: true };
+  }
+
+  async createTable(input: CreateTableInput): Promise<CreateTableResult> {
+    const plan = planCreateTable(input);
+    if (!plan.ok) return plan;
+    const existing = await this.describeTable(plan.name);
+    if (existing) {
+      return {
+        ok: false,
+        error: "table_exists",
+        message: `table ${plan.name} already exists`,
+      };
+    }
+    const sql = buildCreateTableSql(plan.name, plan.columns, "libsql");
+    await this.client.execute(sql);
+    return { ok: true, sql };
+  }
+
+  async listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult> {
+    if (!isValidSqlIdent(input.table)) {
+      return {
+        ok: false,
+        error: "invalid_identifier",
+        message: "table name must match [a-zA-Z_][a-zA-Z0-9_]*",
+      };
+    }
+    const described = await this.describeTable(input.table);
+    if (!described) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${input.table} not found`,
+      };
+    }
+    const window = clampRowWindow(input.limit, input.offset);
+    const rs = await this.client.execute({
+      sql: `SELECT * FROM ${quoteIdent(input.table)} LIMIT ? OFFSET ?`,
+      args: [window.limit, window.offset],
+    });
+    const columns = described.columns.map((col) => col.name);
+    const rows = rs.rows.map((row) => {
+      const out: Record<string, ReturnType<typeof toTableCell>> = {};
+      for (const name of columns) {
+        out[name] = toTableCell(row[name]);
+      }
+      return out;
+    });
+    return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
   }
 
   async snapshotTo(destPath: string): Promise<string> {

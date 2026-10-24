@@ -4,6 +4,11 @@ export { PostgresAdapter } from "./adapter/postgres.js";
 export {
   type AddColumnInput,
   type AddColumnResult,
+  type CreateTableInput,
+  type CreateTableResult,
+  type ListTableRowsInput,
+  type ListTableRowsResult,
+  type TableCell,
   type DeleteFunctionResult,
   type FinishJobRunInput,
   type InsertCustomApiInput,
@@ -71,10 +76,16 @@ export {
 } from "./schema/triggers.js";
 export {
   buildAddColumnSql,
+  buildCreateTableSql,
+  clampRowWindow,
   isJordColumnType,
+  isReservedCreateTableName,
   isValidSqlIdent,
   JORD_COLUMN_TYPES,
+  pgColumnType,
+  planCreateTable,
   quoteIdent,
+  toTableCell,
 } from "./schema/ddl.js";
 export {
   JordSlice0UrlError,
