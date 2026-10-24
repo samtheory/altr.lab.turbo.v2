@@ -1,21 +1,22 @@
 ---
-title: "Jord — remaining backlog (post S0018)"
-description: "S0018 closed; next numbered card is S0019; queue ends at Jord-S0020"
+title: "Jord — remaining backlog (post S0019)"
+description: "S0019 closed; next and last numbered card is S0020"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
   - plan
   - jord
   - backlog
-  - Jord-S0018
+  - Jord-S0019
+  - Jord-S0020
 ---
 
 # Jord — remaining backlog
 
 > Who: **mimir** picking the next card. Intent sources: [[../../feature_list/Jord/01-later]], [[../../feature_list/Jord/02-architecture]], [[../../feature_list/Jord/03-jord-studio]], plus deferred items from closed tech_space notes. Shipped review: [[../../report/Jord-implemented-review]].
 
-**Last closed:** [[Jord-S0018/README|Jord-S0018]] — realtime WS + multi-table · as-built [[../../tech_space/jord/17-s0018-realtime-ws]].  
-**Next to open:** Jord-S0019 (hosted `libsql://`). Not opened yet.
+**Last closed:** [[Jord-S0019/README|Jord-S0019]] — hosted `libsql://` · as-built [[../../tech_space/jord/18-s0019-hosted-libsql]].  
+**Next to open:** Jord-S0020 (`pgvector` / sqlite-vec hard path). Not opened yet.
 
 **Last numbered sprint is Jord-S0020.** Closing S0020 empties this queue. Rows 7–9 are not sprints until a product need opens them. Artemis is a product fork, not a Jord sprint.
 
@@ -27,8 +28,8 @@ tags:
 | **2** | Schema DROP / RENAME / type change | S0004 / S0012 deferred | **Jord-S0016** (done) | Admin-only |
 | **3** | Native Postgres RLS compile from Jord policies | 01-later · S0009 deferred | **Jord-S0017** (done) | libSQL keeps middleware |
 | **4** | Realtime: WebSockets + multi-table fanout | S0011 deferred | **Jord-S0018** (done) | SSE stays; write-path emit |
-| **5** | Hosted `libsql://` (Turso) | 01-later · architecture | **Jord-S0019** (next) | Same LibSqlAdapter, auth token env |
-| **6** | `pgvector` / sqlite-vec hard path | S0014 deferred | **Jord-S0020 — last numbered** | Cosine fallback stays until this closes |
+| **5** | Hosted `libsql://` (Turso) | 01-later · architecture | **Jord-S0019** (done) | Same LibSqlAdapter, auth token env |
+| **6** | `pgvector` / sqlite-vec hard path | S0014 deferred | **Jord-S0020 — last numbered** (next) | Cosine fallback stays until this closes |
 | 7 | Blob enhancements: multipart, larger limits, remote S3 | S0013 deferred | not numbered | Open only if product needs it |
 | 8 | Redis-compatible cache | 01-later | not numbered | When live state needs it |
 | 9 | Bot / second cloud process | 01-later | not numbered | When in-process writer is the wrong shape |
@@ -53,7 +54,8 @@ From as-built notes (non-exhaustive):
 - S0013 — full S3 / SigV4 / remote object store; blob CDC
 - S0014 — hard sqlite-vec/pgvector; hosted embed API; embedding CDC
 - S0017 — non-`records` RLS; drop middleware on Postgres
+- S0019 — embedded replicas; file→Turso wizard; Studio paste-URL UI
 
 ## Rule
 
-**One active Jord sprint at a time.** S0018 is closed. Open S0019 on [[README]] before building it. After S0020, stop opening numbered cards unless rows 7–9 are promoted. Artemis stays a product track.
+**One active Jord sprint at a time.** S0019 is closed. Open S0020 on [[README]] before building it — that card is the **last numbered** sprint. After S0020, stop opening numbered cards unless rows 7–9 are promoted. Artemis stays a product track.

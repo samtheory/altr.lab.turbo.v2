@@ -5,13 +5,29 @@ import { JordSlice0UrlError, JordUrlError } from "./errors.js";
 
 export const DEFAULT_DATABASE_URL = "file:./data/jord.db";
 
-export type JordUrlScheme = "file" | "postgres" | "postgresql";
+/** Safe scheme label (no host/path). `postgresql://` normalizes to `postgres`. */
+export type JordUrlScheme = "file" | "postgres" | "libsql";
 
 export type ResolvedJordUrl =
   | { scheme: "file"; url: string }
-  | { scheme: "postgres"; url: string };
+  | { scheme: "postgres"; url: string }
+  | { scheme: "libsql"; url: string };
 
-/** Classify and validate DATABASE_URL. Accepts file: and postgres:/postgresql:. */
+/**
+ * Auth token for hosted `libsql://`.
+ * Primary: `LIBSQL_AUTH_TOKEN`. Alias: `TURSO_AUTH_TOKEN` if primary unset.
+ */
+export function resolveLibsqlAuthToken(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  const primary = env.LIBSQL_AUTH_TOKEN?.trim();
+  if (primary) return primary;
+  const alias = env.TURSO_AUTH_TOKEN?.trim();
+  if (alias) return alias;
+  return undefined;
+}
+
+/** Classify and validate DATABASE_URL. */
 export function resolveDatabaseUrl(url?: string): ResolvedJordUrl {
   const resolved =
     url ?? process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
@@ -26,10 +42,7 @@ export function resolveDatabaseUrl(url?: string): ResolvedJordUrl {
     return { scheme: "postgres", url: resolved };
   }
   if (resolved.startsWith("libsql:")) {
-    throw new JordUrlError(
-      resolved,
-      "hosted libsql: DATABASE_URL is reserved for a later slice; use file: or postgres:/postgresql:",
-    );
+    return { scheme: "libsql", url: resolved };
   }
   throw new JordSlice0UrlError(resolved);
 }
@@ -66,4 +79,20 @@ export function fsPathToFileUrl(filePath: string): string {
   return normalized.startsWith("/")
     ? `file://${normalized}`
     : `file:${normalized}`;
+}
+
+/** Require a non-empty auth token for hosted libsql URLs. */
+export function requireLibsqlAuthToken(
+  url: string,
+  authToken?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const token = authToken?.trim() || resolveLibsqlAuthToken(env);
+  if (!token) {
+    throw new JordUrlError(
+      url,
+      "LIBSQL_AUTH_TOKEN (or TURSO_AUTH_TOKEN) is required for libsql://",
+    );
+  }
+  return token;
 }

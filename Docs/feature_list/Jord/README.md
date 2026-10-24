@@ -34,11 +34,11 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 | [[00-intent]] | Slice 0 — **shipped** |
 | [[01-later]] | Engine + pillars + Studio order (vectors **shipped**; RLS **shipped**) |
 | [[02-architecture]] | `JordDriverPort`, adapters, concurrency, dialect seams |
-| [[03-jord-studio]] | Studio S1–S11 done · realtime [[../../tech_space/jord/17-s0018-realtime-ws]] |
+| [[03-jord-studio]] | Studio S1–S11 done · hosted libsql [[../../tech_space/jord/18-s0019-hosted-libsql]] |
 
 ## Gate
 
 1. ~~Apolyx-S0005~~ — **closed** 2026-10-21.
-2. ~~Jord-S0001–S0018~~ — **closed** 2026-10-24.
-3. **Next:** Jord-S0019 (hosted `libsql://`). Numbered queue ends at **Jord-S0020**.
+2. ~~Jord-S0001–S0019~~ — **closed** 2026-10-24.
+3. **Next:** Jord-S0020 (`pgvector` / sqlite-vec) — **last numbered sprint**.
 4. Apps stay Apolyx-first (`.cursor/rules/apolyx-first.mdc`).

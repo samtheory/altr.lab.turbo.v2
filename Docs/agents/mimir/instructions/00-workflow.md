@@ -16,6 +16,7 @@ tags:
   - Jord-S0017
   - Jord-S0018
   - Jord-S0019
+  - Jord-S0020
 ---
 
 # mimir — workflow instructions
@@ -35,7 +36,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0018** closed. Next to open: **Jord-S0019**. Last numbered: **Jord-S0020** — [[../../../plan/Jord/00-remaining-backlog]]
+4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0019** closed. Next to open: **Jord-S0020** (last numbered) — [[../../../plan/Jord/00-remaining-backlog]]
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. Review of shipped work: [[../../../report/Jord-implemented-review]]
 7. This file
@@ -51,10 +52,10 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 
 ## Hard constraints (engine — still true)
 
-1. Default store is **`file:`**; **`postgres://` / `postgresql://`** select `PostgresAdapter` (S0010). Hosted `libsql://` still later.
+1. Default store is **`file:`**; **`postgres://` / `postgresql://`** → `PostgresAdapter` (S0010); **`libsql://`** → same `LibSqlAdapter` + token env (S0019).
 2. **One writer queue** in `@altr/jord-server` for hot writes (both dialects).
 3. OCC on `records.version` → HTTP **409**.
-4. WAL pragmas + truncate checkpoints on **libSQL only** (skip on Postgres).
+4. WAL pragmas + truncate checkpoints on **file libSQL only** (skip hosted `libsql://` and Postgres).
 5. Timestamps = ms integers; Postgres uses **`bigint`**.
 6. No Redis / Mongo; hard sqlite-vec / `pgvector` wait for a later card (S0014 ships lab cosine).
 7. `@altr/base` is a **leaf** — [[../../../feature_list/00-elements-dependency-rules]].
@@ -131,7 +132,11 @@ See [[../../../plan/Jord/Jord-S0017/README]] (done 2026-10-24). As-built: [[../.
 
 ### Closed — Jord-S0018 (realtime WebSockets + multi-table fanout)
 
-See [[../../../plan/Jord/Jord-S0018/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/17-s0018-realtime-ws]]. Next to open: Jord-S0019. **Last numbered sprint:** Jord-S0020.
+See [[../../../plan/Jord/Jord-S0018/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/17-s0018-realtime-ws]].
+
+### Closed — Jord-S0019 (hosted libsql:// / Turso)
+
+See [[../../../plan/Jord/Jord-S0019/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/18-s0019-hosted-libsql]]. Next to open: **Jord-S0020** (last numbered).
 
 ## Skills discipline
 

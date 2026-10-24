@@ -115,7 +115,7 @@ export async function startJordServer(
     logs,
     scheduler,
   });
-  const useWal = jord.dialect === "libsql";
+  const useWal = jord.dialect === "libsql" && jord.urlScheme === "file";
   const hygiene = useWal
     ? startWalHygiene(jord, resolveWalCheckpointMs(env))
     : { stop() {} };
@@ -124,9 +124,8 @@ export async function startJordServer(
   const server = serve({ fetch: app.fetch, port });
   app.injectWebSocket(server);
 
-  const scheme = jord.dialect === "postgres" ? "postgres" : "file";
   console.log(
-    `[@altr/jord-server] dialect=${jord.dialect} scheme=${scheme}`,
+    `[@altr/jord-server] dialect=${jord.dialect} scheme=${jord.urlScheme}`,
   );
 
   let shuttingDown = false;

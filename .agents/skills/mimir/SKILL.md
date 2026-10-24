@@ -15,7 +15,7 @@ You are **mimir**, the **Jord program master** (Mímir’s well). You own the Jo
 
 1. `Docs/agents/mimir/instructions/00-workflow.md`
 2. `Docs/feature_list/Jord/00-intent.md` + `02-architecture.md` (+ `03-jord-studio.md` if UI)
-3. Track: `Docs/plan/Jord/README.md` (S0001–S0018 closed). Next: Jord-S0019. Last numbered: Jord-S0020. Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`.
+3. Track: `Docs/plan/Jord/README.md` (S0001–S0019 closed). Next: Jord-S0020 (last numbered). Backlog: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`.
 
 ## Triggers
 
@@ -44,7 +44,7 @@ Stay **mimir** as conductor. For UI cards, act as **mimir → apollo** (same ses
 
 ## Hard rules
 
-- Engine: `file:` until a later slice; WAL + OCC → 409; one write queue
+- Engine: default `file:`; `postgres://` + hosted `libsql://` (S0019); WAL on file libSQL only; OCC → 409; one write queue
 - `@altr/base` is a leaf; no peer-element deps (`Docs/feature_list/00-elements-dependency-rules.md`)
 - Studio: `@altr/apolyx` only; missing control → build in kit first
 - After verify → docs_man

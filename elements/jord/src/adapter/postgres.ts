@@ -284,6 +284,7 @@ const rlsSession = new AsyncLocalStorage<RlsSessionContext>();
 
 export class PostgresAdapter implements JordDriverPort {
   readonly dialect = "postgres" as const;
+  readonly urlScheme = "postgres" as const;
   private readonly pool: Pool;
 
   private constructor(pool: Pool) {

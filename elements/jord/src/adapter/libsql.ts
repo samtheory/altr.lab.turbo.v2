@@ -89,6 +89,7 @@ import {
   planInsertRow,
   planUpdateRow,
 } from "../schema/row-write.js";
+import { JordUnsupportedError } from "../errors.js";
 import { jordBlobs } from "../schema/blobs.js";
 import { jordEmbeddings } from "../schema/embeddings.js";
 import { jordCustomApis, jordFunctions } from "../schema/functions.js";
@@ -97,10 +98,19 @@ import { jordPolicies } from "../schema/policies.js";
 import { records, schema } from "../schema/records.js";
 import { jordTriggers } from "../schema/triggers.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
-import { fileUrlToFsPath } from "../url.js";
+import {
+  fileUrlToFsPath,
+  requireLibsqlAuthToken,
+  type JordUrlScheme,
+} from "../url.js";
 import { packF32, validateEmbeddingArray } from "../vectors/f32.js";
 import { isValidVectorNamespace } from "../vectors/names.js";
 import { rankByCosine } from "../vectors/search.js";
+
+export type LibSqlOpenOptions = {
+  /** Hosted libsql auth; defaults to env tokens. */
+  authToken?: string;
+};
 
 const POLICY_OPS = new Set<JordPolicyOperation>([
   "select",
@@ -290,37 +300,55 @@ function mapTrigger(row: typeof jordTriggers.$inferSelect): JordTrigger {
 
 export class LibSqlAdapter implements JordDriverPort {
   readonly dialect = "libsql" as const;
+  readonly urlScheme: Extract<JordUrlScheme, "file" | "libsql">;
   readonly client: Client;
   readonly db: JordDb;
 
-  private constructor(client: Client) {
+  private constructor(
+    client: Client,
+    urlScheme: Extract<JordUrlScheme, "file" | "libsql">,
+  ) {
     this.client = client;
+    this.urlScheme = urlScheme;
     this.db = drizzle(client, { schema });
   }
 
-  static async open(fileUrl: string): Promise<LibSqlAdapter> {
-    const fsPath = fileUrlToFsPath(fileUrl);
+  static async open(
+    url: string,
+    options: LibSqlOpenOptions = {},
+  ): Promise<LibSqlAdapter> {
+    if (url.startsWith("libsql:")) {
+      const authToken = requireLibsqlAuthToken(url, options.authToken);
+      const client = createClient({ url, authToken });
+      await ensureRecordsSchema(client);
+      return new LibSqlAdapter(client, "libsql");
+    }
+
+    const fsPath = fileUrlToFsPath(url);
     await mkdir(path.dirname(fsPath), { recursive: true });
 
-    const client = createClient({ url: fileUrl });
+    const client = createClient({ url });
     for (const pragma of WAL_PRAGMAS) {
       await client.execute(pragma);
     }
     await ensureRecordsSchema(client);
 
-    return new LibSqlAdapter(client);
+    return new LibSqlAdapter(client, "file");
   }
 
   async close(): Promise<void> {
-    try {
-      await this.client.execute("PRAGMA wal_checkpoint(TRUNCATE)");
-    } catch {
-      // Best-effort — still close so Windows can unlock the file.
+    if (this.urlScheme === "file") {
+      try {
+        await this.client.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+      } catch {
+        // Best-effort — still close so Windows can unlock the file.
+      }
     }
     this.client.close();
   }
 
   async checkpointTruncate(): Promise<void> {
+    if (this.urlScheme !== "file") return;
     await this.client.execute("PRAGMA wal_checkpoint(TRUNCATE)");
   }
 
@@ -1420,6 +1448,9 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async snapshotTo(destPath: string): Promise<string> {
+    if (this.urlScheme !== "file") {
+      throw new JordUnsupportedError("snapshotTo", this.urlScheme);
+    }
     const absDest = path.resolve(destPath);
     await mkdir(path.dirname(absDest), { recursive: true });
     // VACUUM INTO is the SQL-facing online backup path for libSQL/SQLite 3.27+.

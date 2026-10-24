@@ -31,7 +31,7 @@ App and server code depend on a **unified port**, not on libSQL or Postgres APIs
 | Piece | Role |
 |-------|------|
 | `JordDriverPort` | Dialect-agnostic surface: open, query/execute through Drizzle, close. Specialized ops (e.g. `searchVectors`) declared on the port and implemented per adapter |
-| `LibSqlAdapter` | `file:` (local zero-infra) and later `libsql://` (Turso edge). Applies WAL pragmas. Later hosts local `sqlite-vec` |
+| `LibSqlAdapter` | `file:` (local zero-infra) and `libsql://` (Turso edge, S0019). WAL pragmas on `file:` only. Later hosts local `sqlite-vec` |
 | `PostgresAdapter` | `postgres://` / `postgresql://`. `pg` Pool, bigint ms timestamps, same port CRUD. **Shipped in Jord-S0010** · [[../../tech_space/jord/09-s0010-postgres]]. `pgvector` still later |
 
 ### Dynamic driver activation
@@ -127,9 +127,10 @@ one product (Jord)
 
 | Variable | Now | Later |
 |----------|-----|--------|
-| `DATABASE_URL` | `file:…` (default) or `postgres://` / `postgresql://` | `libsql://…` (hosted) |
-| `JORD_TEST_POSTGRES_URL` | Opt-in live adapter tests | — |
-| Auth / pool secrets | Studio / server tokens | Turso token, etc. |
+| `DATABASE_URL` | `file:…` (default), `libsql://…`, or `postgres://` / `postgresql://` | — |
+| `LIBSQL_AUTH_TOKEN` / `TURSO_AUTH_TOKEN` | Required for `libsql://` | — |
+| `JORD_TEST_POSTGRES_URL` / `JORD_TEST_LIBSQL_URL` | Opt-in live adapter tests | — |
+| Auth / pool secrets | Studio / server tokens | — |
 
 ## Links
 

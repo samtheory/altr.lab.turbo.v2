@@ -42,6 +42,7 @@ export {
   type JordDb,
   type JordDialect,
   type JordDriverPort,
+  type JordUrlSchemeLabel,
   type JordFunction,
   type JordHttpMethod,
   type JordJob,
@@ -157,7 +158,9 @@ export {
   DEFAULT_DATABASE_URL,
   fileUrlToFsPath,
   fsPathToFileUrl,
+  requireLibsqlAuthToken,
   resolveDatabaseUrl,
+  resolveLibsqlAuthToken,
   type JordUrlScheme,
   type ResolvedJordUrl,
 } from "./url.js";

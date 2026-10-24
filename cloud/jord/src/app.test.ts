@@ -101,10 +101,17 @@ describe("jord-server routes", () => {
       const res = await app.request("/health");
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({ ok: true, dialect: jord.dialect });
+      expect(body).toEqual({
+        ok: true,
+        dialect: jord.dialect,
+        urlScheme: jord.urlScheme,
+      });
       expect(["libsql", "postgres"]).toContain(body.dialect);
+      expect(["file", "libsql", "postgres"]).toContain(body.urlScheme);
       expect(JSON.stringify(body)).not.toMatch(/postgres:\/\//);
       expect(JSON.stringify(body)).not.toMatch(/file:/);
+      expect(JSON.stringify(body)).not.toMatch(/libsql:\/\//);
+      expect(JSON.stringify(body)).not.toMatch(/AUTH_TOKEN/i);
     } finally {
       await jord.close();
     }

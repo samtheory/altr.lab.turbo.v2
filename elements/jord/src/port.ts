@@ -450,12 +450,20 @@ export type JordDb = LibSQLDatabase<typeof schema>;
 
 export type JordDialect = "libsql" | "postgres";
 
+/** Safe URL scheme on the open client (no host/path). */
+export type JordUrlSchemeLabel = "file" | "libsql" | "postgres";
+
 /**
- * Dialect-agnostic surface. LibSqlAdapter (`file:`) and PostgresAdapter
- * (`postgres://` / `postgresql://`) both implement this.
+ * Dialect-agnostic surface. LibSqlAdapter (`file:` / `libsql://`) and
+ * PostgresAdapter (`postgres://` / `postgresql://`) both implement this.
  */
 export interface JordDriverPort {
   readonly dialect: JordDialect;
+  /**
+   * Connection scheme without secrets: `file` | `libsql` | `postgres`.
+   * Use for WAL gating and /health — never expose the raw URL.
+   */
+  readonly urlScheme: JordUrlSchemeLabel;
   /**
    * Raw libSQL client — present when `dialect === "libsql"`.
    * Prefer port methods; only use for pragmas / dialect-specific SQL.
@@ -468,8 +476,8 @@ export interface JordDriverPort {
 
   close(): Promise<void>;
   /**
-   * `PRAGMA wal_checkpoint(TRUNCATE)` on libSQL.
-   * No-op on Postgres (WAL hygiene is SQLite-only).
+   * `PRAGMA wal_checkpoint(TRUNCATE)` on local file libSQL.
+   * No-op on hosted `libsql://` and Postgres.
    */
   checkpointTruncate(): Promise<void>;
 

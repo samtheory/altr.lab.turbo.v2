@@ -3,9 +3,13 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { createJordClient } from "../client.js";
-import { JordUrlError } from "../errors.js";
+import { JordUnsupportedError, JordUrlError } from "../errors.js";
 import { makeTempDir, rmTempDir } from "../test-temp.js";
-import { fsPathToFileUrl, resolveDatabaseUrl } from "../url.js";
+import {
+  fsPathToFileUrl,
+  resolveDatabaseUrl,
+  resolveLibsqlAuthToken,
+} from "../url.js";
 
 const temps: string[] = [];
 
@@ -59,19 +63,86 @@ describe("createJordClient / LibSqlAdapter", () => {
     });
   });
 
-  it("rejects libsql: as a later slice", async () => {
-    await expect(
-      createJordClient({ url: "libsql://example.turso.io" }),
-    ).rejects.toBeInstanceOf(JordUrlError);
-    await expect(
-      createJordClient({ url: "libsql://example.turso.io" }),
-    ).rejects.toThrow(/hosted libsql/i);
+  it("accepts libsql: at resolve time", () => {
+    expect(resolveDatabaseUrl("libsql://example.turso.io")).toEqual({
+      scheme: "libsql",
+      url: "libsql://example.turso.io",
+    });
+  });
+
+  it("rejects libsql: without auth token", async () => {
+    const prevLib = process.env.LIBSQL_AUTH_TOKEN;
+    const prevTurso = process.env.TURSO_AUTH_TOKEN;
+    delete process.env.LIBSQL_AUTH_TOKEN;
+    delete process.env.TURSO_AUTH_TOKEN;
+    try {
+      await expect(
+        createJordClient({ url: "libsql://example.turso.io" }),
+      ).rejects.toBeInstanceOf(JordUrlError);
+      await expect(
+        createJordClient({ url: "libsql://example.turso.io" }),
+      ).rejects.toThrow(/LIBSQL_AUTH_TOKEN/i);
+    } finally {
+      if (prevLib === undefined) delete process.env.LIBSQL_AUTH_TOKEN;
+      else process.env.LIBSQL_AUTH_TOKEN = prevLib;
+      if (prevTurso === undefined) delete process.env.TURSO_AUTH_TOKEN;
+      else process.env.TURSO_AUTH_TOKEN = prevTurso;
+    }
+  });
+
+  it("resolveLibsqlAuthToken prefers LIBSQL_AUTH_TOKEN", () => {
+    expect(
+      resolveLibsqlAuthToken({
+        LIBSQL_AUTH_TOKEN: " primary ",
+        TURSO_AUTH_TOKEN: "alias",
+      }),
+    ).toBe("primary");
+    expect(
+      resolveLibsqlAuthToken({
+        TURSO_AUTH_TOKEN: " alias ",
+      }),
+    ).toBe("alias");
+    expect(resolveLibsqlAuthToken({})).toBeUndefined();
   });
 
   it("opens a clean temp file: URL", async () => {
     const url = await tempFileUrl();
     const jord = await createJordClient({ url });
     expect(jord.dialect).toBe("libsql");
+    expect(jord.urlScheme).toBe("file");
     await jord.close();
   });
 });
+
+const liveLibsqlUrl = process.env.JORD_TEST_LIBSQL_URL?.trim();
+const liveLibsqlToken =
+  process.env.LIBSQL_AUTH_TOKEN?.trim() ||
+  process.env.TURSO_AUTH_TOKEN?.trim() ||
+  process.env.JORD_TEST_LIBSQL_TOKEN?.trim();
+
+describe.runIf(Boolean(liveLibsqlUrl && liveLibsqlToken))(
+  "LibSqlAdapter hosted live",
+  () => {
+    it("opens, inserts, and skips snapshot on libsql://", async () => {
+      const jord = await createJordClient({
+        url: liveLibsqlUrl,
+        authToken: liveLibsqlToken,
+      });
+      try {
+        expect(jord.dialect).toBe("libsql");
+        expect(jord.urlScheme).toBe("libsql");
+        const inserted = await jord.insertRecord({
+          bucket: "lab-s0019",
+          body: JSON.stringify({ n: 1 }),
+        });
+        expect(inserted.version).toBe(1);
+        await expect(
+          jord.snapshotTo("/tmp/jord-libsql-snap.db"),
+        ).rejects.toBeInstanceOf(JordUnsupportedError);
+        await jord.checkpointTruncate();
+      } finally {
+        await jord.close();
+      }
+    });
+  },
+);

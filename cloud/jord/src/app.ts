@@ -341,7 +341,11 @@ export function createJordApp(deps: JordAppDeps) {
   const publishRecordChange = publishChange;
 
   app.get("/health", (c) =>
-    c.json({ ok: true as const, dialect: deps.jord.dialect }),
+    c.json({
+      ok: true as const,
+      dialect: deps.jord.dialect,
+      urlScheme: deps.jord.urlScheme,
+    }),
   );
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();

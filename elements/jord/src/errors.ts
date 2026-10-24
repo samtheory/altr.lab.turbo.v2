@@ -16,7 +16,7 @@ export class JordSlice0UrlError extends JordUrlError {
   constructor(url: string) {
     super(
       url,
-      "DATABASE_URL scheme is not accepted. Use file: (default) or postgres:/postgresql:. Hosted libsql: is reserved for a later slice",
+      "DATABASE_URL scheme is not accepted. Use file: (default), postgres:/postgresql:, or libsql: (with LIBSQL_AUTH_TOKEN)",
     );
     this.name = "JordSlice0UrlError";
   }
