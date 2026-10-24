@@ -15,7 +15,11 @@ import type {
   InsertJobInput,
   InsertJobRunInput,
   InsertPolicyInput,
+  DeleteTableRowInput,
   InsertRecordInput,
+  InsertTableRowInput,
+  MutateTableRowResult,
+  UpdateTableRowInput,
   InsertTriggerInput,
   JordBlob,
   JordColumnInfo,
@@ -54,11 +58,17 @@ import {
   buildCreateTableSql,
   clampRowWindow,
   isJordColumnType,
+  isReservedCreateTableName,
   isValidSqlIdent,
   planCreateTable,
   quoteIdent,
   toTableCell,
 } from "../schema/ddl.js";
+import {
+  planDeleteRow,
+  planInsertRow,
+  planUpdateRow,
+} from "../schema/row-write.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
 import { packF32, validateEmbeddingArray } from "../vectors/f32.js";
 import { isValidVectorNamespace } from "../vectors/names.js";
@@ -977,6 +987,99 @@ export class PostgresAdapter implements JordDriverPort {
       return out;
     });
     return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
+  }
+
+  async insertTableRow(input: InsertTableRowInput): Promise<MutateTableRowResult> {
+    const described = await this.openUserTable(input.table);
+    if (!described.ok) return described;
+    const plan = planInsertRow(described.info, input.values);
+    if (!plan.ok) return plan;
+    const existing = await this.pool.query(
+      `SELECT 1 AS hit FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1 LIMIT 1`,
+      [plan.pkValue],
+    );
+    if (existing.rows.length > 0) {
+      return {
+        ok: false,
+        error: "pk_exists",
+        message: "primary key already exists",
+      };
+    }
+    const cols = plan.columns.map((name) => quoteIdent(name)).join(", ");
+    const marks = plan.columns.map((_, i) => `$${i + 1}`).join(", ");
+    await this.pool.query(
+      `INSERT INTO ${quoteIdent(plan.table)} (${cols}) VALUES (${marks})`,
+      plan.args,
+    );
+    return { ok: true };
+  }
+
+  async updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult> {
+    const described = await this.openUserTable(input.table);
+    if (!described.ok) return described;
+    const plan = planUpdateRow(described.info, input.pk, input.values);
+    if (!plan.ok) return plan;
+    const sets = plan.setColumns
+      .map((name, i) => `${quoteIdent(name)} = $${i + 1}`)
+      .join(", ");
+    const result = await this.pool.query(
+      `UPDATE ${quoteIdent(plan.table)} SET ${sets} WHERE ${quoteIdent(plan.pkColumn)} = $${plan.setColumns.length + 1}`,
+      [...plan.args, plan.pkValue],
+    );
+    if ((result.rowCount ?? 0) === 0) {
+      return { ok: false, error: "not_found", message: "row not found" };
+    }
+    return { ok: true };
+  }
+
+  async deleteTableRow(input: DeleteTableRowInput): Promise<MutateTableRowResult> {
+    const described = await this.openUserTable(input.table);
+    if (!described.ok) return described;
+    const plan = planDeleteRow(described.info, input.pk);
+    if (!plan.ok) return plan;
+    const result = await this.pool.query(
+      `DELETE FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1`,
+      [plan.pkValue],
+    );
+    if ((result.rowCount ?? 0) === 0) {
+      return { ok: false, error: "not_found", message: "row not found" };
+    }
+    return { ok: true };
+  }
+
+  private async openUserTable(
+    table: string,
+  ): Promise<
+    | { ok: true; info: JordTableInfo }
+    | {
+        ok: false;
+        error: "invalid_identifier" | "reserved" | "table_not_found";
+        message: string;
+      }
+  > {
+    if (!isValidSqlIdent(table)) {
+      return {
+        ok: false,
+        error: "invalid_identifier",
+        message: "table name must match [a-zA-Z_][a-zA-Z0-9_]*",
+      };
+    }
+    if (isReservedCreateTableName(table)) {
+      return {
+        ok: false,
+        error: "reserved",
+        message: `table ${table} is reserved`,
+      };
+    }
+    const info = await this.describeTable(table);
+    if (!info) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${table} not found`,
+      };
+    }
+    return { ok: true, info };
   }
 
   async listBlobBuckets(): Promise<string[]> {

@@ -50,3 +50,8 @@ export function canWriteBlobs(role: JordRole): boolean {
 export function canWriteVectors(role: JordRole): boolean {
   return role === "admin" || role === "editor";
 }
+
+/** Insert / update / delete rows on user tables. */
+export function canWriteTableRows(role: JordRole): boolean {
+  return role === "admin" || role === "editor";
+}

@@ -52,7 +52,7 @@ Saying **`mimir`** (or `mimir build … with apollo`) means: *run the active Jor
 | Vault | `Docs/…` | — | mimir → **docs_man** |
 
 Canonical: [[../../feature_list/Jord/00-intent]] · [[../../feature_list/Jord/02-architecture]] · Studio [[../../feature_list/Jord/03-jord-studio]]  
-**Track:** [[../../plan/Jord/README]] (S0001–**S0014** closed) · Backlog [[../../plan/Jord/00-remaining-backlog]] · Latest as-built [[../../tech_space/jord/13-s0014-vectors]]
+**Active plan:** none — next [[../../plan/Jord/00-remaining-backlog|Jord-S0016]] · Track [[../../plan/Jord/README]] (through **S0015**) · Last numbered **Jord-S0020** · Latest as-built [[../../tech_space/jord/14-s0015-user-table-writes]]
 
 ## Specialist routing
 

@@ -31,6 +31,7 @@ import {
   requireManageJobs,
   requireSubscribeRealtime,
   requireWriteRecords,
+  requireWriteTableRows,
   type JordAuthConfig,
   type JordAuthVariables,
 } from "./auth/index.js";
@@ -292,6 +293,12 @@ function requireGeneratedEnabled(
   );
 }
 
+function tableRowStatus(error: string): 400 | 404 | 409 {
+  if (error === "pk_exists") return 409;
+  if (error === "table_not_found" || error === "not_found") return 404;
+  return 400;
+}
+
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
   const requireAuth = createAuthMiddleware(deps.auth);
@@ -449,6 +456,81 @@ export function createJordApp(deps: JordAppDeps) {
     }
     return c.json(result);
   });
+
+  protectedRoutes.post(
+    "/schema/tables/:name/rows",
+    requireWriteTableRows(),
+    async (c) => {
+      const name = c.req.param("name");
+      const body = (await c.req.json().catch(() => null)) as {
+        values?: unknown;
+      } | null;
+      if (!body || body.values == null || typeof body.values !== "object") {
+        throw new HTTPException(400, { message: "values object is required" });
+      }
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.insertTableRow({
+          table: name,
+          values: body.values as Record<string, unknown>,
+        }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          tableRowStatus(result.error),
+        );
+      }
+      return c.json({ ok: true as const }, 201);
+    },
+  );
+
+  protectedRoutes.patch(
+    "/schema/tables/:name/rows/:pk",
+    requireWriteTableRows(),
+    async (c) => {
+      const name = c.req.param("name");
+      const pk = c.req.param("pk");
+      const body = (await c.req.json().catch(() => null)) as {
+        values?: unknown;
+      } | null;
+      if (!body || body.values == null || typeof body.values !== "object") {
+        throw new HTTPException(400, { message: "values object is required" });
+      }
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.updateTableRow({
+          table: name,
+          pk,
+          values: body.values as Record<string, unknown>,
+        }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          tableRowStatus(result.error),
+        );
+      }
+      return c.json({ ok: true as const });
+    },
+  );
+
+  protectedRoutes.delete(
+    "/schema/tables/:name/rows/:pk",
+    requireWriteTableRows(),
+    async (c) => {
+      const name = c.req.param("name");
+      const pk = c.req.param("pk");
+      const result = await deps.enqueueWrite(() =>
+        deps.jord.deleteTableRow({ table: name, pk }),
+      );
+      if (!result.ok) {
+        return c.json(
+          { error: result.error, message: result.message },
+          tableRowStatus(result.error),
+        );
+      }
+      return c.json({ ok: true as const });
+    },
+  );
 
   protectedRoutes.get("/schema/tables/:name", async (c) => {
     const name = c.req.param("name");

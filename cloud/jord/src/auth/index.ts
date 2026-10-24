@@ -12,6 +12,7 @@ export {
   requireSubscribeRealtime,
   requireWriteBlobs,
   requireWriteRecords,
+  requireWriteTableRows,
   requireWriteVectors,
   type JordAuthVariables,
 } from "./middleware.js";
@@ -24,6 +25,7 @@ export {
   canSubscribeRealtime,
   canWriteBlobs,
   canWriteRecords,
+  canWriteTableRows,
   canWriteVectors,
   isJordRole,
   JORD_ROLES,

@@ -375,6 +375,88 @@ describe("jord-server routes", () => {
     }
   });
 
+  it("user table rows: editor writes, readonly cannot, duplicate pk is 409", async () => {
+    const { app, jord } = await testApp();
+    try {
+      const created = await app.request("/schema/tables", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "lab_notes",
+          columns: [{ name: "title", type: "TEXT" }],
+        }),
+      });
+      expect(created.status).toBe(201);
+
+      const denied = await app.request("/schema/tables/lab_notes/rows", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("readonly"),
+        },
+        body: JSON.stringify({ values: { id: "n1", title: "hello" } }),
+      });
+      expect(denied.status).toBe(403);
+
+      const inserted = await app.request("/schema/tables/lab_notes/rows", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ values: { id: "n1", title: "hello" } }),
+      });
+      expect(inserted.status).toBe(201);
+
+      const dup = await app.request("/schema/tables/lab_notes/rows", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ values: { id: "n1", title: "again" } }),
+      });
+      expect(dup.status).toBe(409);
+
+      const patched = await app.request("/schema/tables/lab_notes/rows/n1", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ values: { title: "edited" } }),
+      });
+      expect(patched.status).toBe(200);
+
+      const reserved = await app.request("/schema/tables/records/rows", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ values: { id: "x" } }),
+      });
+      expect(reserved.status).toBe(400);
+
+      const removed = await app.request("/schema/tables/lab_notes/rows/n1", {
+        method: "DELETE",
+        headers: authHeaders("editor"),
+      });
+      expect(removed.status).toBe(200);
+
+      const missing = await app.request("/schema/tables/lab_notes/rows/n1", {
+        method: "DELETE",
+        headers: authHeaders("editor"),
+      });
+      expect(missing.status).toBe(404);
+    } finally {
+      await jord.close();
+    }
+  });
+
   it("truncateWalCheckpoint is callable (shutdown / interval path)", async () => {
     const { jord } = await testApp();
     try {

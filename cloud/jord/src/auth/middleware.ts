@@ -11,6 +11,7 @@ import {
   canSubscribeRealtime,
   canWriteBlobs,
   canWriteRecords,
+  canWriteTableRows,
   canWriteVectors,
   type JordRole,
 } from "./roles.js";
@@ -59,6 +60,20 @@ export function requireWriteRecords() {
       if (!canWriteRecords(role)) {
         throw new HTTPException(403, {
           message: "role cannot write records",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireWriteTableRows() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canWriteTableRows(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot write table rows",
         });
       }
       await next();

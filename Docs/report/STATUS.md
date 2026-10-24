@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot: Jord-S0001–S0014 shipped; next from remaining backlog"
+description: "Jord-S0001–S0015 shipped; next is S0016; last numbered sprint S0020"
 created: 2026-09-19
 updated: 2026-10-24
 tags:
@@ -12,28 +12,29 @@ tags:
 
 # Status
 
-Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0014** (vectors) · **No active Jord sprint** — next from [[../plan/Jord/00-remaining-backlog]] · **Review packet:** [[Jord-implemented-review]] · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
+Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0015** (user-table writes) · **No active Jord sprint** — next is S0016 · **Last numbered sprint:** Jord-S0020 · Review: [[Jord-implemented-review]]
 
 ## Implemented
 
-- **Jord-S0001–S0014** — full matrix in [[Jord-implemented-review]]
-- Latest as-built: [[../tech_space/jord/13-s0014-vectors]] (vectors) · blobs [[../tech_space/jord/12-s0013-blobs]]
+- **Jord-S0001–S0015** — full matrix in [[Jord-implemented-review]]
+- Latest as-built: [[../tech_space/jord/14-s0015-user-table-writes]]
 - **`@altr/apolyx`** through **S0005** · Apolyx-first
 
 ## In progress
 
-_(none — open next Jord card from backlog when ready)_
+_(none — next card is Jord-S0016 DROP / RENAME)_
 
-## Planned (repo) — next Jord
+## Planned (repo) — after S0015
 
-See sequenced backlog: [[../plan/Jord/00-remaining-backlog]]
+Numbered queue ends at **Jord-S0020**. See [[../plan/Jord/00-remaining-backlog]].
 
-1. User-table writes / generated CRUD beyond `records` (suggested S0015)
-2. DROP / RENAME schema
-3. Native Postgres RLS compile
-4. Realtime WebSockets / multi-table fanout
-5. Hosted `libsql://` · pgvector hard path · Redis · bot process
-6. Artemis product fork · Tia · CI
+1. DROP / RENAME schema (S0016) — next
+2. Native Postgres RLS compile (S0017)
+3. Realtime WebSockets / multi-table fanout (S0018)
+4. Hosted `libsql://` (S0019)
+5. **pgvector / sqlite-vec hard path (S0020) — last numbered sprint**
+6. Conditional only: remote blobs, Redis, bot process
+7. Artemis product fork · Tia · CI
 
 ## Remaining (Apolyx)
 

@@ -12,3 +12,14 @@ export async function GET(request: Request, context: RouteContext) {
   );
   return forwardUpstream(upstream);
 }
+
+export async function POST(request: Request, context: RouteContext) {
+  const { name } = await context.params;
+  const body = await request.text();
+  const upstream = await proxyToJord(
+    `/schema/tables/${encodeURIComponent(name)}/rows`,
+    { method: "POST", body },
+  );
+  return forwardUpstream(upstream);
+}
+

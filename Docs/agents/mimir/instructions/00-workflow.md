@@ -31,7 +31,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0014** closed; next from [[../../../plan/Jord/00-remaining-backlog]]
+4. Sprint track [[../../../plan/Jord/README]] — S0001–**S0015** closed. Next to open: **Jord-S0016**. Last numbered: **Jord-S0020** — [[../../../plan/Jord/00-remaining-backlog]]
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. Review of shipped work: [[../../../report/Jord-implemented-review]]
 7. This file
@@ -111,7 +111,11 @@ See [[../../../plan/Jord/Jord-S0013/README]] (done 2026-10-24). As-built: [[../.
 
 ### Closed — Jord-S0014 (Studio S11 vectors)
 
-See [[../../../plan/Jord/Jord-S0014/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/13-s0014-vectors]]. Next: [[../../../plan/Jord/00-remaining-backlog]]. Product fork: Artemis.
+See [[../../../plan/Jord/Jord-S0014/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/13-s0014-vectors]].
+
+### Closed — Jord-S0015 (user-table row writes)
+
+See [[../../../plan/Jord/Jord-S0015/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/14-s0015-user-table-writes]]. Next to open: Jord-S0016. **Last numbered sprint:** Jord-S0020.
 
 ## Skills discipline
 

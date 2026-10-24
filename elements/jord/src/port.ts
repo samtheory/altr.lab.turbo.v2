@@ -84,6 +84,40 @@ export type ListTableRowsResult =
       message: string;
     };
 
+export type TableRowWriteError =
+  | "invalid_identifier"
+  | "reserved"
+  | "table_not_found"
+  | "no_pk"
+  | "missing_pk"
+  | "unknown_column"
+  | "bad_value"
+  | "empty_patch"
+  | "pk_exists"
+  | "not_found";
+
+export type TableRowValues = Record<string, unknown>;
+
+export type MutateTableRowResult =
+  | { ok: true }
+  | { ok: false; error: TableRowWriteError; message: string };
+
+export type InsertTableRowInput = {
+  table: string;
+  values: TableRowValues;
+};
+
+export type UpdateTableRowInput = {
+  table: string;
+  pk: string;
+  values: TableRowValues;
+};
+
+export type DeleteTableRowInput = {
+  table: string;
+  pk: string;
+};
+
 export type JordBlob = {
   id: string;
   bucket: string;
@@ -483,6 +517,12 @@ export interface JordDriverPort {
   createTable(input: CreateTableInput): Promise<CreateTableResult>;
   /** Read-only page of rows. Limit is clamped to 1–100. */
   listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult>;
+  /** Insert one row into a user table. Rejects reserved names and duplicate PKs. */
+  insertTableRow(input: InsertTableRowInput): Promise<MutateTableRowResult>;
+  /** Patch non-key columns of one user-table row identified by its primary key. */
+  updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult>;
+  /** Delete one user-table row by primary key. */
+  deleteTableRow(input: DeleteTableRowInput): Promise<MutateTableRowResult>;
 
   /** Distinct blob buckets that have at least one object (metadata). */
   listBlobBuckets(): Promise<string[]>;

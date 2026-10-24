@@ -141,6 +141,41 @@ describe("schema introspect + ADD COLUMN", () => {
       expect(rows.ok).toBe(true);
       if (!rows.ok) return;
       expect(rows.rows).toEqual([{ id: "n1", title: "hello" }]);
+
+      const inserted = await jord.insertTableRow({
+        table: "lab_notes",
+        values: { id: "n2", title: "second" },
+      });
+      expect(inserted.ok).toBe(true);
+      const dupPk = await jord.insertTableRow({
+        table: "lab_notes",
+        values: { id: "n2", title: "again" },
+      });
+      expect(dupPk.ok).toBe(false);
+      if (!dupPk.ok) expect(dupPk.error).toBe("pk_exists");
+      const updated = await jord.updateTableRow({
+        table: "lab_notes",
+        pk: "n2",
+        values: { title: "edited" },
+      });
+      expect(updated.ok).toBe(true);
+      const removed = await jord.deleteTableRow({
+        table: "lab_notes",
+        pk: "n2",
+      });
+      expect(removed.ok).toBe(true);
+      const missing = await jord.deleteTableRow({
+        table: "lab_notes",
+        pk: "n2",
+      });
+      expect(missing.ok).toBe(false);
+      if (!missing.ok) expect(missing.error).toBe("not_found");
+      const reservedWrite = await jord.insertTableRow({
+        table: "records",
+        values: { id: "x" },
+      });
+      expect(reservedWrite.ok).toBe(false);
+      if (!reservedWrite.ok) expect(reservedWrite.error).toBe("reserved");
     } finally {
       await jord.close();
     }

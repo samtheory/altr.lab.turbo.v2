@@ -12,6 +12,11 @@ export function canWriteRecords(role: JordRole): boolean {
   return role === "admin" || role === "editor";
 }
 
+/** Insert / update / delete rows on user tables (Studio S0015). */
+export function canWriteTableRows(role: JordRole): boolean {
+  return role === "admin" || role === "editor";
+}
+
 export function canAlterSchema(role: JordRole): boolean {
   return role === "admin";
 }

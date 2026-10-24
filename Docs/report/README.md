@@ -14,5 +14,5 @@ tags:
 Status sum-up across feature_list, plan, and tech_space.
 
 - Latest audit: [[STATUS]]
-- **Jord review packet (S0001–S0014):** [[Jord-implemented-review]]
+- **Jord review packet (S0001–S0015):** [[Jord-implemented-review]]
 - Living map: [[../brain/00-Docs-Brain]]

@@ -1,6 +1,6 @@
 ---
 title: "Jord — remaining backlog (post S0014)"
-description: "Sequenced leftover work from feature_list after Studio S11 vectors"
+description: "S0015 closed; next numbered card is S0016; queue ends at Jord-S0020"
 created: 2026-10-24
 updated: 2026-10-24
 tags:
@@ -14,21 +14,24 @@ tags:
 
 > Who: **mimir** picking the next card. Intent sources: [[../../feature_list/Jord/01-later]], [[../../feature_list/Jord/02-architecture]], [[../../feature_list/Jord/03-jord-studio]], plus deferred items from closed tech_space notes. Shipped review: [[../../report/Jord-implemented-review]].
 
-**Last closed:** [[Jord-S0014/README|Jord-S0014]] — Studio S11 vectors · as-built [[../../tech_space/jord/13-s0014-vectors]].
+**Last closed:** [[Jord-S0015/README|Jord-S0015]] — user-table row writes · as-built [[../../tech_space/jord/14-s0015-user-table-writes]].  
+**Next to open:** Jord-S0016 (DROP / RENAME). Not opened yet.
+
+**Last numbered sprint is Jord-S0020.** Closing S0020 empties this queue. Rows 7–9 are not sprints until a product need opens them. Artemis is a product fork, not a Jord sprint.
 
 ## Priority queue (Jord-owned)
 
-| Order | Item | Source | Suggested sprint | Notes |
-|-------|------|--------|------------------|-------|
-| **1** | User-table mutations (insert/update/delete) + optional generated CRUD for non-`records` | S0012 out-of-scope · S0006 | Jord-S0015 | Completes multi-table as a real editor |
-| 2 | Schema DROP / RENAME / type change | S0004 / S0012 deferred | Jord-S0016 | Admin-only; careful with reserved tables |
+| Order | Item | Source | Sprint | Notes |
+|-------|------|--------|--------|-------|
+| **1** | User-table insert/update/delete | S0012 out-of-scope | **Jord-S0015** (done) | Generic REST + Studio grid |
+| **2** | Schema DROP / RENAME / type change | S0004 / S0012 deferred | **Jord-S0016** (next) | Admin-only; careful with reserved tables |
 | 3 | Native Postgres RLS compile from Jord policies | 01-later · S0009 deferred | Jord-S0017 | libSQL keeps middleware |
-| 4 | Realtime: WebSockets and/or native CDC hooks; fanout beyond `records` | S0011 deferred · 01-later | Jord-S0018 | SSE stays |
+| 4 | Realtime: WebSockets and/or native CDC; fanout beyond `records` | S0011 deferred | Jord-S0018 | SSE stays |
 | 5 | Hosted `libsql://` (Turso) | 01-later · architecture | Jord-S0019 | Same LibSqlAdapter, auth token env |
-| 6 | `pgvector` / sqlite-vec hard path | S0014 deferred · architecture | Jord-S0020 | Cosine fallback remains default until then |
-| 7 | Blob enhancements: multipart, larger limits, remote S3 backend | S0013 deferred | later | |
-| 8 | Redis-compatible cache | 01-later | when product needs it | |
-| 9 | Bot / second cloud process | 01-later | when in-process writer is wrong | |
+| **6** | `pgvector` / sqlite-vec hard path | S0014 deferred | **Jord-S0020 — last numbered** | Cosine fallback stays until this closes |
+| 7 | Blob enhancements: multipart, larger limits, remote S3 | S0013 deferred | not numbered | Open only if product needs it |
+| 8 | Redis-compatible cache | 01-later | not numbered | When live state needs it |
+| 9 | Bot / second cloud process | 01-later | not numbered | When in-process writer is the wrong shape |
 
 ## Explicitly not Jord sprint cards
 
@@ -52,4 +55,4 @@ From as-built notes (non-exhaustive):
 
 ## Rule
 
-**One active Jord sprint at a time.** Open S0015 (or next) only after naming it on [[README]]. Artemis may fork in parallel only as a *product* track, not by stuffing trading tables into `records.body`.
+**One active Jord sprint at a time.** S0015 is closed. Open S0016 on [[README]] before building it. After S0020, stop opening numbered cards unless rows 7–9 are promoted. Artemis stays a product track.
