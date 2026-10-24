@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Audited snapshot: Jord-S0001–S0010 shipped; next Artemis / Studio S9"
+description: "Audited snapshot: Jord-S0001–S0011 shipped; next S10 blobs or Artemis"
 created: 2026-09-19
 updated: 2026-10-24
 tags:
@@ -17,11 +17,12 @@ tags:
   - Jord-S0008
   - Jord-S0009
   - Jord-S0010
+  - Jord-S0011
 ---
 
 # Status
 
-Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0010** (Studio S8 Postgres) · **Active Jord sprint:** none · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
+Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0011** (Studio S9 realtime) · **Active Jord sprint:** none · Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Implemented
 
@@ -31,14 +32,20 @@ Last updated: 2026-10-24 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
   - `PostgresAdapter` + `file:` / `postgres://` / `postgresql://` dispatch
   - `/health` dialect; WAL only on libSQL
   - Studio **Database → Connection** (dialect badge; no URL in UI/JSON)
+- **Jord Studio S9 (`Jord-S0011`)** — [[../tech_space/jord/10-s0011-realtime]]
+  - `RealtimeBus` after successful `records` writes
+  - `GET /realtime` SSE; select-deny → 403; 32-subscriber cap
+  - Studio records **Live** switch via `/api/realtime` (no browser DB)
 - **`@altr/apolyx`** through **S0005** · Apolyx-first · docs_man / apollo / mimir
 
 ## Planned (repo) — **do next**
 
-1. Artemis — idea [[../idea/artemis/README]] (product gate after S8)
-2. Jord Studio S9+ (realtime / blobs / vectors) — open a plan when mimir starts the next Jord card · [[../feature_list/Jord/03-jord-studio]]
-3. Tia — intent [[../feature_list/tia/README]]
-4. CI pipeline
+1. **Jord Studio S10** — blob buckets (plan not opened) · [[../feature_list/Jord/03-jord-studio]]
+2. **Jord Studio S11** — vector ops UI (plan not opened)
+3. Engine later: hosted `libsql://`, `pgvector` / native RLS, Redis, bot process · [[../feature_list/Jord/01-later]]
+4. Artemis — idea [[../idea/artemis/README]] (product fork)
+5. Tia — intent [[../feature_list/tia/README]]
+6. CI pipeline
 
 ## Remaining (Apolyx)
 

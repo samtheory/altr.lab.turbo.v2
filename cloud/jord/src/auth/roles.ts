@@ -30,3 +30,8 @@ export function canManageJobs(role: JordRole): boolean {
 export function canInvokeApis(role: JordRole): boolean {
   return role === "admin" || role === "editor";
 }
+
+/** Open the records SSE stream (Studio S9). Mutate stays on canWriteRecords. */
+export function canSubscribeRealtime(role: JordRole): boolean {
+  return role === "admin" || role === "editor" || role === "readonly";
+}

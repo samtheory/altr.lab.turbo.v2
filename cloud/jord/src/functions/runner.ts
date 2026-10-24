@@ -2,6 +2,7 @@ import type { JordDriverPort, JordFunction } from "@altr/jord";
 
 import type { JordRole } from "../auth/roles.js";
 import type { LogRing } from "../jobs/log-ring.js";
+import type { JordChangeDraft } from "../realtime/types.js";
 import {
   FunctionStepError,
   getStepHandler,
@@ -16,6 +17,7 @@ export type RunFunctionInput = {
   request: FunctionRequestContext;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   logs?: LogRing;
+  onRecordChange?: (draft: JordChangeDraft) => void;
 };
 
 export type RunFunctionOk = {
@@ -80,6 +82,7 @@ export async function runFunction(
         config: step.config ?? {},
         enqueueWrite: input.enqueueWrite,
         logs: input.logs,
+        onRecordChange: input.onRecordChange,
       });
       prior = out.result;
     } catch (err) {

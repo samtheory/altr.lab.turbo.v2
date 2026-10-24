@@ -8,6 +8,7 @@ export {
   requireInvokeApis,
   requireManageApis,
   requireManageJobs,
+  requireSubscribeRealtime,
   requireWriteRecords,
   type JordAuthVariables,
 } from "./middleware.js";
@@ -16,6 +17,7 @@ export {
   canInvokeApis,
   canManageApis,
   canManageJobs,
+  canSubscribeRealtime,
   canWriteRecords,
   isJordRole,
   JORD_ROLES,

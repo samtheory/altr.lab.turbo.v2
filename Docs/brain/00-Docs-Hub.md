@@ -33,7 +33,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 
 App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>/` → `plan/<app>/` (sprint only) → `tech_space/<app>/`.
 
-**Idea catalog (v2.3):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]] · [[../idea/api-client/README|API client]] · [[../idea/search/README|Search]] · [[../idea/Tia (Map Engine)/README|Tia]]. Promoted: Apolyx (S0001–**S0005** shipped); Jord (**S0001**–**S0010** shipped); **Tia** (intent only). Artemis still idea-only. Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]].
+**Idea catalog (v2.3):** [[../idea/artemis/README|Artemis]] · [[../idea/Apolyx (ui-kit)/README|Apolyx]] · [[../idea/Jord/README|Jord]] · [[../idea/hyperfit/README|HyperFit]] · [[../idea/co-op-sphere/README|Co-Op Sphere]] · [[../idea/pantry-yield/README|PantryYield]] · [[../idea/forge-realm/README|ForgeRealm]] · [[../idea/api-client/README|API client]] · [[../idea/search/README|Search]] · [[../idea/Tia (Map Engine)/README|Tia]]. Promoted: Apolyx (S0001–**S0005** shipped); Jord (**S0001**–**S0011** shipped); **Tia** (intent only). Artemis still idea-only. Sequence: [[../plan/00-roadmap-apolyx-jord-artemis]].
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
 

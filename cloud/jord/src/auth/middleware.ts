@@ -7,6 +7,7 @@ import {
   canInvokeApis,
   canManageApis,
   canManageJobs,
+  canSubscribeRealtime,
   canWriteRecords,
   type JordRole,
 } from "./roles.js";
@@ -97,6 +98,20 @@ export function requireManageJobs() {
       if (!canManageJobs(role)) {
         throw new HTTPException(403, {
           message: "role cannot manage jobs",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireSubscribeRealtime() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canSubscribeRealtime(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot subscribe to realtime",
         });
       }
       await next();

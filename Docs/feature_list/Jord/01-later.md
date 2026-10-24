@@ -56,7 +56,7 @@ Detail: [[03-jord-studio]].
 | Studio S6 | Custom APIs + function APIs — **done** [[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · [[../../tech_space/jord/07-s0008-custom-function-apis]] |
 | Studio S7 | Triggers, policies (libSQL middleware; Postgres RLS compile deferred to S8) — **done** [[../../plan/Jord/Jord-S0009/README|Jord-S0009]] · [[../../tech_space/jord/08-s0009-triggers-policies]] |
 | Studio S8 | Postgres connection (`PostgresAdapter`) — **done** [[../../plan/Jord/Jord-S0010/README|Jord-S0010]] · [[../../tech_space/jord/09-s0010-postgres]] |
-| Studio S9 | Realtime subscriptions UI (CDC / SSE / WS) |
+| Studio S9 | Realtime subscriptions UI (CDC-equivalent + SSE) — **done** [[../../plan/Jord/Jord-S0011/README|Jord-S0011]] · [[../../tech_space/jord/10-s0011-realtime]] |
 | Studio S10 | Blob buckets browser |
 | Studio S11 | Vector / embedding ops surfaced in Studio |
 

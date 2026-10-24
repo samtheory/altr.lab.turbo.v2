@@ -21,6 +21,7 @@ import {
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { streamSSE } from "hono/streaming";
 
 import {
   createAuthMiddleware,
@@ -28,6 +29,7 @@ import {
   requireInvokeApis,
   requireManageApis,
   requireManageJobs,
+  requireSubscribeRealtime,
   requireWriteRecords,
   type JordAuthConfig,
   type JordAuthVariables,
@@ -60,6 +62,7 @@ import {
   policiesDisabledFromEnv,
 } from "./policies/index.js";
 import type { WriteQueue } from "./queue.js";
+import { RealtimeBus, MAX_REALTIME_SUBSCRIBERS, REALTIME_V1_TABLE, type JordChangeDraft } from "./realtime/index.js";
 import {
   isBuiltinTriggerActionKind,
   parseActionsJson,
@@ -89,6 +92,8 @@ export type JordAppDeps = {
   generatedApi?: GeneratedApiRegistry;
   logs?: LogRing;
   scheduler?: JobScheduler;
+  /** In-process change fanout. Created when omitted. */
+  realtime?: RealtimeBus;
 };
 
 function publicRecord(row: JordRecord) {
@@ -283,6 +288,23 @@ export function createJordApp(deps: JordAppDeps) {
   const generatedApi =
     deps.generatedApi ?? createGeneratedApiRegistry(process.env);
   const logs = deps.logs ?? new LogRing();
+  const realtime = deps.realtime ?? new RealtimeBus();
+
+  function publishRecordChange(draft: JordChangeDraft): void {
+    try {
+      realtime.publish({
+        type: "jord.change",
+        table: REALTIME_V1_TABLE,
+        op: draft.op,
+        id: draft.id,
+        version: draft.version,
+        at: Date.now(),
+        dialect: deps.jord.dialect,
+      });
+    } catch (err) {
+      console.error("[@altr/jord-server] realtime publish failed", err);
+    }
+  }
 
   app.get("/health", (c) =>
     c.json({ ok: true as const, dialect: deps.jord.dialect }),
@@ -455,7 +477,9 @@ export function createJordApp(deps: JordAppDeps) {
       role,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
+      onRecordChange: publishRecordChange,
     });
+    publishRecordChange({ op: "insert", id: row.id, version: row.version });
     return c.json(publicRecord(row), 201);
   });
 
@@ -555,6 +579,12 @@ export function createJordApp(deps: JordAppDeps) {
       role,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
+      onRecordChange: publishRecordChange,
+    });
+    publishRecordChange({
+      op: "update",
+      id: result.record.id,
+      version: result.record.version,
     });
     return c.json(publicRecord(result.record));
   });
@@ -591,9 +621,68 @@ export function createJordApp(deps: JordAppDeps) {
       role,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
+      onRecordChange: publishRecordChange,
     });
+    publishRecordChange({ op: "delete", id });
     return c.json({ ok: true as const, id });
   });
+
+  protectedRoutes.get(
+    "/realtime",
+    requireSubscribeRealtime(),
+    async (c) => {
+      const table = c.req.query("table") ?? REALTIME_V1_TABLE;
+      if (table !== REALTIME_V1_TABLE) {
+        throw new HTTPException(400, {
+          message: `table must be "${REALTIME_V1_TABLE}"`,
+        });
+      }
+      const idFilter = c.req.query("id")?.trim() || null;
+      const decision = await evaluatePolicies({
+        jord: deps.jord,
+        tableName: REALTIME_V1_TABLE,
+        operation: "select",
+        role: c.get("jordRole"),
+        disabled: policiesOff,
+      });
+      if (!decision.allowed) {
+        return c.json(policyDeniedBody(decision.policy, "select"), 403);
+      }
+      if (realtime.size >= MAX_REALTIME_SUBSCRIBERS) {
+        return c.json(
+          {
+            error: "realtime_full",
+            message: "too many realtime subscribers",
+          },
+          503,
+        );
+      }
+
+      return streamSSE(c, async (stream) => {
+        const unsubscribe = realtime.trySubscribe((event) => {
+          if (idFilter && event.id !== idFilter) return;
+          void stream.writeSSE({
+            event: "jord.change",
+            data: JSON.stringify(event),
+          });
+        });
+        if (!unsubscribe) return;
+
+        const timer = setInterval(() => {
+          void stream.writeSSE({ event: "ping", data: "ping" });
+        }, 15_000);
+
+        try {
+          while (!stream.aborted) {
+            await stream.sleep(1000);
+          }
+        } finally {
+          clearInterval(timer);
+          unsubscribe();
+        }
+      });
+    },
+  );
 
   protectedRoutes.route("/records", recordsRoutes);
 
@@ -920,6 +1009,7 @@ export function createJordApp(deps: JordAppDeps) {
         role: c.get("jordRole"),
         enqueueWrite: deps.enqueueWrite,
         logs,
+        onRecordChange: publishRecordChange,
         request: {
           method: "POST",
           path: `/functions/${id}/invoke`,
@@ -1141,6 +1231,7 @@ export function createJordApp(deps: JordAppDeps) {
       role: c.get("jordRole"),
       enqueueWrite: deps.enqueueWrite,
       logs,
+      onRecordChange: publishRecordChange,
       request: {
         method,
         path: `/x/${slug}`,

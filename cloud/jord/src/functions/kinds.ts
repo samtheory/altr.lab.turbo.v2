@@ -1,6 +1,7 @@
 import type { JordDriverPort, JordRecord } from "@altr/jord";
 
 import { canWriteRecords, type JordRole } from "../auth/roles.js";
+import type { JordChangeDraft } from "../realtime/types.js";
 import type { LogRing } from "../jobs/log-ring.js";
 import {
   evaluatePolicies,
@@ -45,6 +46,8 @@ export type StepContext = {
   enqueueWrite: <T>(fn: () => Promise<T>) => Promise<T>;
   /** When set, AFTER insert triggers can log / invoke. */
   logs?: LogRing;
+  /** When set, successful record writes fan out a realtime event. */
+  onRecordChange?: (draft: JordChangeDraft) => void;
 };
 
 export type StepResult = {
@@ -185,6 +188,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     request,
     enqueueWrite,
     logs,
+    onRecordChange,
   }) {
     if (!canWriteRecords(role)) {
       throw new FunctionStepError(
@@ -241,8 +245,10 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         role,
         enqueueWrite,
         disabled: triggersDisabledFromEnv(),
+        onRecordChange,
       });
     }
+    onRecordChange?.({ op: "insert", id: row.id, version: row.version });
     return { result: publicRecord(row) };
   },
 

@@ -745,3 +745,126 @@ describe("jord-server routes", () => {
     }
   });
 });
+
+async function readSseUntil(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  pattern: string,
+  ms: number,
+): Promise<string> {
+  const decoder = new TextDecoder();
+  let buf = "";
+  const deadline = Date.now() + ms;
+  while (Date.now() < deadline && !buf.includes(pattern)) {
+    const remaining = Math.max(1, deadline - Date.now());
+    const chunk = await Promise.race([
+      reader.read(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), remaining)),
+    ]);
+    if (chunk === null || chunk.done) break;
+    buf += decoder.decode(chunk.value, { stream: true });
+  }
+  return buf;
+}
+
+describe("jord realtime SSE", () => {
+  it("rejects realtime without auth and unknown tables", async () => {
+    const ctx = await testApp();
+    try {
+      const anon = await ctx.app.request("/realtime?table=records");
+      expect(anon.status).toBe(401);
+
+      const badTable = await ctx.app.request("/realtime?table=orders", {
+        headers: authHeaders("admin"),
+      });
+      expect(badTable.status).toBe(400);
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
+  it("readonly can subscribe; insert emits jord.change; 409 does not", async () => {
+    const ctx = await testApp();
+    try {
+      const stream = await ctx.app.request("/realtime?table=records", {
+        headers: {
+          Accept: "text/event-stream",
+          ...authHeaders("readonly"),
+        },
+      });
+      expect(stream.status).toBe(200);
+      expect(stream.headers.get("content-type") ?? "").toContain(
+        "text/event-stream",
+      );
+      const reader = stream.body!.getReader();
+
+      const created = await ctx.app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ bucket: "lab", body: "{\"live\":1}" }),
+      });
+      expect(created.status).toBe(201);
+      const row = (await created.json()) as { id: string; version: number };
+
+      const buf = await readSseUntil(reader, "jord.change", 3000);
+      expect(buf).toContain("event: jord.change");
+      expect(buf).toContain(`"id":"${row.id}"`);
+      expect(buf).toContain(`"op":"insert"`);
+      expect(buf).not.toMatch(/postgres:\/\//);
+      expect(buf).not.toMatch(/file:/);
+      expect(buf).not.toContain('"body"');
+
+      const conflict = await ctx.app.request(`/records/${row.id}`, {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ version: 0, body: "{\"nope\":true}" }),
+      });
+      expect(conflict.status).toBe(409);
+
+      const afterConflict = await readSseUntil(reader, `"op":"update"`, 400);
+      expect(afterConflict).not.toContain(`"op":"update"`);
+
+      await reader.cancel();
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
+  it("select deny policy rejects the stream", async () => {
+    const ctx = await testApp();
+    try {
+      const policy = await ctx.app.request("/policies", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "Deny all select",
+          table_name: "records",
+          operation: "select",
+          effect: "deny",
+          rules: JSON.stringify([{ kind: "always", config: {} }]),
+        }),
+      });
+      expect(policy.status).toBe(201);
+
+      const stream = await ctx.app.request("/realtime?table=records", {
+        headers: authHeaders("readonly"),
+      });
+      expect(stream.status).toBe(403);
+      const body = (await stream.json()) as { error: string };
+      expect(body.error).toBe("policy_denied");
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+});

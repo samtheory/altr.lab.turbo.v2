@@ -9,6 +9,7 @@ tags:
   - Jord-S0001
   - Jord-S0002
   - Jord-S0010
+  - Jord-S0011
 ---
 
 # tech_space
@@ -19,6 +20,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 
 ## Notes
 
+- [[jord/10-s0011-realtime]] — **Jord-S0011** Studio S9 realtime SSE + Live toggle (2026-10-24)
 - [[jord/09-s0010-postgres]] — **Jord-S0010** Studio S8 PostgresAdapter + Connection page (2026-10-24)
 - [[jord/08-s0009-triggers-policies]] — **Jord-S0009** Studio S7 triggers + policies (2026-10-23)
 - [[jord/07-s0008-custom-function-apis]] — **Jord-S0008** Studio S6 custom + function APIs (2026-10-21)
@@ -39,4 +41,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next:** Artemis product gate, or Studio S9+ when mimir opens a plan — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/09-s0010-postgres]].
+**Next:** Studio S10 blobs or Artemis — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/10-s0011-realtime]].

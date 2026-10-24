@@ -8,7 +8,7 @@ tags:
   - mimir
   - jord
   - workflow
-  - Jord-S0009
+  - Jord-S0011
 ---
 
 # mimir — workflow instructions
@@ -28,7 +28,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. **Active** sprint under [[../../../plan/Jord/README]] — none after S0010; open next card or Artemis via mimir
+4. **Active** sprint under [[../../../plan/Jord/README]] — none after S0011; next card is Studio S10 or Artemis via mimir
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. This file
 
@@ -93,9 +93,13 @@ See [[../../../plan/Jord/Jord-S0009/README]] (done 2026-10-23). As-built: [[../.
 
 See [[../../../plan/Jord/Jord-S0010/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/09-s0010-postgres]].
 
+### Closed — Jord-S0011 (Studio S9 realtime)
+
+See [[../../../plan/Jord/Jord-S0011/README]] (done 2026-10-24). As-built: [[../../../tech_space/jord/10-s0011-realtime]].
+
 ### Active
 
-None. Next product gate: Artemis. Next Jord Studio card (S9 realtime, etc.) when mimir opens a plan folder.
+None. Next Jord card to open: Studio S10 blobs. Product fork: Artemis.
 
 ## Skills discipline
 

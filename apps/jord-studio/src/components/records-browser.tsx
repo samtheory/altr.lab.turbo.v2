@@ -7,6 +7,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Field,
   Select,
@@ -14,6 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -39,6 +41,8 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
   const [bucket, setBucket] = useState(initialBucket);
   const [rows, setRows] = useState<PublicRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
+  const [liveState, setLiveState] = useState<"off" | "connecting" | "live" | "reconnecting">("off");
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -81,6 +85,51 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
     };
   }, [bucket]);
 
+  useEffect(() => {
+    if (!live) {
+      setLiveState("off");
+      return;
+    }
+
+    const source = new EventSource("/api/realtime?table=records");
+    setLiveState("connecting");
+
+    function reload() {
+      startTransition(async () => {
+        try {
+          const res = await fetch(
+            `/api/records?bucket=${encodeURIComponent(bucket)}`,
+            { cache: "no-store" },
+          );
+          if (!res.ok) return;
+          const data = (await res.json()) as PublicRecord[];
+          setRows(data);
+        } catch {
+          setLiveState("reconnecting");
+        }
+      });
+    }
+
+    source.addEventListener("jord.change", () => {
+      setLiveState("live");
+      reload();
+    });
+    source.onopen = () => setLiveState("live");
+    source.onerror = () => {
+      if (source.readyState === EventSource.CLOSED) {
+        setLive(false);
+        setLiveState("off");
+        setError("Live updates closed. A select policy may be denying the stream.");
+        return;
+      }
+      setLiveState("reconnecting");
+    };
+
+    return () => {
+      source.close();
+    };
+  }, [live, bucket]);
+
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -96,9 +145,23 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
             <code className="font-mono">version</code>).
           </p>
         </div>
-        <Button asChild>
-          <Link href="/records/new">Insert row</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={live}
+              onCheckedChange={setLive}
+              aria-label="Live updates"
+              size="sm"
+            />
+            <span className="text-sm text-muted-foreground">Live</span>
+            <Badge variant="secondary" className="font-mono text-[10px] uppercase">
+              {liveState}
+            </Badge>
+          </div>
+          <Button asChild>
+            <Link href="/records/new">Insert row</Link>
+          </Button>
+        </div>
       </div>
 
       <Field label="bucket filter" description="WHERE bucket = ?" className="max-w-xs">

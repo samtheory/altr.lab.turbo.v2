@@ -11,6 +11,7 @@ tags:
   - Jord-S0008
   - Jord-S0009
   - Jord-S0010
+  - Jord-S0011
 ---
 
 # plan
@@ -27,6 +28,7 @@ After shipping, move narrative to `tech_space/` and refresh `report/` — do not
 
 | Plan | Track | Opened | Owner | Status |
 |------|-------|--------|-------|--------|
+| [[Jord/Jord-S0011/README]] | Jord-S0011 — Studio S9 realtime subscriptions | 2026-10-24 | mimir | closed (2026-10-24) |
 | [[Jord/Jord-S0010/README]] | Jord-S0010 — Studio S8 Postgres connection | 2026-10-24 | mimir | closed (2026-10-24) |
 | [[Jord/Jord-S0009/README]] | Jord-S0009 — Studio S7 triggers + policies | 2026-10-23 | mimir | closed (2026-10-23) |
 | [[Jord/Jord-S0008/README]] | Jord-S0008 — Studio S6 custom + function APIs | 2026-10-21 | mimir | closed (2026-10-21) |

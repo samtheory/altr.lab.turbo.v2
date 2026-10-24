@@ -22,6 +22,7 @@ export {
   canInvokeApis,
   canManageApis,
   canManageJobs,
+  canSubscribeRealtime,
   canWriteRecords,
   DEFAULT_SESSION_TTL_MS,
   isJordRole,
@@ -70,6 +71,12 @@ export {
   type LogEvent,
 } from "./jobs/index.js";
 export { createWriteQueue } from "./queue.js";
+export {
+  MAX_REALTIME_SUBSCRIBERS,
+  RealtimeBus,
+  REALTIME_V1_TABLE,
+  type JordChangeEvent,
+} from "./realtime/index.js";
 export {
   DEFAULT_WAL_CHECKPOINT_MS,
   resolveWalCheckpointMs,
