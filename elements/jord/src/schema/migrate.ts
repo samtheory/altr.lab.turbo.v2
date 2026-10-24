@@ -22,6 +22,7 @@ export async function ensureRecordsSchema(client: Client): Promise<void> {
   await ensurePoliciesSchema(client);
   await ensureTriggersSchema(client);
   await ensureBlobsSchema(client);
+  await ensureEmbeddingsSchema(client);
 }
 
 /** Studio S5 job definitions + run history. */
@@ -167,5 +168,25 @@ export async function ensureBlobsSchema(client: Client): Promise<void> {
   await client.execute(`
     CREATE INDEX IF NOT EXISTS jord_blobs_bucket_key_idx
     ON jord_blobs (bucket, key)
+  `);
+}
+
+/** Studio S11 embedding rows (Float32 LE blob). */
+export async function ensureEmbeddingsSchema(client: Client): Promise<void> {
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_embeddings (
+      id TEXT PRIMARY KEY NOT NULL,
+      namespace TEXT NOT NULL,
+      ref_id TEXT,
+      dims INTEGER NOT NULL,
+      embedding BLOB NOT NULL,
+      metadata TEXT,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_embeddings_namespace_updated_idx
+    ON jord_embeddings (namespace, updated_at)
   `);
 }

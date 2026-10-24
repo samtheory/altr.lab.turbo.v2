@@ -26,6 +26,7 @@ export {
   canSubscribeRealtime,
   canWriteBlobs,
   canWriteRecords,
+  canWriteVectors,
   DEFAULT_SESSION_TTL_MS,
   isJordRole,
   JORD_ROLES,

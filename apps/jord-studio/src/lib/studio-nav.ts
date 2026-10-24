@@ -44,6 +44,12 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         href: "/storage",
         status: "live",
       },
+      {
+        id: "vectors",
+        label: "Vectors",
+        href: "/vectors",
+        status: "live",
+      },
     ],
   },
   {

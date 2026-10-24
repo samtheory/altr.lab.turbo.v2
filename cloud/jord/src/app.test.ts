@@ -1008,6 +1008,62 @@ describe("jord realtime SSE", () => {
     }
   });
 
+  it("vectors: upsert, search ranks nearest, readonly cannot write", async () => {
+    const ctx = await testApp();
+    try {
+      const a = Array(8).fill(0);
+      a[0] = 1;
+      const b = Array(8).fill(0);
+      b[1] = 1;
+      const putA = await ctx.app.request("/vectors/lab/demo-a", {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ embedding: a }),
+      });
+      expect(putA.status).toBe(200);
+      const putB = await ctx.app.request("/vectors/lab/demo-b", {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({ embedding: b }),
+      });
+      expect(putB.status).toBe(200);
+
+      const search = await ctx.app.request("/vectors/lab/search", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("readonly"),
+        },
+        body: JSON.stringify({ embedding: a, limit: 5 }),
+      });
+      expect(search.status).toBe(200);
+      const body = (await search.json()) as {
+        hits: Array<{ id: string; score: number }>;
+      };
+      expect(body.hits[0]?.id).toBe("demo-a");
+      expect(body.hits[0]!.score).toBeGreaterThan(body.hits[1]!.score);
+
+      const forbidden = await ctx.app.request("/vectors/lab/demo-c", {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("readonly"),
+        },
+        body: JSON.stringify({ embedding: a }),
+      });
+      expect(forbidden.status).toBe(403);
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
+
   it("blob upload rejects oversize and traversal keys", async () => {
     const ctx = await testApp();
     try {

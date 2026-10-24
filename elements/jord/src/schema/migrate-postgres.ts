@@ -148,4 +148,21 @@ export async function ensurePostgresSchema(pool: Pool): Promise<void> {
     CREATE INDEX IF NOT EXISTS jord_blobs_bucket_key_idx
     ON jord_blobs (bucket, key)
   `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS jord_embeddings (
+      id TEXT PRIMARY KEY NOT NULL,
+      namespace TEXT NOT NULL,
+      ref_id TEXT,
+      dims INTEGER NOT NULL,
+      embedding BYTEA NOT NULL,
+      metadata TEXT,
+      created_at BIGINT NOT NULL,
+      updated_at BIGINT NOT NULL
+    )
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS jord_embeddings_namespace_updated_idx
+    ON jord_embeddings (namespace, updated_at)
+  `);
 }

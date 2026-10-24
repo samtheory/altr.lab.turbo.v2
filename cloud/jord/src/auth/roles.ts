@@ -45,3 +45,8 @@ export function canManageBlobs(role: JordRole): boolean {
 export function canWriteBlobs(role: JordRole): boolean {
   return role === "admin" || role === "editor";
 }
+
+/** Upsert / delete embeddings (Studio S11). Same as write records. */
+export function canWriteVectors(role: JordRole): boolean {
+  return role === "admin" || role === "editor";
+}

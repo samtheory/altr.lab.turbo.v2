@@ -103,6 +103,55 @@ export type UpsertBlobMetaInput = {
   etag: string;
 };
 
+/** Embedding metadata without the raw float buffer (list/search). */
+export type JordEmbeddingMeta = {
+  id: string;
+  namespace: string;
+  refId: string | null;
+  dims: number;
+  metadata: string | null;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type UpsertEmbeddingInput = {
+  id: string;
+  namespace: string;
+  embedding: number[];
+  refId?: string | null;
+  metadata?: string | null;
+};
+
+export type UpsertEmbeddingResult =
+  | { ok: true; row: JordEmbeddingMeta }
+  | {
+      ok: false;
+      error: "invalid_namespace" | "invalid_embedding" | "dims_mismatch";
+      message: string;
+    };
+
+export type SearchVectorsInput = {
+  namespace: string;
+  embedding: number[];
+  limit?: number;
+};
+
+export type VectorSearchHit = {
+  id: string;
+  refId: string | null;
+  score: number;
+  metadata: string | null;
+  dims: number;
+};
+
+export type SearchVectorsResult =
+  | { ok: true; hits: VectorSearchHit[] }
+  | {
+      ok: false;
+      error: "invalid_namespace" | "invalid_embedding" | "dims_mismatch";
+      message: string;
+    };
+
 export type JordRecord = {
   id: string;
   bucket: string;
@@ -443,6 +492,13 @@ export interface JordDriverPort {
   upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob>;
   /** Delete metadata row. Returns true if a row was removed. */
   deleteBlobMeta(bucket: string, key: string): Promise<boolean>;
+
+  listVectorNamespaces(): Promise<string[]>;
+  listEmbeddings(namespace: string): Promise<JordEmbeddingMeta[]>;
+  getEmbedding(namespace: string, id: string): Promise<JordEmbeddingMeta | null>;
+  upsertEmbedding(input: UpsertEmbeddingInput): Promise<UpsertEmbeddingResult>;
+  deleteEmbedding(namespace: string, id: string): Promise<boolean>;
+  searchVectors(input: SearchVectorsInput): Promise<SearchVectorsResult>;
 
   /**
    * Consistent snapshot via SQLite `VACUUM INTO` (libSQL only).

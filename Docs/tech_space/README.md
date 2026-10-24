@@ -21,6 +21,7 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 ## Notes
 
 - [[jord/12-s0013-blobs]] — **Jord-S0013** local blob buckets + Studio Storage (2026-10-24)
+- [[jord/13-s0014-vectors]] — **Jord-S0014** vectors / `searchVectors` + Studio Vectors (2026-10-24)
 - [[jord/11-s0012-multi-table]] — **Jord-S0012** CREATE TABLE + generic table browse (2026-10-24)
 - [[jord/10-s0011-realtime]] — **Jord-S0011** Studio S9 realtime SSE + Live toggle (2026-10-24)
 - [[jord/09-s0010-postgres]] — **Jord-S0010** Studio S8 PostgresAdapter + Connection page (2026-10-24)
@@ -43,4 +44,4 @@ Map: [[../brain/00-Docs-Brain]] · Truth: **code** wins over this folder if they
 - [[01-hub-ui-kit-base]] — historical `@altr/hub`, `@altr/ui-kit`, `@altr/base` (2026-09-20; hub app removed 2026-10-18)
 - [[02-ui-kit-storybook]] — Storybook 9 (historical package name; renamed 2026-10-11)
 
-**Next:** vectors (S11) or Artemis — [[../feature_list/Jord/03-jord-studio]]. Latest as-built: [[jord/12-s0013-blobs]].
+**Next:** [[../plan/Jord/00-remaining-backlog]] or Artemis. Latest as-built: [[jord/13-s0014-vectors]].

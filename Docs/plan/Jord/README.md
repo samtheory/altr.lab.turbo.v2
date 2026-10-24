@@ -1,30 +1,20 @@
 ---
 title: "plan/Jord — Jord sprint track"
-description: "Jord-S0001–S0013 closed; next vectors or Artemis"
+description: "Jord-S0001–S0014 closed; next from remaining backlog (user-table writes)"
 created: 2026-10-18
 updated: 2026-10-24
 tags:
   - plan
   - jord
   - Jord-S0001
-  - Jord-S0002
-  - Jord-S0003
-  - Jord-S0004
-  - Jord-S0005
-  - Jord-S0006
-  - Jord-S0007
-  - Jord-S0008
-  - Jord-S0009
-  - Jord-S0010
-  - Jord-S0011
-  - Jord-S0012
   - Jord-S0013
+  - Jord-S0014
   - readme
 ---
 
 # plan / Jord
 
-> **Active:** none · **Closed:** [[Jord-S0013/README]] … [[Jord-S0001/README]] · As-built through [[../../tech_space/jord/12-s0013-blobs]] · Intent: [[../../feature_list/Jord/03-jord-studio]]
+> **Closed through:** [[Jord-S0014/README]] (Studio S11 vectors) · **Backlog:** [[00-remaining-backlog]] · Review: [[../../report/Jord-implemented-review]] · Intent: [[../../feature_list/Jord/03-jord-studio]]
 
 | Sprint | Scope | Status |
 |--------|-------|--------|
@@ -41,7 +31,8 @@ tags:
 | [[Jord-S0011/README]] | Studio S9 realtime subscriptions | **done** (2026-10-24) |
 | [[Jord-S0012/README]] | Multi-table browse + CREATE TABLE | **done** (2026-10-24) |
 | [[Jord-S0013/README]] | Studio S10 blob buckets | **done** (2026-10-24) |
+| [[Jord-S0014/README]] | Studio S11 vectors / searchVectors | **done** (2026-10-24) |
 
-**Not opened (plan next):** vectors (Studio S11) · hosted `libsql://` · `pgvector` / native RLS. Product fork: Artemis.
+**Next:** open next card from [[00-remaining-backlog]] (suggested: user-table writes → Jord-S0015). Product fork: Artemis.
 
 Roadmap: [[../00-roadmap-apolyx-jord-artemis]] · Status: [[../../report/STATUS]]

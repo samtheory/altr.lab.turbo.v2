@@ -67,6 +67,7 @@ import {
   resolveBlobsRoot,
 } from "./blobs/index.js";
 import type { WriteQueue } from "./queue.js";
+import { registerVectorRoutes } from "./vectors/index.js";
 import { RealtimeBus, MAX_REALTIME_SUBSCRIBERS, REALTIME_V1_TABLE, type JordChangeDraft } from "./realtime/index.js";
 import {
   isBuiltinTriggerActionKind,
@@ -1615,6 +1616,11 @@ export function createJordApp(deps: JordAppDeps) {
     enqueueWrite: deps.enqueueWrite,
     disk: createBlobDiskStore(blobsRoot),
     maxBytes: deps.maxBlobBytes,
+  });
+
+  registerVectorRoutes(protectedRoutes, {
+    jord: deps.jord,
+    enqueueWrite: deps.enqueueWrite,
   });
 
   app.route("/", protectedRoutes);

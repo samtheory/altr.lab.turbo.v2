@@ -21,6 +21,7 @@ import type {
   JordColumnInfo,
   JordCustomApi,
   JordDriverPort,
+  JordEmbeddingMeta,
   JordFunction,
   JordHttpMethod,
   JordJob,
@@ -36,7 +37,11 @@ import type {
   JordTriggerTiming,
   ListTableRowsInput,
   ListTableRowsResult,
+  SearchVectorsInput,
+  SearchVectorsResult,
   UpsertBlobMetaInput,
+  UpsertEmbeddingInput,
+  UpsertEmbeddingResult,
   UpdateCustomApiInput,
   UpdateFunctionInput,
   UpdateJobInput,
@@ -55,6 +60,9 @@ import {
   toTableCell,
 } from "../schema/ddl.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
+import { packF32, validateEmbeddingArray } from "../vectors/f32.js";
+import { isValidVectorNamespace } from "../vectors/names.js";
+import { rankByCosine } from "../vectors/search.js";
 
 function num(value: unknown): number {
   if (typeof value === "number") return value;
@@ -130,6 +138,24 @@ function mapBlob(row: QueryResultRow): JordBlob {
     createdAt: num(row.created_at),
     updatedAt: num(row.updated_at),
   };
+}
+
+function mapEmbeddingMeta(row: QueryResultRow): JordEmbeddingMeta {
+  return {
+    id: String(row.id),
+    namespace: String(row.namespace),
+    refId: row.ref_id == null ? null : String(row.ref_id),
+    dims: num(row.dims),
+    metadata: row.metadata == null ? null : String(row.metadata),
+    createdAt: num(row.created_at),
+    updatedAt: num(row.updated_at),
+  };
+}
+
+function asBuffer(value: unknown): Buffer {
+  if (Buffer.isBuffer(value)) return value;
+  if (value instanceof Uint8Array) return Buffer.from(value);
+  return Buffer.from([]);
 }
 
 function mapJob(row: QueryResultRow): JordJob {
@@ -1016,6 +1042,146 @@ export class PostgresAdapter implements JordDriverPort {
       [bucket, key],
     );
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async listVectorNamespaces(): Promise<string[]> {
+    const result = await this.pool.query(
+      `SELECT DISTINCT namespace FROM jord_embeddings ORDER BY namespace ASC`,
+    );
+    return result.rows.map((row) => String(row.namespace));
+  }
+
+  async listEmbeddings(namespace: string): Promise<JordEmbeddingMeta[]> {
+    const result = await this.pool.query(
+      `SELECT id, namespace, ref_id, dims, metadata, created_at, updated_at
+       FROM jord_embeddings WHERE namespace = $1 ORDER BY updated_at DESC`,
+      [namespace],
+    );
+    return result.rows.map(mapEmbeddingMeta);
+  }
+
+  async getEmbedding(
+    namespace: string,
+    id: string,
+  ): Promise<JordEmbeddingMeta | null> {
+    const result = await this.pool.query(
+      `SELECT id, namespace, ref_id, dims, metadata, created_at, updated_at
+       FROM jord_embeddings WHERE namespace = $1 AND id = $2 LIMIT 1`,
+      [namespace, id],
+    );
+    const row = result.rows[0];
+    return row ? mapEmbeddingMeta(row) : null;
+  }
+
+  async upsertEmbedding(
+    input: UpsertEmbeddingInput,
+  ): Promise<UpsertEmbeddingResult> {
+    if (!isValidVectorNamespace(input.namespace)) {
+      return {
+        ok: false,
+        error: "invalid_namespace",
+        message: "namespace must match [a-z0-9][a-z0-9_-]{0,62}",
+      };
+    }
+    const checked = validateEmbeddingArray(input.embedding);
+    if (!checked.ok) {
+      return { ok: false, error: "invalid_embedding", message: checked.message };
+    }
+    const dims = checked.values.length;
+    const sample = await this.listEmbeddings(input.namespace);
+    if (sample.length > 0 && sample[0]!.dims !== dims) {
+      return {
+        ok: false,
+        error: "dims_mismatch",
+        message: `namespace ${input.namespace} expects dims ${sample[0]!.dims}, got ${dims}`,
+      };
+    }
+    const now = Date.now();
+    const blob = packF32(checked.values);
+    const existing = await this.getEmbedding(input.namespace, input.id);
+    if (existing) {
+      const result = await this.pool.query(
+        `UPDATE jord_embeddings SET
+           ref_id = $1, dims = $2, embedding = $3, metadata = $4, updated_at = $5
+         WHERE namespace = $6 AND id = $7
+         RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
+        [
+          input.refId !== undefined ? input.refId : existing.refId,
+          dims,
+          blob,
+          input.metadata !== undefined ? input.metadata : existing.metadata,
+          now,
+          input.namespace,
+          input.id,
+        ],
+      );
+      return { ok: true, row: mapEmbeddingMeta(result.rows[0]!) };
+    }
+    const result = await this.pool.query(
+      `INSERT INTO jord_embeddings (
+         id, namespace, ref_id, dims, embedding, metadata, created_at, updated_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       RETURNING id, namespace, ref_id, dims, metadata, created_at, updated_at`,
+      [
+        input.id,
+        input.namespace,
+        input.refId ?? null,
+        dims,
+        blob,
+        input.metadata ?? null,
+        now,
+        now,
+      ],
+    );
+    return { ok: true, row: mapEmbeddingMeta(result.rows[0]!) };
+  }
+
+  async deleteEmbedding(namespace: string, id: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `DELETE FROM jord_embeddings WHERE namespace = $1 AND id = $2`,
+      [namespace, id],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async searchVectors(input: SearchVectorsInput): Promise<SearchVectorsResult> {
+    if (!isValidVectorNamespace(input.namespace)) {
+      return {
+        ok: false,
+        error: "invalid_namespace",
+        message: "namespace must match [a-z0-9][a-z0-9_-]{0,62}",
+      };
+    }
+    const checked = validateEmbeddingArray(input.embedding);
+    if (!checked.ok) {
+      return { ok: false, error: "invalid_embedding", message: checked.message };
+    }
+    const result = await this.pool.query(
+      `SELECT id, ref_id, dims, embedding, metadata FROM jord_embeddings WHERE namespace = $1`,
+      [input.namespace],
+    );
+    if (
+      result.rows.length > 0 &&
+      num(result.rows[0]!.dims) !== checked.values.length
+    ) {
+      return {
+        ok: false,
+        error: "dims_mismatch",
+        message: `namespace ${input.namespace} expects dims ${num(result.rows[0]!.dims)}, got ${checked.values.length}`,
+      };
+    }
+    const hits = rankByCosine(
+      checked.values,
+      result.rows.map((r) => ({
+        id: String(r.id),
+        refId: r.ref_id == null ? null : String(r.ref_id),
+        dims: num(r.dims),
+        embedding: asBuffer(r.embedding),
+        metadata: r.metadata == null ? null : String(r.metadata),
+      })),
+      input.limit,
+    );
+    return { ok: true, hits };
   }
 
   async snapshotTo(_destPath: string): Promise<string> {

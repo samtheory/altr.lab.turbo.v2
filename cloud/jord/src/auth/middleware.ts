@@ -11,6 +11,7 @@ import {
   canSubscribeRealtime,
   canWriteBlobs,
   canWriteRecords,
+  canWriteVectors,
   type JordRole,
 } from "./roles.js";
 import {
@@ -156,6 +157,20 @@ export function requireWriteBlobs() {
       if (!canWriteBlobs(role)) {
         throw new HTTPException(403, {
           message: "role cannot write blobs",
+        });
+      }
+      await next();
+    },
+  );
+}
+
+export function requireWriteVectors() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const role = c.get("jordRole");
+      if (!canWriteVectors(role)) {
+        throw new HTTPException(403, {
+          message: "role cannot write vectors",
         });
       }
       await next();

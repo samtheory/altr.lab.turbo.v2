@@ -13,6 +13,7 @@ tags:
   - Jord-S0007
   - Jord-S0009
   - Jord-S0013
+  - Jord-S0014
 ---
 
 # Jord — later slices
@@ -27,7 +28,7 @@ None of the engine rows below were Slice 0. Default store is still one `file:` d
 |-------|---------|-------------|
 | Hosted libSQL | `DATABASE_URL=libsql://…` activates `LibSqlAdapter` (same port) | The file should leave one laptop |
 | Artemis agent scratchpad | Writer uses bucket `artemis` on `records` via `@altr/jord-server` batching (not typed `orders` / `positions`) | The bot has a scratchpad payload shape |
-| In-process vector pipelines | Embedded semantic memory on the Jord process; `searchVectors` → `sqlite-vec` | Bot retrieval needs search |
+| In-process vector pipelines | Embedded semantic memory on the Jord process; `searchVectors` + lab cosine — **shipped** [[../../tech_space/jord/13-s0014-vectors]] (sqlite-vec/pgvector hard path later) | Bot retrieval / Studio S11 |
 | PostgresAdapter | Scheme `postgres://` / `postgresql://` — **core CRUD shipped** ([[../../tech_space/jord/09-s0010-postgres]]); `pgvector` / native RLS still later | Optional vectors / RLS compile |
 | Cache | One Redis-compatible store, measured choice | Live state or leaderboards exist |
 | Bot process | Second cloud package only if the Jord server should not run the model | In-process writer is the wrong shape |
@@ -40,7 +41,7 @@ These are first-class later pillars, not Slice 0 packages.
 |--------|---------|------|
 | **Realtime (CDC)** | Change Data Capture from SQLite hooks (libSQL) or equivalent; push via SSE and/or WebSockets on `@altr/jord-server` | Server + Studio live views |
 | **Local blob storage** | Lightweight asset / file buckets (S3-shaped REST + local disk; full S3 later) — **shipped** [[../../tech_space/jord/12-s0013-blobs]] | `@altr/jord-server` (+ Studio browser) |
-| **In-process vector pipelines** | Semantic memory pipelines using `sqlite-vec` through `searchVectors` on `JordDriverPort` | `@altr/jord` + server; Postgres maps to `pgvector` later |
+| **In-process vector pipelines** | Semantic memory via `searchVectors` on `JordDriverPort` — **shipped** [[../../tech_space/jord/13-s0014-vectors]] | `@altr/jord` + server; hard sqlite-vec / `pgvector` later |
 
 ## Jord Studio slices
 
@@ -60,6 +61,6 @@ Detail: [[03-jord-studio]].
 | Studio S9 | Realtime subscriptions UI (CDC-equivalent + SSE) — **done** [[../../plan/Jord/Jord-S0011/README|Jord-S0011]] · [[../../tech_space/jord/10-s0011-realtime]] |
 | Studio S9.5 | Multi-table browse + CREATE TABLE — **done** [[../../plan/Jord/Jord-S0012/README|Jord-S0012]] · [[../../tech_space/jord/11-s0012-multi-table]] |
 | Studio S10 | Blob buckets browser — **done** [[../../plan/Jord/Jord-S0013/README|Jord-S0013]] · [[../../tech_space/jord/12-s0013-blobs]] |
-| Studio S11 | Vector / embedding ops surfaced in Studio |
+| Studio S11 | Vector / embedding ops surfaced in Studio — **done** [[../../plan/Jord/Jord-S0014/README|Jord-S0014]] · [[../../tech_space/jord/13-s0014-vectors]] |
 
 The first Studio plan opens only after Slice 0 acceptance is true.

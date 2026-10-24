@@ -11,6 +11,7 @@ export const JORD_TABLE_NAMES = [
   "jord_policies",
   "jord_triggers",
   "jord_blobs",
+  "jord_embeddings",
 ] as const;
 
 export type JordTableName = (typeof JORD_TABLE_NAMES)[number];

@@ -14,6 +14,7 @@ tags:
   - Jord-S0011
   - Jord-S0012
   - Jord-S0013
+  - Jord-S0014
 ---
 
 # plan
@@ -30,6 +31,7 @@ After shipping, move narrative to `tech_space/` and refresh `report/` — do not
 
 | Plan | Track | Opened | Owner | Status |
 |------|-------|--------|-------|--------|
+| [[Jord/Jord-S0014/README]] | Jord-S0014 — Studio S11 vectors / searchVectors | 2026-10-24 | mimir | **active** |
 | [[Jord/Jord-S0013/README]] | Jord-S0013 — Studio S10 blob buckets | 2026-10-24 | mimir | closed (2026-10-24) |
 | [[Jord/Jord-S0012/README]] | Jord-S0012 — multi-table browse + CREATE TABLE | 2026-10-24 | mimir | closed (2026-10-24) |
 | [[Jord/Jord-S0011/README]] | Jord-S0011 — Studio S9 realtime subscriptions | 2026-10-24 | mimir | closed (2026-10-24) |

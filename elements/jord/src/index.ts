@@ -7,10 +7,16 @@ export {
   type CreateTableInput,
   type CreateTableResult,
   type JordBlob,
+  type JordEmbeddingMeta,
   type ListTableRowsInput,
   type ListTableRowsResult,
+  type SearchVectorsInput,
+  type SearchVectorsResult,
   type TableCell,
   type UpsertBlobMetaInput,
+  type UpsertEmbeddingInput,
+  type UpsertEmbeddingResult,
+  type VectorSearchHit,
   type DeleteFunctionResult,
   type FinishJobRunInput,
   type InsertCustomApiInput,
@@ -82,6 +88,11 @@ export {
   type NewJordBlobRow,
 } from "./schema/blobs.js";
 export {
+  jordEmbeddings,
+  type JordEmbeddingRow,
+  type NewJordEmbeddingRow,
+} from "./schema/embeddings.js";
+export {
   DEFAULT_MAX_BLOB_BYTES,
   isValidBlobBucket,
   isValidBlobKey,
@@ -89,6 +100,19 @@ export {
   MAX_CONTENT_TYPE_LENGTH,
   normalizeContentType,
 } from "./blobs/names.js";
+export {
+  clampSearchLimit,
+  cosineSimilarity,
+  DEFAULT_SEARCH_LIMIT,
+  isValidDims,
+  MAX_EMBEDDING_DIMS,
+  MAX_SEARCH_LIMIT,
+  MIN_EMBEDDING_DIMS,
+  packF32,
+  unpackF32,
+  validateEmbeddingArray,
+} from "./vectors/f32.js";
+export { isValidVectorNamespace } from "./vectors/names.js";
 export {
   buildAddColumnSql,
   buildCreateTableSql,

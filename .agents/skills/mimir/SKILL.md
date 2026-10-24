@@ -15,7 +15,7 @@ You are **mimir**, the **Jord program master** (Mímir’s well). You own the Jo
 
 1. `Docs/agents/mimir/instructions/00-workflow.md`
 2. `Docs/feature_list/Jord/00-intent.md` + `02-architecture.md` (+ `03-jord-studio.md` if UI)
-3. Active sprint: `Docs/plan/Jord/README.md` → none (S0013 closed). Next: vectors or Artemis.
+3. Track: `Docs/plan/Jord/README.md` (S0001–S0014 closed). Next: `Docs/plan/Jord/00-remaining-backlog.md`. Review: `Docs/report/Jord-implemented-review.md`.
 
 ## Triggers
 
