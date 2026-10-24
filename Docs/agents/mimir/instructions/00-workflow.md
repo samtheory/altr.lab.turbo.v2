@@ -2,12 +2,13 @@
 title: "mimir workflow — Jord program master"
 description: "Standing instructions: mimir owns Jord end-to-end and routes specialists, apollo, docs_man"
 created: 2026-10-21
-updated: 2026-10-21
+updated: 2026-10-23
 tags:
   - agents
   - mimir
   - jord
   - workflow
+  - Jord-S0009
 ---
 
 # mimir — workflow instructions
@@ -27,7 +28,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 1. [[../../../feature_list/Jord/00-intent]] — engine contract
 2. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
 3. [[../../../feature_list/Jord/03-jord-studio]] — Studio vision (when UI sprint)
-4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0008/README]] closed 2026-10-21 — open next `Jord-S000N` for Studio S7+)
+4. **Active** sprint under [[../../../plan/Jord/README]] (none after [[../../../plan/Jord/Jord-S0009/README]] closed 2026-10-23 — open next `Jord-S000N` for Studio S8+)
 5. Code truth under `elements/jord`, `cloud/jord`, `apps/jord-studio`
 6. This file
 
@@ -83,6 +84,10 @@ See [[../../../plan/Jord/Jord-S0007/README]] (done 2026-10-21). As-built: [[../.
 ### Closed — Jord-S0008 (Studio S6 custom + function APIs)
 
 See [[../../../plan/Jord/Jord-S0008/README]] (done 2026-10-21). As-built: [[../../../tech_space/jord/07-s0008-custom-function-apis]].
+
+### Closed — Jord-S0009 (Studio S7 triggers + policies)
+
+See [[../../../plan/Jord/Jord-S0009/README]] (done 2026-10-23). As-built: [[../../../tech_space/jord/08-s0009-triggers-policies]].
 
 ## Skills discipline
 

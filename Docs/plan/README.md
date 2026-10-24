@@ -2,13 +2,14 @@
 title: "plan — next steps"
 description: "Plans derived from feature_list and tech_space"
 created: 2026-09-19
-updated: 2026-10-21
+updated: 2026-10-23
 tags:
   - plan
   - readme
   - Jord-S0006
   - Jord-S0007
   - Jord-S0008
+  - Jord-S0009
 ---
 
 # plan
@@ -25,6 +26,7 @@ After shipping, move narrative to `tech_space/` and refresh `report/` — do not
 
 | Plan | Track | Opened | Owner | Status |
 |------|-------|--------|-------|--------|
+| [[Jord/Jord-S0009/README]] | Jord-S0009 — Studio S7 triggers + policies | 2026-10-23 | mimir | closed (2026-10-23) |
 | [[Jord/Jord-S0008/README]] | Jord-S0008 — Studio S6 custom + function APIs | 2026-10-21 | mimir | closed (2026-10-21) |
 | [[Jord/Jord-S0007/README]] | Jord-S0007 — Studio S5 jobs / cron + logs | 2026-10-21 | mimir | closed (2026-10-21) |
 | [[Jord/Jord-S0006/README]] | Jord-S0006 — Studio S4 generated CRUD API | 2026-10-21 | mimir | closed (2026-10-21) |

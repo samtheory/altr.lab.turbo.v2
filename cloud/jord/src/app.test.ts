@@ -640,4 +640,104 @@ describe("jord-server routes", () => {
       await ctx.jord.close();
     }
   });
+
+  it("policies deny select; triggers log after insert; editor cannot manage", async () => {
+    const ctx = await testApp();
+    try {
+      const deniedCreate = await ctx.app.request("/policies", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("editor"),
+        },
+        body: JSON.stringify({
+          name: "Nope",
+          operation: "select",
+          effect: "deny",
+          rules: JSON.stringify([{ kind: "always", config: {} }]),
+        }),
+      });
+      expect(deniedCreate.status).toBe(403);
+
+      const policyRes = await ctx.app.request("/policies", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "Deny lab select for editor",
+          table_name: "records",
+          operation: "select",
+          effect: "deny",
+          priority: 50,
+          rules: JSON.stringify([
+            { kind: "role_in", config: { roles: ["editor"] } },
+            { kind: "bucket_eq", config: { bucket: "lab" } },
+          ]),
+        }),
+      });
+      expect(policyRes.status).toBe(201);
+      const policy = (await policyRes.json()) as { id: string };
+
+      await ctx.app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ bucket: "lab", body: "{}" }),
+      });
+
+      const listDenied = await ctx.app.request("/records?bucket=lab", {
+        headers: authHeaders("editor"),
+      });
+      expect(listDenied.status).toBe(403);
+      const deniedBody = (await listDenied.json()) as {
+        error: string;
+        policyId: string;
+      };
+      expect(deniedBody.error).toBe("policy_denied");
+      expect(deniedBody.policyId).toBe(policy.id);
+
+      const listOk = await ctx.app.request("/records?bucket=lab", {
+        headers: authHeaders("admin"),
+      });
+      expect(listOk.status).toBe(200);
+
+      const triggerRes = await ctx.app.request("/triggers", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({
+          name: "Log inserts",
+          event: "insert",
+          actions: JSON.stringify([
+            { kind: "log", config: { message: "inserted" } },
+          ]),
+        }),
+      });
+      expect(triggerRes.status).toBe(201);
+
+      const insert = await ctx.app.request("/records", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ bucket: "artemis", body: "{\"n\":1}" }),
+      });
+      expect(insert.status).toBe(201);
+
+      const triggerLogs = ctx.logs.list(20, "trigger");
+      expect(triggerLogs.some((e) => e.message.includes("inserted"))).toBe(
+        true,
+      );
+    } finally {
+      ctx.stop();
+      await ctx.jord.close();
+    }
+  });
 });

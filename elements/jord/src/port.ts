@@ -195,6 +195,79 @@ export type UpdateCustomApiInput = {
   enabled?: boolean;
 };
 
+export type JordPolicyOperation = "select" | "insert" | "update" | "delete";
+export type JordPolicyEffect = "allow" | "deny";
+
+export type JordPolicy = {
+  id: string;
+  name: string;
+  tableName: string;
+  operation: JordPolicyOperation;
+  effect: JordPolicyEffect;
+  /** JSON array of `{ kind, config }` rules (AND). */
+  rules: string;
+  priority: number;
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type InsertPolicyInput = {
+  name: string;
+  tableName: string;
+  operation: JordPolicyOperation;
+  effect: JordPolicyEffect;
+  rules?: string;
+  priority?: number;
+  enabled?: boolean;
+};
+
+export type UpdatePolicyInput = {
+  id: string;
+  name?: string;
+  tableName?: string;
+  operation?: JordPolicyOperation;
+  effect?: JordPolicyEffect;
+  rules?: string;
+  priority?: number;
+  enabled?: boolean;
+};
+
+export type JordTriggerTiming = "after";
+export type JordTriggerEvent = "insert" | "update" | "delete";
+
+export type JordTrigger = {
+  id: string;
+  name: string;
+  tableName: string;
+  timing: JordTriggerTiming;
+  event: JordTriggerEvent;
+  /** JSON array of `{ kind, config }` actions. */
+  actions: string;
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type InsertTriggerInput = {
+  name: string;
+  tableName: string;
+  event: JordTriggerEvent;
+  timing?: JordTriggerTiming;
+  actions?: string;
+  enabled?: boolean;
+};
+
+export type UpdateTriggerInput = {
+  id: string;
+  name?: string;
+  tableName?: string;
+  event?: JordTriggerEvent;
+  timing?: JordTriggerTiming;
+  actions?: string;
+  enabled?: boolean;
+};
+
 export type JordDb = LibSQLDatabase<typeof schema>;
 
 /**
@@ -247,6 +320,34 @@ export interface JordDriverPort {
   updateCustomApi(input: UpdateCustomApiInput): Promise<JordCustomApi | null>;
   deleteCustomApi(id: string): Promise<boolean>;
   countCustomApisByFunction(functionId: string): Promise<number>;
+
+  listPolicies(): Promise<JordPolicy[]>;
+  getPolicy(id: string): Promise<JordPolicy | null>;
+  /** Enabled policies for table+operation, sorted priority desc (deny before allow at equal priority). */
+  listPoliciesFor(
+    tableName: string,
+    operation: JordPolicyOperation,
+  ): Promise<JordPolicy[]>;
+  insertPolicy(input: InsertPolicyInput): Promise<JordPolicy>;
+  updatePolicy(input: UpdatePolicyInput): Promise<JordPolicy | null>;
+  deletePolicy(id: string): Promise<boolean>;
+
+  listTriggers(): Promise<JordTrigger[]>;
+  getTrigger(id: string): Promise<JordTrigger | null>;
+  /** Enabled triggers for table+event. */
+  listTriggersFor(
+    tableName: string,
+    event: JordTriggerEvent,
+  ): Promise<JordTrigger[]>;
+  insertTrigger(input: InsertTriggerInput): Promise<JordTrigger>;
+  updateTrigger(input: UpdateTriggerInput): Promise<JordTrigger | null>;
+  deleteTrigger(id: string): Promise<boolean>;
+
+  /**
+   * Dialect SQL emit seam for native triggers (Postgres / future).
+   * LibSqlAdapter returns null in S7 — app hooks are the primary path.
+   */
+  compileTriggerSql?(def: JordTrigger): string | null;
 
   /** User tables from sqlite_master (excludes sqlite_*). */
   listTables(): Promise<string[]>;

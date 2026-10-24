@@ -19,6 +19,8 @@ export async function ensureRecordsSchema(client: Client): Promise<void> {
   `);
   await ensureJobsSchema(client);
   await ensureFunctionsSchema(client);
+  await ensurePoliciesSchema(client);
+  await ensureTriggersSchema(client);
 }
 
 /** Studio S5 job definitions + run history. */
@@ -97,5 +99,48 @@ export async function ensureFunctionsSchema(client: Client): Promise<void> {
   await client.execute(`
     CREATE INDEX IF NOT EXISTS jord_custom_apis_function_id_idx
     ON jord_custom_apis (function_id)
+  `);
+}
+
+/** Studio S7 policies (libSQL middleware definitions). */
+export async function ensurePoliciesSchema(client: Client): Promise<void> {
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_policies (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      table_name TEXT NOT NULL,
+      operation TEXT NOT NULL,
+      effect TEXT NOT NULL,
+      rules TEXT NOT NULL DEFAULT '[]',
+      priority INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_policies_table_op_priority_idx
+    ON jord_policies (table_name, operation, priority)
+  `);
+}
+
+/** Studio S7 AFTER write triggers. */
+export async function ensureTriggersSchema(client: Client): Promise<void> {
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS jord_triggers (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      table_name TEXT NOT NULL,
+      timing TEXT NOT NULL DEFAULT 'after',
+      event TEXT NOT NULL,
+      actions TEXT NOT NULL DEFAULT '[]',
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS jord_triggers_table_event_idx
+    ON jord_triggers (table_name, event)
   `);
 }

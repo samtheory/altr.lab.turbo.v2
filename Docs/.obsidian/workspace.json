@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "feature_list/Jord/00-intent.md",
+                "file": "plan/Jord/Jord-S0009/01-security-contract.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "00-intent"
+              "title": "01-security-contract"
             }
           }
         ]
@@ -190,6 +190,19 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "tech_space/jord/08-s0009-triggers-policies.md",
+    "plan/Jord/Jord-S0009/04-studio-database-ui.md",
+    "plan/Jord/Jord-S0009/03-server-enforcement.md",
+    "plan/Jord/Jord-S0009/02-engine-schema.md",
+    "plan/Jord/Jord-S0009/01-security-contract.md",
+    "feature_list/Jord/00-intent.md",
+    "plan/Jord/Jord-S0009/06-verify.md",
+    "plan/Jord/Jord-S0009/05-role-gates.md",
+    "plan/Jord/Jord-S0009/README.md",
+    "plan/Jord/Jord-S0009",
+    "feature_list/Jord/01-later.md",
+    "feature_list/Jord/02-architecture.md",
+    "feature_list/Jord/03-jord-studio.md",
     "tech_space/jord/07-s0008-custom-function-apis.md",
     "plan/Jord/Jord-S0008/06-verify.md",
     "plan/Jord/Jord-S0008/05-role-gates.md",
@@ -205,27 +218,14 @@
     "plan/Jord/Jord-S0007/04-studio-runtime-ui.md",
     "plan/Jord/Jord-S0007/03-server-runner-logs.md",
     "plan/Jord/Jord-S0007/02-engine-jobs-schema.md",
-    "plan/Jord/Jord-S0007/01-runtime-contract.md",
-    "plan/Jord/Jord-S0007/README.md",
     "plan/Jord/Jord-S0007",
-    "tech_space/jord/05-s0006-generated-api.md",
-    "plan/Jord/Jord-S0006/06-verify.md",
-    "plan/Jord/Jord-S0006/05-role-gates.md",
-    "plan/Jord/Jord-S0006/04-studio-api-panel.md",
-    "plan/Jord/Jord-S0006/03-records-delete.md",
-    "plan/Jord/Jord-S0006/02-server-catalog.md",
-    "plan/Jord/Jord-S0006/01-api-contract.md",
-    "plan/Jord/Jord-S0006/README.md",
     "plan/Jord/Jord-S0006",
-    "feature_list/Jord/01-later.md",
-    "feature_list/Jord/02-architecture.md",
     "plan/Jord/Jord-S0005",
     "plan/Jord/Jord-S0004",
     "plan/Jord/Jord-S0003",
     "plan/Jord/Jord-S0002",
     "tech_space/jord",
     "agents/mimir/subagents",
-    "agents/mimir/skills",
     "report/assets/apolyx-s0004/popover-slide-dark.png",
     "report/assets/apolyx-s0004/popover-pop-light.png",
     "report/assets/apolyx-s0004/popover-notifications-dark.png",

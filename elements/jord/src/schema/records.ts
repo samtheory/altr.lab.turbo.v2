@@ -2,6 +2,8 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import { jordCustomApis, jordFunctions } from "./functions.js";
 import { jordJobRuns, jordJobs } from "./jobs.js";
+import { jordPolicies } from "./policies.js";
+import { jordTriggers } from "./triggers.js";
 
 /**
  * Generic JSON scratchpad. Not for typed trading entities.
@@ -32,4 +34,6 @@ export const schema = {
   jordJobRuns,
   jordFunctions,
   jordCustomApis,
+  jordPolicies,
+  jordTriggers,
 };

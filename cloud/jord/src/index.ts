@@ -41,6 +41,16 @@ export {
   type BuiltinStepKind,
 } from "./functions/index.js";
 export {
+  BUILTIN_POLICY_RULE_KINDS,
+  isBuiltinPolicyRuleKind,
+  type BuiltinPolicyRuleKind,
+} from "./policies/index.js";
+export {
+  BUILTIN_TRIGGER_ACTION_KINDS,
+  isBuiltinTriggerActionKind,
+  type BuiltinTriggerActionKind,
+} from "./triggers/index.js";
+export {
   createGeneratedApiRegistry,
   GENERATED_API_RESOURCES,
   GeneratedApiRegistry,

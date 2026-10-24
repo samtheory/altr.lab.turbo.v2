@@ -2,7 +2,7 @@
 title: "Jord Studio — dashboard and control plane"
 description: "Jord Studio surfaces: tables, visualizer, jobs, auth, APIs, plus roadmap for realtime CDC, blobs, and vectors. Not Slice 0."
 created: 2026-10-18
-updated: 2026-10-21
+updated: 2026-10-23
 tags:
   - feature
   - jord
@@ -14,11 +14,12 @@ tags:
   - Jord-S0005
   - Jord-S0006
   - Jord-S0007
+  - Jord-S0009
 ---
 
 # Jord Studio — dashboard and control plane
 
-> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S6 shipped:** through [[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · as-built [[../../tech_space/jord/07-s0008-custom-function-apis]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
+> Product: **Jord Studio**. Package: `apps/jord-studio` (`@altr/jord-studio`). Slice 0 engine is done ([[../../plan/Jord/Jord-S0001/README|Jord-S0001]]). **Studio S1–S7 shipped:** through [[../../plan/Jord/Jord-S0009/README|Jord-S0009]] · as-built [[../../tech_space/jord/08-s0009-triggers-policies]]. Architecture: [[02-architecture]]. Later phases: [[01-later]].
 
 ## Why
 
@@ -100,7 +101,7 @@ Jord is **libSQL / SQL**. Studio must not teach operators that Jord is a JSON do
 | S4 | Generated CRUD API panel | S1 — **done** ([[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]]) |
 | S5 | Jobs / cron + logs | Server job runner — **done** ([[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]]) |
 | S6 | Custom + function APIs editor | S4 — **done** ([[../../plan/Jord/Jord-S0008/README|Jord-S0008]] · [[../../tech_space/jord/07-s0008-custom-function-apis]]) |
-| S7 | Triggers, policies | S2 + dialect seam |
+| S7 | Triggers, policies | S2 + dialect seam — **done** ([[../../plan/Jord/Jord-S0009/README|Jord-S0009]] · [[../../tech_space/jord/08-s0009-triggers-policies]]) |
 | S8 | Postgres connection (`PostgresAdapter`) | Postgres driver installed |
 | S9 | Realtime subscriptions UI | CDC / SSE / WS on server |
 | S10 | Blob buckets UI | Local blob storage |
@@ -126,4 +127,5 @@ S2 plan (closed): [[../../plan/Jord/Jord-S0004/README]] · [[../../tech_space/jo
 S3 plan (closed): [[../../plan/Jord/Jord-S0005/README]] · [[../../tech_space/jord/04-s0005-auth]].  
 S4 plan (closed): [[../../plan/Jord/Jord-S0006/README]] · [[../../tech_space/jord/05-s0006-generated-api]].  
 S5 plan (closed): [[../../plan/Jord/Jord-S0007/README]] · [[../../tech_space/jord/06-s0007-jobs-logs]].  
-S6 plan (closed): [[../../plan/Jord/Jord-S0008/README]] · [[../../tech_space/jord/07-s0008-custom-function-apis]]. Later phases (S7+) get their own plan folders when opened by mimir.
+S6 plan (closed): [[../../plan/Jord/Jord-S0008/README]] · [[../../tech_space/jord/07-s0008-custom-function-apis]].  
+S7 plan (closed): [[../../plan/Jord/Jord-S0009/README]] · [[../../tech_space/jord/08-s0009-triggers-policies]]. Later phases (S8+) get their own plan folders when opened by mimir.

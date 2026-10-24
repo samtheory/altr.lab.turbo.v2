@@ -9,7 +9,9 @@ export {
   type InsertFunctionInput,
   type InsertJobInput,
   type InsertJobRunInput,
+  type InsertPolicyInput,
   type InsertRecordInput,
+  type InsertTriggerInput,
   type JordColumnInfo,
   type JordColumnType,
   type JordCustomApi,
@@ -21,13 +23,21 @@ export {
   type JordJobRun,
   type JordJobRunStatus,
   type JordJobStatus,
+  type JordPolicy,
+  type JordPolicyEffect,
+  type JordPolicyOperation,
   type JordRecord,
   type JordTableInfo,
+  type JordTrigger,
+  type JordTriggerEvent,
+  type JordTriggerTiming,
   type UpdateCustomApiInput,
   type UpdateFunctionInput,
   type UpdateJobInput,
+  type UpdatePolicyInput,
   type UpdateRecordInput,
   type UpdateRecordResult,
+  type UpdateTriggerInput,
 } from "./port.js";
 export { records, schema, type NewRecordRow, type RecordRow } from "./schema/records.js";
 export {
@@ -46,6 +56,16 @@ export {
   type NewJordCustomApiRow,
   type NewJordFunctionRow,
 } from "./schema/functions.js";
+export {
+  jordPolicies,
+  type JordPolicyRow,
+  type NewJordPolicyRow,
+} from "./schema/policies.js";
+export {
+  jordTriggers,
+  type JordTriggerRow,
+  type NewJordTriggerRow,
+} from "./schema/triggers.js";
 export {
   buildAddColumnSql,
   isJordColumnType,

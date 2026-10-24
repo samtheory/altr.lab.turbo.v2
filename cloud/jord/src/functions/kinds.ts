@@ -1,6 +1,11 @@
 import type { JordDriverPort, JordRecord } from "@altr/jord";
 
 import { canWriteRecords, type JordRole } from "../auth/roles.js";
+import type { LogRing } from "../jobs/log-ring.js";
+import {
+  evaluatePolicies,
+  policiesDisabledFromEnv,
+} from "../policies/evaluate.js";
 
 export const BUILTIN_STEP_KINDS = [
   "echo",
@@ -38,6 +43,8 @@ export type StepContext = {
   config: Record<string, unknown>;
   /** When set, writes go through the server write queue. */
   enqueueWrite: <T>(fn: () => Promise<T>) => Promise<T>;
+  /** When set, AFTER insert triggers can log / invoke. */
+  logs?: LogRing;
 };
 
 export type StepResult = {
@@ -98,11 +105,26 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     return { result: { echoed: message, body } };
   },
 
-  async records_list({ jord, config }) {
+  async records_list({ jord, role, config }) {
     const bucket =
       typeof config.bucket === "string" && config.bucket.length > 0
         ? config.bucket
         : "lab";
+    const decision = await evaluatePolicies({
+      jord,
+      tableName: "records",
+      operation: "select",
+      role,
+      bucket,
+      disabled: policiesDisabledFromEnv(),
+    });
+    if (!decision.allowed) {
+      throw new FunctionStepError(
+        403,
+        "policy_denied",
+        `policy ${decision.policy.id} denied select`,
+      );
+    }
     const limitRaw = config.limit;
     const limit =
       typeof limitRaw === "number" && Number.isFinite(limitRaw)
@@ -119,7 +141,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     };
   },
 
-  async records_get({ jord, config, request }) {
+  async records_get({ jord, role, config, request }) {
     const body = bodyRecord(request.body);
     const id =
       (typeof config.id === "string" && config.id) ||
@@ -138,10 +160,32 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     if (!row) {
       throw new FunctionStepError(404, "not_found", `record ${id} not found`);
     }
+    const decision = await evaluatePolicies({
+      jord,
+      tableName: "records",
+      operation: "select",
+      role,
+      bucket: row.bucket,
+      disabled: policiesDisabledFromEnv(),
+    });
+    if (!decision.allowed) {
+      throw new FunctionStepError(
+        403,
+        "policy_denied",
+        `policy ${decision.policy.id} denied select`,
+      );
+    }
     return { result: publicRecord(row) };
   },
 
-  async records_insert({ jord, role, config, request, enqueueWrite }) {
+  async records_insert({
+    jord,
+    role,
+    config,
+    request,
+    enqueueWrite,
+    logs,
+  }) {
     if (!canWriteRecords(role)) {
       throw new FunctionStepError(
         403,
@@ -154,6 +198,21 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       (typeof config.bucket === "string" && config.bucket) ||
       (typeof body.bucket === "string" ? body.bucket : "") ||
       "lab";
+    const decision = await evaluatePolicies({
+      jord,
+      tableName: "records",
+      operation: "insert",
+      role,
+      bucket,
+      disabled: policiesDisabledFromEnv(),
+    });
+    if (!decision.allowed) {
+      throw new FunctionStepError(
+        403,
+        "policy_denied",
+        `policy ${decision.policy.id} denied insert`,
+      );
+    }
     const recordBody =
       typeof body.body === "string"
         ? body.body
@@ -168,14 +227,45 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     const row = await enqueueWrite(() =>
       jord.insertRecord({ bucket, body: recordBody, metadata }),
     );
+    if (logs) {
+      // Dynamic import avoids kinds ↔ triggers ↔ runner cycle.
+      const { runTriggersAfterWrite, triggersDisabledFromEnv } = await import(
+        "../triggers/runner.js"
+      );
+      await runTriggersAfterWrite({
+        jord,
+        logs,
+        tableName: "records",
+        event: "insert",
+        row,
+        role,
+        enqueueWrite,
+        disabled: triggersDisabledFromEnv(),
+      });
+    }
     return { result: publicRecord(row) };
   },
 
-  async records_count({ jord, config }) {
+  async records_count({ jord, role, config }) {
     const bucket =
       typeof config.bucket === "string" && config.bucket.length > 0
         ? config.bucket
         : "lab";
+    const decision = await evaluatePolicies({
+      jord,
+      tableName: "records",
+      operation: "select",
+      role,
+      bucket,
+      disabled: policiesDisabledFromEnv(),
+    });
+    if (!decision.allowed) {
+      throw new FunctionStepError(
+        403,
+        "policy_denied",
+        `policy ${decision.policy.id} denied select`,
+      );
+    }
     const rows = await jord.listRecordsByBucket(bucket);
     return { result: { bucket, count: rows.length } };
   },

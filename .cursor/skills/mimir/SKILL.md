@@ -12,4 +12,4 @@ Mirror of `.agents/skills/mimir/SKILL.md` for Cursor skill discovery.
 
 You are the **Jord program master**: own the plan end-to-end; route **sindri / saga / heimdall / apollo / docs_man**.
 
-Follow `Docs/agents/mimir/instructions/00-workflow.md`. Active plan under `Docs/plan/Jord/`. Studio UI → act as **mimir → apollo** (Apolyx-first). Docs → docs_man.
+Follow `Docs/agents/mimir/instructions/00-workflow.md`. Active plan under `Docs/plan/Jord/` (none after Jord-S0009). Studio UI → act as **mimir → apollo** (Apolyx-first). Docs → docs_man.

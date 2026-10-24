@@ -6,7 +6,12 @@ import type {
   JordHttpMethod,
   JordJob,
   JordJobRun,
+  JordPolicy,
+  JordPolicyEffect,
+  JordPolicyOperation,
   JordRecord,
+  JordTrigger,
+  JordTriggerEvent,
 } from "@altr/jord";
 import {
   buildAddColumnSql,
@@ -49,7 +54,32 @@ import {
   type JobScheduler,
   type LogSource,
 } from "./jobs/index.js";
+import {
+  evaluatePolicies,
+  isBuiltinPolicyRuleKind,
+  policiesDisabledFromEnv,
+} from "./policies/index.js";
 import type { WriteQueue } from "./queue.js";
+import {
+  isBuiltinTriggerActionKind,
+  parseActionsJson,
+  runTriggersAfterWrite,
+  triggersDisabledFromEnv,
+} from "./triggers/index.js";
+
+const POLICY_OPS = new Set<JordPolicyOperation>([
+  "select",
+  "insert",
+  "update",
+  "delete",
+]);
+const POLICY_EFFECTS = new Set<JordPolicyEffect>(["allow", "deny"]);
+const TRIGGER_EVENTS = new Set<JordTriggerEvent>([
+  "insert",
+  "update",
+  "delete",
+]);
+const V1_TABLE = "records";
 
 export type JordAppDeps = {
   jord: JordDriverPort;
@@ -126,6 +156,84 @@ function publicCustomApi(row: JordCustomApi) {
     created_at: row.createdAt,
     updated_at: row.updatedAt,
   };
+}
+
+function publicPolicy(row: JordPolicy) {
+  return {
+    id: row.id,
+    name: row.name,
+    table_name: row.tableName,
+    operation: row.operation,
+    effect: row.effect,
+    rules: row.rules,
+    priority: row.priority,
+    enabled: row.enabled,
+    created_at: row.createdAt,
+    updated_at: row.updatedAt,
+  };
+}
+
+function publicTrigger(row: JordTrigger) {
+  return {
+    id: row.id,
+    name: row.name,
+    table_name: row.tableName,
+    timing: row.timing,
+    event: row.event,
+    actions: row.actions,
+    enabled: row.enabled,
+    created_at: row.createdAt,
+    updated_at: row.updatedAt,
+  };
+}
+
+function policyDeniedBody(policy: JordPolicy, operation: JordPolicyOperation) {
+  return {
+    error: "policy_denied" as const,
+    policyId: policy.id,
+    table: policy.tableName,
+    operation,
+  };
+}
+
+function validateRulesJson(raw: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return "rules must be valid JSON";
+  }
+  if (!Array.isArray(parsed)) return "rules must be a JSON array";
+  for (const item of parsed) {
+    if (!item || typeof item !== "object") {
+      return "each rule must be an object";
+    }
+    const kind = (item as { kind?: unknown }).kind;
+    if (typeof kind !== "string" || !isBuiltinPolicyRuleKind(kind)) {
+      return "each rule.kind must be a built-in policy rule kind";
+    }
+  }
+  return null;
+}
+
+function validateActionsJson(raw: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return "actions must be valid JSON";
+  }
+  if (!Array.isArray(parsed)) return "actions must be a JSON array";
+  for (const item of parsed) {
+    if (!item || typeof item !== "object") {
+      return "each action must be an object";
+    }
+    const kind = (item as { kind?: unknown }).kind;
+    if (typeof kind !== "string" || !isBuiltinTriggerActionKind(kind)) {
+      return "each action.kind must be a built-in trigger action kind";
+    }
+  }
+  return null;
 }
 
 function validateStepsJson(raw: string): string | null {
@@ -294,6 +402,15 @@ export function createJordApp(deps: JordAppDeps) {
     },
   );
 
+  const policiesOff = policiesDisabledFromEnv();
+  const triggersOff = triggersDisabledFromEnv();
+  if (policiesOff) {
+    console.warn("[@altr/jord-server] JORD_POLICIES_DISABLED — skipping policy evaluation");
+  }
+  if (triggersOff) {
+    console.warn("[@altr/jord-server] JORD_TRIGGERS_DISABLED — skipping trigger hooks");
+  }
+
   const recordsRoutes = new Hono<{ Variables: JordAuthVariables }>();
   recordsRoutes.use("*", requireGeneratedEnabled(generatedApi, "records"));
 
@@ -309,6 +426,19 @@ export function createJordApp(deps: JordAppDeps) {
       });
     }
 
+    const role = c.get("jordRole");
+    const decision = await evaluatePolicies({
+      jord: deps.jord,
+      tableName: V1_TABLE,
+      operation: "insert",
+      role,
+      bucket: body.bucket,
+      disabled: policiesOff,
+    });
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision.policy, "insert"), 403);
+    }
+
     const row = await deps.enqueueWrite(() =>
       deps.jord.insertRecord({
         bucket: body.bucket!,
@@ -316,6 +446,16 @@ export function createJordApp(deps: JordAppDeps) {
         metadata: body.metadata,
       }),
     );
+    await runTriggersAfterWrite({
+      jord: deps.jord,
+      logs,
+      tableName: V1_TABLE,
+      event: "insert",
+      row,
+      role,
+      enqueueWrite: deps.enqueueWrite,
+      disabled: triggersOff,
+    });
     return c.json(publicRecord(row), 201);
   });
 
@@ -323,6 +463,17 @@ export function createJordApp(deps: JordAppDeps) {
     const bucket = c.req.query("bucket");
     if (!bucket) {
       throw new HTTPException(400, { message: "query bucket= is required" });
+    }
+    const decision = await evaluatePolicies({
+      jord: deps.jord,
+      tableName: V1_TABLE,
+      operation: "select",
+      role: c.get("jordRole"),
+      bucket,
+      disabled: policiesOff,
+    });
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision.policy, "select"), 403);
     }
     const rows = await deps.jord.listRecordsByBucket(bucket);
     return c.json(rows.map(publicRecord));
@@ -332,6 +483,17 @@ export function createJordApp(deps: JordAppDeps) {
     const row = await deps.jord.getRecord(c.req.param("id"));
     if (!row) {
       throw new HTTPException(404, { message: "record not found" });
+    }
+    const decision = await evaluatePolicies({
+      jord: deps.jord,
+      tableName: V1_TABLE,
+      operation: "select",
+      role: c.get("jordRole"),
+      bucket: row.bucket,
+      disabled: policiesOff,
+    });
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision.policy, "select"), 403);
     }
     return c.json(publicRecord(row));
   });
@@ -350,6 +512,23 @@ export function createJordApp(deps: JordAppDeps) {
       });
     }
 
+    const existing = await deps.jord.getRecord(id);
+    if (!existing) {
+      throw new HTTPException(404, { message: "record not found" });
+    }
+    const role = c.get("jordRole");
+    const decision = await evaluatePolicies({
+      jord: deps.jord,
+      tableName: V1_TABLE,
+      operation: "update",
+      role,
+      bucket: body.bucket ?? existing.bucket,
+      disabled: policiesOff,
+    });
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision.policy, "update"), 403);
+    }
+
     const result = await deps.enqueueWrite(() =>
       deps.jord.updateRecord({
         id,
@@ -366,15 +545,53 @@ export function createJordApp(deps: JordAppDeps) {
         409,
       );
     }
+    await runTriggersAfterWrite({
+      jord: deps.jord,
+      logs,
+      tableName: V1_TABLE,
+      event: "update",
+      row: result.record,
+      prior: existing,
+      role,
+      enqueueWrite: deps.enqueueWrite,
+      disabled: triggersOff,
+    });
     return c.json(publicRecord(result.record));
   });
 
   recordsRoutes.delete("/:id", requireWriteRecords(), async (c) => {
     const id = c.req.param("id");
+    const existing = await deps.jord.getRecord(id);
+    if (!existing) {
+      throw new HTTPException(404, { message: "record not found" });
+    }
+    const role = c.get("jordRole");
+    const decision = await evaluatePolicies({
+      jord: deps.jord,
+      tableName: V1_TABLE,
+      operation: "delete",
+      role,
+      bucket: existing.bucket,
+      disabled: policiesOff,
+    });
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision.policy, "delete"), 403);
+    }
     const deleted = await deps.enqueueWrite(() => deps.jord.deleteRecord(id));
     if (!deleted) {
       throw new HTTPException(404, { message: "record not found" });
     }
+    await runTriggersAfterWrite({
+      jord: deps.jord,
+      logs,
+      tableName: V1_TABLE,
+      event: "delete",
+      row: existing,
+      prior: existing,
+      role,
+      enqueueWrite: deps.enqueueWrite,
+      disabled: triggersOff,
+    });
     return c.json({ ok: true as const, id });
   });
 
@@ -702,6 +919,7 @@ export function createJordApp(deps: JordAppDeps) {
         fn,
         role: c.get("jordRole"),
         enqueueWrite: deps.enqueueWrite,
+        logs,
         request: {
           method: "POST",
           path: `/functions/${id}/invoke`,
@@ -922,6 +1140,7 @@ export function createJordApp(deps: JordAppDeps) {
       fn,
       role: c.get("jordRole"),
       enqueueWrite: deps.enqueueWrite,
+      logs,
       request: {
         method,
         path: `/x/${slug}`,
@@ -950,6 +1169,272 @@ export function createJordApp(deps: JordAppDeps) {
       result: run.result,
       steps_run: run.stepsRun,
     });
+  });
+
+  protectedRoutes.get("/policies", async (c) => {
+    const rows = await deps.jord.listPolicies();
+    return c.json({ policies: rows.map(publicPolicy) });
+  });
+
+  protectedRoutes.post("/policies", requireAlterSchema(), async (c) => {
+    const body = await c.req.json<{
+      name?: string;
+      table_name?: string;
+      operation?: string;
+      effect?: string;
+      rules?: string;
+      priority?: number;
+      enabled?: boolean;
+    }>();
+    if (typeof body.name !== "string" || body.name.trim().length === 0) {
+      throw new HTTPException(400, { message: "name is required" });
+    }
+    const tableName = body.table_name ?? V1_TABLE;
+    if (tableName !== V1_TABLE) {
+      throw new HTTPException(400, {
+        message: `table_name must be "${V1_TABLE}" in S7`,
+      });
+    }
+    if (
+      typeof body.operation !== "string" ||
+      !POLICY_OPS.has(body.operation as JordPolicyOperation)
+    ) {
+      throw new HTTPException(400, {
+        message: "operation must be select|insert|update|delete",
+      });
+    }
+    if (
+      typeof body.effect !== "string" ||
+      !POLICY_EFFECTS.has(body.effect as JordPolicyEffect)
+    ) {
+      throw new HTTPException(400, {
+        message: "effect must be allow|deny",
+      });
+    }
+    const rules =
+      typeof body.rules === "string" ? body.rules : JSON.stringify([]);
+    const rulesErr = validateRulesJson(rules);
+    if (rulesErr) throw new HTTPException(400, { message: rulesErr });
+    const priority =
+      typeof body.priority === "number" && Number.isFinite(body.priority)
+        ? Math.floor(body.priority)
+        : 0;
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.insertPolicy({
+        name: body.name!.trim(),
+        tableName,
+        operation: body.operation as JordPolicyOperation,
+        effect: body.effect as JordPolicyEffect,
+        rules,
+        priority,
+        enabled: body.enabled,
+      }),
+    );
+    return c.json(publicPolicy(row), 201);
+  });
+
+  protectedRoutes.get("/policies/:id", async (c) => {
+    const row = await deps.jord.getPolicy(c.req.param("id"));
+    if (!row) throw new HTTPException(404, { message: "policy not found" });
+    return c.json(publicPolicy(row));
+  });
+
+  protectedRoutes.patch("/policies/:id", requireAlterSchema(), async (c) => {
+    const id = c.req.param("id");
+    const body = await c.req.json<{
+      name?: string;
+      table_name?: string;
+      operation?: string;
+      effect?: string;
+      rules?: string;
+      priority?: number;
+      enabled?: boolean;
+    }>();
+    if (body.table_name !== undefined && body.table_name !== V1_TABLE) {
+      throw new HTTPException(400, {
+        message: `table_name must be "${V1_TABLE}" in S7`,
+      });
+    }
+    if (
+      body.operation !== undefined &&
+      !POLICY_OPS.has(body.operation as JordPolicyOperation)
+    ) {
+      throw new HTTPException(400, {
+        message: "operation must be select|insert|update|delete",
+      });
+    }
+    if (
+      body.effect !== undefined &&
+      !POLICY_EFFECTS.has(body.effect as JordPolicyEffect)
+    ) {
+      throw new HTTPException(400, {
+        message: "effect must be allow|deny",
+      });
+    }
+    if (body.rules !== undefined) {
+      const rulesErr = validateRulesJson(body.rules);
+      if (rulesErr) throw new HTTPException(400, { message: rulesErr });
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.updatePolicy({
+        id,
+        name: body.name,
+        tableName: body.table_name,
+        operation: body.operation as JordPolicyOperation | undefined,
+        effect: body.effect as JordPolicyEffect | undefined,
+        rules: body.rules,
+        priority: body.priority,
+        enabled: body.enabled,
+      }),
+    );
+    if (!row) throw new HTTPException(404, { message: "policy not found" });
+    return c.json(publicPolicy(row));
+  });
+
+  protectedRoutes.delete("/policies/:id", requireAlterSchema(), async (c) => {
+    const id = c.req.param("id");
+    const deleted = await deps.enqueueWrite(() => deps.jord.deletePolicy(id));
+    if (!deleted) throw new HTTPException(404, { message: "policy not found" });
+    return c.json({ ok: true as const, id });
+  });
+
+  protectedRoutes.get("/triggers", async (c) => {
+    const rows = await deps.jord.listTriggers();
+    return c.json({ triggers: rows.map(publicTrigger) });
+  });
+
+  protectedRoutes.post("/triggers", requireAlterSchema(), async (c) => {
+    const body = await c.req.json<{
+      name?: string;
+      table_name?: string;
+      event?: string;
+      actions?: string;
+      enabled?: boolean;
+    }>();
+    if (typeof body.name !== "string" || body.name.trim().length === 0) {
+      throw new HTTPException(400, { message: "name is required" });
+    }
+    const tableName = body.table_name ?? V1_TABLE;
+    if (tableName !== V1_TABLE) {
+      throw new HTTPException(400, {
+        message: `table_name must be "${V1_TABLE}" in S7`,
+      });
+    }
+    if (
+      typeof body.event !== "string" ||
+      !TRIGGER_EVENTS.has(body.event as JordTriggerEvent)
+    ) {
+      throw new HTTPException(400, {
+        message: "event must be insert|update|delete",
+      });
+    }
+    const actions =
+      typeof body.actions === "string" ? body.actions : JSON.stringify([]);
+    const actionsErr = validateActionsJson(actions);
+    if (actionsErr) throw new HTTPException(400, { message: actionsErr });
+
+    // Validate invoke_function targets exist
+    for (const action of parseActionsJson(actions)) {
+      if (action.kind === "invoke_function") {
+        const fid = action.config?.functionId;
+        if (typeof fid !== "string" || !fid) {
+          throw new HTTPException(400, {
+            message: "invoke_function requires config.functionId",
+          });
+        }
+        const fn = await deps.jord.getFunction(fid);
+        if (!fn) {
+          throw new HTTPException(400, {
+            message: `function ${fid} not found`,
+          });
+        }
+      }
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.insertTrigger({
+        name: body.name!.trim(),
+        tableName,
+        event: body.event as JordTriggerEvent,
+        actions,
+        enabled: body.enabled,
+      }),
+    );
+    return c.json(publicTrigger(row), 201);
+  });
+
+  protectedRoutes.get("/triggers/:id", async (c) => {
+    const row = await deps.jord.getTrigger(c.req.param("id"));
+    if (!row) throw new HTTPException(404, { message: "trigger not found" });
+    return c.json(publicTrigger(row));
+  });
+
+  protectedRoutes.patch("/triggers/:id", requireAlterSchema(), async (c) => {
+    const id = c.req.param("id");
+    const body = await c.req.json<{
+      name?: string;
+      table_name?: string;
+      event?: string;
+      actions?: string;
+      enabled?: boolean;
+    }>();
+    if (body.table_name !== undefined && body.table_name !== V1_TABLE) {
+      throw new HTTPException(400, {
+        message: `table_name must be "${V1_TABLE}" in S7`,
+      });
+    }
+    if (
+      body.event !== undefined &&
+      !TRIGGER_EVENTS.has(body.event as JordTriggerEvent)
+    ) {
+      throw new HTTPException(400, {
+        message: "event must be insert|update|delete",
+      });
+    }
+    if (body.actions !== undefined) {
+      const actionsErr = validateActionsJson(body.actions);
+      if (actionsErr) throw new HTTPException(400, { message: actionsErr });
+      for (const action of parseActionsJson(body.actions)) {
+        if (action.kind === "invoke_function") {
+          const fid = action.config?.functionId;
+          if (typeof fid !== "string" || !fid) {
+            throw new HTTPException(400, {
+              message: "invoke_function requires config.functionId",
+            });
+          }
+          const fn = await deps.jord.getFunction(fid);
+          if (!fn) {
+            throw new HTTPException(400, {
+              message: `function ${fid} not found`,
+            });
+          }
+        }
+      }
+    }
+
+    const row = await deps.enqueueWrite(() =>
+      deps.jord.updateTrigger({
+        id,
+        name: body.name,
+        tableName: body.table_name,
+        event: body.event as JordTriggerEvent | undefined,
+        actions: body.actions,
+        enabled: body.enabled,
+      }),
+    );
+    if (!row) throw new HTTPException(404, { message: "trigger not found" });
+    return c.json(publicTrigger(row));
+  });
+
+  protectedRoutes.delete("/triggers/:id", requireAlterSchema(), async (c) => {
+    const id = c.req.param("id");
+    const deleted = await deps.enqueueWrite(() => deps.jord.deleteTrigger(id));
+    if (!deleted) {
+      throw new HTTPException(404, { message: "trigger not found" });
+    }
+    return c.json({ ok: true as const, id });
   });
 
   app.route("/", protectedRoutes);

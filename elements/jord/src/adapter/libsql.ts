@@ -15,7 +15,9 @@ import type {
   InsertFunctionInput,
   InsertJobInput,
   InsertJobRunInput,
+  InsertPolicyInput,
   InsertRecordInput,
+  InsertTriggerInput,
   JordColumnInfo,
   JordCustomApi,
   JordDb,
@@ -25,13 +27,21 @@ import type {
   JordJob,
   JordJobRun,
   JordJobStatus,
+  JordPolicy,
+  JordPolicyEffect,
+  JordPolicyOperation,
   JordRecord,
   JordTableInfo,
+  JordTrigger,
+  JordTriggerEvent,
+  JordTriggerTiming,
   UpdateCustomApiInput,
   UpdateFunctionInput,
   UpdateJobInput,
+  UpdatePolicyInput,
   UpdateRecordInput,
   UpdateRecordResult,
+  UpdateTriggerInput,
 } from "../port.js";
 import {
   buildAddColumnSql,
@@ -41,9 +51,46 @@ import {
 } from "../schema/ddl.js";
 import { jordCustomApis, jordFunctions } from "../schema/functions.js";
 import { jordJobRuns, jordJobs } from "../schema/jobs.js";
+import { jordPolicies } from "../schema/policies.js";
 import { records, schema } from "../schema/records.js";
+import { jordTriggers } from "../schema/triggers.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
 import { fileUrlToFsPath } from "../url.js";
+
+const POLICY_OPS = new Set<JordPolicyOperation>([
+  "select",
+  "insert",
+  "update",
+  "delete",
+]);
+const POLICY_EFFECTS = new Set<JordPolicyEffect>(["allow", "deny"]);
+const TRIGGER_EVENTS = new Set<JordTriggerEvent>([
+  "insert",
+  "update",
+  "delete",
+]);
+
+function asPolicyOp(value: string): JordPolicyOperation {
+  return POLICY_OPS.has(value as JordPolicyOperation)
+    ? (value as JordPolicyOperation)
+    : "select";
+}
+
+function asPolicyEffect(value: string): JordPolicyEffect {
+  return POLICY_EFFECTS.has(value as JordPolicyEffect)
+    ? (value as JordPolicyEffect)
+    : "deny";
+}
+
+function asTriggerEvent(value: string): JordTriggerEvent {
+  return TRIGGER_EVENTS.has(value as JordTriggerEvent)
+    ? (value as JordTriggerEvent)
+    : "insert";
+}
+
+function asTriggerTiming(value: string): JordTriggerTiming {
+  return value === "after" ? "after" : "after";
+}
 
 const HTTP_METHODS = new Set<JordHttpMethod>([
   "GET",
@@ -134,6 +181,35 @@ function mapCustomApi(row: typeof jordCustomApis.$inferSelect): JordCustomApi {
     method: asHttpMethod(row.method),
     slug: row.slug,
     functionId: row.functionId,
+    enabled: Boolean(row.enabled),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapPolicy(row: typeof jordPolicies.$inferSelect): JordPolicy {
+  return {
+    id: row.id,
+    name: row.name,
+    tableName: row.tableName,
+    operation: asPolicyOp(row.operation),
+    effect: asPolicyEffect(row.effect),
+    rules: row.rules,
+    priority: row.priority,
+    enabled: Boolean(row.enabled),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapTrigger(row: typeof jordTriggers.$inferSelect): JordTrigger {
+  return {
+    id: row.id,
+    name: row.name,
+    tableName: row.tableName,
+    timing: asTriggerTiming(row.timing),
+    event: asTriggerEvent(row.event),
+    actions: row.actions,
     enabled: Boolean(row.enabled),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -560,6 +636,181 @@ export class LibSqlAdapter implements JordDriverPort {
       .from(jordCustomApis)
       .where(eq(jordCustomApis.functionId, functionId));
     return rows.length;
+  }
+
+  async listPolicies(): Promise<JordPolicy[]> {
+    const rows = await this.db
+      .select()
+      .from(jordPolicies)
+      .orderBy(desc(jordPolicies.priority), desc(jordPolicies.createdAt));
+    return rows.map(mapPolicy);
+  }
+
+  async getPolicy(id: string): Promise<JordPolicy | null> {
+    const rows = await this.db
+      .select()
+      .from(jordPolicies)
+      .where(eq(jordPolicies.id, id))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapPolicy(row) : null;
+  }
+
+  async listPoliciesFor(
+    tableName: string,
+    operation: JordPolicyOperation,
+  ): Promise<JordPolicy[]> {
+    const rows = await this.db
+      .select()
+      .from(jordPolicies)
+      .where(
+        and(
+          eq(jordPolicies.tableName, tableName),
+          eq(jordPolicies.operation, operation),
+          eq(jordPolicies.enabled, true),
+        ),
+      );
+    const mapped = rows.map(mapPolicy);
+    mapped.sort((a, b) => {
+      if (b.priority !== a.priority) return b.priority - a.priority;
+      // Deny before allow at equal priority
+      if (a.effect !== b.effect) {
+        if (a.effect === "deny") return -1;
+        if (b.effect === "deny") return 1;
+      }
+      return b.createdAt - a.createdAt;
+    });
+    return mapped;
+  }
+
+  async insertPolicy(input: InsertPolicyInput): Promise<JordPolicy> {
+    const now = Date.now();
+    const row = {
+      id: randomUUID(),
+      name: input.name,
+      tableName: input.tableName,
+      operation: input.operation,
+      effect: input.effect,
+      rules: input.rules ?? "[]",
+      priority: input.priority ?? 0,
+      enabled: input.enabled ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.db.insert(jordPolicies).values(row);
+    return mapPolicy(row);
+  }
+
+  async updatePolicy(input: UpdatePolicyInput): Promise<JordPolicy | null> {
+    const existing = await this.getPolicy(input.id);
+    if (!existing) return null;
+    const now = Date.now();
+    await this.db
+      .update(jordPolicies)
+      .set({
+        name: input.name ?? existing.name,
+        tableName: input.tableName ?? existing.tableName,
+        operation: input.operation ?? existing.operation,
+        effect: input.effect ?? existing.effect,
+        rules: input.rules ?? existing.rules,
+        priority: input.priority ?? existing.priority,
+        enabled: input.enabled ?? existing.enabled,
+        updatedAt: now,
+      })
+      .where(eq(jordPolicies.id, input.id));
+    return this.getPolicy(input.id);
+  }
+
+  async deletePolicy(id: string): Promise<boolean> {
+    const result = await this.client.execute({
+      sql: "DELETE FROM jord_policies WHERE id = ?",
+      args: [id],
+    });
+    return result.rowsAffected > 0;
+  }
+
+  async listTriggers(): Promise<JordTrigger[]> {
+    const rows = await this.db
+      .select()
+      .from(jordTriggers)
+      .orderBy(desc(jordTriggers.createdAt));
+    return rows.map(mapTrigger);
+  }
+
+  async getTrigger(id: string): Promise<JordTrigger | null> {
+    const rows = await this.db
+      .select()
+      .from(jordTriggers)
+      .where(eq(jordTriggers.id, id))
+      .limit(1);
+    const row = rows[0];
+    return row ? mapTrigger(row) : null;
+  }
+
+  async listTriggersFor(
+    tableName: string,
+    event: JordTriggerEvent,
+  ): Promise<JordTrigger[]> {
+    const rows = await this.db
+      .select()
+      .from(jordTriggers)
+      .where(
+        and(
+          eq(jordTriggers.tableName, tableName),
+          eq(jordTriggers.event, event),
+          eq(jordTriggers.enabled, true),
+        ),
+      )
+      .orderBy(desc(jordTriggers.createdAt));
+    return rows.map(mapTrigger);
+  }
+
+  async insertTrigger(input: InsertTriggerInput): Promise<JordTrigger> {
+    const now = Date.now();
+    const row = {
+      id: randomUUID(),
+      name: input.name,
+      tableName: input.tableName,
+      timing: input.timing ?? "after",
+      event: input.event,
+      actions: input.actions ?? "[]",
+      enabled: input.enabled ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.db.insert(jordTriggers).values(row);
+    return mapTrigger(row);
+  }
+
+  async updateTrigger(input: UpdateTriggerInput): Promise<JordTrigger | null> {
+    const existing = await this.getTrigger(input.id);
+    if (!existing) return null;
+    const now = Date.now();
+    await this.db
+      .update(jordTriggers)
+      .set({
+        name: input.name ?? existing.name,
+        tableName: input.tableName ?? existing.tableName,
+        timing: input.timing ?? existing.timing,
+        event: input.event ?? existing.event,
+        actions: input.actions ?? existing.actions,
+        enabled: input.enabled ?? existing.enabled,
+        updatedAt: now,
+      })
+      .where(eq(jordTriggers.id, input.id));
+    return this.getTrigger(input.id);
+  }
+
+  async deleteTrigger(id: string): Promise<boolean> {
+    const result = await this.client.execute({
+      sql: "DELETE FROM jord_triggers WHERE id = ?",
+      args: [id],
+    });
+    return result.rowsAffected > 0;
+  }
+
+  compileTriggerSql(_def: JordTrigger): string | null {
+    return null;
   }
 
   async listTables(): Promise<string[]> {
