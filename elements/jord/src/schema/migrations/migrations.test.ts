@@ -98,7 +98,9 @@ describe("libsql migration runner", () => {
         lockKey: url,
       });
       expect(second.applied).toEqual([]);
-      expect(second.skipped).toEqual(["0001", "0002", "0003"]);
+      expect(second.skipped).toEqual(
+        loadSqlMigrations("libsql").map((m) => m.id),
+      );
       const again = await client.execute(
         "SELECT applied_at FROM jord_migrations WHERE id = '0001'",
       );
@@ -160,7 +162,7 @@ describe("libsql migration runner", () => {
         runLibsqlMigrations(right, { lockKey: url }),
       ]);
       const applied = [...a.applied, ...b.applied];
-      expect(applied).toEqual(["0001", "0002", "0003"]);
+      expect(applied).toEqual(loadSqlMigrations("libsql").map((m) => m.id));
       const count = await left.execute(
         "SELECT COUNT(*) AS n FROM jord_migrations WHERE id = '0001'",
       );

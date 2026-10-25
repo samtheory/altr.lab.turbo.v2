@@ -148,6 +148,9 @@ export type AlterColumnInput = {
   type?: JordColumnType;
 };
 
+export const JORD_BLOB_STATUSES = ["pending", "ready"] as const;
+export type JordBlobStatus = (typeof JORD_BLOB_STATUSES)[number];
+
 export type JordBlob = {
   id: string;
   bucket: string;
@@ -155,6 +158,9 @@ export type JordBlob = {
   contentType: string;
   size: number;
   etag: string;
+  status: JordBlobStatus;
+  pendingExpiresAt: number | null;
+  uploadId: string | null;
   createdAt: number;
   updatedAt: number;
 };
@@ -165,6 +171,9 @@ export type UpsertBlobMetaInput = {
   contentType: string;
   size: number;
   etag: string;
+  status?: JordBlobStatus;
+  pendingExpiresAt?: number | null;
+  uploadId?: string | null;
 };
 
 /** Embedding metadata without the raw float buffer (list/search). */
@@ -498,6 +507,24 @@ export interface JordDriverPort {
     args?: Array<string | number | null>,
   ): Promise<Array<Record<string, unknown>>>;
   /**
+   * Studio SQL console. Read-only uses a dedicated connection with
+   * `PRAGMA query_only=ON` (libSQL) or `BEGIN READ ONLY` (Postgres).
+   * Writes use the main client; the server must enqueue them.
+   */
+  executeSql(input: {
+    sql: string;
+    args?: Array<string | number | null>;
+    readOnly: boolean;
+    timeoutMs?: number;
+    rowCap?: number;
+  }): Promise<{
+    columns: string[];
+    rows: Array<Record<string, unknown>>;
+    rowCount: number;
+    truncated: boolean;
+    elapsedMs: number;
+  }>;
+  /**
    * `PRAGMA wal_checkpoint(TRUNCATE)` on local file libSQL.
    * No-op on hosted `libsql://` and Postgres.
    */
@@ -634,6 +661,10 @@ export interface JordDriverPort {
   upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob>;
   /** Delete metadata row. Returns true if a row was removed. */
   deleteBlobMeta(bucket: string, key: string): Promise<boolean>;
+  /** Pending rows whose pending_expires_at is at or before `nowMs`. */
+  listExpiredPendingBlobs(nowMs: number): Promise<JordBlob[]>;
+  /** All blob metadata rows (copy/verify plan; may be large). */
+  listAllBlobMeta(): Promise<JordBlob[]>;
 
   listVectorNamespaces(): Promise<string[]>;
   listEmbeddings(namespace: string): Promise<JordEmbeddingMeta[]>;

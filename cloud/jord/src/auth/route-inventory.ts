@@ -58,6 +58,11 @@ export function surfaceFor(method: string, path: string): string | null {
   }
   if (normalized === "/jobs" || normalized.startsWith("/jobs/")) return "jobs";
   if (normalized === "/logs" || normalized.startsWith("/logs/")) return "logs";
+  if (normalized === "/sql" || normalized.startsWith("/sql/")) return "sql";
+  if (normalized === "/migrate" || normalized.startsWith("/migrate/")) {
+    return "migrate";
+  }
+  if (normalized === "/admin" || normalized.startsWith("/admin/")) return "admin";
   if (normalized === "/functions" || normalized.startsWith("/functions/")) {
     return "functions";
   }

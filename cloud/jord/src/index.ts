@@ -5,7 +5,6 @@ import { createJordApp } from "./app.js";
 import { resolveAuthConfig } from "./auth/index.js";
 import { assertPostgresMigrateUrl } from "./auth/pg-url.js";
 import {
-  LogRing,
   seedDefaultJobs,
   startJobScheduler,
 } from "./jobs/index.js";
@@ -46,6 +45,17 @@ export {
   resolveBlobsRoot,
   type BlobDiskStore,
 } from "./blobs/index.js";
+export {
+  buildLocalToRemoteCopyPlan,
+  clampSignTtlSeconds,
+  createLocalStorageAdapter,
+  createS3StorageAdapter,
+  createStorageFromEnv,
+  DEFAULT_SIGN_TTL_SECONDS,
+  MAX_SIGN_TTL_SECONDS,
+  type JordStoragePort,
+  type PresignResult,
+} from "./storage/index.js";
 export {
   BUILTIN_STEP_KINDS,
   isBuiltinStepKind,
@@ -115,6 +125,11 @@ export async function startJordServer(
       "jord_auth_tokens",
       "jord_refresh_tokens",
       "jord_table_rls",
+      "jord_changes",
+      "jord_tracked_tables",
+      "jord_logs",
+      "jord_sql_audit",
+      "jord_migrate_jobs",
     ]);
   }
   const jord = await createJordClient({
@@ -123,7 +138,9 @@ export async function startJordServer(
   });
   const enqueueWrite = createWriteQueue();
   const realtime = new RealtimeBus();
-  const logs = new LogRing();
+  const { LogBatcher } = await import("./logs/batch.js");
+  const logs = new LogBatcher(jord);
+  logs.start();
   await seedDefaultJobs(jord);
   const scheduler = startJobScheduler({ jord, enqueueWrite, logs });
   const app = createJordApp({

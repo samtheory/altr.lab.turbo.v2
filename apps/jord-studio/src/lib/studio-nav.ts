@@ -102,6 +102,18 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         status: "live",
       },
       {
+        id: "sql",
+        label: "SQL console",
+        href: "/database/sql",
+        status: "live",
+      },
+      {
+        id: "migrate",
+        label: "Migrate",
+        href: "/database/migrate",
+        status: "live",
+      },
+      {
         id: "policies",
         label: "Policies",
         href: "/database/policies",
@@ -111,6 +123,12 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         id: "triggers",
         label: "Triggers",
         href: "/database/triggers",
+        status: "live",
+      },
+      {
+        id: "users",
+        label: "Users",
+        href: "/auth/users",
         status: "live",
       },
     ],

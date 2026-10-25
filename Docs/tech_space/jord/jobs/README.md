@@ -1,8 +1,8 @@
 ---
 title: "Jord — jobs and logs"
-description: "Interval jobs in SQL, in-process scheduler, and an in-memory log ring"
+description: "Interval jobs in SQL, in-process scheduler, batched jord_logs, outbox prune, blob GC"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
@@ -12,19 +12,19 @@ tags:
 
 # Jord — jobs and logs
 
-> Who: anyone scheduling work inside jord-server. Auth: [[../auth/README]].
+> Who: anyone scheduling work inside jord-server. Auth: [[../auth/README]]. Blobs GC: [[../blobs/README]].
 
 ## Why
 
-Maintenance (WAL checkpoint) and small probes should run in the same process as the write queue, visible in Studio, without Redis or a second worker.
+Maintenance (WAL checkpoint, outbox prune, pending blob GC) and small probes should run in the same process as the write queue, visible in Studio, without Redis or a second worker.
 
 ## What
 
-Tables `jord_jobs` and `jord_job_runs` migrate on open. A job has an interval of at least 1000 ms and an enabled flag. Built-in kinds: `wal_checkpoint`, `echo`, `records_count`. The scheduler is single-flight. Manage (create, enable, delete, run-now) is **admin**.
+Tables `jord_jobs` and `jord_job_runs` migrate on open. A job has an interval of at least 1000 ms and an enabled flag. Built-in kinds: `wal_checkpoint`, `echo`, `records_count`, `changes_prune`, **`blobs_gc`**. The scheduler is single-flight. Manage (create, enable, delete, run-now) is **admin**.
 
-Logs are an in-memory ring of 500 lines. Restart clears it. HTTP middleware appends a request summary and strips `Authorization`. Sources include `request` and `trigger`. `GET /logs?source=&limit=` dumps the ring.
+Logs: S0024 persists batched, redacted rows to `jord_logs` (see [[../studio/README]]). The in-memory ring may still be used for ephemeral request lines.
 
-Boot seeds a **disabled** WAL checkpoint job so file installs can turn it on without inventing SQL.
+Boot seeds a **disabled** WAL checkpoint job, an enabled **outbox prune**, and an enabled **blob pending GC** when missing.
 
 ## How
 

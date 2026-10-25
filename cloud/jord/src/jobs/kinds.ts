@@ -4,6 +4,8 @@ export const BUILTIN_JOB_KINDS = [
   "wal_checkpoint",
   "echo",
   "records_count",
+  "changes_prune",
+  "blobs_gc",
 ] as const;
 
 export type BuiltinJobKind = (typeof BUILTIN_JOB_KINDS)[number];
@@ -57,6 +59,47 @@ export const JOB_KIND_HANDLERS: Record<BuiltinJobKind, JobKindHandler> = {
         : "lab";
     const rows = await jord.listRecordsByBucket(bucket);
     return { result: { bucket, count: rows.length } };
+  },
+
+  async changes_prune({ jord, job }) {
+    const { createOutbox, resolveRetention } = await import(
+      "../realtime/outbox.js"
+    );
+    const config = parseConfig(job.config);
+    const envDays =
+      typeof config.days === "number" && config.days > 0
+        ? config.days
+        : undefined;
+    const envRows =
+      typeof config.rows === "number" && config.rows > 0
+        ? config.rows
+        : undefined;
+    const defaults = resolveRetention();
+    const outbox = createOutbox(jord);
+    const result = await outbox.prune({
+      days: envDays ?? defaults.days,
+      rows: envRows ?? defaults.rows,
+    });
+    return { result };
+  },
+
+  async blobs_gc({ jord }) {
+    const { gcExpiredPendingBlobs } = await import("../storage/lifecycle.js");
+    const {
+      createStorageFromEnv,
+      resolveHmacSecret,
+      resolvePublicBaseUrl,
+    } = await import("../storage/factory.js");
+    const { resolveBlobsRoot } = await import("../blobs/disk.js");
+    const env = process.env;
+    const storage = createStorageFromEnv({
+      env,
+      blobsRoot: resolveBlobsRoot(env),
+      hmacSecret: resolveHmacSecret(env, env.JORD_SERVER_TOKEN),
+      publicBaseUrl: resolvePublicBaseUrl(env),
+    });
+    const result = await gcExpiredPendingBlobs({ jord, storage });
+    return { result };
   },
 };
 

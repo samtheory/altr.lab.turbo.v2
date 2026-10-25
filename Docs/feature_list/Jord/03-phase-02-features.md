@@ -14,7 +14,7 @@ tags:
 
 > **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Review brief: [[../../report/Jord-phase-02-plan-review]].
 
-**Process lock:** implement **one stop at a time**. **S0027**, **S0021-A**, and **S0021-B** are in the tree (file libSQL). Postgres tests were not run (`JORD_TEST_POSTGRES_URL` unset). Next is the **S0021 threat-model ADR** before Part C.
+**Process lock:** implement **one stop at a time**. **S0027** through **S0026** are complete for phase-02 execution (file libSQL for server stops; S0026 is ADR-only). Postgres tests were not run (`JORD_TEST_POSTGRES_URL` unset). Functions v2 **runtime** stays soft backlog until a follow-up sprint is approved.
 
 ## Execution order
 
@@ -75,12 +75,14 @@ Sprint **ids are stable**. Execution order is not numeric order.
 | | |
 |--|--|
 | **What** | Opt-in `jord_tracked_tables`. Same-transaction outbox. Watermark: libSQL relies on the write queue; Postgres withholds seqs that are ahead of an in-flight lower seq. Indexes on `seq` and `(table_name, seq)`. Retention default 7 days and 100_000 rows. `pg_notify` carries **seq only**. `since` past retention → **410**. Delivery-time policy filter. **Replace** the in-process producer; keep the event name `jord.change`. BLOBs omitted or referenced. libSQL Studio raw SQL is not captured |
+| **Status** | File libSQL is in the tree (2026-10-25). Live Postgres watermark race was not run |
 | **Acceptance** | Postgres race test does not skip; libSQL queue-order test; 410 test; one producer path |
 
 ## F6 — Studio tools (`Jord-S0024`)
 
 | | |
 |--|--|
+| **Status** | In tree for file libSQL (2026-10-25). Connection page stays labels-only |
 | **What** | SQL editor: reads off the write queue; read-only via `PRAGMA query_only` or `BEGIN READ ONLY` + `statement_timeout`; writes queued; audit log. **No connection URL editor** — read-only labels + env restart docs. Wizard type map TEXT/INTEGER/REAL/BLOB → text/bigint/double/bytea; skip `jord_vix_*` and rebuild; resumable; never delete source. Logs batched **outside** the hot queue, redacted, no read-loop |
 | **Acceptance** | Engine-level read-only test; no secret URL field; type-map test; log redaction |
 
@@ -88,6 +90,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 
 | | |
 |--|--|
+| **Status** | In tree for file libSQL (2026-10-25). Local default; S3/R2/MinIO via env. As-built [[../../tech_space/jord/blobs/README]] |
 | **What** | S3 adapter. Policy at **sign time**, short TTL. pending → finalize → GC. Local HMAC-signed URLs match the S3 shape. Copy/verify/switch plan for existing local bytes (no silent delete) |
 | **Acceptance** | Denied principal cannot mint a URL; GC test; local and S3 share the client shape |
 
@@ -95,8 +98,9 @@ Sprint **ids are stable**. Execution order is not numeric order.
 
 | | |
 |--|--|
+| **Status** | ADR written (2026-10-25). Recommend `worker_threads`. Reject `isolated-vm`. **No runtime code.** Gate: do not implement until a follow-up sprint is approved. As-built [[../../tech_space/jord/apis/ADR-functions-v2]] |
 | **What** | Recommend `worker_threads`. Reject `isolated-vm`. No implementation without approval |
-| **Acceptance** | Written ADR only |
+| **Acceptance** | Written ADR only — **met** |
 
 ## F9 — CI (`Jord-S0027`, runs first)
 
@@ -117,6 +121,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 
 | | |
 |--|--|
+| **Status** | In tree (2026-10-25). `elements/jord-client`. CI typecheck + mock-fetch tests |
 | **What** | Private `@altr/jord-client` (fetch). Auto refresh, table API, realtime `since`. On 410, surface resync. **Must not depend on `@altr/jord`** |
 | **Acceptance** | Mock-fetch tests; CI includes the package; no engine dependency |
 

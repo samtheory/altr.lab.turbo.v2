@@ -2,7 +2,7 @@ import type { JordDriverPort, JordRecord } from "@altr/jord";
 
 import { canWriteRecords, type JordRole } from "../auth/roles.js";
 import type { JordChangeDraft } from "../realtime/types.js";
-import type { LogRing } from "../jobs/log-ring.js";
+import type { LogSink } from "../logs/sink.js";
 import {
   evaluatePolicies,
   policiesDisabledFromEnv,
@@ -45,7 +45,7 @@ export type StepContext = {
   /** When set, writes go through the server write queue. */
   enqueueWrite: <T>(fn: () => Promise<T>) => Promise<T>;
   /** When set, AFTER insert triggers can log / invoke. */
-  logs?: LogRing;
+  logs?: LogSink;
   /** When set, successful record writes fan out a realtime event. */
   onRecordChange?: (draft: JordChangeDraft) => void;
   /** Service callers skip user-policy checks inside steps. */

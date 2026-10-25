@@ -2,7 +2,7 @@
 title: "Jord-S0025 — Storage v2 (S3 / R2 / MinIO)"
 description: "Sign-time policy, pending/finalize GC, HMAC local URLs, local-to-S3 copy plan"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0025 — Storage v2
 
-> Who: **mimir**. **Status: planned.** **Execution #11.** Blocked by [[../Jord-S0024/README]]. Next in queue docs: [[../Jord-S0026/README]] (ADR only; no product dependency).
+> Who: **mimir**. **Status: in tree** (file libSQL, 2026-10-25). **Execution #11.** Blocked by [[../Jord-S0024/README]]. Next in queue docs: [[../Jord-S0026/README]] (ADR only; no product dependency).
 
 **Sprint id:** `Jord-S0025`  
 **Hats:** **sindri** · **heimdall** · **docs_man**
@@ -39,8 +39,16 @@ A hosted embed API · new native deps · automatic cutover without an operator f
 
 ## Definition of Done
 
-- [ ] Sign denied when policy denies, even if the object exists
-- [ ] GC removes pending rows past TTL and unreferenced bytes
-- [ ] Local HMAC URL and S3 presign share one client shape
-- [ ] Copy/verify plan documented in `tech_space/jord/blobs`; local remains the default
-- [ ] No secrets in Studio JSON
+- [x] Sign denied when policy denies, even if the object exists
+- [x] GC removes pending rows past TTL and unreferenced bytes
+- [x] Local HMAC URL and S3 presign share one client shape
+- [x] Copy/verify plan documented in `tech_space/jord/blobs`; local remains the default
+- [x] No secrets in Studio JSON
+
+## As-built
+
+- Migration `0006_storage_v2` (libSQL + Postgres): `status`, `pending_expires_at`, `upload_id`
+- `cloud/jord/src/storage/` — port, local HMAC, S3 adapter, lifecycle, copy-plan, sign-policy
+- Routes: `…/sign`, `…/finalize`, `/blobs/signed/…`, `/blobs/copy-plan`
+- Job `blobs_gc`; CLI `pnpm --filter @altr/jord-server storage:copy-plan`
+- Category: [[../../../tech_space/jord/blobs/README]]

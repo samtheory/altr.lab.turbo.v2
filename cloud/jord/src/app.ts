@@ -65,6 +65,19 @@ import {
   type JobScheduler,
   type LogSource,
 } from "./jobs/index.js";
+import { LogBatcher } from "./logs/batch.js";
+import type { LogSink } from "./logs/sink.js";
+import { createSqlRoutes } from "./sql/routes.js";
+import {
+  getMigrateJob,
+  runMigrateJob,
+  startMigrateJob,
+} from "./migrate/wizard.js";
+import {
+  listUsers,
+  revokeUserSessions,
+  setUserDisabled,
+} from "./auth/admin.js";
 import {
   evaluatePolicies,
   isBuiltinPolicyRuleKind,
@@ -73,10 +86,17 @@ import {
   type PolicyDecision,
 } from "./policies/index.js";
 import {
-  createBlobDiskStore,
   registerBlobRoutes,
+  registerSignedBlobRoutes,
   resolveBlobsRoot,
 } from "./blobs/index.js";
+import {
+  createStorageFromEnv,
+  resolveHmacSecret,
+  resolveMaxBlobBytes,
+  resolvePublicBaseUrl,
+  type JordStoragePort,
+} from "./storage/index.js";
 import {
   createCorsMiddleware,
   createDataRateLimitMiddleware,
@@ -101,11 +121,13 @@ import type { WriteQueue } from "./queue.js";
 import { registerVectorRoutes } from "./vectors/index.js";
 import { createTableApiRoutes } from "./table-api/routes.js";
 import {
+  createOutbox,
   isRealtimeSubscribeTable,
   MAX_REALTIME_SUBSCRIBERS,
   REALTIME_V1_TABLE,
   RealtimeBus,
   type JordChangeDraft,
+  type JordChangeEvent,
 } from "./realtime/index.js";
 import {
   isBuiltinTriggerActionKind,
@@ -136,7 +158,7 @@ export type JordAppDeps = {
   mailer?: MailerPort;
   /** Defaults to env-seeded registry when omitted. */
   generatedApi?: GeneratedApiRegistry;
-  logs?: LogRing;
+  logs?: LogSink;
   scheduler?: JobScheduler;
   /** In-process change fanout. Created when omitted. */
   realtime?: RealtimeBus;
@@ -144,6 +166,10 @@ export type JordAppDeps = {
   blobsRoot?: string;
   /** Max upload bytes (default 10 MiB). */
   maxBlobBytes?: number;
+  /** Injected storage adapter (tests). Defaults from JORD_STORAGE_BACKEND. */
+  storage?: JordStoragePort;
+  /** HMAC secret for local signed blob URLs. */
+  blobSigningSecret?: string;
   /** Optional process env for CORS / body / rate / idempotency knobs. */
   env?: NodeJS.ProcessEnv;
   /** Shared idempotency store. Created from env when omitted. */
@@ -384,9 +410,27 @@ export function createJordApp(deps: JordAppDeps) {
   const idempotency =
     deps.idempotency ?? createIdempotencyStore(resolveIdempotencyTtlMs(env));
   const dataRate = resolveDataRateLimit(env);
+  const blobsRoot = resolveBlobsRoot(env, deps.blobsRoot);
+  const maxBlobBytes = resolveMaxBlobBytes(env, deps.maxBlobBytes);
+  const hmacSecret =
+    deps.blobSigningSecret ?? resolveHmacSecret(env, deps.auth.secret);
+  const storage =
+    deps.storage ??
+    createStorageFromEnv({
+      env,
+      blobsRoot,
+      hmacSecret,
+      publicBaseUrl: resolvePublicBaseUrl(env),
+    });
 
   app.use("*", createCorsMiddleware(parseCorsOrigins(env)));
   app.use("*", createJsonBodyLimitMiddleware(resolveMaxJsonBytes(env)));
+
+  registerSignedBlobRoutes(app, {
+    storage,
+    hmacSecret,
+    maxBytes: maxBlobBytes,
+  });
 
   function stepRole(principal: Principal): JordRole {
     if (principal.kind === "operator" && isJordRole(principal.role)) {
@@ -404,27 +448,81 @@ export function createJordApp(deps: JordAppDeps) {
   }
   const generatedApi =
     deps.generatedApi ?? createGeneratedApiRegistry(process.env);
-  const logs = deps.logs ?? new LogRing();
+  const logs =
+    deps.logs ??
+    (() => {
+      const batcher = new LogBatcher(deps.jord);
+      batcher.start();
+      return batcher;
+    })();
   const realtime = deps.realtime ?? new RealtimeBus();
+  const outbox = createOutbox(deps.jord);
 
-  function publishChange(draft: JordChangeDraft): void {
+  /**
+   * Single emit path: write jord_changes (when the table is tracked), then
+   * fan out jord.change. Do not publish to the bus without an outbox row.
+   */
+  async function publishChange(
+    draft: JordChangeDraft,
+    principal?: Principal,
+  ): Promise<void> {
     try {
-      realtime.publish({
-        type: "jord.change",
-        table: draft.table ?? REALTIME_V1_TABLE,
+      const table = draft.table ?? REALTIME_V1_TABLE;
+      const newRow =
+        draft.newRow ??
+        (draft.version != null
+          ? { id: draft.id, version: draft.version }
+          : draft.op === "delete"
+            ? null
+            : { id: draft.id });
+      const row = await outbox.appendChange({
+        tableName: table,
         op: draft.op,
-        id: draft.id,
-        version: draft.version,
-        at: Date.now(),
-        dialect: deps.jord.dialect,
+        pk: draft.id,
+        oldRow: draft.oldRow ?? null,
+        newRow,
+        blobColumns: new Set(draft.blobColumns ?? []),
+        actor: principal
+          ? {
+              kind: principal.kind,
+              uid: principal.uid ?? null,
+              role: principal.role,
+            }
+          : null,
       });
+      if (!row) return;
+      realtime.publish(outbox.toEvent(row));
     } catch (err) {
-      console.error("[@altr/jord-server] realtime publish failed", err);
+      console.error("[@altr/jord-server] outbox fanout failed", err);
     }
   }
 
-  /** @deprecated alias — records emit sites */
-  const publishRecordChange = publishChange;
+  /** Records emit sites — outbox only when `records` is tracked (seeded). */
+  const publishRecordChange = (
+    draft: JordChangeDraft,
+    principal?: Principal,
+  ) => {
+    void publishChange(draft, principal);
+  };
+
+  async function deliveryAllowed(
+    principal: Principal,
+    event: JordChangeEvent,
+    row: { oldJson: string | null; newJson: string | null; op: string },
+  ): Promise<boolean> {
+    let parsed: Record<string, unknown> | null = null;
+    try {
+      const raw =
+        row.op === "delete" ? row.oldJson : row.newJson ?? row.oldJson;
+      parsed = raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+    } catch {
+      parsed = null;
+    }
+    const decision = await decide(principal, event.table, "select", {
+      row: parsed,
+    });
+    return decision.allowed;
+  }
 
   app.route(
     "/auth",
@@ -605,6 +703,8 @@ export function createJordApp(deps: JordAppDeps) {
         status,
       );
     }
+    // Opt-in capture: mark newly created tables tracked (S0023).
+    await outbox.setTracked(body.name as string, true);
     const info = await deps.jord.describeTable(body.name);
     return c.json({ ok: true as const, sql: result.sql, table: info }, 201);
   });
@@ -675,11 +775,15 @@ export function createJordApp(deps: JordAppDeps) {
       const info = await deps.jord.describeTable(name);
       const pkCol = info?.columns.find((col) => col.pk)?.name ?? "id";
       const pkRaw = values[pkCol];
-      publishChange({
-        table: name,
-        op: "insert",
-        id: pkRaw == null ? "" : String(pkRaw),
-      });
+      await publishChange(
+        {
+          table: name,
+          op: "insert",
+          id: pkRaw == null ? "" : String(pkRaw),
+          newRow: values,
+        },
+        principal,
+      );
       return c.json({ ok: true as const }, 201);
     },
   );
@@ -734,7 +838,16 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
-      publishChange({ table: name, op: "update", id: pk });
+      await publishChange(
+        {
+          table: name,
+          op: "update",
+          id: pk,
+          oldRow: existing,
+          newRow: { ...(existing ?? {}), ...values },
+        },
+        principal,
+      );
       return c.json({ ok: true as const });
     },
   );
@@ -762,7 +875,16 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
-      publishChange({ table: name, op: "delete", id: pk });
+      await publishChange(
+        {
+          table: name,
+          op: "delete",
+          id: pk,
+          oldRow: existing,
+          newRow: null,
+        },
+        principal,
+      );
       return c.json({ ok: true as const });
     },
   );
@@ -803,6 +925,30 @@ export function createJordApp(deps: JordAppDeps) {
         rls_enabled: saved.rlsEnabled,
         owner_column: saved.ownerColumn,
       });
+    },
+  );
+
+  protectedRoutes.put(
+    "/schema/tables/:name/track",
+    requireAlterSchema(),
+    async (c) => {
+      const name = c.req.param("name");
+      const body = (await c.req.json().catch(() => null)) as {
+        tracked?: unknown;
+      } | null;
+      if (!body || typeof body.tracked !== "boolean") {
+        throw new HTTPException(400, {
+          message: "tracked (boolean) is required",
+        });
+      }
+      if (name !== REALTIME_V1_TABLE) {
+        const info = await deps.jord.describeTable(name);
+        if (!info) {
+          throw new HTTPException(404, { message: "table not found" });
+        }
+      }
+      await outbox.setTracked(name, body.tracked);
+      return c.json({ table_name: name, tracked: body.tracked });
     },
   );
 
@@ -1089,7 +1235,21 @@ export function createJordApp(deps: JordAppDeps) {
       disabled: triggersOff,
       onRecordChange: publishRecordChange,
     });
-    publishRecordChange({ op: "insert", id: row.id, version: row.version });
+    await publishChange(
+      {
+        op: "insert",
+        id: row.id,
+        version: row.version,
+        newRow: {
+          id: row.id,
+          bucket: row.bucket,
+          body: row.body,
+          metadata: row.metadata,
+          version: row.version,
+        },
+      },
+      principal,
+    );
     return c.json(publicRecord(row), 201);
   });
 
@@ -1209,11 +1369,28 @@ export function createJordApp(deps: JordAppDeps) {
       disabled: triggersOff,
       onRecordChange: publishRecordChange,
     });
-    publishRecordChange({
-      op: "update",
-      id: result.record.id,
-      version: result.record.version,
-    });
+    await publishChange(
+      {
+        op: "update",
+        id: result.record.id,
+        version: result.record.version,
+        oldRow: {
+          id: existing.id,
+          bucket: existing.bucket,
+          body: existing.body,
+          metadata: existing.metadata,
+          version: existing.version,
+        },
+        newRow: {
+          id: result.record.id,
+          bucket: result.record.bucket,
+          body: result.record.body,
+          metadata: result.record.metadata,
+          version: result.record.version,
+        },
+      },
+      principal,
+    );
     return c.json(publicRecord(result.record));
   });
 
@@ -1263,7 +1440,21 @@ export function createJordApp(deps: JordAppDeps) {
       disabled: triggersOff,
       onRecordChange: publishRecordChange,
     });
-    publishRecordChange({ op: "delete", id });
+    await publishChange(
+      {
+        op: "delete",
+        id,
+        oldRow: {
+          id: existing.id,
+          bucket: existing.bucket,
+          body: existing.body,
+          metadata: existing.metadata,
+          version: existing.version,
+        },
+        newRow: null,
+      },
+      principal,
+    );
     return c.json({ ok: true as const, id });
   });
 
@@ -1279,14 +1470,34 @@ export function createJordApp(deps: JordAppDeps) {
         });
       }
       const idFilter = c.req.query("id")?.trim() || null;
+      const sinceRaw = c.req.query("since");
+      const principal = c.get("principal");
       if (table === REALTIME_V1_TABLE) {
-        const decision = await decide(
-          c.get("principal"),
-          REALTIME_V1_TABLE,
-          "select",
-        );
+        const decision = await decide(principal, REALTIME_V1_TABLE, "select");
         if (!decision.allowed) {
           return c.json(policyDeniedBody(decision, "select"), 403);
+        }
+      }
+      if (sinceRaw != null && sinceRaw !== "") {
+        if (!/^\d+$/.test(sinceRaw)) {
+          throw new HTTPException(400, { message: "since must be an integer" });
+        }
+        const since = Number(sinceRaw);
+        const floor = await outbox.minSeq();
+        const expired =
+          floor == null
+            ? since > 0
+            : since < floor - 1;
+        if (expired) {
+          return c.json(
+            {
+              error: "gone",
+              message: "since is older than the retained change log",
+              hint: "resync",
+              floor,
+            },
+            410,
+          );
         }
       }
       if (realtime.size >= MAX_REALTIME_SUBSCRIBERS) {
@@ -1300,14 +1511,39 @@ export function createJordApp(deps: JordAppDeps) {
       }
 
       const accessExp = c.get("accessExp");
+      const since =
+        sinceRaw != null && sinceRaw !== "" && /^\d+$/.test(sinceRaw)
+          ? Number(sinceRaw)
+          : null;
       return streamSSE(c, async (stream) => {
-        const unsubscribe = realtime.trySubscribeFiltered(
-          { table, id: idFilter },
-          (event) => {
-            void stream.writeSSE({
+        if (since != null) {
+          const catchup = await outbox.listAfter(since, { table });
+          for (const row of catchup) {
+            if (idFilter && row.pk !== idFilter) continue;
+            const event = outbox.toEvent(row);
+            if (!(await deliveryAllowed(principal, event, row))) continue;
+            await stream.writeSSE({
               event: "jord.change",
               data: JSON.stringify(event),
             });
+          }
+        }
+
+        const unsubscribe = realtime.trySubscribeFiltered(
+          { table, id: idFilter },
+          (event) => {
+            void (async () => {
+              const row =
+                event.seq != null ? await outbox.getBySeq(event.seq) : null;
+              if (row) {
+                const ok = await deliveryAllowed(principal, event, row);
+                if (!ok) return;
+              }
+              await stream.writeSSE({
+                event: "jord.change",
+                data: JSON.stringify(event),
+              });
+            })();
           },
         );
         if (!unsubscribe) return;
@@ -2281,12 +2517,14 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json({ ok: true as const, id });
   });
 
-  const blobsRoot = resolveBlobsRoot(process.env, deps.blobsRoot);
   registerBlobRoutes(protectedRoutes, {
     jord: deps.jord,
     enqueueWrite: deps.enqueueWrite,
-    disk: createBlobDiskStore(blobsRoot),
-    maxBytes: deps.maxBlobBytes,
+    storage,
+    hmacSecret,
+    maxBytes: maxBlobBytes,
+    env,
+    localRoot: blobsRoot,
   });
 
   registerVectorRoutes(protectedRoutes, {
@@ -2302,6 +2540,98 @@ export function createJordApp(deps: JordAppDeps) {
       generatedRecordsEnabled: () => generatedApi.isEnabled("records"),
     }),
   );
+
+  const sqlLogs =
+    logs instanceof LogBatcher
+      ? logs
+      : new LogBatcher(deps.jord);
+  if (!(logs instanceof LogBatcher)) sqlLogs.start();
+  protectedRoutes.route(
+    "/sql",
+    createSqlRoutes({
+      jord: deps.jord,
+      enqueueWrite: deps.enqueueWrite,
+      logs: sqlLogs,
+    }),
+  );
+
+  protectedRoutes.post("/migrate/jobs", async (c) => {
+    const principal = c.get("principal");
+    if (principal.kind !== "operator" || principal.role !== "admin") {
+      throw new HTTPException(403, { message: "admin operator only" });
+    }
+    const body = (await c.req.json().catch(() => ({}))) as { targetUrl?: string };
+    const targetUrl = typeof body.targetUrl === "string" ? body.targetUrl.trim() : "";
+    if (!targetUrl) {
+      throw new HTTPException(400, { message: "targetUrl required" });
+    }
+    const job = await startMigrateJob({ source: deps.jord, targetUrl });
+    void runMigrateJob({ source: deps.jord, jobId: job.id });
+    return c.json({
+      job: {
+        id: job.id,
+        status: job.status,
+        phase: job.phase,
+        tables: job.tables,
+        targetScheme: job.targetScheme,
+      },
+    }, 201);
+  });
+
+  protectedRoutes.get("/migrate/jobs/:id", async (c) => {
+    const principal = c.get("principal");
+    if (principal.kind !== "operator" || principal.role !== "admin") {
+      throw new HTTPException(403, { message: "admin operator only" });
+    }
+    const job = await getMigrateJob(deps.jord, c.req.param("id"));
+    if (!job) throw new HTTPException(404, { message: "job not found" });
+    return c.json({
+      job: {
+        id: job.id,
+        status: job.status,
+        phase: job.phase,
+        tables: job.tables,
+        counts: job.counts,
+        targetScheme: job.targetScheme,
+        errorText: job.errorText,
+      },
+    });
+  });
+
+  protectedRoutes.get("/admin/users", async (c) => {
+    const principal = c.get("principal");
+    if (principal.kind !== "operator" || principal.role !== "admin") {
+      throw new HTTPException(403, { message: "admin operator only" });
+    }
+    return c.json({ users: await listUsers(deps.jord) });
+  });
+
+  protectedRoutes.post("/admin/users/:id/disable", async (c) => {
+    const principal = c.get("principal");
+    if (principal.kind !== "operator" || principal.role !== "admin") {
+      throw new HTTPException(403, { message: "admin operator only" });
+    }
+    const body = (await c.req.json().catch(() => ({}))) as { disabled?: boolean };
+    const user = await setUserDisabled({
+      jord: deps.jord,
+      userId: c.req.param("id"),
+      disabled: body.disabled !== false,
+    });
+    if (!user) throw new HTTPException(404, { message: "user not found" });
+    return c.json({ user });
+  });
+
+  protectedRoutes.post("/admin/users/:id/revoke", async (c) => {
+    const principal = c.get("principal");
+    if (principal.kind !== "operator" || principal.role !== "admin") {
+      throw new HTTPException(403, { message: "admin operator only" });
+    }
+    const result = await revokeUserSessions({
+      jord: deps.jord,
+      userId: c.req.param("id"),
+    });
+    return c.json(result);
+  });
 
   app.route("/", protectedRoutes);
 

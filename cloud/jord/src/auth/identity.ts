@@ -59,22 +59,25 @@ async function q(
   return jord.query(sql, args);
 }
 
-function mapUser(row: Record<string, unknown>): AuthUser {
+type AuthUserRow = AuthUser & { disabledAt: number | null };
+
+function mapUser(row: Record<string, unknown>): AuthUserRow {
   return {
     id: asString(row.id),
     email: asString(row.email),
     passwordHash: asString(row.password_hash),
     emailConfirmed: asBool(row.email_confirmed),
+    disabledAt: row.disabled_at == null ? null : Number(row.disabled_at),
   };
 }
 
 async function findUserByEmail(
   jord: JordDriverPort,
   email: string,
-): Promise<AuthUser | null> {
+): Promise<AuthUserRow | null> {
   const rows = await q(
     jord,
-    "SELECT id, email, password_hash, email_confirmed FROM jord_users WHERE email = ?",
+    "SELECT id, email, password_hash, email_confirmed, disabled_at FROM jord_users WHERE email = ?",
     [email],
   );
   const row = rows[0];
@@ -84,10 +87,10 @@ async function findUserByEmail(
 async function findUserById(
   jord: JordDriverPort,
   id: string,
-): Promise<AuthUser | null> {
+): Promise<AuthUserRow | null> {
   const rows = await q(
     jord,
-    "SELECT id, email, password_hash, email_confirmed FROM jord_users WHERE id = ?",
+    "SELECT id, email, password_hash, email_confirmed, disabled_at FROM jord_users WHERE id = ?",
     [id],
   );
   const row = rows[0];
@@ -147,7 +150,7 @@ export async function signinUser(input: {
   const user = email ? await findUserByEmail(input.jord, email) : null;
   const hash = user?.passwordHash ?? (await dummyPasswordHash());
   const match = await verifyPassword(input.password, hash);
-  if (!user || !match || !user.emailConfirmed) {
+  if (!user || !match || !user.emailConfirmed || user.disabledAt != null) {
     return { ok: false, error: "invalid_credentials" };
   }
   return { ok: true, user };

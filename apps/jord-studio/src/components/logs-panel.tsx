@@ -86,7 +86,8 @@ export function LogsPanel({ role }: Props) {
           </p>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Logs</h1>
           <p className="text-sm text-muted-foreground">
-            In-memory ring on jord-server (cleared on restart). Role{" "}
+            Batched into <code className="font-mono">jord_logs</code> outside
+            the hot write queue; secrets redacted. Role{" "}
             <code className="font-mono">{role}</code> · auto-refresh 5s.
           </p>
         </div>

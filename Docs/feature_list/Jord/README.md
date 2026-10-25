@@ -25,7 +25,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 | [[04-phase-01-capabilities]] | What we have after phase-01 | **Authoritative shipped intent** |
 | [[02-architecture]] | Ports, dialects, concurrency, seams | Current (matches phase-01 code) |
 | [[03-jord-studio]] | Studio surfaces and build order | Phase-01 Studio **shipped** |
-| [[03-phase-02-features]] | **What to implement in phase-02** (acceptance criteria) | **Active** — S0027 through S0022 (file libSQL) in tree; next S0023 |
+| [[03-phase-02-features]] | **What to implement in phase-02** (acceptance criteria) | **Execution complete** — S0027…S0026 (S0026 ADR only; runtime gated) |
 | [[01-phase-02-candidates]] | Soft leftovers not in the numbered queue | Conditional only |
 
 ## Truth map (phase-aware)
@@ -34,7 +34,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 |-------|------|-------|
 | Intent (this folder) | `feature_list/Jord/` | Living |
 | Shipped plans | [[../../plan/Jord/phase-01/README\|plan/Jord/phase-01]] | **phase-01 done** (S0001–S0020) |
-| Next plans | [[../../plan/Jord/phase-02/README\|plan/Jord/phase-02]] | **S0027 through S0022 in tree** (file libSQL); S0023…S0029 still planned |
+| Next plans | [[../../plan/Jord/phase-02/README\|plan/Jord/phase-02]] | **Execution complete** (S0027…S0026); Functions runtime soft backlog · [[../../report/jord-phase-02-report/00-phase-02-tasks]] |
 | As-built | [[../../tech_space/jord/README]] | Living categories |
 | Code | `elements/jord` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` | Source of truth |
 

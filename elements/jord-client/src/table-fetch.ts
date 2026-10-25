@@ -1,7 +1,4 @@
-/**
- * Thin fetch helper for the table API. Lives in the S0022 test folder
- * until S0029 promotes it. Must not import @altr/jord.
- */
+/** Fetch helper promoted from the S0022 test folder. Must not import @altr/jord. */
 
 export type TableFetchResult = {
   status: number;
@@ -29,4 +26,14 @@ export async function tableFetch(
     body,
     preferApplied: res.headers.get("preference-applied"),
   };
+}
+
+export async function readResponseBody(res: Response): Promise<unknown> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
+  }
 }

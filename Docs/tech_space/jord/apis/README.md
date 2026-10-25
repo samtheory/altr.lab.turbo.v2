@@ -1,6 +1,6 @@
 ---
 title: "Jord — APIs"
-description: "Generated records CRUD catalog, built-in function steps, and custom /x/:slug bindings"
+description: "Generated records CRUD catalog, built-in function steps, custom /x/:slug bindings, and Functions v2 ADR"
 created: 2026-10-24
 updated: 2026-10-25
 tags:
@@ -63,8 +63,39 @@ Caps: default limit **100**, max **1000**, `in(...)` max **100**, JSON body **1 
 
 `records` still honors `JORD_GENERATED_API_DISABLED` (**503**). User and anon stay default-deny until a policy allows the table. `/api/v1` shares the data-route limit (120 / minute) and idempotency.
 
-Studio playground: `/apis/table` (Apolyx). The fetch helper used by tests is `cloud/jord/src/table-api/__tests__/fetch-helper.ts`. It does not import `@altr/jord`.
+Studio playground: `/apis/table` (Apolyx). Apps call the same routes through `@altr/jord-client` (`tableFetch` and `JordClient`). That package does not import `@altr/jord`. Studio keeps its own BFF and does not embed the client.
+
+## Client (S0029)
+
+Private workspace package `elements/jord-client`. Fetch only.
+
+- `signIn` stores access and refresh tokens. A **401** refreshes once and retries. `refresh_reused` clears the session and throws `JordSignedOutError`.
+- `from(table)` calls `/api/v1/:table`.
+- `subscribe({ table, since, onEvent })` opens SSE `GET /realtime`. **410** returns `{ status: "resync" }` and does not emit events.
+
+```ts
+const client = new JordClient({ baseUrl: "http://127.0.0.1:8787", tokens });
+const live = await client.subscribe({
+  table: "notes",
+  since: 12,
+  onEvent: (message) => console.log(message.event, message.data),
+});
+if (live.status === "resync") {
+  // hint is "resync" — reload the table, then subscribe again
+}
+```
+
+## Functions v2 (S0026 — ADR only)
+
+User TypeScript handlers are **not** implemented. Decision record: [[ADR-functions-v2]].
+
+- **Recommend** `worker_threads` + wall-clock timeout + restricted message API.
+- **Reject** `isolated-vm` (native / node-gyp).
+- In-process registered TS handlers are not the default for untrusted code.
+- **Do not implement** a worker runtime until a follow-up sprint is explicitly approved. Soft backlog: [[../../../plan/Jord/phase-02/00-remaining-backlog]].
+
+Built-in steps above remain the only function execution path today.
 
 ## Not in Jord yet
 
-Embeds, joins, per-operation toggles, arbitrary SQL steps, user-uploaded code, a generated catalog per user table. Postgres RETURNING for this route was not run.
+Embeds, joins, per-operation toggles, arbitrary SQL steps, user-uploaded code / Functions v2 runtime, a generated catalog per user table. Postgres RETURNING for this route was not run.

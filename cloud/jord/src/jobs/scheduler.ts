@@ -2,7 +2,7 @@ import type { JordDriverPort, JordJob } from "@altr/jord";
 
 import type { WriteQueue } from "../queue.js";
 import { getJobKindHandler } from "./kinds.js";
-import type { LogRing } from "./log-ring.js";
+import type { LogEvent, LogRing } from "./log-ring.js";
 
 export const MIN_JOB_INTERVAL_MS = 1000;
 export const DEFAULT_SCHEDULER_TICK_MS = 1000;
@@ -15,10 +15,14 @@ export type JobScheduler = {
   isBusy: () => boolean;
 };
 
+type LogSink = Pick<LogRing, "append"> | {
+  append: (input: Omit<LogEvent, "id" | "at"> & { at?: number; id?: string }) => LogEvent;
+};
+
 export type JobSchedulerDeps = {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
-  logs: LogRing;
+  logs: LogSink;
   tickMs?: number;
   /** Skip starting the interval (tests can call runNow / tick manually). */
   autostart?: boolean;
@@ -177,15 +181,37 @@ export function startJobScheduler(deps: JobSchedulerDeps): JobScheduler {
   };
 }
 
-/** Seed a disabled wal_checkpoint job when the table is empty. */
+/** Seed default jobs when missing (wal checkpoint + outbox prune). */
 export async function seedDefaultJobs(jord: JordDriverPort): Promise<void> {
   const existing = await jord.listJobs();
-  if (existing.length > 0) return;
-  await jord.insertJob({
-    name: "WAL checkpoint",
-    kind: "wal_checkpoint",
-    enabled: false,
-    intervalMs: 5 * 60_000,
-    config: "{}",
-  });
+  const kinds = new Set(existing.map((job) => job.kind));
+  if (!kinds.has("wal_checkpoint") && existing.length === 0) {
+    await jord.insertJob({
+      name: "WAL checkpoint",
+      kind: "wal_checkpoint",
+      enabled: false,
+      intervalMs: 5 * 60_000,
+      config: "{}",
+    });
+  }
+  const refreshed = await jord.listJobs();
+  if (!refreshed.some((job) => job.kind === "changes_prune")) {
+    await jord.insertJob({
+      name: "Outbox prune",
+      kind: "changes_prune",
+      enabled: true,
+      intervalMs: 60 * 60_000,
+      config: "{}",
+    });
+  }
+  const afterPrune = await jord.listJobs();
+  if (!afterPrune.some((job) => job.kind === "blobs_gc")) {
+    await jord.insertJob({
+      name: "Blob pending GC",
+      kind: "blobs_gc",
+      enabled: true,
+      intervalMs: 15 * 60_000,
+      config: "{}",
+    });
+  }
 }

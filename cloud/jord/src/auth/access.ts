@@ -61,6 +61,14 @@ export function routeAllowed(
     return false;
   }
 
+  if (
+    starts(path, "/sql") ||
+    starts(path, "/migrate") ||
+    starts(path, "/admin")
+  ) {
+    return principal.kind === "operator" && principal.role === "admin";
+  }
+
   if (isSchemaDdl(method, path)) {
     return principal.kind === "operator" && principal.role === "admin";
   }
@@ -69,6 +77,9 @@ export function routeAllowed(
     if (isControlPlane(path)) return false;
     if (starts(path, "/functions") || starts(path, "/custom-apis")) return false;
     if (path === "/logs") return false;
+    if (starts(path, "/sql") || starts(path, "/migrate") || starts(path, "/admin")) {
+      return false;
+    }
     if (method === "POST" && path === "/auth/anon-key") return false;
     return true;
   }

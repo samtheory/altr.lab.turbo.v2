@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 
 import { createClient, type Client } from "@libsql/client";
-import { and, desc, eq, isNull, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lte, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
 import type {
@@ -103,6 +103,10 @@ import { jordTriggers } from "../schema/triggers.js";
 import { ensureRecordsSchema } from "../schema/migrate.js";
 import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
+  clampSqlRowCap,
+  clampSqlTimeout,
+} from "../schema/sql-console.js";
+import {
   fileUrlToFsPath,
   requireLibsqlAuthToken,
   type JordUrlScheme,
@@ -194,6 +198,8 @@ function mapRow(row: typeof records.$inferSelect): JordRecord {
 }
 
 function mapBlob(row: typeof jordBlobs.$inferSelect): JordBlob {
+  const status =
+    row.status === "pending" || row.status === "ready" ? row.status : "ready";
   return {
     id: row.id,
     bucket: row.bucket,
@@ -201,6 +207,9 @@ function mapBlob(row: typeof jordBlobs.$inferSelect): JordBlob {
     contentType: row.contentType,
     size: row.size,
     etag: row.etag,
+    status,
+    pendingExpiresAt: row.pendingExpiresAt ?? null,
+    uploadId: row.uploadId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -344,16 +353,22 @@ export class LibSqlAdapter implements JordDriverPort {
   readonly vectorBackend: VectorBackend;
   readonly client: Client;
   readonly db: JordDb;
+  private readonly connectionUrl: string;
+  private readonly authToken?: string;
 
   private constructor(
     client: Client,
     urlScheme: Extract<JordUrlScheme, "file" | "libsql">,
     vectorBackend: VectorBackend,
+    connectionUrl: string,
+    authToken?: string,
   ) {
     this.client = client;
     this.urlScheme = urlScheme;
     this.vectorBackend = vectorBackend;
     this.db = drizzle(client, { schema });
+    this.connectionUrl = connectionUrl;
+    this.authToken = authToken;
   }
 
   static async open(
@@ -366,7 +381,7 @@ export class LibSqlAdapter implements JordDriverPort {
       try {
         await ensureRecordsSchema(client, migrationLockKey(url));
         const vectorBackend = await probeLibsqlVectorBackend(client);
-        return new LibSqlAdapter(client, "libsql", vectorBackend);
+        return new LibSqlAdapter(client, "libsql", vectorBackend, url, authToken);
       } catch (err) {
         client.close();
         throw err;
@@ -383,7 +398,7 @@ export class LibSqlAdapter implements JordDriverPort {
       }
       await ensureRecordsSchema(client, migrationLockKey(url));
       const vectorBackend = await probeLibsqlVectorBackend(client);
-      return new LibSqlAdapter(client, "file", vectorBackend);
+      return new LibSqlAdapter(client, "file", vectorBackend, url);
     } catch (err) {
       client.close();
       throw err;
@@ -405,6 +420,87 @@ export class LibSqlAdapter implements JordDriverPort {
       }
       return out;
     });
+  }
+
+  async executeSql(input: {
+    sql: string;
+    args?: Array<string | number | null>;
+    readOnly: boolean;
+    timeoutMs?: number;
+    rowCap?: number;
+  }): Promise<{
+    columns: string[];
+    rows: Array<Record<string, unknown>>;
+    rowCount: number;
+    truncated: boolean;
+    elapsedMs: number;
+  }> {
+    const rowCap = clampSqlRowCap(input.rowCap);
+    const timeoutMs = clampSqlTimeout(input.timeoutMs);
+    const args = input.args ?? [];
+    const started = Date.now();
+
+    if (input.readOnly) {
+      const readClient = createClient({
+        url: this.connectionUrl,
+        ...(this.authToken ? { authToken: this.authToken } : {}),
+      });
+      try {
+        await readClient.execute("PRAGMA query_only = ON");
+        const result = await Promise.race([
+          readClient.execute({ sql: input.sql, args }),
+          new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error("sql_timeout")), timeoutMs);
+          }),
+        ]);
+        const columns = result.columns;
+        const mapped = result.rows.map((row) => {
+          const record = row as unknown as Record<string, unknown>;
+          const out: Record<string, unknown> = {};
+          for (let i = 0; i < columns.length; i++) {
+            const name = columns[i] ?? String(i);
+            out[name] = record[name] ?? record[i];
+          }
+          return out;
+        });
+        const truncated = mapped.length > rowCap;
+        const rows = truncated ? mapped.slice(0, rowCap) : mapped;
+        return {
+          columns,
+          rows,
+          rowCount: mapped.length,
+          truncated,
+          elapsedMs: Date.now() - started,
+        };
+      } finally {
+        readClient.close();
+      }
+    }
+
+    const result = await Promise.race([
+      this.client.execute({ sql: input.sql, args }),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("sql_timeout")), timeoutMs);
+      }),
+    ]);
+    const columns = result.columns;
+    const mapped = result.rows.map((row) => {
+      const record = row as unknown as Record<string, unknown>;
+      const out: Record<string, unknown> = {};
+      for (let i = 0; i < columns.length; i++) {
+        const name = columns[i] ?? String(i);
+        out[name] = record[name] ?? record[i];
+      }
+      return out;
+    });
+    const truncated = mapped.length > rowCap;
+    return {
+      columns,
+      rows: truncated ? mapped.slice(0, rowCap) : mapped,
+      rowCount: mapped.length,
+      truncated,
+      elapsedMs: Date.now() - started,
+    };
   }
 
   async close(): Promise<void> {
@@ -1389,6 +1485,17 @@ export class LibSqlAdapter implements JordDriverPort {
   async upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob> {
     const existing = await this.getBlobMeta(input.bucket, input.key);
     const now = Date.now();
+    const status = input.status ?? "ready";
+    const pendingExpiresAt =
+      input.pendingExpiresAt !== undefined
+        ? input.pendingExpiresAt
+        : status === "ready"
+          ? null
+          : (existing?.pendingExpiresAt ?? null);
+    const uploadId =
+      input.uploadId !== undefined
+        ? input.uploadId
+        : (existing?.uploadId ?? null);
     if (existing) {
       await this.db
         .update(jordBlobs)
@@ -1396,6 +1503,9 @@ export class LibSqlAdapter implements JordDriverPort {
           contentType: input.contentType,
           size: input.size,
           etag: input.etag,
+          status,
+          pendingExpiresAt,
+          uploadId,
           updatedAt: now,
         })
         .where(eq(jordBlobs.id, existing.id));
@@ -1404,6 +1514,9 @@ export class LibSqlAdapter implements JordDriverPort {
         contentType: input.contentType,
         size: input.size,
         etag: input.etag,
+        status,
+        pendingExpiresAt,
+        uploadId,
         updatedAt: now,
       };
     }
@@ -1414,6 +1527,9 @@ export class LibSqlAdapter implements JordDriverPort {
       contentType: input.contentType,
       size: input.size,
       etag: input.etag,
+      status,
+      pendingExpiresAt,
+      uploadId,
       createdAt: now,
       updatedAt: now,
     };
@@ -1426,6 +1542,29 @@ export class LibSqlAdapter implements JordDriverPort {
     if (!existing) return false;
     await this.db.delete(jordBlobs).where(eq(jordBlobs.id, existing.id));
     return true;
+  }
+
+  async listExpiredPendingBlobs(nowMs: number): Promise<JordBlob[]> {
+    const rows = await this.db
+      .select()
+      .from(jordBlobs)
+      .where(
+        and(
+          eq(jordBlobs.status, "pending"),
+          isNotNull(jordBlobs.pendingExpiresAt),
+          lte(jordBlobs.pendingExpiresAt, nowMs),
+        ),
+      )
+      .orderBy(asc(jordBlobs.pendingExpiresAt));
+    return rows.map(mapBlob);
+  }
+
+  async listAllBlobMeta(): Promise<JordBlob[]> {
+    const rows = await this.db
+      .select()
+      .from(jordBlobs)
+      .orderBy(asc(jordBlobs.bucket), asc(jordBlobs.key));
+    return rows.map(mapBlob);
   }
 
   async listVectorNamespaces(): Promise<string[]> {

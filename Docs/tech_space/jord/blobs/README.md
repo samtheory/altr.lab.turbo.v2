@@ -1,49 +1,97 @@
 ---
 title: "Jord — blobs"
-description: "Local disk object bytes plus jord_blobs metadata and S3-shaped REST"
+description: "Storage v2: local HMAC and S3/R2/MinIO adapters, sign-time policy, pending/finalize/GC"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
   - blobs
+  - storage
+  - s0025
 ---
 
 # Jord — blobs
 
-> Who: anyone storing files beside the database. Auth: [[../auth/README]].
+> Who: anyone storing files beside the database. Auth: [[../auth/README]]. Policies: [[../policies/README]].
 
 ## Why
 
-Assets should not live inside `records.body`. Metadata stays in SQL so both dialects can list buckets; bytes stay on disk next to the server.
+Assets should not live inside `records.body`. Metadata stays in SQL so both dialects can list buckets; bytes live behind a `JordStoragePort` (local disk by default, or S3 / R2 / MinIO). Signed URLs are checked against policy **when minted**, not only when later fetched.
 
 ## What
 
-Table `jord_blobs`. Bytes at `data/blobs/<bucket>/<key…>` (`JORD_BLOBS_ROOT` overrides the root). Max object **10 MiB**. Names pass `isValidBlobBucket` / `isValidBlobKey`. Writes of meta+bytes share the write queue.
+### Metadata (`jord_blobs`)
+
+Migration `0006_storage_v2` adds lifecycle columns on top of phase-01 meta:
+
+| Column | Role |
+|--------|------|
+| `status` | `pending` → `ready` |
+| `pending_expires_at` | GC target for abandoned uploads |
+| `upload_id` | Multipart id when used |
+
+Ready objects are listed on `GET /blobs/:bucket`. Pending rows are omitted from that list until finalize.
+
+### Adapters
+
+| Backend | Env | Notes |
+|---------|-----|--------|
+| **local** (default) | `JORD_STORAGE_BACKEND=local` or unset | Bytes under `data/blobs/` (`JORD_BLOBS_ROOT`). Presign returns HMAC URLs with the same JSON shape as S3 |
+| **s3** | `JORD_STORAGE_BACKEND=s3` (also accepts `r2` / `minio`) | `@aws-sdk/client-s3` + presigner. One physical bucket (`JORD_S3_BUCKET`); Jord buckets are key prefixes |
+
+Signed-URL TTL defaults to **15 minutes**, hard-capped at **1 hour** (`clampSignTtlSeconds`).
+
+### HTTP
 
 | Method | Path | Role |
 |--------|------|------|
 | `GET` | `/blobs/buckets` | authenticated |
 | `POST` | `/blobs/buckets` `{ name }` | admin |
-| `GET` | `/blobs/:bucket` | authenticated |
-| `PUT` | `/blobs/:bucket/objects/:key` | editor+ |
-| `GET` | `/blobs/:bucket/objects/:key` | authenticated |
+| `GET` | `/blobs/:bucket` | authenticated (ready only) |
+| `PUT` | `/blobs/:bucket/objects/:key` | editor+ (direct upload → `ready`) |
+| `POST` | `/blobs/:bucket/objects/:key/sign` | policy at sign time; upload needs write; download needs read |
+| `POST` | `/blobs/:bucket/objects/:key/finalize` | editor+ |
+| `GET` | `/blobs/:bucket/objects/:key` | authenticated (ready) |
 | `DELETE` | `/blobs/:bucket/objects/:key` | editor+ |
+| `POST` | `/blobs/copy-plan` | admin dry-run |
+| `PUT`/`GET` | `/blobs/signed/:bucket/objects/:key?…` | local HMAC only (no bearer) |
 
-`:key` is one path segment (`encodeURIComponent` of the relative key).
+`PresignResult` for both adapters: `{ url, method, headers, expires_at, object, storage }`. Studio must not echo S3 secrets — env only.
+
+### Lifecycle
+
+1. **Sign upload** → insert `pending` meta + return URL  
+2. Client **PUT**s bytes to the signed URL (local HMAC or S3)  
+3. **Finalize** verifies bytes exist, then sets `ready`  
+4. Job kind **`blobs_gc`** deletes expired pending rows and their adapter bytes  
+
+Object-byte I/O stays **off** the serial SQL write queue; only meta mutations enqueue.
+
+### Local → S3 move plan
+
+Default stays local. Dry-run:
+
+```bash
+pnpm --filter @altr/jord-server storage:copy-plan
+```
+
+or `POST /blobs/copy-plan` (admin). The plan always reports `delete_local: false` and `switch_requires_explicit_flag: true`. Steps: copy → verify checksums → flip `JORD_STORAGE_BACKEND=s3` → restart. **Do not delete local bytes in the same step as the flip.**
 
 ## How
 
 | Piece | Path |
 |-------|------|
-| Metadata port | `elements/jord` blob methods |
-| Disk | `createBlobDiskStore` in `@altr/jord-server` |
-| Studio | **Storage** → `/storage`, BFF `/api/blobs/*` |
+| Schema + migration | `elements/jord` `schema/blobs.ts`, `migrations/*/0006_storage_v2.sql` |
+| Port + adapters | `cloud/jord/src/storage/` (`port`, `local`, `s3`, `lifecycle`, `copy-plan`, `sign-policy`) |
+| Routes | `cloud/jord/src/blobs/routes.ts` |
+| GC job | `blobs_gc` in `cloud/jord/src/jobs/kinds.ts` |
+| Studio | **Storage** → `/storage` (existing BFF; no secrets in JSON) |
 
 ## Example
 
-Admin `POST /blobs/buckets` `{ "name": "lab" }`. Editor `PUT /blobs/lab/objects/note.txt` with the file body. `GET` returns the same bytes. The file is under `data/blobs/lab/note.txt`, not inside `jord.db`.
+Editor `POST /blobs/lab/objects/note.txt/sign` `{ "intent":"upload", "content_type":"text/plain" }` → PUT body to `url` → `POST …/finalize`. Denied `jord_blobs` policies return **403** at sign even if meta already exists.
 
 ## Not in Jord yet
 
-Multipart upload, larger limits, SigV4, a remote S3 backend, blob CDC.
+Automatic cutover without an operator flag · hosted embed API · Studio UI for S3 credential editing (secrets stay in env)

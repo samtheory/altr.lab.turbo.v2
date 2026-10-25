@@ -26,7 +26,7 @@ A PR cannot merge Jord type or test failures before principal auth lands.
 
 ## In scope
 
-- GitHub Actions: pnpm install, typecheck, unit/integration for `@altr/jord`, `@altr/jord-server`, `@altr/jord-studio`
+- GitHub Actions: pnpm install, typecheck, unit/integration for `@altr/jord`, `@altr/jord-server`, `@altr/jord-client`, `@altr/jord-studio`
 - File libSQL tests always
 - Postgres opt-in via secret / `JORD_TEST_POSTGRES_URL` (not required for the default green job)
 

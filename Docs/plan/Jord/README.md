@@ -22,7 +22,7 @@ Intent: [[../../feature_list/Jord/README]] · Capabilities: [[../../feature_list
 | Phase | Folder | Status | Entry |
 |-------|--------|--------|-------|
 | **01** | [[phase-01/README]] | **Closed** — Jord-S0001 … Jord-S0020 | Lab data plane + Studio through hard vectors |
-| **02** | [[phase-02/README]] | **Open** — S0027 through S0022 (file libSQL) in tree; next untouched stop S0023 | Features: [[../../feature_list/Jord/03-phase-02-features]] |
+| **02** | [[phase-02/README]] | **Execution complete** (S0027…S0026 ADR) · Functions runtime gated · [[../../report/jord-phase-02-report/00-phase-02-tasks]] | Features: [[../../feature_list/Jord/03-phase-02-features]] |
 
 ```mermaid
 flowchart LR

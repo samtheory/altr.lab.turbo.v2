@@ -25,6 +25,7 @@ One data plane for the lab: a file you can copy, a dialect port so Postgres and 
 |---------|------|------|
 | `@altr/jord` | `elements/jord` | `JordDriverPort`, adapters, schema, vectors, blobs metadata |
 | `@altr/jord-server` | `cloud/jord` | Hono HTTP, one write queue, WAL hygiene on file libSQL |
+| `@altr/jord-client` | `elements/jord-client` | Private fetch client. No `@altr/jord` dependency |
 | `@altr/jord-studio` | `apps/jord-studio` | Next.js control plane. UI from `@altr/apolyx` only |
 
 Default data: `data/jord.db` (gitignored). Blob bytes: `data/blobs/`. `@altr/base` is a leaf — it does not open Jord.
@@ -85,6 +86,7 @@ Workflow: `.github/workflows/jord.yml` (job name **`jord`**). Triggers: `pull_re
 |---------|---------|
 | `@altr/jord` | `typecheck` + `test` (file libSQL always) |
 | `@altr/jord-server` | `typecheck` + `test` |
+| `@altr/jord-client` | `typecheck` + `test` (mock fetch; no engine) |
 | `@altr/jord-studio` | `typecheck` only (no `test` script in package.json) |
 
 Local equivalent:
@@ -95,6 +97,8 @@ pnpm --filter @altr/jord typecheck
 pnpm --filter @altr/jord test
 pnpm --filter @altr/jord-server typecheck
 pnpm --filter @altr/jord-server test
+pnpm --filter @altr/jord-client typecheck
+pnpm --filter @altr/jord-client test
 pnpm --filter @altr/jord-studio typecheck
 ```
 

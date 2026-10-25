@@ -2,7 +2,7 @@
 title: "Jord-S0023 — Outbox CDC + realtime upgrade"
 description: "Tracked tables, commit watermark, notify-by-seq, 410 on expired since, single emit path"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0023 — Outbox CDC + realtime upgrade
 
-> Who: **mimir**. **Status: planned.** **Execution #8.** Blocked by [[../Jord-S0022/README]]. Next: [[../Jord-S0029/README]].
+> Who: **mimir**. **Status: in tree** (file libSQL, 2026-10-25). **Execution #8.** Next: [[../Jord-S0029/README]]. Postgres watermark race was not run (`JORD_TEST_POSTGRES_URL` unset).
 
 **Sprint id:** `Jord-S0023`  
 **Hats:** **sindri** · **saga** · **heimdall** · **docs_man**
@@ -56,9 +56,9 @@ Same-tx outbox; watermark race on Postgres; 410 when `since` is pruned; notify p
 
 ## Definition of Done
 
-- [ ] 410 + resync hint for expired `since`
-- [ ] In-process producer replaced; event name `jord.change` unchanged; no second path
-- [ ] Retention defaults (7 days and 100_000 rows) and both indexes exist
-- [ ] libSQL test shows queue order; Postgres test shows the watermark race does not skip
-- [ ] libSQL raw-SQL gap documented in `tech_space/jord/realtime` and Studio
-- [ ] Category `realtime` updated
+- [x] 410 + resync hint for expired `since`
+- [x] In-process producer replaced; event name `jord.change` unchanged; no second path
+- [x] Retention defaults (7 days and 100_000 rows) and both indexes exist
+- [ ] libSQL test shows queue order; Postgres test shows the watermark race does not skip — queue-order + in-memory watermark unit tests passed; live Postgres race not run
+- [x] libSQL raw-SQL gap documented in `tech_space/jord/realtime` and Studio
+- [x] Category `realtime` updated

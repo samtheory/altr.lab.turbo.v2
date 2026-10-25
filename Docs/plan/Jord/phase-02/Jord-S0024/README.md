@@ -2,7 +2,7 @@
 title: "Jord-S0024 — Studio power tools"
 description: "Engine-enforced SQL editor, no URL editor, type-mapped migrate wizard, batched redacted logs"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # Jord-S0024 — Studio power tools
 
-> Who: **mimir → apollo**. **Status: planned.** **Execution #10.** Blocked by [[../Jord-S0029/README]]. Next: [[../Jord-S0025/README]].
+> Who: **mimir → apollo**. **Status: in tree** (file libSQL, 2026-10-25). **Execution #10.** Next: [[../Jord-S0025/README]].
 
 **Sprint id:** `Jord-S0024`  
 **Hats:** **apollo** · **sindri** · **heimdall** · **docs_man**
@@ -76,10 +76,10 @@ Writable connection URLs (cut) · Monaco (rejected) · deleting the source DB
 
 ## Definition of Done
 
-- [ ] Read-only proven by engine pragma / `BEGIN READ ONLY`, including a statement the parser would miss
-- [ ] Reads do not take the write queue
-- [ ] No URL field that posts a connection string
-- [ ] Type-map test for the four SQLite affinities; `jord_vix_*` not copied
-- [ ] Log batch skips the hot queue; redaction test; log-read does not recurse
-- [ ] Apolyx-first
-- [ ] Category `studio` updated
+- [x] Read-only proven by engine pragma / `BEGIN READ ONLY`, including a statement the parser would miss
+- [x] Reads do not take the write queue
+- [x] No URL field that posts a connection string
+- [x] Type-map test for the four SQLite affinities; `jord_vix_*` not copied
+- [x] Log batch skips the hot queue; redaction test; log-read does not recurse
+- [x] Apolyx-first
+- [x] Category `studio` updated

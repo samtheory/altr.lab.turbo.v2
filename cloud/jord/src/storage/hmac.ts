@@ -1,0 +1,115 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+/**
+ * Local signed-URL query shape (mirrors S3-style params so one client works).
+ * Algorithm is Jord HMAC-SHA256, not AWS SigV4.
+ */
+export const JORD_SIGN_ALGORITHM = "JORD1-HMAC-SHA256";
+
+export type LocalSignParams = {
+  bucket: string;
+  key: string;
+  method: "GET" | "PUT";
+  expiresAt: number;
+  contentType?: string;
+  uploadId?: string;
+  partNumber?: number;
+};
+
+function canonicalString(params: LocalSignParams): string {
+  const parts = [
+    JORD_SIGN_ALGORITHM,
+    params.method,
+    params.bucket,
+    params.key,
+    String(params.expiresAt),
+    params.contentType ?? "",
+    params.uploadId ?? "",
+    params.partNumber != null ? String(params.partNumber) : "",
+  ];
+  return parts.join("\n");
+}
+
+export function signLocalParams(
+  secret: string,
+  params: LocalSignParams,
+): string {
+  return createHmac("sha256", secret)
+    .update(canonicalString(params), "utf8")
+    .digest("hex");
+}
+
+export function verifyLocalSignature(
+  secret: string,
+  params: LocalSignParams,
+  signature: string,
+  nowMs: number = Date.now(),
+): boolean {
+  if (nowMs > params.expiresAt) return false;
+  if (!/^[0-9a-f]{64}$/i.test(signature)) return false;
+  const expected = signLocalParams(secret, params);
+  try {
+    return timingSafeEqual(
+      Buffer.from(expected, "utf8"),
+      Buffer.from(signature.toLowerCase(), "utf8"),
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function buildLocalSignedUrl(input: {
+  baseUrl: string;
+  secret: string;
+  params: LocalSignParams;
+}): string {
+  const signature = signLocalParams(input.secret, input.params);
+  const qs = new URLSearchParams({
+    "X-Jord-Algorithm": JORD_SIGN_ALGORITHM,
+    "X-Jord-Expires": String(input.params.expiresAt),
+    "X-Jord-SignedHeaders": "host",
+    "X-Jord-Signature": signature,
+  });
+  if (input.params.contentType) {
+    qs.set("X-Jord-Content-Type", input.params.contentType);
+  }
+  if (input.params.uploadId) {
+    qs.set("X-Jord-Upload-Id", input.params.uploadId);
+  }
+  if (input.params.partNumber != null) {
+    qs.set("X-Jord-Part-Number", String(input.params.partNumber));
+  }
+  const path = `/blobs/signed/${encodeURIComponent(input.params.bucket)}/objects/${encodeURIComponent(input.params.key)}`;
+  const base = input.baseUrl.replace(/\/$/, "");
+  return `${base}${path}?${qs.toString()}`;
+}
+
+export function parseLocalSignedQuery(query: URLSearchParams): {
+  expiresAt: number;
+  signature: string;
+  contentType?: string;
+  uploadId?: string;
+  partNumber?: number;
+} | null {
+  const algorithm = query.get("X-Jord-Algorithm");
+  const expiresRaw = query.get("X-Jord-Expires");
+  const signature = query.get("X-Jord-Signature");
+  if (algorithm !== JORD_SIGN_ALGORITHM || !expiresRaw || !signature) {
+    return null;
+  }
+  const expiresAt = Number.parseInt(expiresRaw, 10);
+  if (!Number.isFinite(expiresAt)) return null;
+  const contentType = query.get("X-Jord-Content-Type") ?? undefined;
+  const uploadId = query.get("X-Jord-Upload-Id") ?? undefined;
+  const partRaw = query.get("X-Jord-Part-Number");
+  const partNumber =
+    partRaw == null ? undefined : Number.parseInt(partRaw, 10);
+  return {
+    expiresAt,
+    signature,
+    contentType,
+    uploadId,
+    partNumber:
+      partNumber != null && Number.isFinite(partNumber) ? partNumber : undefined,
+  };
+}

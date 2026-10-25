@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, and which screen owns which API"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, SQL console, migrate wizard, users admin"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
@@ -39,14 +39,25 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts`. Shell: `StudioShell` (desk
 | Records editor | `/records` | [[../writes/README]] + Live [[../realtime/README]] |
 | Tables | `/tables`, `/tables/[name]` | [[../schema/README]] [[../writes/README]] |
 | Schema | `/schema` | [[../schema/README]] |
-| Connection | `/database/connection` | [[../dialects/README]] |
+| Connection | `/database/connection` | [[../dialects/README]] — labels only; **no URL editor** |
+| SQL console | `/database/sql` | `POST /sql/execute` — admin; read-only via engine pragma |
+| Migrate | `/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
+| Users | `/auth/users` | `GET /admin/users` — disable / revoke |
 | Policies / Triggers | Database nav | [[../policies/README]] |
-| Generated / Function / Custom APIs | `/apis/…` | [[../apis/README]] |
-| Jobs / Logs | `/jobs`, `/logs` | [[../jobs/README]] |
+| Generated / Function / Custom / Table APIs | `/apis/…` | [[../apis/README]] |
+| Jobs / Logs | `/jobs`, `/logs` | [[../jobs/README]] — logs batch into `jord_logs` |
 | Storage | `/storage` | [[../blobs/README]] |
 | Vectors | `/vectors` | [[../vectors/README]] |
 
-BFF routes live under `apps/jord-studio/src/app/api/` and mirror the server paths (`/api/records`, `/api/schema/…`, `/api/realtime`, `/api/blobs/…`, `/api/vectors/…`).
+BFF routes live under `apps/jord-studio/src/app/api/` and mirror the server paths.
+
+## SQL console (S0024)
+
+Admin operator only. Read-only default uses a **dedicated** libSQL connection with `PRAGMA query_only=ON` (Postgres: `BEGIN READ ONLY` + `statement_timeout`). Those reads never enter the write queue. Writes require the toggle off and go through `enqueueWrite`. Every statement is audited in `jord_sql_audit`. Raw SQL bypasses the migration runner and, on libSQL, the outbox.
+
+## Migrate wizard (S0024)
+
+File libSQL → Turso or Postgres. Type map: TEXT→text, INTEGER→bigint, REAL→double precision, BLOB→bytea. Skip `jord_vix_*`. Destination URL is accepted once for the job, never returned in JSON, and the source is never deleted.
 
 ## Example
 
@@ -55,8 +66,8 @@ pnpm dev:jord
 pnpm dev:jord-studio
 ```
 
-Sign in, open **Records**, insert a row, toggle **Live**, and PATCH the same id from `curl` with the matching bearer. The grid refetches on `jord.change`. A stale `version` still shows the server’s **409**.
+Sign in as admin, open **SQL console**, run `SELECT 1`, then flip read-only off only when you intend a queued write.
 
 ## Not in Jord yet
 
-A connection-string editor, multi-tenant hosting, Artemis screens inside Studio.
+A writable connection-string editor (cut — needs a new ADR), Monaco, multi-tenant hosting, Artemis screens inside Studio.

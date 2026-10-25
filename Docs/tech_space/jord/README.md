@@ -24,11 +24,11 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
 | [[schema/README]] | Introspect, CREATE, ADD, DROP, RENAME, type change |
 | [[auth/README]] | Principals, HMAC operators, JWT, scrypt, route matrix |
-| [[apis/README]] | Generated CRUD, function steps, `/x/:slug`, `/api/v1` table API |
+| [[apis/README]] | Generated CRUD, function steps, `/x/:slug`, `/api/v1` table API, [[apis/ADR-functions-v2\|Functions v2 ADR]] |
 | [[jobs/README]] | Scheduler, built-in kinds, log ring |
 | [[policies/README]] | Deny-overrides, user/anon default-deny, `jord_app`, Postgres RLS |
-| [[realtime/README]] | Write-path events, SSE, WebSocket |
-| [[blobs/README]] | Local buckets and bytes |
+| [[realtime/README]] | Outbox CDC, SSE / WebSocket, `since` resume |
+| [[blobs/README]] | Local HMAC + S3/R2/MinIO, sign-time policy, pending/finalize/GC |
 | [[vectors/README]] | Embeddings, cosine, libSQL engine, pgvector |
 | [[studio/README]] | Control plane, BFF, nav, Apolyx-only |
 

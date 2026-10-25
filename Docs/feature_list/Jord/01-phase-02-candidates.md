@@ -44,7 +44,7 @@ Architecture: [[02-architecture]]. Studio: [[03-jord-studio]]. Shipped: [[04-pha
 | Tia map engine | [[../tia/README]] |
 | Apolyx kit carryovers | [[../ui-kit/01-apolyx-s0001-carryovers]] |
 | OAuth / magic links | Deferred past S0021 |
-| Functions v2 **implementation** | Plan-only [[../plan/Jord/phase-02/Jord-S0026/README\|Jord-S0026]] until approved |
+| Functions v2 **implementation** | [[../plan/Jord/phase-02/Jord-S0026/README\|S0026]] ADR written ([[../tech_space/jord/apis/ADR-functions-v2\|worker_threads]]); still gated until a follow-up sprint is approved |
 
 ## Rule
 

@@ -22,6 +22,8 @@ export type JordChangeEvent = {
   version?: number;
   at: number;
   dialect: "libsql" | "postgres";
+  /** Outbox sequence for resume (`?since=`). */
+  seq?: number;
 };
 
 export type JordChangeDraft = {
@@ -30,6 +32,9 @@ export type JordChangeDraft = {
   op: JordChangeOp;
   id: string;
   version?: number;
+  oldRow?: Record<string, unknown> | null;
+  newRow?: Record<string, unknown> | null;
+  blobColumns?: string[];
 };
 
 /**

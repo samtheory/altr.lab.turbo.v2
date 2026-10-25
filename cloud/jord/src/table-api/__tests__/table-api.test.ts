@@ -12,7 +12,7 @@ import { signSessionToken } from "../../auth/token.js";
 import { createWriteQueue } from "../../queue.js";
 import { compileSelect } from "../sql.js";
 import { parseTableQuery } from "../query.js";
-import { tableFetch } from "./fetch-helper.js";
+import { tableFetch } from "@altr/jord-client";
 
 const temps: string[] = [];
 const JWT = "jwt-current-secret";

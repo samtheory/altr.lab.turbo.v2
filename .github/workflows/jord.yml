@@ -47,6 +47,12 @@ jobs:
       - name: Test @altr/jord-server
         run: pnpm --filter @altr/jord-server test
 
+      - name: Typecheck @altr/jord-client
+        run: pnpm --filter @altr/jord-client typecheck
+
+      - name: Test @altr/jord-client
+        run: pnpm --filter @altr/jord-client test
+
       - name: Typecheck @altr/jord-studio
         run: pnpm --filter @altr/jord-studio typecheck
 

@@ -13,6 +13,8 @@ export {
   type SchemaDdlError,
   type SchemaDdlResult,
   type JordBlob,
+  type JordBlobStatus,
+  JORD_BLOB_STATUSES,
   type JordEmbeddingMeta,
   type ListTableRowsInput,
   type ListTableRowsResult,
@@ -181,3 +183,16 @@ export {
   type ResolvedJordUrl,
 } from "./url.js";
 export { snapshotDatabase, type SnapshotOptions } from "./snapshot.js";
+export {
+  mapSqliteTypeToPostgres,
+  shouldSkipMigrateTable,
+  type SqliteAffinity,
+} from "./schema/migrate-type-map.js";
+export {
+  clampSqlRowCap,
+  clampSqlTimeout,
+  DEFAULT_SQL_ROW_CAP,
+  DEFAULT_SQL_TIMEOUT_MS,
+  type ExecuteSqlInput,
+  type ExecuteSqlResult,
+} from "./schema/sql-console.js";

@@ -1,8 +1,8 @@
 ---
 title: "Jord phase-02 — remaining backlog"
-description: "Soft leftovers after the S0021–S0027 queue is defined; promote only if needed"
+description: "Soft leftovers after the phase-02 numbered queue; promote only if needed"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -12,10 +12,9 @@ tags:
 
 # Jord phase-02 — remaining backlog
 
-> Who: **mimir**. Numbered queue: [[README]]. Features: [[../../../feature_list/Jord/03-phase-02-features]]. Soft candidates: [[../../../feature_list/Jord/01-phase-02-candidates]]. Prompt: [[../../../report/Jord-next-phase2-prompt]].
+> Who: **mimir**. Numbered queue: [[README]] (**complete** through S0026 ADR). Features: [[../../../feature_list/Jord/03-phase-02-features]]. Soft candidates: [[../../../feature_list/Jord/01-phase-02-candidates]]. Prompt: [[../../../report/Jord-next-phase2-prompt]]. Progress: [[../../../report/jord-phase-02-report/00-phase-02-tasks]].
 
-**Next when approved:** [[Jord-S0027/README|Jord-S0027]] CI, then [[Jord-S0021/README|Jord-S0021]] Part A.  
-**New cards:** [[Jord-S0028/README|Jord-S0028]] hardening (before the table API) · [[Jord-S0029/README|Jord-S0029]] client (after CDC).
+**Numbered queue:** finished (S0027…S0026). Soft leftovers below are not automatic next work.
 
 ## Numbered (do not duplicate)
 
@@ -29,7 +28,7 @@ S0021 → S0027 are indexed on [[README]]. Track progress there.
 | Bot / second cloud process | When in-process writer is the wrong shape |
 | Hosted embed API · embedding CDC | Callers still supply floats after S0020 |
 | Embedded Turso replicas | S0019 deferred |
-| Functions v2 **implementation** | Only after [[Jord-S0026/README\|S0026]] ADR approval |
+| Functions v2 **implementation** | [[Jord-S0026/README\|S0026]] ADR written ([[../../../tech_space/jord/apis/ADR-functions-v2\|recommend worker_threads]]). Still **do not implement** until a follow-up sprint is explicitly approved |
 
 ## Explicitly not Jord sprint cards
 

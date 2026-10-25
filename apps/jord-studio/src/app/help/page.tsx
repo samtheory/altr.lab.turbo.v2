@@ -61,6 +61,17 @@ export default async function HelpPage() {
       </Alert>
 
       <Alert variant="info">
+        <AlertTitle>Realtime / CDC</AlertTitle>
+        <AlertDescription>
+          Change events come from the <code className="font-mono">jord_changes</code> outbox for
+          tracked tables. On libSQL, raw SQL from a Studio editor is{" "}
+          <strong>not</strong> captured — only API and function write paths that go through the
+          server. Resume with <code className="font-mono">?since=</code>; a cursor older than
+          retention returns <code className="font-mono">410</code> with a resync hint.
+        </AlertDescription>
+      </Alert>
+
+      <Alert variant="info">
         <AlertTitle>Vault docs</AlertTitle>
         <AlertDescription>
           Plan: <code className="font-mono">Docs/plan/Jord/Jord-S0007/</code> · intent{" "}

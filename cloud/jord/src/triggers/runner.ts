@@ -17,7 +17,7 @@ import {
 
 export type TriggerFireInput = {
   jord: JordDriverPort;
-  logs: LogRing;
+  logs: { append: LogRing["append"] };
   tableName: string;
   event: JordTriggerEvent;
   row: JordRecord | null;

@@ -101,6 +101,13 @@ const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "GET", path: "/vectors/namespaces" },
   { method: "GET", path: "/api/v1" },
   { method: "GET", path: "/api/v1/records" },
+  { method: "POST", path: "/sql/execute" },
+  { method: "GET", path: "/sql/history" },
+  { method: "POST", path: "/migrate/jobs" },
+  { method: "GET", path: "/migrate/jobs/abc" },
+  { method: "GET", path: "/admin/users" },
+  { method: "POST", path: "/admin/users/abc/disable" },
+  { method: "POST", path: "/admin/users/abc/revoke" },
 ];
 
 describe("S0021-C server enforcement", () => {

@@ -1,7 +1,7 @@
 import type { JordDriverPort, JordFunction } from "@altr/jord";
 
 import type { JordRole } from "../auth/roles.js";
-import type { LogRing } from "../jobs/log-ring.js";
+import type { LogSink } from "../logs/sink.js";
 import type { JordChangeDraft } from "../realtime/types.js";
 import {
   FunctionStepError,
@@ -19,7 +19,7 @@ export type RunFunctionInput = {
   uid?: string | null;
   request: FunctionRequestContext;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
-  logs?: LogRing;
+  logs?: LogSink;
   onRecordChange?: (draft: JordChangeDraft) => void;
 };
 

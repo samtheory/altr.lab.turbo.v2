@@ -97,6 +97,10 @@ import { samePostgresConnection } from "../schema/connection-identity.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
 import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
+  clampSqlRowCap,
+  clampSqlTimeout,
+} from "../schema/sql-console.js";
+import {
   clampSearchLimit,
   packF32,
   unpackF32,
@@ -175,6 +179,9 @@ function mapRecord(row: QueryResultRow): JordRecord {
 }
 
 function mapBlob(row: QueryResultRow): JordBlob {
+  const rawStatus = row.status == null ? "ready" : String(row.status);
+  const status =
+    rawStatus === "pending" || rawStatus === "ready" ? rawStatus : "ready";
   return {
     id: String(row.id),
     bucket: String(row.bucket),
@@ -182,6 +189,10 @@ function mapBlob(row: QueryResultRow): JordBlob {
     contentType: String(row.content_type),
     size: num(row.size),
     etag: String(row.etag),
+    status,
+    pendingExpiresAt:
+      row.pending_expires_at == null ? null : num(row.pending_expires_at),
+    uploadId: row.upload_id == null ? null : String(row.upload_id),
     createdAt: num(row.created_at),
     updatedAt: num(row.updated_at),
   };
@@ -376,6 +387,52 @@ export class PostgresAdapter implements JordDriverPort {
   ): Promise<Array<Record<string, unknown>>> {
     const result = await this.pool.query(sql, args);
     return result.rows as Array<Record<string, unknown>>;
+  }
+
+  async executeSql(input: {
+    sql: string;
+    args?: Array<string | number | null>;
+    readOnly: boolean;
+    timeoutMs?: number;
+    rowCap?: number;
+  }): Promise<{
+    columns: string[];
+    rows: Array<Record<string, unknown>>;
+    rowCount: number;
+    truncated: boolean;
+    elapsedMs: number;
+  }> {
+    const rowCap = clampSqlRowCap(input.rowCap);
+    const timeoutMs = clampSqlTimeout(input.timeoutMs);
+    const args = input.args ?? [];
+    const started = Date.now();
+    const client = await this.pool.connect();
+    try {
+      if (input.readOnly) {
+        await client.query("BEGIN READ ONLY");
+        await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`);
+      } else {
+        await client.query("BEGIN");
+        await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`);
+      }
+      const result = await client.query(input.sql, args);
+      await client.query("COMMIT");
+      const columns = result.fields.map((field) => field.name);
+      const mapped = result.rows as Array<Record<string, unknown>>;
+      const truncated = mapped.length > rowCap;
+      return {
+        columns,
+        rows: truncated ? mapped.slice(0, rowCap) : mapped,
+        rowCount: mapped.length,
+        truncated,
+        elapsedMs: Date.now() - started,
+      };
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   bindRlsSession(input: {
@@ -1445,21 +1502,43 @@ export class PostgresAdapter implements JordDriverPort {
   async upsertBlobMeta(input: UpsertBlobMetaInput): Promise<JordBlob> {
     const existing = await this.getBlobMeta(input.bucket, input.key);
     const now = Date.now();
+    const status = input.status ?? "ready";
+    const pendingExpiresAt =
+      input.pendingExpiresAt !== undefined
+        ? input.pendingExpiresAt
+        : status === "ready"
+          ? null
+          : (existing?.pendingExpiresAt ?? null);
+    const uploadId =
+      input.uploadId !== undefined
+        ? input.uploadId
+        : (existing?.uploadId ?? null);
     if (existing) {
       const result = await this.pool.query(
         `UPDATE jord_blobs SET
-           content_type = $1, size = $2, etag = $3, updated_at = $4
-         WHERE id = $5
+           content_type = $1, size = $2, etag = $3, status = $4,
+           pending_expires_at = $5, upload_id = $6, updated_at = $7
+         WHERE id = $8
          RETURNING *`,
-        [input.contentType, input.size, input.etag, now, existing.id],
+        [
+          input.contentType,
+          input.size,
+          input.etag,
+          status,
+          pendingExpiresAt,
+          uploadId,
+          now,
+          existing.id,
+        ],
       );
       return mapBlob(result.rows[0]!);
     }
     const id = randomUUID();
     const result = await this.pool.query(
       `INSERT INTO jord_blobs (
-         id, bucket, key, content_type, size, etag, created_at, updated_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+         id, bucket, key, content_type, size, etag, status,
+         pending_expires_at, upload_id, created_at, updated_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        RETURNING *`,
       [
         id,
@@ -1468,6 +1547,9 @@ export class PostgresAdapter implements JordDriverPort {
         input.contentType,
         input.size,
         input.etag,
+        status,
+        pendingExpiresAt,
+        uploadId,
         now,
         now,
       ],
@@ -1481,6 +1563,25 @@ export class PostgresAdapter implements JordDriverPort {
       [bucket, key],
     );
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async listExpiredPendingBlobs(nowMs: number): Promise<JordBlob[]> {
+    const result = await this.pool.query(
+      `SELECT * FROM jord_blobs
+       WHERE status = 'pending'
+         AND pending_expires_at IS NOT NULL
+         AND pending_expires_at <= $1
+       ORDER BY pending_expires_at ASC`,
+      [nowMs],
+    );
+    return result.rows.map(mapBlob);
+  }
+
+  async listAllBlobMeta(): Promise<JordBlob[]> {
+    const result = await this.pool.query(
+      `SELECT * FROM jord_blobs ORDER BY bucket ASC, key ASC`,
+    );
+    return result.rows.map(mapBlob);
   }
 
   async listVectorNamespaces(): Promise<string[]> {
