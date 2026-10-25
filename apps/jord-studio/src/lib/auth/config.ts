@@ -22,7 +22,14 @@ export function getDefaultServerRole(): JordRole {
   return isJordRole(raw) ? raw : "admin";
 }
 
-/** Lab-only: skip login UI and mint upstream bearer from env. */
+/**
+ * Lab-only: skip login UI and mint upstream bearer from env.
+ * Ignored in production builds (`next build` / `next start`), so a stray
+ * `JORD_STUDIO_OPEN=1` cannot open a deployed Studio.
+ */
 export function isStudioOpenBypass(): boolean {
-  return process.env.JORD_STUDIO_OPEN === "1";
+  return (
+    process.env.JORD_STUDIO_OPEN === "1" &&
+    process.env.NODE_ENV !== "production"
+  );
 }

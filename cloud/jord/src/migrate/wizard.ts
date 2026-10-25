@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 
 import {
   createJordClient,
+  fileUrlToFsPath,
   mapSqliteTypeToPostgres,
   shouldSkipMigrateTable,
   type JordDriverPort,
@@ -28,12 +31,64 @@ function pgPlaceholder(i: number): string {
   return `$${i}`;
 }
 
+/** Thrown for a target that must not be used; the route maps it to 400. */
+export class MigrateTargetError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MigrateTargetError";
+  }
+}
+
+function canonicalFsPath(p: string): string {
+  let abs = path.resolve(p);
+  try {
+    abs = fs.realpathSync.native(abs);
+  } catch {
+    // Not created yet: compare on the resolved path (parent may still be a link).
+    try {
+      abs = path.join(fs.realpathSync.native(path.dirname(abs)), path.basename(abs));
+    } catch {
+      /* keep resolved */
+    }
+  }
+  return process.platform === "win32" || process.platform === "darwin"
+    ? abs.toLowerCase()
+    : abs;
+}
+
+/**
+ * True when `targetUrl` resolves to the same database file as the source.
+ * Only `file:` sources have a comparable identity here (hosted libSQL URLs are
+ * not exposed by the driver; their target is a different connection anyway).
+ */
+export async function targetIsSource(
+  source: JordDriverPort,
+  targetUrl: string,
+): Promise<boolean> {
+  if (!targetUrl.startsWith("file:") || source.urlScheme !== "file") return false;
+  const bare = targetUrl.split(/[?#]/)[0]!;
+  let targetPath: string;
+  try {
+    targetPath = fileUrlToFsPath(bare);
+  } catch {
+    throw new MigrateTargetError("targetUrl is not a valid file: URL");
+  }
+  const rows = await source.query(`PRAGMA database_list`);
+  const main = rows.find((r) => r.name === "main") ?? rows[0];
+  const sourcePath = typeof main?.file === "string" ? main.file : "";
+  if (!sourcePath) return false;
+  return canonicalFsPath(sourcePath) === canonicalFsPath(targetPath);
+}
+
 export async function startMigrateJob(input: {
   source: JordDriverPort;
   targetUrl: string;
 }): Promise<MigrateJob> {
   if (input.source.dialect !== "libsql") {
     throw new Error("migrate wizard source must be libSQL (file)");
+  }
+  if (await targetIsSource(input.source, input.targetUrl)) {
+    throw new MigrateTargetError("targetUrl must not be this server's own database");
   }
   const tables = (await input.source.listTables()).filter(
     (name) => !shouldSkipMigrateTable(name),
@@ -82,16 +137,17 @@ export async function runMigrateJob(input: {
 }): Promise<MigrateJob> {
   const job = await getMigrateJob(input.source, input.jobId);
   if (!job) throw new Error("migrate_job_not_found");
-  const targetUrl = targetUrls.get(input.jobId);
-  if (!targetUrl) throw new Error("migrate_target_expired");
-
-  job.status = "running";
-  job.phase = "copy";
-  job.updatedAt = Date.now();
-  await persistJob(input.source, job);
 
   let target: JordDriverPort | null = null;
   try {
+    const targetUrl = targetUrls.get(input.jobId);
+    if (!targetUrl) throw new Error("migrate_target_expired");
+
+    job.status = "running";
+    job.phase = "copy";
+    job.updatedAt = Date.now();
+    await persistJob(input.source, job);
+
     target = await createJordClient({
       url: targetUrl,
       postgresDdl: true,
@@ -125,7 +181,12 @@ export async function runMigrateJob(input: {
     job.status = "error";
     job.errorText = err instanceof Error ? err.message : String(err);
     job.updatedAt = Date.now();
-    await persistJob(input.source, job);
+    try {
+      await persistJob(input.source, job);
+    } catch (persistErr) {
+      // The caller still logs nothing for a resolved job; surface it here.
+      console.error("[@altr/jord-server] migrate job error state not persisted", persistErr);
+    }
     return job;
   } finally {
     targetUrls.delete(input.jobId);

@@ -70,6 +70,7 @@ import type { LogSink } from "./logs/sink.js";
 import { createSqlRoutes } from "./sql/routes.js";
 import {
   getMigrateJob,
+  MigrateTargetError,
   runMigrateJob,
   startMigrateJob,
 } from "./migrate/wizard.js";
@@ -130,6 +131,7 @@ import {
   RealtimeBus,
   type JordChangeEvent,
 } from "./realtime/index.js";
+import { liveDeliveryAllowed } from "./realtime/deliver.js";
 import type { OutboxRow } from "./realtime/outbox.js";
 import type { WriteWithChange } from "./realtime/types.js";
 import {
@@ -539,6 +541,44 @@ export function createJordApp(deps: JordAppDeps) {
     };
   }
 
+  /**
+   * B4: one table-level `op: "resync"` row per tracked table, for writes
+   * whose touched rows are unknown (SQL console write, migrate apply).
+   * Caller must already hold the write queue. Runs in its own transaction
+   * after the triggering write has committed: raw user SQL can carry its own
+   * BEGIN/COMMIT, so it cannot share ours. Advisory: a failure is logged and
+   * never fails the write that already landed.
+   */
+  async function resyncTrackedAs(principal: Principal): Promise<void> {
+    const actor = {
+      kind: principal.kind,
+      uid: principal.uid ?? null,
+      role: principal.role,
+    };
+    const appended: OutboxRow[] = [];
+    try {
+      await deps.jord.transaction(async () => {
+        for (const tableName of await outbox.listTracked()) {
+          const row = await outbox.appendChange({
+            tableName,
+            op: "resync",
+            pk: "",
+            actor,
+          });
+          if (row) appended.push(row);
+        }
+      });
+    } catch (err) {
+      for (const row of appended) outbox.settle(row.seq, false);
+      console.error("[@altr/jord-server] resync emit failed", err);
+      return;
+    }
+    for (const row of appended) {
+      outbox.settle(row.seq, true);
+      realtime.publish(outbox.toEvent(row));
+    }
+  }
+
   async function deliveryAllowed(
     principal: Principal,
     event: JordChangeEvent,
@@ -556,6 +596,18 @@ export function createJordApp(deps: JordAppDeps) {
       row: parsed,
     });
     return decision.allowed;
+  }
+
+  /** Live fan-out gate shared by SSE and WebSocket (fail closed). */
+  function canDeliverLive(
+    principal: Principal,
+    event: JordChangeEvent,
+  ): Promise<boolean> {
+    return liveDeliveryAllowed({
+      event,
+      getBySeq: (seq) => outbox.getBySeq(seq),
+      allowed: (ev, row) => deliveryAllowed(principal, ev, row),
+    });
   }
 
   app.route(
@@ -1501,7 +1553,7 @@ export function createJordApp(deps: JordAppDeps) {
         if (since != null) {
           const catchup = await outbox.listAfter(since, { table });
           for (const row of catchup) {
-            if (idFilter && row.pk !== idFilter) continue;
+            if (idFilter && row.op !== "resync" && row.pk !== idFilter) continue;
             const event = outbox.toEvent(row);
             if (!(await deliveryAllowed(principal, event, row))) continue;
             await stream.writeSSE({
@@ -1511,21 +1563,19 @@ export function createJordApp(deps: JordAppDeps) {
           }
         }
 
+        let sendChain: Promise<void> = Promise.resolve();
         const unsubscribe = realtime.trySubscribeFiltered(
           { table, id: idFilter },
           (event) => {
-            void (async () => {
-              const row =
-                event.seq != null ? await outbox.getBySeq(event.seq) : null;
-              if (row) {
-                const ok = await deliveryAllowed(principal, event, row);
-                if (!ok) return;
-              }
+            sendChain = sendChain.then(async () => {
+              if (!(await canDeliverLive(principal, event))) return;
               await stream.writeSSE({
                 event: "jord.change",
                 data: JSON.stringify(event),
               });
-            })();
+            }).catch((err) => {
+              console.error("[@altr/jord-server] sse send failed", err);
+            });
           },
         );
         if (!unsubscribe) return;
@@ -1593,6 +1643,8 @@ export function createJordApp(deps: JordAppDeps) {
       let pingTimer: ReturnType<typeof setInterval> | null = null;
       let expTimer: ReturnType<typeof setTimeout> | null = null;
       const accessExp = c.get("accessExp");
+      const principal = c.get("principal");
+      let sendChain: Promise<void> = Promise.resolve();
 
       return {
         onOpen(_evt, ws) {
@@ -1608,11 +1660,15 @@ export function createJordApp(deps: JordAppDeps) {
           unsubscribe = realtime.trySubscribeFiltered(
             { table, id: idFilter },
             (event) => {
-              try {
-                ws.send(JSON.stringify(event));
-              } catch (err) {
-                console.error("[@altr/jord-server] ws send failed", err);
-              }
+              // Same per-event policy decision as SSE (SF-1); ordered.
+              sendChain = sendChain.then(async () => {
+                if (!(await canDeliverLive(principal, event))) return;
+                try {
+                  ws.send(JSON.stringify(event));
+                } catch (err) {
+                  console.error("[@altr/jord-server] ws send failed", err);
+                }
+              });
             },
           );
           if (!unsubscribe) {
@@ -2534,6 +2590,7 @@ export function createJordApp(deps: JordAppDeps) {
       jord: deps.jord,
       enqueueWrite: deps.enqueueWrite,
       logs: sqlLogs,
+      resyncTracked: resyncTrackedAs,
     }),
   );
 
@@ -2547,8 +2604,20 @@ export function createJordApp(deps: JordAppDeps) {
     if (!targetUrl) {
       throw new HTTPException(400, { message: "targetUrl required" });
     }
-    const job = await startMigrateJob({ source: deps.jord, targetUrl });
-    void runMigrateJob({ source: deps.jord, jobId: job.id });
+    let job;
+    try {
+      job = await startMigrateJob({ source: deps.jord, targetUrl });
+    } catch (err) {
+      if (err instanceof MigrateTargetError) {
+        throw new HTTPException(400, { message: err.message });
+      }
+      throw err;
+    }
+    // No resync here (B4): the wizard only reads this database and writes the
+    // external target, whose subscribers live on another server.
+    runMigrateJob({ source: deps.jord, jobId: job.id }).catch((err) => {
+      console.error("[@altr/jord-server] migrate job failed", err);
+    });
     return c.json({
       job: {
         id: job.id,

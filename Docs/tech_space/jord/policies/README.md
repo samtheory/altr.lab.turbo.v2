@@ -59,7 +59,7 @@ Authoring accepts `records` or an existing user table. `PUT /schema/tables/:name
 | Route inventory | `cloud/jord/src/auth/route-inventory.ts` |
 | Studio | Database → Policies, Triggers |
 
-Tests: `cloud/jord/src/policies/part-c.test.ts` runs on file libSQL and, when `JORD_TEST_POSTGRES_URL` is set, on a fresh Postgres database as `jord_app` (`cloud/jord/src/testing/harness.ts`). It includes a route conformance test (every mounted route, as a user, never returns another user's row) and a Postgres-only test that a raw `jord_app` query is filtered by the database. The pool-leak test is `elements/jord/src/adapter/postgres-uid-leak.test.ts`.
+Tests: `cloud/jord/src/policies/part-c.test.ts` runs on file libSQL and, when `JORD_TEST_POSTGRES_URL` is set, on a fresh Postgres database as `jord_app` (`cloud/jord/src/testing/harness.ts`). It includes a route conformance test (every mounted route, as a user, never returns another user's row) and a Postgres-only test that a raw `jord_app` query is filtered by the database. Another Postgres-only test runs a column retype and a table rename with a non-superuser owner and checks no row is lost. The pool-leak test is `elements/jord/src/adapter/postgres-uid-leak.test.ts`.
 
 ## Example
 

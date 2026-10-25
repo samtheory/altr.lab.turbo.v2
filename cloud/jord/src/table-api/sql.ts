@@ -162,6 +162,7 @@ export function compileUpdate(
   bumpVersion: boolean,
   allowUnfiltered = false,
   scope?: ScopeFor,
+  locked?: { keys: string[]; rows: Array<Record<string, unknown>> },
 ): CompiledSql {
   const cols = Object.keys(values).filter((name) => name !== "version" || !bumpVersion);
   if (cols.length === 0 && !bumpVersion) {
@@ -173,7 +174,11 @@ export function compileUpdate(
   if (filters.length === 0 && !allowUnfiltered) {
     throw new TableApiError(400, "filter_required", "PATCH requires a filter");
   }
-  const where = whereSql(filters, args, scope);
+  let where = whereSql(filters, args, scope);
+  if (locked && locked.rows.length > 0 && locked.keys.length > 0) {
+    const clause = lockedRowsClause(locked.keys, locked.rows, args);
+    where = where ? `${where} AND ${clause}` : ` WHERE ${clause}`;
+  }
   if (!where && !allowUnfiltered) {
     throw new TableApiError(400, "filter_required", "PATCH requires a filter");
   }
@@ -184,6 +189,48 @@ export function compileUpdate(
     ),
     args,
   };
+}
+
+/** Rows a PATCH will change, locked on Postgres so the following update sees the same set. */
+export function compilePriorSelect(
+  info: JordTableInfo,
+  filters: Filter[],
+  dialect: "libsql" | "postgres",
+  allowUnfiltered = false,
+  scope?: ScopeFor,
+): CompiledSql {
+  const args: SqlValue[] = [];
+  const where = whereSql(filters, args, scope);
+  if (!where && !allowUnfiltered) {
+    throw new TableApiError(400, "filter_required", "PATCH requires a filter");
+  }
+  const lock = dialect === "postgres" ? " FOR UPDATE" : "";
+  return {
+    sql: placeholders(`SELECT * FROM ${quoteIdent(info.name)}${where}${lock}`, dialect),
+    args,
+  };
+}
+
+function lockedRowsClause(
+  keys: string[],
+  rows: Array<Record<string, unknown>>,
+  args: SqlValue[],
+): string {
+  const valueOf = (value: unknown): SqlValue =>
+    typeof value === "string" || typeof value === "number" || value === null ? value : String(value ?? "");
+  if (keys.length === 1) {
+    const key = keys[0]!;
+    for (const row of rows) args.push(valueOf(row[key]));
+    return `${quoteIdent(key)} IN (${rows.map(() => "?").join(", ")})`;
+  }
+  const groups = rows.map((row) => {
+    const parts = keys.map((key) => {
+      args.push(valueOf(row[key]));
+      return `${quoteIdent(key)} = ?`;
+    });
+    return `(${parts.join(" AND ")})`;
+  });
+  return `(${groups.join(" OR ")})`;
 }
 
 export function compileDelete(

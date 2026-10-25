@@ -153,6 +153,26 @@ describe("jord-client", () => {
     expect(events).toEqual(["jord.change"]);
   });
 
+  it("passes a table-level op:resync change through to onEvent", async () => {
+    const seen: unknown[] = [];
+    const client = new JordClient({
+      baseUrl: "http://jord.local",
+      fetch: async () =>
+        sseResponse([
+          'event: jord.change\ndata: {"type":"jord.change","table":"notes","op":"resync","id":"","seq":7}\n\n',
+        ]),
+      tokens: { accessToken: "access-1", refreshToken: null },
+    });
+    const live = await client.subscribe({
+      table: "notes",
+      onEvent: (message) => seen.push(message.data),
+    });
+    expect(live.status).toBe("live");
+    expect(seen).toEqual([
+      { type: "jord.change", table: "notes", op: "resync", id: "", seq: 7 },
+    ]);
+  });
+
   it("does not depend on @altr/jord", () => {
     const pkg = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8"),

@@ -64,9 +64,12 @@ export default async function HelpPage() {
         <AlertTitle>Realtime / CDC</AlertTitle>
         <AlertDescription>
           Change events come from the <code className="font-mono">jord_changes</code> outbox for
-          tracked tables. On libSQL, raw SQL from a Studio editor is{" "}
-          <strong>not</strong> captured — only API and function write paths that go through the
-          server. Resume with <code className="font-mono">?since=</code>; a cursor older than
+          tracked tables. Raw SQL from the Studio SQL console is not captured row by row: after a
+          successful write, every tracked table gets one{" "}
+          <code className="font-mono">op: &quot;resync&quot;</code> change and live views refetch. A
+          migrate-wizard copy only reads this database; rows it writes on the destination emit no
+          events there.
+          Resume with <code className="font-mono">?since=</code>; a cursor older than
           retention returns <code className="font-mono">410</code> with a resync hint.
         </AlertDescription>
       </Alert>

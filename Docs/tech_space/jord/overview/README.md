@@ -104,7 +104,7 @@ pnpm --filter @altr/jord-studio typecheck
 
 Job **`jord-postgres`** (not a required check yet) starts a `pgvector/pgvector:pg16` service container, sets `JORD_TEST_POSTGRES_URL` to it, and runs the `@altr/jord` and `@altr/jord-server` tests. No secret is needed, so forks run it too.
 
-Server tests use `cloud/jord/src/testing/harness.ts`. `TEST_BACKENDS` is `["file"]`, plus `"postgres"` when `JORD_TEST_POSTGRES_URL` is set. For Postgres each test gets a fresh database, the owner migration, and a runtime pool as `jord_app`, so FORCE RLS applies exactly as in production. Suites on both backends: table API, policies (part-c), outbox, SQL console, storage metadata. Local run:
+Server tests use `cloud/jord/src/testing/harness.ts`. `TEST_BACKENDS` is `["file"]`, plus `"postgres"` when `JORD_TEST_POSTGRES_URL` is set. For Postgres each test gets a fresh database, the owner migration, and a runtime pool as `jord_app`, so FORCE RLS applies exactly as in production. `openTestDb("postgres", { owner: "plain" })` makes the table owner a `NOSUPERUSER NOBYPASSRLS` role (`jord_owner_test`), as on a managed Postgres, where FORCE RLS binds the owner too. Suites on both backends: table API, policies (part-c), outbox, SQL console, storage metadata. Local run:
 
 ```powershell
 docker run -d --name jord-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=jord_test -p 55432:5432 pgvector/pgvector:pg16

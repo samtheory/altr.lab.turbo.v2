@@ -22,6 +22,7 @@ import {
   compileCount,
   compileDelete,
   compileInsert,
+  compilePriorSelect,
   compileSelect,
   compileUpdate,
   filtersForWrite,
@@ -174,18 +175,44 @@ export function createTableApiRoutes(deps: {
       if (hasVersion && typeof body.version === "number") {
         filters.push({ column: "version", op: "eq", values: [body.version] });
       }
-      const compiled =
-        method === "PATCH"
-          ? compileUpdate(
+      if (method === "PATCH") {
+        const prior = compilePriorSelect(info, filters, dialect, parsed.all, scope);
+        const bump = hasVersion && typeof body.version === "number";
+        let previous: Array<Record<string, unknown>> = [];
+        const rows = await deps.writeChangeAs(principal)(
+          async () => {
+            previous = await deps.jord.query(prior.sql, prior.args);
+            if (previous.length === 0) return [];
+            const compiled = compileUpdate(
               info,
               values,
               filters,
               dialect,
-              hasVersion && typeof body.version === "number",
+              bump,
               parsed.all,
               scope,
-            )
-          : compileDelete(info, filters, dialect, parsed.all, scope);
+              { keys, rows: previous },
+            );
+            return deps.jord.query(compiled.sql, compiled.args);
+          },
+          (updated) => {
+            const oldById = new Map(previous.map((row) => [rowId(keys, row), row]));
+            return updated.map((row) => ({
+              table,
+              op: "update" as const,
+              id: rowId(keys, row),
+              oldRow: oldById.get(rowId(keys, row)) ?? null,
+              newRow: row,
+              blobColumns,
+            }));
+          },
+        );
+        if (rows.length === 0 && bump) {
+          return jsonError(409, "version_conflict", "version did not match");
+        }
+        return c.json(parsed.representation ? { data: rows } : { ok: true, affected: rows.length });
+      }
+      const compiled = compileDelete(info, filters, dialect, parsed.all, scope);
       const rows = await run(compiled);
       if (rows.length === 0 && hasVersion && typeof body.version === "number") {
         return jsonError(409, "version_conflict", "version did not match");
@@ -208,6 +235,10 @@ async function readBody(c: { req: { json: () => Promise<unknown> } }): Promise<R
     throw new TableApiError(400, "bad_body", "JSON object is required");
   }
   return raw as Record<string, unknown>;
+}
+
+function rowId(keys: string[], row: Record<string, unknown>): string {
+  return keys.map((key) => String(row[key] ?? "")).join(",");
 }
 
 function coerceBody(

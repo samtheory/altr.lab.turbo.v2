@@ -250,7 +250,7 @@ describe.each(TEST_BACKENDS)("S0022 table API (%s)", (backend) => {
     expect((await app.request("/api/v1/notes?id=eq.1", { method: "DELETE", headers: json })).status).toBe(200);
 
     const rows = await db.jord.query(
-      `SELECT op, pk, new_json FROM jord_changes WHERE table_name = ${db.ph(1)} ORDER BY seq`,
+      `SELECT op, pk, old_json, new_json FROM jord_changes WHERE table_name = ${db.ph(1)} ORDER BY seq`,
       ["notes"],
     );
     expect(rows.map((row) => [row.op, row.pk])).toEqual([
@@ -258,6 +258,7 @@ describe.each(TEST_BACKENDS)("S0022 table API (%s)", (backend) => {
       ["update", "1"],
       ["delete", "1"],
     ]);
+    expect(JSON.parse(String(rows[1]!.old_json))).toMatchObject({ id: "1", title: "a" });
     expect(JSON.parse(String(rows[1]!.new_json))).toMatchObject({ id: "1", title: "b" });
     expect(events.filter((event) => event.table === "notes").map((event) => event.op)).toEqual([
       "insert",

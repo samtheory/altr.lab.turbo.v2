@@ -54,7 +54,9 @@ export function MigrateWizardPanel({ role }: Props) {
           Copy this file libSQL source to Turso or Postgres. Source is never
           deleted. <code className="font-mono">jord_vix_*</code> tables are
           skipped. The destination URL is used only for this job and is not
-          stored in Studio or returned by the API.
+          stored in Studio or returned by the API. The copy writes rows on the
+          destination directly, so its live subscribers do not get change
+          events for them.
         </p>
       </div>
 

@@ -48,6 +48,11 @@ export type JordStoragePort = {
   ): Promise<PutObjectResult>;
   getObject(bucket: string, key: string): Promise<Buffer | null>;
   headObject(bucket: string, key: string): Promise<HeadObjectResult | null>;
+  /**
+   * Resolves true if bytes were removed, false if already absent (not a
+   * failure). Throws on a real storage failure; callers must not treat a
+   * throw as "gone".
+   */
   deleteObject(bucket: string, key: string): Promise<boolean>;
   /** Issue a short-lived upload or download URL. */
   presign(request: PresignRequest): Promise<PresignResult>;

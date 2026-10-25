@@ -12,7 +12,7 @@ tags:
 
 # Jord — phase-03 candidates
 
-> **Proposed, not approved — needs a plan.** Gate: [[../../plan/Jord/phase-02.5/README|phase-02.5]] is code done (2026-10-25); start planning after [[../../plan/Jord/phase-02.75/README|phase-02.75]] group A (first green Actions run, branch protection). Phase-02.75 items that are really phase-03 scope: B6 `JORD_PG_WRITE_CONCURRENCY` (P1), B7 custom JWT claims (P4), C1 MinIO S3 CI (P6). Rationale and rating: [[../../report/Jord-phase-02-closeout-review]]. Phase-02 features: [[03-phase-02-features]]. Older soft list: [[01-phase-02-candidates]].
+> **Proposed, not approved — needs a plan.** Gate: [[../../plan/Jord/phase-02.5/README|phase-02.5]] is code done (2026-10-25); start planning after [[../../plan/Jord/phase-02.75/README|phase-02.75]] group A (first green Actions run, branch protection). Phase-02.75 items moved here (decided 2026-10-26): B6 `JORD_PG_WRITE_CONCURRENCY` (P1), B7 custom JWT claims (P4). C1 MinIO S3 live test landed in phase-02.75, so P6 starts with the S3 adapter already exercised in CI. Rationale and rating: [[../../report/Jord-phase-02-closeout-review]]. Phase-02 features: [[03-phase-02-features]]. Older soft list: [[01-phase-02-candidates]].
 
 The overall rating after phase-02 is **6/10**: lab-grade on file libSQL. Phase-03 should move Jord to a backend an Altr app can run in production. Order is by what blocks real use first.
 

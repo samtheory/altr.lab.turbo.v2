@@ -54,7 +54,9 @@ export function SqlConsolePanel({ role }: Props) {
         <p className="text-sm text-muted-foreground">
           Reads use a dedicated connection with engine-enforced query_only /
           READ ONLY. Writes go through the write queue. Raw SQL bypasses
-          migrations and, on libSQL, the outbox.
+          migrations and row-level change capture: after a successful write,
+          every tracked table gets one <code className="font-mono">resync</code>{" "}
+          change so live views refetch.
         </p>
       </div>
 

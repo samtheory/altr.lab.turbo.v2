@@ -36,7 +36,7 @@ Last updated: 2026-10-25 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 ## In progress
 
 - **Phase-02.5 — code done** ([[../plan/Jord/phase-02.5/README]]). S0030: dual-backend harness, live Postgres runs for table API / policies / outbox / SQL console / storage / jobs, nine real Postgres bugs fixed. S0031: one transactional outbox helper for every write route, real watermark, fail-closed. S0032: `owner_eq` + `claim_eq` row scope ORed across allows, user-table `CREATE POLICY`, route conformance test. S0033: verify card, features, rollup, tech_space.
-- **Phase-02.75 — active** ([[../plan/Jord/phase-02.75/README]]): A) push, first green `jord` + `jord-postgres` Actions runs, branch protection; B) rename-table RLS move (B1 done 2026-10-25), non-superuser rebuild test, hosted libSQL atomic tx, console emits, PATCH `old`, `JORD_PG_WRITE_CONCURRENCY`, custom claims; C) live S3 (MinIO), hosted libSQL CI.
+- **Phase-02.75 — active** ([[../plan/Jord/phase-02.75/README]]): A) push, first green `jord` + `jord-postgres` Actions runs, branch protection; B) rename-table RLS move (B1 done 2026-10-25), non-superuser rebuild test (B2 done 2026-10-26), hosted libSQL atomic tx, console emits, PATCH `old` (B5 done 2026-10-26), `JORD_PG_WRITE_CONCURRENCY`, custom claims; C) live S3 (MinIO), hosted libSQL CI.
 - **Phase-03** needs a plan (no folder yet): [[../feature_list/Jord/05-phase-03-candidates]]. Start after 02.75 group A.
 
 ## Gate — do not implement yet

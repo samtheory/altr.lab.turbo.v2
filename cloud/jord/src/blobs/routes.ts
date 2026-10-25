@@ -389,7 +389,17 @@ export function registerBlobRoutes(
       }
 
       // Byte delete outside the SQL queue; meta delete on the queue.
-      await deps.storage.deleteObject(bucket, key).catch(() => false);
+      // Already-absent bytes resolve (false); a real storage failure throws,
+      // and we keep the metadata row so the client can retry.
+      try {
+        await deps.storage.deleteObject(bucket, key);
+      } catch (err) {
+        console.error(
+          `[@altr/jord-server] blob byte delete failed ${bucket}/${key}`,
+          err,
+        );
+        return c.json({ error: "storage_delete_failed" as const }, 502);
+      }
       const deleted = await deps.enqueueWrite(() =>
         deps.jord.deleteBlobMeta(bucket, key),
       );

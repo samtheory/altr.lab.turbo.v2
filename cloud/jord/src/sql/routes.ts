@@ -5,6 +5,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 import type { JordAuthVariables } from "../auth/middleware.js";
+import type { Principal } from "../auth/principal.js";
 import type { WriteQueue } from "../queue.js";
 import type { LogSink } from "../logs/sink.js";
 
@@ -14,6 +15,11 @@ export function createSqlRoutes(deps: {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
   logs: LogSink;
+  /**
+   * B4: emit one `op: "resync"` per tracked table. Called inside the write
+   * queue, after a non-read-only statement succeeds. Never throws.
+   */
+  resyncTracked?: (principal: Principal) => Promise<void>;
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
   const history: Array<{
@@ -59,7 +65,13 @@ export function createSqlRoutes(deps: {
     let result;
     let errorText: string | null = null;
     try {
-      result = readOnly ? await run() : await deps.enqueueWrite(run);
+      result = readOnly
+        ? await run()
+        : await deps.enqueueWrite(async () => {
+            const value = await run();
+            await deps.resyncTracked?.(principal);
+            return value;
+          });
     } catch (err) {
       errorText = err instanceof Error ? err.message : String(err);
       result = null;
@@ -121,8 +133,9 @@ export function createSqlRoutes(deps: {
       truncated: result.truncated,
       elapsedMs: result.elapsedMs,
       readOnly,
-      note:
-        "Raw SQL bypasses the migration runner. On libSQL it also bypasses the outbox CDC path.",
+      note: readOnly
+        ? "Raw SQL bypasses the migration runner."
+        : "Raw SQL bypasses the migration runner. Row-level CDC is not captured; every tracked table gets one op:\"resync\" change so live subscribers refetch.",
     });
   });
 

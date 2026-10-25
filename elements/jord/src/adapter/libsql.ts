@@ -3,7 +3,7 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-import { createClient, type Client } from "@libsql/client";
+import { createClient, type Client, type Transaction } from "@libsql/client";
 import { and, asc, desc, eq, isNotNull, isNull, lte, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
@@ -132,6 +132,67 @@ export type LibSqlOpenOptions = {
   /** Hosted libsql auth; defaults to env tokens. */
   authToken?: string;
 };
+
+/**
+ * How `transaction(work)` holds atomicity.
+ * - `connection`: file libSQL — `BEGIN IMMEDIATE` on the one shared connection.
+ * - `interactive`: hosted libsql:// — `client.transaction("write")` (one
+ *   server-side stream); every statement inside `work` is routed to it.
+ */
+type LibSqlTxMode = "connection" | "interactive";
+
+/** Active transaction scope. `tx` is null on the shared-connection path. */
+type LibSqlTxScope = { tx: Transaction | null };
+
+/** Module-private key: forces the interactive (hosted) path on a file: DB. */
+const FORCE_INTERACTIVE_TX = Symbol("jord.libsql.forceInteractiveTx");
+type InternalOpenOptions = LibSqlOpenOptions & {
+  [FORCE_INTERACTIVE_TX]?: boolean;
+};
+
+/**
+ * @internal Test-only. Opens a file: DB but runs `transaction` through the
+ * hosted interactive-transaction path, so it can be proven without Turso.
+ * Not re-exported from the package index.
+ */
+export function openLibSqlWithInteractiveTxForTests(
+  url: string,
+): Promise<LibSqlAdapter> {
+  const options: InternalOpenOptions = { [FORCE_INTERACTIVE_TX]: true };
+  return LibSqlAdapter.open(url, options);
+}
+
+const ROUTED_METHODS = new Set<PropertyKey>(["execute", "batch", "executeMultiple"]);
+
+/**
+ * Wrap the client so `execute` / `batch` / `executeMultiple` go to the active
+ * interactive transaction when one is in scope (AsyncLocalStorage), else to the
+ * client. Drizzle and every raw adapter call share this one seam.
+ */
+function routeThroughTx(
+  client: Client,
+  activeTx: () => Transaction | null,
+): Client {
+  return new Proxy(client, {
+    get(target, prop) {
+      if (ROUTED_METHODS.has(prop)) {
+        return (...args: unknown[]) => {
+          const tx = activeTx();
+          const exec = (tx ?? target) as unknown as Record<
+            PropertyKey,
+            (...a: unknown[]) => unknown
+          >;
+          return exec[prop]!(...args);
+        };
+      }
+      const value: unknown = Reflect.get(target, prop, target);
+      if (typeof value === "function" && prop !== "constructor") {
+        return (value as (...a: unknown[]) => unknown).bind(target);
+      }
+      return value;
+    },
+  });
+}
 
 const POLICY_OPS = new Set<JordPolicyOperation>([
   "select",
@@ -350,14 +411,17 @@ async function probeLibsqlVectorBackend(client: Client): Promise<VectorBackend> 
   return "cosine";
 }
 
-const inLibsqlTx = new AsyncLocalStorage<boolean>();
-
 export class LibSqlAdapter implements JordDriverPort {
   readonly dialect = "libsql" as const;
   readonly urlScheme: Extract<JordUrlScheme, "file" | "libsql">;
   readonly vectorBackend: VectorBackend;
+  /** Tx-routed client: inside an interactive `transaction`, statements join it. */
   readonly client: Client;
   readonly db: JordDb;
+  private readonly rawClient: Client;
+  private readonly txMode: LibSqlTxMode;
+  /** Per adapter, so two open DBs never route into each other's transaction. */
+  private readonly txScope = new AsyncLocalStorage<LibSqlTxScope>();
   private readonly connectionUrl: string;
   private readonly authToken?: string;
 
@@ -366,12 +430,18 @@ export class LibSqlAdapter implements JordDriverPort {
     urlScheme: Extract<JordUrlScheme, "file" | "libsql">,
     vectorBackend: VectorBackend,
     connectionUrl: string,
+    txMode: LibSqlTxMode,
     authToken?: string,
   ) {
-    this.client = client;
+    this.rawClient = client;
+    this.txMode = txMode;
+    this.client = routeThroughTx(
+      client,
+      () => this.txScope.getStore()?.tx ?? null,
+    );
     this.urlScheme = urlScheme;
     this.vectorBackend = vectorBackend;
-    this.db = drizzle(client, { schema });
+    this.db = drizzle(this.client, { schema });
     this.connectionUrl = connectionUrl;
     this.authToken = authToken;
   }
@@ -386,7 +456,14 @@ export class LibSqlAdapter implements JordDriverPort {
       try {
         await ensureRecordsSchema(client, migrationLockKey(url));
         const vectorBackend = await probeLibsqlVectorBackend(client);
-        return new LibSqlAdapter(client, "libsql", vectorBackend, url, authToken);
+        return new LibSqlAdapter(
+          client,
+          "libsql",
+          vectorBackend,
+          url,
+          "interactive",
+          authToken,
+        );
       } catch (err) {
         client.close();
         throw err;
@@ -403,7 +480,15 @@ export class LibSqlAdapter implements JordDriverPort {
       }
       await ensureRecordsSchema(client, migrationLockKey(url));
       const vectorBackend = await probeLibsqlVectorBackend(client);
-      return new LibSqlAdapter(client, "file", vectorBackend, url);
+      const forceInteractive =
+        (options as InternalOpenOptions)[FORCE_INTERACTIVE_TX] === true;
+      return new LibSqlAdapter(
+        client,
+        "file",
+        vectorBackend,
+        url,
+        forceInteractive ? "interactive" : "connection",
+      );
     } catch (err) {
       client.close();
       throw err;
@@ -431,16 +516,37 @@ export class LibSqlAdapter implements JordDriverPort {
    * File libSQL: BEGIN IMMEDIATE on the shared connection, so drizzle and raw
    * calls inside `work` join it. Callers must hold the write queue; any other
    * statement issued on this connection meanwhile also lands in the transaction.
+   *
+   * Hosted libsql://: `client.transaction("write")` (interactive, one remote
+   * stream). The handle lives in this adapter's AsyncLocalStorage and the
+   * routed client sends every `execute` / `batch` made inside `work` (drizzle
+   * and raw port calls) to it. Statements outside `work`'s async context still
+   * use the stateless client and do not see uncommitted rows. Do not start
+   * detached jord work (unawaited promises, timers) inside `work`; on hosted
+   * libsql:// it fails with `TRANSACTION_CLOSED` once the transaction ends.
    */
   async transaction<T>(work: () => Promise<T>): Promise<T> {
-    if (this.urlScheme === "libsql" || inLibsqlTx.getStore()) return work();
-    await this.client.execute("BEGIN IMMEDIATE");
+    if (this.txScope.getStore()) return work();
+    if (this.txMode === "interactive") {
+      const tx = await this.rawClient.transaction("write");
+      try {
+        const result = await this.txScope.run({ tx }, work);
+        await tx.commit();
+        return result;
+      } catch (err) {
+        await tx.rollback().catch(() => undefined);
+        throw err;
+      } finally {
+        tx.close();
+      }
+    }
+    await this.rawClient.execute("BEGIN IMMEDIATE");
     try {
-      const result = await inLibsqlTx.run(true, work);
-      await this.client.execute("COMMIT");
+      const result = await this.txScope.run({ tx: null }, work);
+      await this.rawClient.execute("COMMIT");
       return result;
     } catch (err) {
-      await this.client.execute("ROLLBACK").catch(() => undefined);
+      await this.rawClient.execute("ROLLBACK").catch(() => undefined);
       throw err;
     }
   }

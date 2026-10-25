@@ -8,7 +8,13 @@ import { assertPostgresMigrateUrl } from "../auth/pg-url.js";
 import { surfaceFor, undeclared } from "../auth/route-inventory.js";
 import { signSessionToken } from "../auth/token.js";
 import { createWriteQueue } from "../queue.js";
-import { openTestDb, TEST_BACKENDS, type TestBackend, type TestDb } from "../testing/harness.js";
+import {
+  openTestDb,
+  TEST_BACKENDS,
+  type TestBackend,
+  type TestDb,
+  type TestDbOptions,
+} from "../testing/harness.js";
 
 const open: TestDb[] = [];
 
@@ -31,8 +37,8 @@ afterEach(async () => {
 
 let backend: TestBackend = "file";
 
-async function boot() {
-  const db = await openTestDb(backend);
+async function boot(options?: TestDbOptions) {
+  const db = await openTestDb(backend, options);
   open.push(db);
   const mailer = new ConsoleMailer();
   const app = createJordApp({
@@ -680,6 +686,50 @@ describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {
       expect(rowIds(asUser)).toEqual(["1", "4"]);
     }
   });
+
+  it.runIf(name === "postgres")(
+    "a non-superuser table owner keeps every row through retype and rename",
+    async () => {
+      const ctx = await boot({ owner: "plain" });
+      const [who] = (await ctx.db.ddl.query(
+        "SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user",
+      )) as Array<{ rolsuper: boolean; rolbypassrls: boolean }>;
+      expect(who).toEqual({ rolsuper: false, rolbypassrls: false });
+
+      await scopedTable(ctx.app, [[{ kind: "owner_eq", config: { column: "owner_id" } }]]);
+      const admin = { "content-type": "application/json", ...bearer(adminToken()) };
+      const retyped = await ctx.app.request("/schema/tables/lab_notes/columns/title", {
+        method: "PATCH",
+        headers: admin,
+        body: JSON.stringify({ type: "REAL" }),
+      });
+      expect(retyped.status).toBe(200);
+      const renamed = await ctx.app.request("/schema/tables/lab_notes", {
+        method: "PATCH",
+        headers: admin,
+        body: JSON.stringify({ name: "lab_notes2" }),
+      });
+      expect(renamed.status).toBe(200);
+
+      const as = (session: { role: string; uid?: string }) =>
+        new Promise<Row[]>((resolve, reject) => {
+          setImmediate(() => {
+            ctx.jord.bindRlsSession?.(session);
+            ctx.jord
+              .query("SELECT id FROM lab_notes2 ORDER BY id")
+              .then((rows) => resolve(rows as Row[]), reject);
+          });
+        });
+      expect(rowIds(await as({ role: "admin" }))).toEqual(["1", "2", "3"]);
+      expect(rowIds(await as({ role: "user", uid: "user-1" }))).toEqual(["1"]);
+      const [forced] = (await ctx.db.ddl.query(
+        "SELECT relforcerowsecurity FROM pg_class WHERE relname = 'lab_notes2'",
+      )) as Array<{ relforcerowsecurity: boolean }>;
+      expect(forced?.relforcerowsecurity).toBe(true);
+      const api = await ctx.app.request("/api/v1/lab_notes2", { headers: bearer(userToken()) });
+      expect(rowIds(((await api.json()) as { data: Row[] }).data)).toEqual(["1"]);
+    },
+  );
 
   it.runIf(name === "postgres")(
     "enforces FORCE RLS in the database for jord_app, not only in the server",

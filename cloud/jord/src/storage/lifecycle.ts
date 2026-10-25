@@ -142,6 +142,7 @@ export async function gcExpiredPendingBlobs(input: {
       await input.jord.deleteBlobMeta(row.bucket, row.key);
       deletedPending += 1;
     } catch (err) {
+      // Byte delete failed (or later step): row is kept for retry next sweep.
       errors.push(
         `${row.bucket}/${row.key}: ${err instanceof Error ? err.message : String(err)}`,
       );

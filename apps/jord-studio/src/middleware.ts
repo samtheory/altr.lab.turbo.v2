@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { SESSION_COOKIE } from "@/lib/auth/config";
+import { isStudioOpenBypass, SESSION_COOKIE } from "@/lib/auth/config";
 
 const PUBLIC_PREFIXES = ["/login", "/api/auth"];
 
@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
   requestHeaders.set("x-jord-pathname", pathname);
 
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
-  const openBypass = process.env.JORD_STUDIO_OPEN === "1";
+  const openBypass = isStudioOpenBypass();
 
   if (!isPublic && !hasSession && !openBypass) {
     const login = new URL("/login", request.url);

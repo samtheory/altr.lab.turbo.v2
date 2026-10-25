@@ -87,6 +87,14 @@ export function createOutbox(jord: JordDriverPort) {
     return rows.length > 0;
   }
 
+  /** Every tracked table name, sorted (resync fan-out). */
+  async function listTracked(): Promise<string[]> {
+    const rows = await jord.query(
+      `SELECT table_name FROM jord_tracked_tables ORDER BY table_name ASC`,
+    );
+    return rows.map((row) => String(row.table_name));
+  }
+
   async function setTracked(tableName: string, tracked: boolean): Promise<void> {
     if (tracked) {
       await jord.query(
@@ -132,12 +140,14 @@ export function createOutbox(jord: JordDriverPort) {
   }): Promise<OutboxRow | null> {
     if (!(await isTracked(input.tableName))) return null;
     const blobs = input.blobColumns ?? new Set<string>();
-    const oldJson = JSON.stringify(
-      sanitizeRowForOutbox(input.oldRow ?? null, blobs),
-    );
-    const newJson = JSON.stringify(
-      sanitizeRowForOutbox(input.newRow ?? null, blobs),
-    );
+    // A table-level resync carries no row: SQL NULL, not the string "null".
+    const resync = input.op === "resync";
+    const oldJson = resync
+      ? null
+      : JSON.stringify(sanitizeRowForOutbox(input.oldRow ?? null, blobs));
+    const newJson = resync
+      ? null
+      : JSON.stringify(sanitizeRowForOutbox(input.newRow ?? null, blobs));
     const actor =
       input.actor == null
         ? null
@@ -290,6 +300,7 @@ export function createOutbox(jord: JordDriverPort) {
 
   return {
     isTracked,
+    listTracked,
     setTracked,
     appendChange,
     settle,

@@ -2,7 +2,7 @@
 title: "Jord — blobs"
 description: "Storage v2: local HMAC and S3/R2/MinIO adapters, sign-time policy, pending/finalize/GC"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-26
 tags:
   - tech-space
   - jord
@@ -68,6 +68,8 @@ Signed-URL TTL defaults to **15 minutes**, hard-capped at **1 hour** (`clampSign
 
 Object-byte I/O stays **off** the serial SQL write queue; only meta mutations enqueue.
 
+**Delete.** Bytes go first, then metadata. `deleteObject` resolves `true` (removed) or `false` (already absent, not an error) and **throws** on a real storage failure. On a throw, `DELETE /blobs/:bucket/objects/:key` logs the error and returns **502** `{ "error": "storage_delete_failed" }`, and keeps the metadata row so a retry works. A delete never reports success while bytes stay in storage. GC keeps a row whose byte delete failed and retries it on the next sweep.
+
 ### Local → S3 move plan
 
 Default stays local. Dry-run:
@@ -87,6 +89,9 @@ or `POST /blobs/copy-plan` (admin). The plan always reports `delete_local: false
 | Routes | `cloud/jord/src/blobs/routes.ts` |
 | GC job | `blobs_gc` in `cloud/jord/src/jobs/kinds.ts` |
 | Studio | **Storage** → `/storage` (existing BFF; no secrets in JSON) |
+| Tests | `cloud/jord/src/blobs/delete-failure.test.ts` (stub storage, file + Postgres) · live S3 `cloud/jord/src/storage/s3-live.test.ts`: sign → PUT → finalize → download → delete against MinIO, gated on `JORD_TEST_S3_ENDPOINT` (+ `_ACCESS_KEY_ID`, `_SECRET_ACCESS_KEY`, optional `_BUCKET`, `_REGION`). CI runs it in the `jord-postgres` job |
+
+MinIO needs path-style addressing: set `JORD_S3_FORCE_PATH_STYLE=1` with `JORD_STORAGE_BACKEND=s3`.
 
 ## Example
 

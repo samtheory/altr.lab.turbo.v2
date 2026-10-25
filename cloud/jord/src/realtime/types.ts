@@ -11,7 +11,12 @@ export const REALTIME_V1_TABLE = "records" as const;
 /** Shared cap for SSE + WebSocket subscribers on one process. */
 export const MAX_REALTIME_SUBSCRIBERS = 48;
 
-export type JordChangeOp = "insert" | "update" | "delete";
+/**
+ * `resync` is table-level and advisory (B4): emitted after a Studio SQL
+ * console write or a migrate-wizard apply, when the touched rows are unknown.
+ * It has `id: ""`, no row JSON, and tells subscribers to refetch the table.
+ */
+export type JordChangeOp = "insert" | "update" | "delete" | "resync";
 
 export type JordChangeEvent = {
   type: "jord.change";

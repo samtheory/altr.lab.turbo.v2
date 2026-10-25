@@ -523,7 +523,10 @@ export interface JordDriverPort {
   /**
    * Run `work` in one write transaction. Port calls made inside `work`
    * join it; a throw rolls everything back. Nested calls join the outer one.
-   * Hosted `libsql://` runs `work` without a transaction (stateless streams).
+   * File libSQL: `BEGIN IMMEDIATE` on the shared connection. Hosted
+   * `libsql://`: one interactive `client.transaction("write")`; statements
+   * issued inside `work` (drizzle and raw) are routed to it, so it is atomic too.
+   * Postgres: one pooled client.
    */
   transaction<T>(work: () => Promise<T>): Promise<T>;
   /**

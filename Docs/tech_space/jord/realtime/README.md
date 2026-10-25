@@ -2,7 +2,7 @@
 title: "Jord — realtime"
 description: "Transactional outbox CDC over SSE and WebSocket; resume with since; tracked tables only"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-26
 tags:
   - tech-space
   - jord
@@ -20,7 +20,7 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 
 ## What
 
-**Single emit path.** Every server write to a **tracked** table goes through one helper, `writeChangeAs(principal)` in `cloud/jord/src/app.ts`. Inside the write queue it opens `jord.transaction`, runs the data write, inserts the `jord_changes` row(s) (`outbox.appendChange`, the only `INSERT INTO jord_changes` in the source; a test greps for this), and commits. Only after commit does it publish `jord.change`. If the outbox insert fails, the data write rolls back and the request fails (5xx). Callers: Studio rows, `/records`, `/api/v1/:table` (using the `RETURNING` rows for `new` / `old`), functions (`records_insert`), triggers, and `/x/:slug`. Event name stays `jord.change`. Payload: `type`, `table`, `op`, `id`, `version?`, `at`, `dialect`, plus `seq` for resume.
+**Single emit path.** Every server write to a **tracked** table goes through one helper, `writeChangeAs(principal)` in `cloud/jord/src/app.ts`. Inside the write queue it opens `jord.transaction`, runs the data write, inserts the `jord_changes` row(s) (`outbox.appendChange`, the only `INSERT INTO jord_changes` in the source; a test greps for this), and commits. Only after commit does it publish `jord.change`. If the outbox insert fails, the data write rolls back and the request fails (5xx). Callers: Studio rows, `/records`, `/api/v1/:table` (`RETURNING` for `new`; a PATCH reads the prior row in the same transaction for `old`), functions (`records_insert`), triggers, and `/x/:slug`. Event name stays `jord.change`. Payload: `type`, `table`, `op`, `id`, `version?`, `at`, `dialect`, plus `seq` for resume.
 
 | Piece | Detail |
 |-------|--------|
@@ -42,11 +42,13 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 
 Any authenticated principal may subscribe, including `user` and `anon`. When the access token `exp` passes, SSE emits `expired` and ends; WebSocket closes with **4401**.
 
+### Table-level resync (raw SQL)
+
+Raw SQL from the Studio SQL console is not captured row by row. After a successful **non-read-only** console write, `resyncTrackedAs(principal)` in `cloud/jord/src/app.ts` appends one row per tracked table with `op: "resync"`, `pk: ""` and NULL `old_json` / `new_json`, all in one transaction, still inside the write queue slot. After commit each row is published on its table channel as `{ type: "jord.change", table, op: "resync", id: "", at, dialect, seq }`. Clients refetch the table. It is not in the same transaction as the user's SQL (raw SQL may carry its own `BEGIN` / `COMMIT`), so a failed resync is logged and the write still succeeds. Read-only and failed queries emit nothing. Resync rows pass the `?id=` filter (live and on `since=` replay) because they carry no row id. Delivery still goes through the policy check.
+
 ### Not captured
 
-- **Raw SQL** from the Studio SQL console and the migrate wizard. Only writes through the paths above insert into `jord_changes`. Studio Help documents the gap.
-- **Hosted `libsql://`.** `jord.transaction` runs without a transaction there (the remote client has no shared connection), so data and outbox are written in order but not atomically.
-- `/api/v1` PATCH emits `old: null` (the update does not read the prior row).
+- **Migrate wizard.** It only reads this database and writes the destination directly, so the destination's subscribers get no events for copied rows. Nothing changes here, so nothing is emitted here.
 
 ## How
 
@@ -56,9 +58,9 @@ Any authenticated principal may subscribe, including `user` and `anon`. When the
 | Outbox | `cloud/jord/src/realtime/outbox.ts` |
 | Watermark | `cloud/jord/src/realtime/watermark.ts` |
 | Bus (fanout only) | `cloud/jord/src/realtime/bus.ts` |
-| Transaction | `JordDriverPort.transaction` (libSQL `BEGIN IMMEDIATE` on the shared connection; Postgres one pooled client with the session GUCs) |
+| Transaction | `JordDriverPort.transaction`: file libSQL `BEGIN IMMEDIATE` on the shared connection; hosted `libsql://` an interactive `client.transaction("write")`, with every adapter statement routed into it; Postgres one pooled client with the session GUCs. All three are atomic. Do not start detached jord work inside `work` |
 | Migration | `elements/jord/migrations/{libsql,postgres}/0004_outbox.sql` |
-| Tests | `cloud/jord/src/realtime/outbox.test.ts` (file + live Postgres) |
+| Tests | `cloud/jord/src/realtime/outbox.test.ts` (file + live Postgres) · resync `cloud/jord/src/sql/resync.test.ts` · hosted atomicity `elements/jord/src/adapter/libsql-transaction.test.ts` (forced interactive path on `file:`; live run needs `JORD_TEST_LIBSQL_URL` + `JORD_TEST_LIBSQL_AUTH_TOKEN`) |
 
 ## Example
 

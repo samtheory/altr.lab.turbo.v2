@@ -42,6 +42,7 @@ export class RealtimeBus {
 
   /**
    * Subscribe with table / optional id filter applied before the listener runs.
+   * `op: "resync"` events skip the id filter (they carry no row id).
    */
   trySubscribeFiltered(
     filter: RealtimeSubscribeFilter,
@@ -49,7 +50,8 @@ export class RealtimeBus {
   ): (() => void) | null {
     return this.trySubscribe((event) => {
       if (event.table !== filter.table) return;
-      if (filter.id && event.id !== filter.id) return;
+      // A table-level resync reaches id-filtered subscribers too.
+      if (filter.id && event.op !== "resync" && event.id !== filter.id) return;
       listener(event);
     });
   }

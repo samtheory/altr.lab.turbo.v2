@@ -38,8 +38,15 @@ jobs:
       - name: Typecheck @altr/jord
         run: pnpm --filter @altr/jord typecheck
 
+      # Hosted libsql:// atomicity test runs only when both secrets exist
+      # (empty on forks and until a Turso test database is configured).
+      # The whole engine test process sees the token: use one scoped to a
+      # single throwaway test database, never an org or platform token.
       - name: Test @altr/jord
         run: pnpm --filter @altr/jord test
+        env:
+          JORD_TEST_LIBSQL_URL: ${{ secrets.JORD_TEST_LIBSQL_URL }}
+          JORD_TEST_LIBSQL_AUTH_TOKEN: ${{ secrets.JORD_TEST_LIBSQL_AUTH_TOKEN }}
 
       - name: Typecheck @altr/jord-server
         run: pnpm --filter @altr/jord-server typecheck
@@ -75,8 +82,27 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # Docker Hub minio/minio is no longer published; bitnamilegacy/minio starts
+      # the server by default (service containers cannot pass a command).
+      # Frozen namespace, so pinned by digest (tag 2025.5.24-debian-12-r5).
+      # Revisit when a maintained image that starts without a command exists.
+      minio:
+        image: bitnamilegacy/minio@sha256:451fe6858cb770cc9d0e77ba811ce287420f781c7c1b806a386f6896471a349c
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       JORD_TEST_POSTGRES_URL: postgres://postgres:postgres@localhost:5432/jord_test
+      JORD_TEST_S3_ENDPOINT: http://localhost:9000
+      JORD_TEST_S3_ACCESS_KEY_ID: minioadmin
+      JORD_TEST_S3_SECRET_ACCESS_KEY: minioadmin
     steps:
       - uses: actions/checkout@v4
 

@@ -141,17 +141,14 @@ export function createS3StorageAdapter(
     },
 
     async deleteObject(bucket, key) {
-      try {
-        await client.send(
-          new DeleteObjectCommand({
-            Bucket: physicalBucket,
-            Key: objectKey(bucket, key, prefix),
-          }),
-        );
-        return true;
-      } catch {
-        return false;
-      }
+      // S3 DeleteObject is idempotent (missing key succeeds); real failures throw.
+      await client.send(
+        new DeleteObjectCommand({
+          Bucket: physicalBucket,
+          Key: objectKey(bucket, key, prefix),
+        }),
+      );
+      return true;
     },
 
     async presign(request: PresignRequest): Promise<PresignResult> {
