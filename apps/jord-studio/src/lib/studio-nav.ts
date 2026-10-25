@@ -82,6 +82,12 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         href: "/apis/functions",
         status: "live",
       },
+      {
+        id: "table-api",
+        label: "Table API",
+        href: "/apis/table",
+        status: "live",
+      },
     ],
   },
   {

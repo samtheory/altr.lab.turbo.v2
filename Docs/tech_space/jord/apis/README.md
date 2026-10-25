@@ -2,7 +2,7 @@
 title: "Jord — APIs"
 description: "Generated records CRUD catalog, built-in function steps, and custom /x/:slug bindings"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
@@ -51,6 +51,20 @@ Step writes call `enqueueWrite`. `records_*` steps use the same policy gate as H
 
 Bind `POST /x/count-notes` to a function whose only step is `records_count`. An editor `POST /x/count-notes` runs the pipeline. A readonly token gets **403**. An admin toggle off returns **503** on the next call.
 
+## Table API (S0022)
+
+Authenticated `GET|POST|PATCH|DELETE /api/v1/:table` and `GET /api/v1/openapi.json`. Filters are `column=op.value` with `eq neq gt gte lt lte like ilike in is`. Values are coerced to the introspected column type and bound. Identifiers come from that column list only.
+
+`ilike` is `lower(column) LIKE lower(?)` on libSQL. That is not Postgres Unicode `ILIKE`.
+
+Caps: default limit **100**, max **1000**, `in(...)` max **100**, JSON body **1 MiB** (S0028). PATCH and DELETE without a filter return **400**. `?all=true` is **service only**. A table with no primary key rejects PATCH and DELETE. Composite keys are repeated `pk` query params in column order.
+
+`Prefer: count=planned` may return `count: null` on libSQL (no planner estimate). `Prefer: count=exact` runs `COUNT(*)` and is costly. It is not the default. `Prefer: return=representation` uses `RETURNING` (verified on file libSQL; Postgres not run here).
+
+`records` still honors `JORD_GENERATED_API_DISABLED` (**503**). User and anon stay default-deny until a policy allows the table. `/api/v1` shares the data-route limit (120 / minute) and idempotency.
+
+Studio playground: `/apis/table` (Apolyx). The fetch helper used by tests is `cloud/jord/src/table-api/__tests__/fetch-helper.ts`. It does not import `@altr/jord`.
+
 ## Not in Jord yet
 
-OpenAPI export, per-operation toggles, arbitrary SQL steps, user-uploaded code, a generated catalog per user table.
+Embeds, joins, per-operation toggles, arbitrary SQL steps, user-uploaded code, a generated catalog per user table. Postgres RETURNING for this route was not run.

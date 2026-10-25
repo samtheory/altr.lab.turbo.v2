@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; S0027 through S0028 in tree for file libSQL; next untouched stop is S0022"
+description: "Jord phase-01 shipped; S0027 through S0022 in tree for file libSQL; next untouched stop is S0023"
 created: 2026-09-19
 updated: 2026-10-25
 tags:
@@ -13,7 +13,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-25 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0028** (HTTP hardening, file libSQL) · **Phase-01 closed** · **S0027** CI workflow in tree (Actions / branch-protection `jord` still **UNVERIFIED**) · Plan review: [[Jord-phase-02-plan-review]] · Shipped review: [[Jord-implemented-review]]
+Last updated: 2026-10-25 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **Jord-S0022** (table API, file libSQL) · **Phase-01 closed** · **S0027** CI workflow in tree (Actions / branch-protection `jord` still **UNVERIFIED**) · Plan review: [[Jord-phase-02-plan-review]] · Shipped review: [[Jord-implemented-review]]
 
 ## Implemented
 
@@ -26,16 +26,17 @@ Last updated: 2026-10-25 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Jord-S0021 ADR** — accepted for Part C · [[../plan/Jord/phase-02/Jord-S0021/ADR-threat-model]]
 - **Jord-S0021-C (local, file libSQL)** — deny-overrides, user/anon default-deny, `jord_table_rls`, owner column, route inventory, `jord_app` grant plan · [[../tech_space/jord/policies/README]] · card [[../plan/Jord/phase-02/Jord-S0021/03-policy]]
 - **Jord-S0028 (local, file libSQL)** — CORS allow-list, data-route rate limits, 1 MiB JSON cap, write-queue drain, Idempotency-Key · [[../tech_space/jord/overview/README#http-edge-s0028]] · [[../tech_space/jord/writes/README]] · card [[../plan/Jord/phase-02/Jord-S0028/README]]
+- **Jord-S0022 (local, file libSQL)** — `/api/v1/:table`, OpenAPI, Studio playground · [[../tech_space/jord/apis/README]] · card [[../plan/Jord/phase-02/Jord-S0022/README]]
 
 ## In progress
 
-_(Postgres tests not run: `JORD_TEST_POSTGRES_URL` unset. Part C pool-leak and dialect-pair boxes stay open. S0027 branch protection still a manual admin step.)_
+_(Postgres tests not run: `JORD_TEST_POSTGRES_URL` unset. Part C pool-leak and dialect-pair boxes stay open. S0022 RETURNING was not run on Postgres. S0027 branch protection still a manual admin step.)_
 
 ## Planned (repo)
 
 Phase-02 features: [[../feature_list/Jord/03-phase-02-features]] · Queue: [[../plan/Jord/phase-02/README]]
 
-Execution (ids are not this order): **S0027** CI (workflow in tree) → **S0021-A** migrations (file libSQL in tree) → **S0021-B** principals (file libSQL in tree) → **S0021 ADR** accepted → **S0021-C** policies (file libSQL in tree; two Postgres boxes open) → **S0028** HTTP hardening (file libSQL in tree) → **S0022** table API → **S0023** CDC → **S0029** client → **S0024** Studio → **S0025** storage → **S0026** functions ADR only.
+Execution (ids are not this order): **S0027** CI (workflow in tree) → **S0021-A** migrations (file libSQL in tree) → **S0021-B** principals (file libSQL in tree) → **S0021 ADR** accepted → **S0021-C** policies (file libSQL in tree; two Postgres boxes open) → **S0028** HTTP hardening (file libSQL in tree) → **S0022** table API (file libSQL in tree; Postgres RETURNING not run) → **S0023** CDC → **S0029** client → **S0024** Studio → **S0025** storage → **S0026** functions ADR only.
 
 Soft leftovers: [[../feature_list/Jord/01-phase-02-candidates]] · Artemis · Tia
 

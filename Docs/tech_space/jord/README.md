@@ -24,7 +24,7 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
 | [[schema/README]] | Introspect, CREATE, ADD, DROP, RENAME, type change |
 | [[auth/README]] | Principals, HMAC operators, JWT, scrypt, route matrix |
-| [[apis/README]] | Generated CRUD, function steps, `/x/:slug` |
+| [[apis/README]] | Generated CRUD, function steps, `/x/:slug`, `/api/v1` table API |
 | [[jobs/README]] | Scheduler, built-in kinds, log ring |
 | [[policies/README]] | Deny-overrides, user/anon default-deny, `jord_app`, Postgres RLS |
 | [[realtime/README]] | Write-path events, SSE, WebSocket |

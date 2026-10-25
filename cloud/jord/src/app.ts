@@ -99,6 +99,7 @@ import {
 } from "./idempotency/middleware.js";
 import type { WriteQueue } from "./queue.js";
 import { registerVectorRoutes } from "./vectors/index.js";
+import { createTableApiRoutes } from "./table-api/routes.js";
 import {
   isRealtimeSubscribeTable,
   MAX_REALTIME_SUBSCRIBERS,
@@ -424,12 +425,6 @@ export function createJordApp(deps: JordAppDeps) {
 
   /** @deprecated alias — records emit sites */
   const publishRecordChange = publishChange;
-
-  app.all("/api/v1/*", () => {
-    throw new HTTPException(403, {
-      message: "table API is not available until S0022",
-    });
-  });
 
   app.route(
     "/auth",
@@ -2298,6 +2293,15 @@ export function createJordApp(deps: JordAppDeps) {
     jord: deps.jord,
     enqueueWrite: deps.enqueueWrite,
   });
+
+  protectedRoutes.route(
+    "/api/v1",
+    createTableApiRoutes({
+      jord: deps.jord,
+      enqueueWrite: deps.enqueueWrite,
+      generatedRecordsEnabled: () => generatedApi.isEnabled("records"),
+    }),
+  );
 
   app.route("/", protectedRoutes);
 

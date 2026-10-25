@@ -35,6 +35,7 @@ export function resolveDataRateLimit(
 }
 
 function dataRouteBucket(path: string): string | null {
+  if (path.startsWith("/api/v1")) return "api-v1";
   if (path.startsWith("/records")) return "records";
   if (SCHEMA_ROWS.test(path)) return "schema-rows";
   if (path.startsWith("/vectors")) return "vectors";

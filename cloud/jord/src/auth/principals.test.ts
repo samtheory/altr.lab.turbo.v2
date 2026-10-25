@@ -207,8 +207,8 @@ describe("route matrix", () => {
     expect(routeAllowed(user, "GET", "/auth/me")).toBe(true);
     expect(routeAllowed(anon, "POST", "/x/echo")).toBe(true);
     expect(routeAllowed(operator("readonly"), "POST", "/x/echo")).toBe(false);
-    expect(routeAllowed(user, "GET", "/api/v1/records")).toBe(false);
-    expect(routeAllowed(service, "GET", "/api/v1/records")).toBe(false);
+    expect(routeAllowed(user, "GET", "/api/v1/records")).toBe(true);
+    expect(routeAllowed(service, "GET", "/api/v1/records")).toBe(true);
   });
 });
 
@@ -400,7 +400,7 @@ describe("auth routes", () => {
       const tableApi = await ctx.app.request("/api/v1/records", {
         headers: bearer(admin),
       });
-      expect(tableApi.status).toBe(403);
+      expect(tableApi.status).toBe(200);
     } finally {
       await ctx.jord.close();
     }

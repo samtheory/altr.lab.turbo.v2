@@ -25,7 +25,7 @@ function isSchemaRowPath(path: string): boolean {
 /**
  * Kind-level route matrix for groups that exist today.
  * `user` and `anon` may call `/records` and schema row routes; other surfaces stay closed.
- * `/api/v1` is denied until S0022 (registered separately).
+ * `/api/v1` is the table API. Policies decide the row, not this gate.
  */
 export function routeAllowed(
   principal: Principal,
@@ -36,7 +36,10 @@ export function routeAllowed(
     rawPath === "/me" || rawPath === "/logout" || rawPath === "/anon-key"
       ? `/auth${rawPath}`
       : rawPath;
-  if (starts(path, "/api/v1")) return false;
+  if (starts(path, "/api/v1")) {
+    if (method === "GET" || method === "HEAD") return true;
+    return allowsRecordWrite(principal);
+  }
 
   if (path === "/auth/me" || path === "/auth/logout") return true;
   if (path === "/auth/anon-key") {

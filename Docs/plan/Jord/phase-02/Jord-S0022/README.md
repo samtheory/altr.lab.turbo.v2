@@ -2,7 +2,7 @@
 title: "Jord-S0022 — Table API (PostgREST-lite) + OpenAPI"
 description: "Typed filters, caps, return=representation, no unfiltered write without service all=true"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0022 — Table API + OpenAPI
 
-> Who: **mimir**. **Status: planned.** **Execution #7.** Blocked by [[../Jord-S0028/README]]. Next: [[../Jord-S0023/README]].
+> Who: **mimir**. **Status: in tree** (file libSQL, 2026-10-25). **Execution #7.** Next: [[../Jord-S0023/README]]. Postgres RETURNING was not run (`JORD_TEST_POSTGRES_URL` unset).
 
 **Sprint id:** `Jord-S0022`  
 **Hats:** **sindri** · **saga** · **heimdall** · **apollo** · **docs_man**
@@ -61,9 +61,9 @@ Filter coerce; ilike lower() on libSQL; cap rejection; PATCH/DELETE without filt
 
 ## Definition of Done
 
-- [ ] No SQL concatenation of user input
-- [ ] Caps and `all=true` rules tested
-- [ ] `count=planned` documented; `count=exact` marked costly
-- [ ] RETURNING works on both dialects in the conformance suite
-- [ ] Category `apis` updated
-- [ ] Test-folder `fetch-helper` typechecks with no `@altr/jord` import; a test calls it against the table route
+- [x] No SQL concatenation of user input
+- [x] Caps and `all=true` rules tested
+- [x] `count=planned` documented; `count=exact` marked costly
+- [ ] RETURNING works on both dialects in the conformance suite — file libSQL `Prefer: return=representation` passed. Postgres was not run.
+- [x] Category `apis` updated
+- [x] Test-folder `fetch-helper` typechecks with no `@altr/jord` import; a test calls it against the table route

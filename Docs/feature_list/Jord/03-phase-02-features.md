@@ -67,6 +67,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 | | |
 |--|--|
 | **What** | `/api/v1/:table`. Coerce query values by column type. libSQL `ilike` = `lower()`. Caps: limit default 100 / max 1000, `in` max 100, body 1 MiB. PATCH/DELETE without filter rejected; `?all=true` **service only**. Composite PKs supported; no stable key → no PATCH/DELETE. `count=planned` default-ish; `count=exact` documented as costly. `Prefer: return=representation` via RETURNING |
+| **Status** | File libSQL is in the tree (2026-10-25). Postgres RETURNING was not run |
 | **Acceptance** | Caps, all=true, coerce, RETURNING, and ilike documented and tested. Test-folder fetch helper does not import `@altr/jord` (S0029 promotes it). No embeds |
 
 ## F5 — CDC (`Jord-S0023`)

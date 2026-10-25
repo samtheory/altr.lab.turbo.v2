@@ -44,7 +44,7 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 
 ### Route matrix
 
-`user` and `anon` are default-deny on data routes until Part C attaches a policy. `/api/v1` answers **403** until S0022.
+`user` and `anon` are default-deny on data routes until a policy allows the table. `/api/v1` is mounted. Policies still decide the row.
 
 | Route group | operator `admin` | operator `editor` | operator `readonly` | `service` | `user` | `anon` |
 |-------------|------------------|-------------------|---------------------|-----------|--------|--------|
@@ -58,7 +58,7 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 | `/realtime`, `/realtime/ws` | yes | yes | yes | yes | yes until exp | yes until exp |
 | Custom `/x/:slug` | yes | yes | no | yes | as caller, no escalate | as caller, no escalate |
 | Jobs, policies, triggers | yes | no | inspect | no | no | no |
-| `/api/v1` | no until S0022 | no | no | no | no | no |
+| `/api/v1` | yes (policies) | write / read | read | yes (bypass) | policies | policies |
 
 | HTTP | Meaning |
 |------|---------|
@@ -115,4 +115,4 @@ A raw `Authorization: Bearer $JORD_SERVER_TOKEN` is `service` / `service_role` u
 
 ## Not in Jord yet
 
-OAuth, SMTP, user policies (Part C), and the public table API (S0022).
+OAuth and SMTP.

@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0021 — migration + principal auth + policies
 
-> Who: **mimir**. **Status: Parts A, B, and C are in the tree** for file libSQL (2026-10-25). [[ADR-threat-model]] **accepted for Part C**. Two Part C boxes stay open until Postgres is run (pool leak, dialect pair) and do not block later stops. S0028 is in the tree. **Next untouched stop:** [[../Jord-S0022/README]]. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]].
+> Who: **mimir**. **Status: Parts A, B, and C are in the tree** for file libSQL (2026-10-25). [[ADR-threat-model]] **accepted for Part C**. Two Part C boxes stay open until Postgres is run (pool leak, dialect pair) and do not block later stops. S0028 and S0022 are in the tree. **Next untouched stop:** [[../Jord-S0023/README]]. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]].
 
 **Sprint id:** `Jord-S0021`  
 **Owner:** mimir  
