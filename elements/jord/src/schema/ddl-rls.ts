@@ -24,6 +24,8 @@ export type RlsSessionContext = {
   bucket: string;
   /** Empty string when the request has no end-user id. */
   uid: string;
+  /** JSON object of string claims, or empty string. */
+  claims?: string;
 };
 
 type PolicyRule = {
@@ -31,8 +33,17 @@ type PolicyRule = {
   config?: Record<string, unknown>;
 };
 
-export function rlsPolicyName(operation: JordPolicyOperation): string {
-  return `jord_rls_records_${operation}`;
+/** Options for compiling policies on one table. */
+export type RlsTableShape = {
+  /** `bucket_*` rules read a `bucket` column; skip them when it is missing. */
+  hasBucket: boolean;
+};
+
+export function rlsPolicyName(
+  operation: JordPolicyOperation,
+  tableName = "records",
+): string {
+  return `jord_rls_${tableName}_${operation}`;
 }
 
 /** Escape a SQL string literal. Rejects NUL. */
@@ -72,7 +83,7 @@ function parseRules(raw: string): PolicyRule[] | null {
   }
 }
 
-function ruleExpr(rule: PolicyRule): string | null {
+function ruleExpr(rule: PolicyRule, shape: RlsTableShape): string | null {
   const config = rule.config ?? {};
   switch (rule.kind) {
     case "always":
@@ -84,11 +95,13 @@ function ruleExpr(rule: PolicyRule): string | null {
       return `current_setting('jord.role', true) = ANY (ARRAY[${list}]::text[])`;
     }
     case "bucket_eq": {
+      if (!shape.hasBucket) return null;
       if (typeof config.bucket !== "string") return "FALSE";
       const lit = quoteSqlLiteral(config.bucket);
       return `(bucket = ${lit} AND current_setting('jord.bucket', true) = ${lit})`;
     }
     case "bucket_in": {
+      if (!shape.hasBucket) return null;
       const buckets = asStringArray(config.buckets);
       if (buckets.length === 0) return "FALSE";
       const list = buckets.map(quoteSqlLiteral).join(", ");
@@ -97,8 +110,16 @@ function ruleExpr(rule: PolicyRule): string | null {
     case "owner_eq":
       return ownerUidExpr(config.column);
     case "claim_eq": {
-      if (config.claim !== "sub") return null;
-      return ownerUidExpr(config.column);
+      if (config.claim === "sub") return ownerUidExpr(config.column);
+      if (
+        typeof config.claim !== "string" ||
+        config.claim.length === 0 ||
+        typeof config.column !== "string" ||
+        !isValidSqlIdent(config.column)
+      ) {
+        return null;
+      }
+      return `${quoteIdent(config.column)} = (NULLIF(current_setting('jord.claims', true), '')::jsonb ->> ${quoteSqlLiteral(config.claim)})`;
     }
     default:
       return null;
@@ -111,15 +132,22 @@ function ownerUidExpr(column: unknown): string | null {
   return `${quoteIdent(column)} = current_setting('jord.uid', true)`;
 }
 
+function defaultShape(tableName: string): RlsTableShape {
+  return { hasBucket: tableName === "records" };
+}
+
 /** Boolean SQL for one policy, or null when it must not be compiled. */
-export function policyMatchExpr(policy: JordPolicy): string | null {
+export function policyMatchExpr(
+  policy: JordPolicy,
+  shape: RlsTableShape = defaultShape(policy.tableName),
+): string | null {
   if (!policy.enabled) return null;
-  if (policy.tableName !== "records") return null;
+  if (!isValidSqlIdent(policy.tableName)) return null;
   const rules = parseRules(policy.rules);
   if (!rules) return null;
   const parts: string[] = [];
   for (const rule of rules) {
-    const expr = ruleExpr(rule);
+    const expr = ruleExpr(rule, shape);
     if (!expr) return null;
     parts.push(expr);
   }
@@ -146,11 +174,14 @@ const OPERATOR_SQL_DEFAULT =
  * Deny overrides allow. Anything else is allowed only for operator roles.
  * `user` / `anon` (and an empty role) do not match the ELSE.
  */
-export function buildOperationExpr(policies: readonly JordPolicy[]): string {
+export function buildOperationExpr(
+  policies: readonly JordPolicy[],
+  shape?: RlsTableShape,
+): string {
   const denies: string[] = [];
   const allows: string[] = [];
   for (const policy of policies) {
-    const match = policyMatchExpr(policy);
+    const match = policyMatchExpr(policy, shape);
     if (!match) continue;
     if (policy.effect === "deny") denies.push(match);
     else allows.push(match);
@@ -166,28 +197,33 @@ export function buildOperationExpr(policies: readonly JordPolicy[]): string {
   return `(CASE ${whens.join(" ")} ELSE ${OPERATOR_SQL_DEFAULT} END)`;
 }
 
-export function compilePolicySql(policy: JordPolicy): string | null {
-  const match = policyMatchExpr(policy);
+export function compilePolicySql(
+  policy: JordPolicy,
+  shape?: RlsTableShape,
+): string | null {
+  const match = policyMatchExpr(policy, shape);
   if (!match) return null;
-  const name = quoteIdent(rlsPolicyName(policy.operation));
-  const expr = buildOperationExpr([policy]);
-  return createPolicySql(policy.operation, name, expr);
+  const name = quoteIdent(rlsPolicyName(policy.operation, policy.tableName));
+  const expr = buildOperationExpr([policy], shape);
+  return createPolicySql(policy.tableName, policy.operation, name, expr);
 }
 
 function createPolicySql(
+  tableName: string,
   operation: JordPolicyOperation,
   name: string,
   expr: string,
 ): string {
+  const table = quoteIdent(tableName);
   switch (operation) {
     case "select":
-      return `CREATE POLICY ${name} ON ${quoteIdent("records")} FOR SELECT USING (${expr})`;
+      return `CREATE POLICY ${name} ON ${table} FOR SELECT USING (${expr})`;
     case "insert":
-      return `CREATE POLICY ${name} ON ${quoteIdent("records")} FOR INSERT WITH CHECK (${expr})`;
+      return `CREATE POLICY ${name} ON ${table} FOR INSERT WITH CHECK (${expr})`;
     case "update":
-      return `CREATE POLICY ${name} ON ${quoteIdent("records")} FOR UPDATE USING (${expr}) WITH CHECK (${expr})`;
+      return `CREATE POLICY ${name} ON ${table} FOR UPDATE USING (${expr}) WITH CHECK (${expr})`;
     case "delete":
-      return `CREATE POLICY ${name} ON ${quoteIdent("records")} FOR DELETE USING (${expr})`;
+      return `CREATE POLICY ${name} ON ${table} FOR DELETE USING (${expr})`;
   }
 }
 
@@ -198,24 +234,34 @@ export type RecordsRlsPlan = {
 };
 
 /**
- * Rebuild native policies on `records` from Jord policy rows.
+ * Rebuild native policies on one table from Jord policy rows.
  * Unknown rule kinds are skipped (middleware still evaluates them).
+ * `enable: "auto"` (records) turns RLS off when nothing compiles;
+ * `true` / `false` follow the user table's `jord_table_rls` flag.
  */
-export function planSyncRecordsRls(
+export function planSyncTableRls(
+  tableName: string,
   policies: readonly JordPolicy[],
+  options: { shape?: RlsTableShape; enable: boolean | "auto" },
 ): RecordsRlsPlan {
-  const table = quoteIdent("records");
+  const shape = options.shape ?? defaultShape(tableName);
+  const table = quoteIdent(tableName);
   const drops = RLS_OPERATIONS.map(
     (op) =>
-      `DROP POLICY IF EXISTS ${quoteIdent(rlsPolicyName(op))} ON ${table}`,
+      `DROP POLICY IF EXISTS ${quoteIdent(rlsPolicyName(op, tableName))} ON ${table}`,
   );
 
   const compilable = policies
-    .filter((policy) => policyMatchExpr(policy) != null)
+    .filter(
+      (policy) =>
+        policy.tableName === tableName && policyMatchExpr(policy, shape) != null,
+    )
     .slice()
     .sort(comparePolicyOrder);
 
-  if (compilable.length === 0) {
+  const enable =
+    options.enable === "auto" ? compilable.length > 0 : options.enable;
+  if (!enable) {
     return {
       enable: false,
       statements: [
@@ -228,8 +274,13 @@ export function planSyncRecordsRls(
 
   const creates = RLS_OPERATIONS.map((operation) => {
     const group = compilable.filter((policy) => policy.operation === operation);
-    const expr = buildOperationExpr(group);
-    return createPolicySql(operation, quoteIdent(rlsPolicyName(operation)), expr);
+    const expr = buildOperationExpr(group, shape);
+    return createPolicySql(
+      tableName,
+      operation,
+      quoteIdent(rlsPolicyName(operation, tableName)),
+      expr,
+    );
   });
 
   return {
@@ -241,4 +292,11 @@ export function planSyncRecordsRls(
       ...creates,
     ],
   };
+}
+
+/** Rebuild native policies on `records` from Jord policy rows. */
+export function planSyncRecordsRls(
+  policies: readonly JordPolicy[],
+): RecordsRlsPlan {
+  return planSyncTableRls("records", policies, { enable: "auto" });
 }

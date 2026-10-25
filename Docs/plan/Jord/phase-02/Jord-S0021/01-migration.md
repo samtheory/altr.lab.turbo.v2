@@ -96,5 +96,5 @@ Execution **#2**. Blocked by [[../Jord-S0027/README]] only.
 - [x] Fixture test: baseline migration against `phase-01-baseline.sql` keeps the seed row
 - [x] Second boot applies nothing
 - [x] `Docs/tech_space/jord/overview/README.md` updated in this change
-- [ ] Two concurrent Postgres boots do not double-apply (advisory lock) — **UNVERIFIED** here. Test exists; `JORD_TEST_POSTGRES_URL` was unset
+- [x] Two concurrent Postgres boots do not double-apply (advisory lock). Proof (phase-02.5 S0030, 2026-10-25, live `pgvector/pgvector:pg16`): `migrations.test.ts` › `postgres migration lock` › "does not double-apply when two boots race" and "waits on the session advisory lock" both passed. That run also found and fixed a real bug: the SQL splitter broke `$$` bodies, so every Postgres boot failed
 - [x] File libSQL tests green; Postgres opt-in via `JORD_TEST_POSTGRES_URL` (skipped on this host)

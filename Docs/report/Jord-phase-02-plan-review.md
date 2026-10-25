@@ -13,6 +13,9 @@ tags:
 
 # Jord phase-02 plan — review brief
 
+> [!warning] Historical (2026-10-25)
+> This is the pre-approval plan snapshot. The plan was approved, executed, and closed out in [[../plan/Jord/phase-02.5/README|phase-02.5]]. Its "do not start S0027" gates no longer apply. For current state read [[STATUS]] and `Docs/tech_space/jord/`.
+
 > **Audience:** a model or human that has **not** seen this planning session or the repo.  
 > **As of:** 2026-10-24.  
 > **Status:** review snapshot from 2026-10-24. **Since then:** S0027 (CI workflow), S0021-A (file libSQL migration runner), S0021-B (principals), the S0021 threat-model ADR (accepted for Part C), S0021-C (file libSQL policies), S0028 (HTTP hardening), S0022 (table API, file libSQL), S0023 (outbox CDC, file libSQL), S0029 (`@altr/jord-client`), and S0024 (Studio power tools, file libSQL) are in the tree. Postgres tests were not run. As-built includes `Docs/tech_space/jord/studio/README.md`. The sections below are the pre-implementation review.  

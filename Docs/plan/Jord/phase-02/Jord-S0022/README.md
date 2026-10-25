@@ -64,6 +64,6 @@ Filter coerce; ilike lower() on libSQL; cap rejection; PATCH/DELETE without filt
 - [x] No SQL concatenation of user input
 - [x] Caps and `all=true` rules tested
 - [x] `count=planned` documented; `count=exact` marked costly
-- [ ] RETURNING works on both dialects in the conformance suite — file libSQL `Prefer: return=representation` passed. Postgres was not run.
+- [x] RETURNING works on both dialects in the conformance suite. Proof (phase-02.5 S0030, 2026-10-25): `table-api.test.ts` runs on file and live Postgres as `jord_app`; 10/10 on each, including `Prefer: return=representation` and `count=exact`
 - [x] Category `apis` updated
 - [x] Test-folder `fetch-helper` typechecks with no `@altr/jord` import; a test calls it against the table route

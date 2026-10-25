@@ -136,6 +136,9 @@ export async function startJordServer(
     url: env.DATABASE_URL,
     postgresDdl: postgres ? false : undefined,
   });
+  const ddl = postgres
+    ? await createJordClient({ url: env.JORD_MIGRATE_URL, postgresDdl: true })
+    : undefined;
   const enqueueWrite = createWriteQueue();
   const realtime = new RealtimeBus();
   const { LogBatcher } = await import("./logs/batch.js");
@@ -145,6 +148,7 @@ export async function startJordServer(
   const scheduler = startJobScheduler({ jord, enqueueWrite, logs });
   const app = createJordApp({
     jord,
+    ddl,
     enqueueWrite,
     auth,
     logs,
@@ -183,6 +187,7 @@ export async function startJordServer(
       }
     }
     await jord.close();
+    await ddl?.close();
     server.close();
     process.exit(0);
   };
@@ -202,6 +207,7 @@ export async function startJordServer(
         await truncateWalCheckpoint(jord);
       }
       await jord.close();
+      await ddl?.close();
       server.close();
     },
   };

@@ -2,6 +2,8 @@ import type {
   JordDriverPort,
   JordPolicy,
   JordPolicyOperation,
+  RowPredicate,
+  RowScope,
 } from "@altr/jord";
 
 import type { PrincipalKind } from "../auth/principal.js";
@@ -15,7 +17,11 @@ import {
 export type PolicyDecision =
   | {
       allowed: true;
-      constraint?: { ownerColumn: string; uid: string };
+      /**
+       * Rows the caller may touch, when an allow matched only because of
+       * `owner_eq` / `claim_eq`. Absent means no row restriction.
+       */
+      scope?: RowScope;
     }
   | {
       allowed: false;
@@ -48,13 +54,82 @@ function highestPriority(policies: JordPolicy[]): JordPolicy {
   return best;
 }
 
-function ownerColumnFrom(rules: PolicyRule[]): string | null {
+/**
+ * Row terms for one matching allow policy, or null when it has no row rule
+ * (then it allows every row). A rule with no usable value yields a term that
+ * matches nothing.
+ */
+function rowPredicateFrom(
+  rules: PolicyRule[],
+  ctx: PolicyEvalContext,
+): RowPredicate | null {
+  const terms: RowPredicate = [];
   for (const rule of rules) {
-    if (rule.kind !== "owner_eq") continue;
     const column = rule.config?.column;
-    if (typeof column === "string" && column.length > 0) return column;
+    if (typeof column !== "string" || column.length === 0) continue;
+    if (rule.kind === "owner_eq") {
+      terms.push({ column, value: typeof ctx.uid === "string" ? ctx.uid : "" });
+    } else if (rule.kind === "claim_eq") {
+      const claim = rule.config?.claim;
+      const value = typeof claim === "string" ? ctx.claims?.[claim] : undefined;
+      terms.push({
+        column,
+        value: typeof value === "string" || typeof value === "number" ? String(value) : "",
+      });
+    }
   }
-  return null;
+  return terms.length > 0 ? terms : null;
+}
+
+/** Columns that the scope pins to a value (owner, tenant, ...). */
+export function scopeColumns(scope: RowScope | undefined): string[] {
+  if (!scope) return [];
+  return [...new Set(scope.anyOf.flatMap((predicate) => predicate.map((term) => term.column)))];
+}
+
+/**
+ * Stamp scope columns onto an insert. Picks the first predicate the values
+ * already agree with (missing columns count as agreeing), else the first one,
+ * and overwrites its columns. Returns null when the scope matches no row.
+ */
+export function stampInsertScope(
+  scope: RowScope | undefined,
+  values: Record<string, unknown>,
+): Record<string, unknown> | null {
+  if (!scope) return values;
+  const candidates = scope.anyOf.filter((predicate) =>
+    predicate.every((term) => term.value !== ""),
+  );
+  if (candidates.length === 0) return null;
+  const agrees = candidates.find((predicate) =>
+    predicate.every(
+      (term) => values[term.column] == null || String(values[term.column]) === term.value,
+    ),
+  );
+  const chosen = agrees ?? candidates[0]!;
+  const out = { ...values };
+  for (const term of chosen) out[term.column] = term.value;
+  return out;
+}
+
+/**
+ * True when a patch does not move the row out of the caller's scope: every
+ * scope column it sets equals that column's value in some predicate.
+ */
+export function patchKeepsScope(
+  scope: RowScope | undefined,
+  values: Record<string, unknown>,
+): boolean {
+  if (!scope) return true;
+  for (const column of scopeColumns(scope)) {
+    if (!Object.prototype.hasOwnProperty.call(values, column)) continue;
+    const next = String(values[column] ?? "");
+    const allowed = scope.anyOf.some((predicate) =>
+      predicate.some((term) => term.column === column && term.value === next),
+    );
+    if (!allowed) return false;
+  }
+  return true;
 }
 
 /**
@@ -81,6 +156,7 @@ export function ownerUnchanged(
  * Deny overrides allow among policies whose rules match.
  * `service`, `disabled`, and `bypass` allow. `user` / `anon` default-deny.
  * `operator` (or an omitted subject) keeps the phase-01 allow.
+ * Allows OR together: the scope is the union of their row predicates.
  */
 export async function evaluatePolicies(
   input: EvaluatePoliciesInput,
@@ -123,25 +199,13 @@ export async function evaluatePolicies(
   }
 
   if (allows.length > 0) {
-    let ownerColumn: string | null = null;
-    let ownerPriority = Number.NEGATIVE_INFINITY;
+    const anyOf: RowPredicate[] = [];
     for (const policy of allows) {
-      const column = ownerColumnFrom(parseRulesJson(policy.rules));
-      if (column && policy.priority >= ownerPriority) {
-        ownerColumn = column;
-        ownerPriority = policy.priority;
-      }
+      const predicate = rowPredicateFrom(parseRulesJson(policy.rules), ctx);
+      if (!predicate) return { allowed: true };
+      anyOf.push(predicate);
     }
-    if (ownerColumn) {
-      return {
-        allowed: true,
-        constraint: {
-          ownerColumn,
-          uid: typeof input.uid === "string" ? input.uid : "",
-        },
-      };
-    }
-    return { allowed: true };
+    return { allowed: true, scope: { anyOf } };
   }
 
   if (input.subject === "user" || input.subject === "anon") {

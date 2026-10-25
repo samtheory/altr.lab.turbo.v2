@@ -2,7 +2,7 @@ import type { JordDriverPort, JordFunction } from "@altr/jord";
 
 import type { JordRole } from "../auth/roles.js";
 import type { LogSink } from "../logs/sink.js";
-import type { JordChangeDraft } from "../realtime/types.js";
+import type { WriteWithChange } from "../realtime/types.js";
 import {
   FunctionStepError,
   getStepHandler,
@@ -20,7 +20,7 @@ export type RunFunctionInput = {
   request: FunctionRequestContext;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   logs?: LogSink;
-  onRecordChange?: (draft: JordChangeDraft) => void;
+  writeChange?: WriteWithChange;
 };
 
 export type RunFunctionOk = {
@@ -88,7 +88,7 @@ export async function runFunction(
         config: step.config ?? {},
         enqueueWrite: input.enqueueWrite,
         logs: input.logs,
-        onRecordChange: input.onRecordChange,
+        writeChange: input.writeChange,
       });
       prior = out.result;
     } catch (err) {

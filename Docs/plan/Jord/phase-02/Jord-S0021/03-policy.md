@@ -113,7 +113,7 @@ This card's PR updates `Docs/tech_space/jord/policies/README.md` (including the 
 - [x] Startup check refuses a Postgres runtime role that owns tables or has `BYPASSRLS`
 - [x] Runtime stays **`DATABASE_URL`** (name unchanged; no second runtime env, no alias, no deprecation warning)
 - [x] `file:` boot still works with only `DATABASE_URL` (no migrate URL)
-- [ ] Pool leak test green on Postgres (file exists; skipped here)
-- [ ] Shared dialect conformance suite green on file libSQL (Postgres opt-in) — file HTTP tests cover the decisions; the paired Postgres run was not executed
+- [x] Pool leak test green on Postgres. Proof (phase-02.5 S0030, 2026-10-25, live PG): `postgres-uid-leak.test.ts` › "clears jord.uid when the transaction ends" passed
+- [x] Shared dialect conformance suite green on file libSQL and Postgres. Proof: `part-c.test.ts` now runs `describe.each(["file","postgres"])` through `src/testing/harness.ts` (Postgres runtime is the `jord_app` role, FORCE RLS on). 15 shared tests pass on each backend, plus a Postgres-only test that FORCE RLS filters a raw `jord_app` query in the database
 - [x] Route inventory test fails on an undeclared route
 - [x] `service` bypass and existing `role_in` / `bucket_in` still work

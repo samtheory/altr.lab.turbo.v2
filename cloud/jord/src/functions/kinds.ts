@@ -1,7 +1,7 @@
 import type { JordDriverPort, JordRecord } from "@altr/jord";
 
 import { canWriteRecords, type JordRole } from "../auth/roles.js";
-import type { JordChangeDraft } from "../realtime/types.js";
+import type { WriteWithChange } from "../realtime/types.js";
 import type { LogSink } from "../logs/sink.js";
 import {
   evaluatePolicies,
@@ -46,8 +46,8 @@ export type StepContext = {
   enqueueWrite: <T>(fn: () => Promise<T>) => Promise<T>;
   /** When set, AFTER insert triggers can log / invoke. */
   logs?: LogSink;
-  /** When set, successful record writes fan out a realtime event. */
-  onRecordChange?: (draft: JordChangeDraft) => void;
+  /** When set, record writes commit with their outbox row and fan out. */
+  writeChange?: WriteWithChange;
   /** Service callers skip user-policy checks inside steps. */
   policyBypass?: boolean;
   /** Caller principal. Omitted keeps the phase-01 operator default. */
@@ -211,7 +211,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     uid,
     enqueueWrite,
     logs,
-    onRecordChange,
+    writeChange,
   }) {
     if (!canWriteRecords(role)) {
       throw new FunctionStepError(
@@ -256,14 +256,21 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         ? (body.metadata as string | null)
         : undefined;
 
-    const row = await enqueueWrite(() => {
+    const insert = () => {
       jord.bindRlsSession?.({
         role: subject === "user" || subject === "anon" ? subject : role,
         bucket,
         uid: uid ?? "",
       });
       return jord.insertRecord({ bucket, body: recordBody, metadata });
-    });
+    };
+    const row = writeChange
+      ? await writeChange(insert, (inserted) => ({
+          op: "insert",
+          id: inserted.id,
+          version: inserted.version,
+        }))
+      : await enqueueWrite(insert);
     if (logs) {
       // Dynamic import avoids kinds ↔ triggers ↔ runner cycle.
       const { runTriggersAfterWrite, triggersDisabledFromEnv } = await import(
@@ -280,10 +287,9 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         uid,
         enqueueWrite,
         disabled: triggersDisabledFromEnv(),
-        onRecordChange,
+        writeChange,
       });
     }
-    onRecordChange?.({ op: "insert", id: row.id, version: row.version });
     return { result: publicRecord(row) };
   },
 

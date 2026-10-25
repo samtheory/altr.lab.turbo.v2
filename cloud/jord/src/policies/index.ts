@@ -1,7 +1,10 @@
 export {
   evaluatePolicies,
   ownerUnchanged,
+  patchKeepsScope,
   policiesDisabledFromEnv,
+  scopeColumns,
+  stampInsertScope,
   type EvaluatePoliciesInput,
   type PolicyDecision,
 } from "./evaluate.js";

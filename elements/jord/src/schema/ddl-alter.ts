@@ -53,6 +53,14 @@ export function planDropTable(
   return requireUserTableName(name);
 }
 
+/** Control-plane tables keyed by user table name; a rename moves their rows. */
+export const TABLE_NAME_METADATA = [
+  "jord_table_rls",
+  "jord_policies",
+  "jord_triggers",
+  "jord_tracked_tables",
+] as const;
+
 export function planRenameTable(
   from: string,
   to: string,

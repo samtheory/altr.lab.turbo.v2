@@ -2,10 +2,11 @@ import { mkdtemp, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { createJordClient, fsPathToFileUrl } from "@altr/jord";
-import { afterEach, describe, expect, it } from "vitest";
+import type { JordDriverPort } from "@altr/jord";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { createWriteQueue } from "../queue.js";
+import { openTestDb, TEST_BACKENDS, type TestBackend, type TestDb } from "../testing/harness.js";
 import { createJordApp } from "../app.js";
 import type { JordAuthConfig } from "../auth/config.js";
 import { signSessionToken } from "../auth/token.js";
@@ -37,8 +38,17 @@ const TEST_AUTH: JordAuthConfig = {
 };
 
 const temps: string[] = [];
+const dbs: TestDb[] = [];
+let backend: TestBackend = "file";
+
+async function openDb(): Promise<JordDriverPort> {
+  const db = await openTestDb(backend);
+  dbs.push(db);
+  return db.jord;
+}
 
 afterEach(async () => {
+  while (dbs.length > 0) await dbs.pop()?.close();
   while (temps.length > 0) {
     const dir = temps.pop();
     if (!dir) continue;
@@ -132,159 +142,151 @@ describe("local HMAC URL shape", () => {
   });
 });
 
-describe("pending / finalize / GC", () => {
+describe.each(TEST_BACKENDS)("pending / finalize / GC (%s)", (name) => {
+  beforeEach(() => {
+    backend = name;
+  });
+
   it("promotes pending after bytes exist and GCs expired pending", async () => {
     const dir = await tempDir("jord-storage-");
-    const jord = await createJordClient({
-      url: fsPathToFileUrl(path.join(dir, "jord.db")),
-    });
+    const jord = await openDb();
     const storage = createLocalStorageAdapter({
       root: path.join(dir, "blobs"),
       hmacSecret: "s",
       publicBaseUrl: "http://127.0.0.1:8787",
     });
-    try {
-      const expiresAt = Date.now() + 60_000;
-      await createPendingBlobMeta({
-        jord,
-        bucket: "lab",
-        key: "pending.bin",
-        contentType: "application/octet-stream",
-        pendingExpiresAt: expiresAt,
-      });
+    const expiresAt = Date.now() + 60_000;
+    await createPendingBlobMeta({
+      jord,
+      bucket: "lab",
+      key: "pending.bin",
+      contentType: "application/octet-stream",
+      pendingExpiresAt: expiresAt,
+    });
 
-      await expect(
-        finalizeBlob({
-          jord,
-          storage,
-          bucket: "lab",
-          key: "pending.bin",
-        }),
-      ).rejects.toBeInstanceOf(FinalizeError);
-
-      await storage.putObject(
-        "lab",
-        "pending.bin",
-        new TextEncoder().encode("hello"),
-        "application/octet-stream",
-      );
-      const ready = await finalizeBlob({
+    await expect(
+      finalizeBlob({
         jord,
         storage,
         bucket: "lab",
         key: "pending.bin",
-      });
-      expect(ready.status).toBe("ready");
-      expect(ready.size).toBe(5);
+      }),
+    ).rejects.toBeInstanceOf(FinalizeError);
 
-      await createPendingBlobMeta({
-        jord,
-        bucket: "lab",
-        key: "stale.bin",
-        contentType: "application/octet-stream",
-        pendingExpiresAt: Date.now() - 1,
-      });
-      await storage.putObject(
-        "lab",
-        "stale.bin",
-        new TextEncoder().encode("gone"),
-        "application/octet-stream",
-      );
-      const gc = await gcExpiredPendingBlobs({
-        jord,
-        storage,
-        nowMs: Date.now(),
-      });
-      expect(gc.deletedPending).toBe(1);
-      expect(await jord.getBlobMeta("lab", "stale.bin")).toBeNull();
-      expect(await storage.getObject("lab", "stale.bin")).toBeNull();
-      expect((await jord.getBlobMeta("lab", "pending.bin"))?.status).toBe(
-        "ready",
-      );
-    } finally {
-      await jord.close();
-    }
+    await storage.putObject(
+      "lab",
+      "pending.bin",
+      new TextEncoder().encode("hello"),
+      "application/octet-stream",
+    );
+    const ready = await finalizeBlob({
+      jord,
+      storage,
+      bucket: "lab",
+      key: "pending.bin",
+    });
+    expect(ready.status).toBe("ready");
+    expect(ready.size).toBe(5);
+
+    await createPendingBlobMeta({
+      jord,
+      bucket: "lab",
+      key: "stale.bin",
+      contentType: "application/octet-stream",
+      pendingExpiresAt: Date.now() - 1,
+    });
+    await storage.putObject(
+      "lab",
+      "stale.bin",
+      new TextEncoder().encode("gone"),
+      "application/octet-stream",
+    );
+    const gc = await gcExpiredPendingBlobs({
+      jord,
+      storage,
+      nowMs: Date.now(),
+    });
+    expect(gc.deletedPending).toBe(1);
+    expect(await jord.getBlobMeta("lab", "stale.bin")).toBeNull();
+    expect(await storage.getObject("lab", "stale.bin")).toBeNull();
+    expect((await jord.getBlobMeta("lab", "pending.bin"))?.status).toBe(
+      "ready",
+    );
   });
 });
 
-describe("copy/verify plan", () => {
+describe.each(TEST_BACKENDS)("copy/verify plan (%s)", (name) => {
+  beforeEach(() => {
+    backend = name;
+  });
+
   it("never sets deleteLocal and plans copy without silent delete", async () => {
     const dir = await tempDir("jord-copy-");
-    const jord = await createJordClient({
-      url: fsPathToFileUrl(path.join(dir, "jord.db")),
-    });
+    const jord = await openDb();
     const blobsRoot = path.join(dir, "blobs");
     await mkdir(path.join(blobsRoot, "lab"), { recursive: true });
     await writeFile(path.join(blobsRoot, "lab", "a.txt"), "alpha");
-    try {
-      const plan = await buildLocalToRemoteCopyPlan({
-        jord,
-        localRoot: blobsRoot,
-      });
-      expect(plan.dryRun).toBe(true);
-      expect(plan.deleteLocal).toBe(false);
-      expect(plan.switchRequiresExplicitFlag).toBe(true);
-      expect(plan.wouldCopy).toBe(1);
-      expect(plan.steps.some((s) => s.includes("Do NOT delete local"))).toBe(
-        true,
-      );
-    } finally {
-      await jord.close();
-    }
+    const plan = await buildLocalToRemoteCopyPlan({
+      jord,
+      localRoot: blobsRoot,
+    });
+    expect(plan.dryRun).toBe(true);
+    expect(plan.deleteLocal).toBe(false);
+    expect(plan.switchRequiresExplicitFlag).toBe(true);
+    expect(plan.wouldCopy).toBe(1);
+    expect(plan.steps.some((s) => s.includes("Do NOT delete local"))).toBe(
+      true,
+    );
   });
 });
 
-describe("sign-time policy", () => {
+describe.each(TEST_BACKENDS)("sign-time policy (%s)", (name) => {
+  beforeEach(() => {
+    backend = name;
+  });
+
   it("denies minting when a deny policy matches the bucket", async () => {
     const dir = await tempDir("jord-sign-");
-    const jord = await createJordClient({
-      url: fsPathToFileUrl(path.join(dir, "jord.db")),
+    const jord = await openDb();
+    await jord.insertPolicy({
+      name: "deny-lab-blobs",
+      tableName: "jord_blobs",
+      operation: "insert",
+      effect: "deny",
+      priority: 100,
+      rules: JSON.stringify([
+        { kind: "bucket_eq", config: { bucket: "secret" } },
+      ]),
     });
-    try {
-      await jord.insertPolicy({
-        name: "deny-lab-blobs",
-        tableName: "jord_blobs",
-        operation: "insert",
-        effect: "deny",
-        priority: 100,
-        rules: JSON.stringify([
-          { kind: "bucket_eq", config: { bucket: "secret" } },
-        ]),
-      });
 
-      const denied = await assertSignAllowed({
-        jord,
-        principal: {
-          kind: "operator",
-          role: "editor",
-          claims: {},
-        },
-        bucket: "secret",
-        intent: "upload",
-      });
-      expect(denied.allowed).toBe(false);
+    const denied = await assertSignAllowed({
+      jord,
+      principal: {
+        kind: "operator",
+        role: "editor",
+        claims: {},
+      },
+      bucket: "secret",
+      intent: "upload",
+    });
+    expect(denied.allowed).toBe(false);
 
-      const allowed = await assertSignAllowed({
-        jord,
-        principal: {
-          kind: "operator",
-          role: "editor",
-          claims: {},
-        },
-        bucket: "lab",
-        intent: "upload",
-      });
-      expect(allowed.allowed).toBe(true);
-    } finally {
-      await jord.close();
-    }
+    const allowed = await assertSignAllowed({
+      jord,
+      principal: {
+        kind: "operator",
+        role: "editor",
+        claims: {},
+      },
+      bucket: "lab",
+      intent: "upload",
+    });
+    expect(allowed.allowed).toBe(true);
   });
 
   it("HTTP sign returns 403 when policy denies even if object meta exists", async () => {
     const dir = await tempDir("jord-sign-http-");
-    const jord = await createJordClient({
-      url: fsPathToFileUrl(path.join(dir, "jord.db")),
-    });
+    const jord = await openDb();
     const enqueueWrite = createWriteQueue();
     const blobsRoot = path.join(dir, "blobs");
     const app = createJordApp({
@@ -294,48 +296,42 @@ describe("sign-time policy", () => {
       blobsRoot,
       blobSigningSecret: TEST_AUTH.secret,
     });
-    try {
-      await jord.upsertBlobMeta({
-        bucket: "locked",
-        key: "x.bin",
-        contentType: "application/octet-stream",
-        size: 1,
-        etag: "abc",
-        status: "ready",
-      });
-      await jord.insertPolicy({
-        name: "deny-locked",
-        tableName: "jord_blobs",
-        operation: "select",
-        effect: "deny",
-        priority: 50,
-        rules: JSON.stringify([
-          { kind: "bucket_eq", config: { bucket: "locked" } },
-        ]),
-      });
+    await jord.upsertBlobMeta({
+      bucket: "locked",
+      key: "x.bin",
+      contentType: "application/octet-stream",
+      size: 1,
+      etag: "abc",
+      status: "ready",
+    });
+    await jord.insertPolicy({
+      name: "deny-locked",
+      tableName: "jord_blobs",
+      operation: "select",
+      effect: "deny",
+      priority: 50,
+      rules: JSON.stringify([
+        { kind: "bucket_eq", config: { bucket: "locked" } },
+      ]),
+    });
 
-      const res = await app.request(
-        `/blobs/locked/objects/${encodeURIComponent("x.bin")}/sign`,
-        {
-          method: "POST",
-          headers: {
-            ...authHeaders("editor"),
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ intent: "download" }),
+    const res = await app.request(
+      `/blobs/locked/objects/${encodeURIComponent("x.bin")}/sign`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders("editor"),
+          "Content-Type": "application/json",
         },
-      );
-      expect(res.status).toBe(403);
-    } finally {
-      await jord.close();
-    }
+        body: JSON.stringify({ intent: "download" }),
+      },
+    );
+    expect(res.status).toBe(403);
   });
 
   it("sign + local HMAC upload + finalize shares client shape", async () => {
     const dir = await tempDir("jord-sign-flow-");
-    const jord = await createJordClient({
-      url: fsPathToFileUrl(path.join(dir, "jord.db")),
-    });
+    const jord = await openDb();
     const enqueueWrite = createWriteQueue();
     const blobsRoot = path.join(dir, "blobs");
     const app = createJordApp({
@@ -349,62 +345,58 @@ describe("sign-time policy", () => {
         JORD_PUBLIC_BASE_URL: "http://127.0.0.1:8787",
       },
     });
-    try {
-      const sign = await app.request(
-        `/blobs/lab/objects/${encodeURIComponent("flow.txt")}/sign`,
-        {
-          method: "POST",
-          headers: {
-            ...authHeaders("editor"),
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            intent: "upload",
-            content_type: "text/plain",
-            ttl_seconds: 120,
-          }),
+    const sign = await app.request(
+      `/blobs/lab/objects/${encodeURIComponent("flow.txt")}/sign`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders("editor"),
+          "Content-Type": "application/json",
         },
-      );
-      expect(sign.status).toBe(200);
-      const signed = (await sign.json()) as {
-        url: string;
-        method: string;
-        headers: Record<string, string>;
-        expires_at: number;
-        object: { status: string };
-        storage: string;
-      };
-      expect(signed.method).toBe("PUT");
-      expect(signed.storage).toBe("local");
-      expect(signed.object.status).toBe("pending");
-      expect(signed.url).toContain("/blobs/signed/");
-      expect(signed.headers["Content-Type"]).toBe("text/plain");
+        body: JSON.stringify({
+          intent: "upload",
+          content_type: "text/plain",
+          ttl_seconds: 120,
+        }),
+      },
+    );
+    expect(sign.status).toBe(200);
+    const signed = (await sign.json()) as {
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      expires_at: number;
+      object: { status: string };
+      storage: string;
+    };
+    expect(signed.method).toBe("PUT");
+    expect(signed.storage).toBe("local");
+    expect(signed.object.status).toBe("pending");
+    expect(signed.url).toContain("/blobs/signed/");
+    expect(signed.headers["Content-Type"]).toBe("text/plain");
 
-      const pathAndQuery = signed.url.replace(/^https?:\/\/[^/]+/, "");
-      const put = await app.request(pathAndQuery, {
-        method: "PUT",
-        headers: signed.headers,
-        body: "flow-body",
-      });
-      expect(put.status).toBe(200);
+    const pathAndQuery = signed.url.replace(/^https?:\/\/[^/]+/, "");
+    const put = await app.request(pathAndQuery, {
+      method: "PUT",
+      headers: signed.headers,
+      body: "flow-body",
+    });
+    expect(put.status).toBe(200);
 
-      const fin = await app.request(
-        `/blobs/lab/objects/${encodeURIComponent("flow.txt")}/finalize`,
-        {
-          method: "POST",
-          headers: {
-            ...authHeaders("editor"),
-            "Content-Type": "application/json",
-          },
-          body: "{}",
+    const fin = await app.request(
+      `/blobs/lab/objects/${encodeURIComponent("flow.txt")}/finalize`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders("editor"),
+          "Content-Type": "application/json",
         },
-      );
-      expect(fin.status).toBe(200);
-      const ready = (await fin.json()) as { status: string; size: number };
-      expect(ready.status).toBe("ready");
-      expect(ready.size).toBe("flow-body".length);
-    } finally {
-      await jord.close();
-    }
+        body: "{}",
+      },
+    );
+    expect(fin.status).toBe(200);
+    const ready = (await fin.json()) as { status: string; size: number };
+    expect(ready.status).toBe("ready");
+    expect(ready.size).toBe("flow-body".length);
   });
 });

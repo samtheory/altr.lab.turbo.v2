@@ -59,6 +59,6 @@ Same-tx outbox; watermark race on Postgres; 410 when `since` is pruned; notify p
 - [x] 410 + resync hint for expired `since`
 - [x] In-process producer replaced; event name `jord.change` unchanged; no second path
 - [x] Retention defaults (7 days and 100_000 rows) and both indexes exist
-- [ ] libSQL test shows queue order; Postgres test shows the watermark race does not skip — queue-order + in-memory watermark unit tests passed; live Postgres race not run
+- [x] libSQL test shows queue order; Postgres test shows the watermark race does not skip. Proof (phase-02.5 S0030/S0031, 2026-10-25): `outbox.test.ts` › "a higher seq committing first is not readable past a lower in-flight seq" passed on live PG. With the watermark guard removed the same test fails (`expected 2 to be 0`)
 - [x] libSQL raw-SQL gap documented in `tech_space/jord/realtime` and Studio
 - [x] Category `realtime` updated

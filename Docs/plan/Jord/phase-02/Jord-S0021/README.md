@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0021 — migration + principal auth + policies
 
-> Who: **mimir**. **Status: Parts A, B, and C are in the tree** for file libSQL (2026-10-25). [[ADR-threat-model]] **accepted for Part C**. Two Part C boxes stay open until Postgres is run (pool leak, dialect pair) and do not block later stops. S0028 through S0023 are in the tree. **Next untouched stop:** [[../Jord-S0029/README]]. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]].
+> Who: **mimir**. **Status: Done** (2026-10-25). Parts A, B, and C pass on file libSQL and live Postgres; the Postgres boxes were closed in [[../../phase-02.5/README|phase-02.5]] S0030. [[ADR-threat-model]] accepted. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]].
 
 **Sprint id:** `Jord-S0021`  
 **Owner:** mimir  
@@ -43,7 +43,7 @@ OAuth · magic links · real email provider · table API (S0022) · CDC (S0023) 
 
 ## Parent Definition of Done
 
-- [ ] A, B, and C each have their own DoD green
+- [x] A, B, and C each have their own DoD green (last Postgres boxes closed by phase-02.5 S0030, 2026-10-25)
 - [x] ADR accepted before C merged
 - [x] Each part's PR already updated its `tech_space` page (R4). Verify only reconciles links
 - [x] Typecheck `@altr/jord` and `@altr/jord-server` (CI from S0027 already required)

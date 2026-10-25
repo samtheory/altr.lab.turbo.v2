@@ -32,6 +32,8 @@ async function executeJob(
   deps: JobSchedulerDeps,
   job: JordJob,
 ): Promise<void> {
+  // Jobs are admin-authored; on Postgres a run with no session sees no FORCE RLS rows.
+  deps.jord.bindRlsSession?.({ role: "admin" });
   const handler = getJobKindHandler(job.kind);
   const run = await deps.enqueueWrite(() =>
     deps.jord.insertJobRun({ jobId: job.id }),

@@ -117,6 +117,10 @@ export function createOutbox(jord: JordDriverPort) {
     };
   }
 
+  /**
+   * Insert one outbox row. Call only inside `jord.transaction` (see
+   * `writeWithChange` in app.ts); the seq stays in flight until `settle`.
+   */
   async function appendChange(input: {
     tableName: string;
     op: JordChangeOp;
@@ -162,14 +166,15 @@ export function createOutbox(jord: JordDriverPort) {
     ]);
     const mapped = mapRow(rows[0]!);
     watermark.begin(mapped.seq);
-    watermark.complete(mapped.seq);
     return mapped;
   }
 
-  /**
-   * Allocate a seq for tests that simulate out-of-order Postgres commits.
-   * Production API path on libSQL always begin+complete together.
-   */
+  /** After the transaction ends: committed seqs become readable. */
+  function settle(seq: number, committed: boolean): void {
+    if (committed) watermark.complete(seq);
+    else watermark.abandon(seq);
+  }
+
   function watermarkApi(): CommitWatermark {
     return watermark;
   }
@@ -193,16 +198,16 @@ export function createOutbox(jord: JordDriverPort) {
   }
 
   /**
-   * libSQL: the write queue orders commits — readable is MAX(seq).
-   * Postgres: withhold seqs above the in-memory watermark (in-flight lower seq).
+   * Highest seq a reader may see: MAX(seq) of committed rows, held below
+   * any lower seq still in flight in this process (Postgres BIGSERIAL can
+   * commit out of order; libSQL shares the connection, so it can see its
+   * own uncommitted row).
    */
   async function readableWatermark(): Promise<number> {
     const rows = await jord.query(`SELECT MAX(seq) AS n FROM jord_changes`);
     const dbMax = Number(rows[0]?.n ?? 0);
-    if (dialect === "libsql") return dbMax;
-    const memory = watermark.get();
-    if (memory <= 0) return dbMax;
-    return Math.min(memory, dbMax);
+    if (!watermark.hasInFlight()) return dbMax;
+    return Math.min(watermark.get(), dbMax);
   }
 
   async function listAfter(
@@ -287,6 +292,8 @@ export function createOutbox(jord: JordDriverPort) {
     isTracked,
     setTracked,
     appendChange,
+    settle,
+    readableWatermark,
     getBySeq,
     minSeq,
     listAfter,

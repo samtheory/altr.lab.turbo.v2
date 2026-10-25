@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 
-import { Pool, type QueryResult, type QueryResultRow } from "pg";
+import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
 
 import { JordUnsupportedError } from "../errors.js";
 import type {
@@ -66,8 +66,12 @@ import type {
 import {
   compilePolicySql as compilePolicySqlText,
   planSyncRecordsRls,
+  planSyncTableRls,
+  quoteSqlLiteral,
   type RlsSessionContext,
 } from "../schema/ddl-rls.js";
+import { JORD_APP_ROLE } from "../schema/jord-app.js";
+import { rowScopeSql } from "../schema/row-scope.js";
 import {
   buildCreateTableSql,
   clampRowWindow,
@@ -85,6 +89,7 @@ import {
   planDropColumn,
   planDropTable,
   planRenameTable,
+  TABLE_NAME_METADATA,
   rebuildTempName,
   requireUserTableName,
 } from "../schema/ddl-alter.js";
@@ -324,8 +329,25 @@ function mapTrigger(row: QueryResultRow): JordTrigger {
 }
 
 const rlsSession = new AsyncLocalStorage<RlsSessionContext>();
+const pgTx = new AsyncLocalStorage<PoolClient>();
 
-async function probePgvector(pool: Pool): Promise<VectorBackend> {
+/** One simple-protocol round trip: BEGIN plus the session GUCs. */
+function beginWithSessionSql(ctx: RlsSessionContext | undefined, begin = "BEGIN"): string {
+  if (!ctx) return begin;
+  return `${begin}; SELECT set_config('jord.role', ${quoteSqlLiteral(ctx.role)}, true), set_config('jord.bucket', ${quoteSqlLiteral(ctx.bucket)}, true), set_config('jord.uid', ${quoteSqlLiteral(ctx.uid ?? "")}, true), set_config('jord.claims', ${quoteSqlLiteral(ctx.claims ?? "")}, true)`;
+}
+
+async function probePgvector(
+  pool: Pool,
+  options: { ddl: boolean },
+): Promise<VectorBackend> {
+  if (!options.ddl) {
+    const found = await pool.query(
+      `SELECT 1 FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = 'jord_embeddings' AND column_name = 'embedding_vec'`,
+    );
+    return found.rows.length > 0 ? "pgvector" : "cosine";
+  }
   try {
     await pool.query("CREATE EXTENSION IF NOT EXISTS vector");
     await pool.query(pgvectorColumnSql());
@@ -356,11 +378,19 @@ export class PostgresAdapter implements JordDriverPort {
     options?: { ddl?: boolean },
   ): Promise<PostgresAdapter> {
     const pool = new Pool({ connectionString });
+    // Without a listener, a server-side disconnect of an idle client crashes the process.
+    pool.on("error", (err) => {
+      console.error("[@altr/jord] idle postgres client error:", err.message);
+    });
     const ddl = options?.ddl !== false;
     try {
       await pool.query("SELECT 1");
       const migrateUrl = process.env.JORD_MIGRATE_URL;
-      if (migrateUrl && samePostgresConnection(migrateUrl, connectionString)) {
+      if (
+        !ddl &&
+        migrateUrl &&
+        samePostgresConnection(migrateUrl, connectionString)
+      ) {
         throw new Error(
           "[@altr/jord] JORD_MIGRATE_URL and the runtime URL are the same connection",
         );
@@ -371,7 +401,7 @@ export class PostgresAdapter implements JordDriverPort {
         const { assertRuntimeRole } = await import("../schema/jord-app.js");
         await assertRuntimeRole(pool);
       }
-      const vectorBackend = await probePgvector(pool);
+      const vectorBackend = await probePgvector(pool, { ddl });
       const adapter = new PostgresAdapter(pool, vectorBackend);
       if (ddl) await adapter.syncRecordsPoliciesRls();
       return adapter;
@@ -385,8 +415,48 @@ export class PostgresAdapter implements JordDriverPort {
     sql: string,
     args: Array<string | number | null> = [],
   ): Promise<Array<Record<string, unknown>>> {
-    const result = await this.pool.query(sql, args);
+    const result = await this.exec(sql, args);
     return result.rows as Array<Record<string, unknown>>;
+  }
+
+  /**
+   * Every runtime statement goes through here: join the open transaction,
+   * else wrap in one that sets the request GUCs (FORCE RLS needs them),
+   * else run on the pool.
+   */
+  private async exec(text: string, params: unknown[] = []): Promise<QueryResult> {
+    const tx = pgTx.getStore();
+    if (tx) return tx.query(text, params);
+    const ctx = rlsSession.getStore();
+    if (!ctx) return this.pool.query(text, params);
+    const client = await this.pool.connect();
+    try {
+      await client.query(beginWithSessionSql(ctx));
+      const result = await client.query(text, params);
+      await client.query("COMMIT");
+      return result;
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async transaction<T>(work: () => Promise<T>): Promise<T> {
+    if (pgTx.getStore()) return work();
+    const client = await this.pool.connect();
+    try {
+      await client.query(beginWithSessionSql(rlsSession.getStore()));
+      const result = await pgTx.run(client, work);
+      await client.query("COMMIT");
+      return result;
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async executeSql(input: {
@@ -408,13 +478,10 @@ export class PostgresAdapter implements JordDriverPort {
     const started = Date.now();
     const client = await this.pool.connect();
     try {
-      if (input.readOnly) {
-        await client.query("BEGIN READ ONLY");
-        await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`);
-      } else {
-        await client.query("BEGIN");
-        await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`);
-      }
+      await client.query(
+        beginWithSessionSql(rlsSession.getStore(), input.readOnly ? "BEGIN READ ONLY" : "BEGIN"),
+      );
+      await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`);
       const result = await client.query(input.sql, args);
       await client.query("COMMIT");
       const columns = result.fields.map((field) => field.name);
@@ -439,11 +506,19 @@ export class PostgresAdapter implements JordDriverPort {
     role: string;
     bucket?: string | null;
     uid?: string | null;
+    claims?: Record<string, unknown> | null;
   }): void {
+    const claims: Record<string, string> = {};
+    for (const [key, value] of Object.entries(input.claims ?? {})) {
+      if (typeof value === "string" || typeof value === "number") {
+        claims[key] = String(value);
+      }
+    }
     rlsSession.enterWith({
       role: input.role,
       bucket: input.bucket ?? "",
       uid: input.uid ?? "",
+      claims: Object.keys(claims).length > 0 ? JSON.stringify(claims) : "",
     });
   }
 
@@ -490,11 +565,42 @@ export class PostgresAdapter implements JordDriverPort {
 
   async syncRecordsPoliciesRls(): Promise<void> {
     const policies = await this.listPolicies();
-    const plan = planSyncRecordsRls(policies);
+    const statements = [...planSyncRecordsRls(policies).statements];
+    const flags = await this.pool.query(
+      `SELECT r.table_name, r.rls_enabled,
+              EXISTS (
+                SELECT 1 FROM information_schema.columns c
+                WHERE c.table_schema = 'public' AND c.table_name = r.table_name AND c.column_name = 'bucket'
+              ) AS has_bucket
+       FROM jord_table_rls r
+       JOIN information_schema.tables t
+         ON t.table_schema = 'public' AND t.table_name = r.table_name
+       WHERE r.table_name <> 'records'`,
+    );
+    for (const row of flags.rows) {
+      const tableName = String(row.table_name);
+      if (!isValidSqlIdent(tableName)) continue;
+      statements.push(
+        ...planSyncTableRls(tableName, policies, {
+          enable: rlsEnabledFlag(row.rls_enabled),
+          shape: { hasBucket: bool(row.has_bucket) },
+        }).statements,
+      );
+    }
+    const app = await this.pool.query(
+      "SELECT 1 FROM pg_roles WHERE rolname = $1",
+      [JORD_APP_ROLE],
+    );
+    if (app.rows.length > 0) {
+      statements.push(
+        `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${JORD_APP_ROLE}`,
+        `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${JORD_APP_ROLE}`,
+      );
+    }
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
-      for (const sql of plan.statements) {
+      for (const sql of statements) {
         await client.query(sql);
       }
       await client.query("COMMIT");
@@ -517,22 +623,11 @@ export class PostgresAdapter implements JordDriverPort {
     params: unknown[] = [],
     mode: "enforce" | "bypass" = "enforce",
   ): Promise<QueryResult> {
-    const ctx = rlsSession.getStore();
-    if (!ctx && mode === "enforce") {
-      return this.pool.query(text, params);
-    }
+    if (mode === "enforce") return this.exec(text, params);
     const client = await this.pool.connect();
     try {
-      await client.query("BEGIN");
-      if (ctx) {
-        await client.query(
-          "SELECT set_config('jord.role', $1, true), set_config('jord.bucket', $2, true), set_config('jord.uid', $3, true)",
-          [ctx.role, ctx.bucket, ctx.uid ?? ""],
-        );
-      }
-      if (mode === "bypass") {
-        await client.query("SET LOCAL row_security = off");
-      }
+      await client.query(beginWithSessionSql(rlsSession.getStore()));
+      await client.query("SET LOCAL row_security = off");
       const result = await client.query(text, params);
       await client.query("COMMIT");
       return result;
@@ -618,14 +713,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listJobs(): Promise<JordJob[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_jobs ORDER BY created_at DESC`,
     );
     return result.rows.map(mapJob);
   }
 
   async getJob(id: string): Promise<JordJob | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_jobs WHERE id = $1 LIMIT 1`,
       [id],
     );
@@ -637,7 +732,7 @@ export class PostgresAdapter implements JordDriverPort {
     const now = Date.now();
     const id = randomUUID();
     const enabled = input.enabled ?? false;
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_jobs (
          id, name, kind, enabled, interval_ms, config, next_run_at,
          last_run_at, last_status, last_error, created_at, updated_at
@@ -662,7 +757,7 @@ export class PostgresAdapter implements JordDriverPort {
     const existing = await this.getJob(input.id);
     if (!existing) return null;
     const now = Date.now();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE jord_jobs SET
          name = $1, kind = $2, enabled = $3, interval_ms = $4, config = $5,
          next_run_at = $6, last_run_at = $7, last_status = $8, last_error = $9,
@@ -688,8 +783,8 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteJob(id: string): Promise<boolean> {
-    await this.pool.query(`DELETE FROM jord_job_runs WHERE job_id = $1`, [id]);
-    const result = await this.pool.query(
+    await this.exec(`DELETE FROM jord_job_runs WHERE job_id = $1`, [id]);
+    const result = await this.exec(
       `DELETE FROM jord_jobs WHERE id = $1`,
       [id],
     );
@@ -698,7 +793,7 @@ export class PostgresAdapter implements JordDriverPort {
 
   async listJobRuns(jobId: string, limit = 50): Promise<JordJobRun[]> {
     const capped = Math.max(1, Math.min(limit, 200));
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_job_runs WHERE job_id = $1
        ORDER BY started_at DESC LIMIT $2`,
       [jobId, capped],
@@ -709,7 +804,7 @@ export class PostgresAdapter implements JordDriverPort {
   async insertJobRun(input: InsertJobRunInput): Promise<JordJobRun> {
     const startedAt = input.startedAt ?? Date.now();
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_job_runs (id, job_id, status, started_at, finished_at, error, result)
        VALUES ($1, $2, 'running', $3, NULL, NULL, NULL)
        RETURNING *`,
@@ -720,7 +815,7 @@ export class PostgresAdapter implements JordDriverPort {
 
   async finishJobRun(input: FinishJobRunInput): Promise<JordJobRun | null> {
     const finishedAt = input.finishedAt ?? Date.now();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE jord_job_runs SET
          status = $1, finished_at = $2, error = $3, result = $4
        WHERE id = $5
@@ -738,7 +833,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listDueJobs(nowMs: number): Promise<JordJob[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_jobs
        WHERE enabled = TRUE
          AND (next_run_at IS NULL OR next_run_at <= $1)
@@ -749,14 +844,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listFunctions(): Promise<JordFunction[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_functions ORDER BY created_at DESC`,
     );
     return result.rows.map(mapFunction);
   }
 
   async getFunction(id: string): Promise<JordFunction | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_functions WHERE id = $1 LIMIT 1`,
       [id],
     );
@@ -765,7 +860,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async getFunctionBySlug(slug: string): Promise<JordFunction | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_functions WHERE slug = $1 LIMIT 1`,
       [slug],
     );
@@ -776,7 +871,7 @@ export class PostgresAdapter implements JordDriverPort {
   async insertFunction(input: InsertFunctionInput): Promise<JordFunction> {
     const now = Date.now();
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_functions
          (id, name, slug, description, steps, enabled, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -801,7 +896,7 @@ export class PostgresAdapter implements JordDriverPort {
     const existing = await this.getFunction(input.id);
     if (!existing) return null;
     const now = Date.now();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE jord_functions SET
          name = $1, slug = $2, description = $3, steps = $4,
          enabled = $5, updated_at = $6
@@ -830,7 +925,7 @@ export class PostgresAdapter implements JordDriverPort {
     if (dependents > 0) {
       return { ok: false, error: "has_dependents", dependents };
     }
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM jord_functions WHERE id = $1`,
       [id],
     );
@@ -839,14 +934,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listCustomApis(): Promise<JordCustomApi[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_custom_apis ORDER BY created_at DESC`,
     );
     return result.rows.map(mapCustomApi);
   }
 
   async getCustomApi(id: string): Promise<JordCustomApi | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_custom_apis WHERE id = $1 LIMIT 1`,
       [id],
     );
@@ -858,7 +953,7 @@ export class PostgresAdapter implements JordDriverPort {
     method: JordHttpMethod,
     slug: string,
   ): Promise<JordCustomApi | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_custom_apis WHERE method = $1 AND slug = $2 LIMIT 1`,
       [method, slug],
     );
@@ -869,7 +964,7 @@ export class PostgresAdapter implements JordDriverPort {
   async insertCustomApi(input: InsertCustomApiInput): Promise<JordCustomApi> {
     const now = Date.now();
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_custom_apis
          (id, name, method, slug, function_id, enabled, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -894,7 +989,7 @@ export class PostgresAdapter implements JordDriverPort {
     const existing = await this.getCustomApi(input.id);
     if (!existing) return null;
     const now = Date.now();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE jord_custom_apis SET
          name = $1, method = $2, slug = $3, function_id = $4,
          enabled = $5, updated_at = $6
@@ -915,7 +1010,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteCustomApi(id: string): Promise<boolean> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM jord_custom_apis WHERE id = $1`,
       [id],
     );
@@ -923,7 +1018,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async countCustomApisByFunction(functionId: string): Promise<number> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT COUNT(*)::int AS n FROM jord_custom_apis WHERE function_id = $1`,
       [functionId],
     );
@@ -931,14 +1026,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listPolicies(): Promise<JordPolicy[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_policies ORDER BY priority DESC, created_at DESC`,
     );
     return result.rows.map(mapPolicy);
   }
 
   async getPolicy(id: string): Promise<JordPolicy | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_policies WHERE id = $1 LIMIT 1`,
       [id],
     );
@@ -950,7 +1045,7 @@ export class PostgresAdapter implements JordDriverPort {
     tableName: string,
     operation: JordPolicyOperation,
   ): Promise<JordPolicy[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_policies
        WHERE table_name = $1 AND operation = $2 AND enabled = TRUE`,
       [tableName, operation],
@@ -970,7 +1065,7 @@ export class PostgresAdapter implements JordDriverPort {
   async insertPolicy(input: InsertPolicyInput): Promise<JordPolicy> {
     const now = Date.now();
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_policies
          (id, name, table_name, operation, effect, rules, priority, enabled, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -995,7 +1090,7 @@ export class PostgresAdapter implements JordDriverPort {
     const existing = await this.getPolicy(input.id);
     if (!existing) return null;
     const now = Date.now();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE jord_policies SET
          name = $1, table_name = $2, operation = $3, effect = $4,
          rules = $5, priority = $6, enabled = $7, updated_at = $8
@@ -1018,7 +1113,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deletePolicy(id: string): Promise<boolean> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM jord_policies WHERE id = $1`,
       [id],
     );
@@ -1026,14 +1121,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listTriggers(): Promise<JordTrigger[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_triggers ORDER BY created_at DESC`,
     );
     return result.rows.map(mapTrigger);
   }
 
   async getTrigger(id: string): Promise<JordTrigger | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_triggers WHERE id = $1 LIMIT 1`,
       [id],
     );
@@ -1045,7 +1140,7 @@ export class PostgresAdapter implements JordDriverPort {
     tableName: string,
     event: JordTriggerEvent,
   ): Promise<JordTrigger[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_triggers
        WHERE table_name = $1 AND event = $2 AND enabled = TRUE
        ORDER BY created_at DESC`,
@@ -1057,7 +1152,7 @@ export class PostgresAdapter implements JordDriverPort {
   async insertTrigger(input: InsertTriggerInput): Promise<JordTrigger> {
     const now = Date.now();
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_triggers
          (id, name, table_name, timing, event, actions, enabled, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -1081,7 +1176,7 @@ export class PostgresAdapter implements JordDriverPort {
     const existing = await this.getTrigger(input.id);
     if (!existing) return null;
     const now = Date.now();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE jord_triggers SET
          name = $1, table_name = $2, timing = $3, event = $4,
          actions = $5, enabled = $6, updated_at = $7
@@ -1103,7 +1198,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteTrigger(id: string): Promise<boolean> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM jord_triggers WHERE id = $1`,
       [id],
     );
@@ -1115,7 +1210,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listTables(): Promise<string[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT tablename AS name
        FROM pg_catalog.pg_tables
        WHERE schemaname = 'public'
@@ -1129,7 +1224,7 @@ export class PostgresAdapter implements JordDriverPort {
     const tables = await this.listTables();
     if (!tables.includes(name)) return null;
 
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT
          a.attname AS name,
          pg_catalog.format_type(a.atttypid, a.atttypmod) AS type,
@@ -1201,7 +1296,7 @@ export class PostgresAdapter implements JordDriverPort {
           : input.type === "REAL"
             ? "DOUBLE PRECISION"
             : "BYTEA";
-    await this.pool.query(
+    await this.exec(
       `ALTER TABLE ${quoteIdent(input.table)} ADD COLUMN ${quoteIdent(input.name)} ${pgType}`,
     );
     return { ok: true };
@@ -1219,7 +1314,7 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
     const sql = buildCreateTableSql(plan.name, plan.columns, "postgres");
-    await this.pool.query(sql);
+    await this.exec(sql);
     return { ok: true, sql };
   }
 
@@ -1240,11 +1335,16 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
     const window = clampRowWindow(input.limit, input.offset);
-    const result = await this.pool.query(
-      `SELECT * FROM ${quoteIdent(input.table)} LIMIT $1 OFFSET $2`,
-      [window.limit, window.offset],
-    );
     const columns = described.columns.map((col) => col.name);
+    const args: Array<string | number | null> = [];
+    const where = input.rowScope
+      ? ` WHERE ${rowScopeSql(input.rowScope, columns, args, (n) => `$${n}`)}`
+      : "";
+    args.push(window.limit, window.offset);
+    const result = await this.exec(
+      `SELECT * FROM ${quoteIdent(input.table)}${where} LIMIT $${args.length - 1} OFFSET $${args.length}`,
+      args,
+    );
     const rows = result.rows.map((row) => {
       const out: Record<string, ReturnType<typeof toTableCell>> = {};
       for (const name of columns) {
@@ -1260,7 +1360,7 @@ export class PostgresAdapter implements JordDriverPort {
     if (!described.ok) return described;
     const plan = planInsertRow(described.info, input.values);
     if (!plan.ok) return plan;
-    const existing = await this.pool.query(
+    const existing = await this.exec(
       `SELECT 1 AS hit FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1 LIMIT 1`,
       [plan.pkValue],
     );
@@ -1273,7 +1373,7 @@ export class PostgresAdapter implements JordDriverPort {
     }
     const cols = plan.columns.map((name) => quoteIdent(name)).join(", ");
     const marks = plan.columns.map((_, i) => `$${i + 1}`).join(", ");
-    await this.pool.query(
+    await this.exec(
       `INSERT INTO ${quoteIdent(plan.table)} (${cols}) VALUES (${marks})`,
       plan.args,
     );
@@ -1288,7 +1388,7 @@ export class PostgresAdapter implements JordDriverPort {
     const sets = plan.setColumns
       .map((name, i) => `${quoteIdent(name)} = $${i + 1}`)
       .join(", ");
-    const result = await this.pool.query(
+    const result = await this.exec(
       `UPDATE ${quoteIdent(plan.table)} SET ${sets} WHERE ${quoteIdent(plan.pkColumn)} = $${plan.setColumns.length + 1}`,
       [...plan.args, plan.pkValue],
     );
@@ -1303,7 +1403,7 @@ export class PostgresAdapter implements JordDriverPort {
     if (!described.ok) return described;
     const plan = planDeleteRow(described.info, input.pk);
     if (!plan.ok) return plan;
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1`,
       [plan.pkValue],
     );
@@ -1324,7 +1424,7 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${plan.name} not found`,
       };
     }
-    await this.pool.query(`DROP TABLE ${quoteIdent(plan.name)}`);
+    await this.exec(`DROP TABLE ${quoteIdent(plan.name)}`);
     return { ok: true };
   }
 
@@ -1347,9 +1447,28 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${plan.to} already exists`,
       };
     }
-    await this.pool.query(
-      `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
-    );
+    await this.transaction(async () => {
+      await this.exec(
+        `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
+      );
+      for (const meta of TABLE_NAME_METADATA) {
+        await this.exec(`UPDATE ${meta} SET table_name = $1 WHERE table_name = $2`, [
+          plan.to,
+          plan.from,
+        ]);
+      }
+      // Compiled policies keep the old name; the caller's RLS sync recreates them.
+      const stale = await this.exec(
+        `SELECT policyname FROM pg_policies
+         WHERE schemaname = 'public' AND tablename = $1 AND policyname LIKE 'jord\\_rls\\_%'`,
+        [plan.to],
+      );
+      for (const row of stale.rows as Array<{ policyname: string }>) {
+        await this.exec(
+          `DROP POLICY IF EXISTS ${quoteIdent(row.policyname)} ON ${quoteIdent(plan.to)}`,
+        );
+      }
+    });
     return { ok: true };
   }
 
@@ -1366,7 +1485,7 @@ export class PostgresAdapter implements JordDriverPort {
     }
     const plan = planDropColumn(info, input.column);
     if (!plan.ok) return plan;
-    await this.pool.query(
+    await this.exec(
       `ALTER TABLE ${quoteIdent(plan.table)} DROP COLUMN ${quoteIdent(plan.column)}`,
     );
     return { ok: true };
@@ -1390,7 +1509,7 @@ export class PostgresAdapter implements JordDriverPort {
     if (!plan.ok) return plan;
 
     if (plan.mode === "rename") {
-      await this.pool.query(
+      await this.exec(
         `ALTER TABLE ${quoteIdent(plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
       );
       return { ok: true };
@@ -1400,6 +1519,10 @@ export class PostgresAdapter implements JordDriverPort {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
+      // A non-superuser owner is filtered by FORCE RLS and would copy no rows.
+      await client.query(
+        `ALTER TABLE ${quoteIdent(plan.table)} NO FORCE ROW LEVEL SECURITY`,
+      );
       await client.query(buildRebuildCreateSql(temp, plan.columns, "postgres"));
       await client.query(
         buildRebuildCopySql(
@@ -1425,7 +1548,7 @@ export class PostgresAdapter implements JordDriverPort {
         /* ignore */
       }
       try {
-        await this.pool.query(`DROP TABLE IF EXISTS ${quoteIdent(temp)}`);
+        await this.exec(`DROP TABLE IF EXISTS ${quoteIdent(temp)}`);
       } catch {
         /* ignore cleanup */
       }
@@ -1476,14 +1599,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listBlobBuckets(): Promise<string[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT DISTINCT bucket FROM jord_blobs ORDER BY bucket ASC`,
     );
     return result.rows.map((row) => String(row.bucket));
   }
 
   async listBlobs(bucket: string): Promise<JordBlob[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_blobs WHERE bucket = $1 ORDER BY key ASC`,
       [bucket],
     );
@@ -1491,7 +1614,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async getBlobMeta(bucket: string, key: string): Promise<JordBlob | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_blobs WHERE bucket = $1 AND key = $2 LIMIT 1`,
       [bucket, key],
     );
@@ -1514,7 +1637,7 @@ export class PostgresAdapter implements JordDriverPort {
         ? input.uploadId
         : (existing?.uploadId ?? null);
     if (existing) {
-      const result = await this.pool.query(
+      const result = await this.exec(
         `UPDATE jord_blobs SET
            content_type = $1, size = $2, etag = $3, status = $4,
            pending_expires_at = $5, upload_id = $6, updated_at = $7
@@ -1534,7 +1657,7 @@ export class PostgresAdapter implements JordDriverPort {
       return mapBlob(result.rows[0]!);
     }
     const id = randomUUID();
-    const result = await this.pool.query(
+    const result = await this.exec(
       `INSERT INTO jord_blobs (
          id, bucket, key, content_type, size, etag, status,
          pending_expires_at, upload_id, created_at, updated_at
@@ -1558,7 +1681,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteBlobMeta(bucket: string, key: string): Promise<boolean> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM jord_blobs WHERE bucket = $1 AND key = $2`,
       [bucket, key],
     );
@@ -1566,7 +1689,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listExpiredPendingBlobs(nowMs: number): Promise<JordBlob[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_blobs
        WHERE status = 'pending'
          AND pending_expires_at IS NOT NULL
@@ -1578,21 +1701,21 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async listAllBlobMeta(): Promise<JordBlob[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT * FROM jord_blobs ORDER BY bucket ASC, key ASC`,
     );
     return result.rows.map(mapBlob);
   }
 
   async listVectorNamespaces(): Promise<string[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT DISTINCT namespace FROM jord_embeddings ORDER BY namespace ASC`,
     );
     return result.rows.map((row) => String(row.namespace));
   }
 
   async listEmbeddings(namespace: string): Promise<JordEmbeddingMeta[]> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT id, namespace, ref_id, dims, metadata, created_at, updated_at
        FROM jord_embeddings WHERE namespace = $1 ORDER BY updated_at DESC`,
       [namespace],
@@ -1604,7 +1727,7 @@ export class PostgresAdapter implements JordDriverPort {
     namespace: string,
     id: string,
   ): Promise<JordEmbeddingMeta | null> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT id, namespace, ref_id, dims, metadata, created_at, updated_at
        FROM jord_embeddings WHERE namespace = $1 AND id = $2 LIMIT 1`,
       [namespace, id],
@@ -1645,7 +1768,7 @@ export class PostgresAdapter implements JordDriverPort {
     const existing = await this.getEmbedding(input.namespace, input.id);
     if (existing) {
       const result = vec
-        ? await this.pool.query(
+        ? await this.exec(
             `UPDATE jord_embeddings SET
                ref_id = $1, dims = $2, embedding = $3, metadata = $4, updated_at = $5,
                embedding_vec = $6::vector
@@ -1662,7 +1785,7 @@ export class PostgresAdapter implements JordDriverPort {
               input.id,
             ],
           )
-        : await this.pool.query(
+        : await this.exec(
             `UPDATE jord_embeddings SET
                ref_id = $1, dims = $2, embedding = $3, metadata = $4, updated_at = $5
              WHERE namespace = $6 AND id = $7
@@ -1680,7 +1803,7 @@ export class PostgresAdapter implements JordDriverPort {
       return { ok: true, row: mapEmbeddingMeta(result.rows[0]!) };
     }
     const result = vec
-      ? await this.pool.query(
+      ? await this.exec(
           `INSERT INTO jord_embeddings (
              id, namespace, ref_id, dims, embedding, metadata, created_at, updated_at, embedding_vec
            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::vector)
@@ -1697,7 +1820,7 @@ export class PostgresAdapter implements JordDriverPort {
             vec,
           ],
         )
-      : await this.pool.query(
+      : await this.exec(
           `INSERT INTO jord_embeddings (
              id, namespace, ref_id, dims, embedding, metadata, created_at, updated_at
            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -1717,7 +1840,7 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteEmbedding(namespace: string, id: string): Promise<boolean> {
-    const result = await this.pool.query(
+    const result = await this.exec(
       `DELETE FROM jord_embeddings WHERE namespace = $1 AND id = $2`,
       [namespace, id],
     );
@@ -1736,7 +1859,7 @@ export class PostgresAdapter implements JordDriverPort {
     if (!checked.ok) {
       return { ok: false, error: "invalid_embedding", message: checked.message };
     }
-    const sample = await this.pool.query(
+    const sample = await this.exec(
       `SELECT dims FROM jord_embeddings WHERE namespace = $1 LIMIT 1`,
       [input.namespace],
     );
@@ -1763,7 +1886,7 @@ export class PostgresAdapter implements JordDriverPort {
         // Extension or column missing — rank blobs in process.
       }
     }
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT id, ref_id, dims, embedding, metadata FROM jord_embeddings WHERE namespace = $1`,
       [input.namespace],
     );
@@ -1792,14 +1915,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   private async backfillPgvector(namespace: string): Promise<void> {
-    const missing = await this.pool.query(
+    const missing = await this.exec(
       `SELECT id, embedding FROM jord_embeddings
        WHERE namespace = $1 AND embedding_vec IS NULL`,
       [namespace],
     );
     for (const row of missing.rows) {
       const values = unpackF32(asBuffer(row.embedding));
-      await this.pool.query(
+      await this.exec(
         `UPDATE jord_embeddings SET embedding_vec = $1::vector WHERE id = $2`,
         [toVectorLiteral(padEmbedding(values)), row.id],
       );
@@ -1814,7 +1937,7 @@ export class PostgresAdapter implements JordDriverPort {
     await this.backfillPgvector(namespace);
     const literal = toVectorLiteral(padEmbedding(values));
     const top = clampSearchLimit(limit);
-    const result = await this.pool.query(
+    const result = await this.exec(
       `SELECT id, ref_id, dims, metadata,
               1 - (embedding_vec <=> $1::vector) AS score
        FROM jord_embeddings

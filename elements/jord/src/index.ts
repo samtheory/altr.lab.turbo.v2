@@ -17,6 +17,8 @@ export {
   JORD_BLOB_STATUSES,
   type JordEmbeddingMeta,
   type ListTableRowsInput,
+  type RowPredicate,
+  type RowScope,
   type ListTableRowsResult,
   type DeleteTableRowInput,
   type InsertTableRowInput,
@@ -146,13 +148,16 @@ export {
   buildOperationExpr,
   compilePolicySql,
   planSyncRecordsRls,
+  planSyncTableRls,
   policyMatchExpr,
   quoteSqlLiteral,
   rlsPolicyName,
   RLS_OPERATIONS,
   type RecordsRlsPlan,
   type RlsSessionContext,
+  type RlsTableShape,
 } from "./schema/ddl-rls.js";
+export { rowScopeSql } from "./schema/row-scope.js";
 export {
   JORD_APP_ROLE,
   jordAppDmlGrants,

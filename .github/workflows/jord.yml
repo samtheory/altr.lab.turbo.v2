@@ -56,36 +56,45 @@ jobs:
       - name: Typecheck @altr/jord-studio
         run: pnpm --filter @altr/jord-studio typecheck
 
-  # secrets cannot be used in a job-level if. Bind into env; live steps run
-  # only when the secret is set. A green jord-postgres with skipped steps does
-  # not prove Postgres was tested.
+  # Live Postgres tests against a service container (pgvector image so the
+  # vector path is exercised). Not a required check until it is green on main.
   jord-postgres:
     name: jord-postgres
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: jord_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
-      JORD_TEST_POSTGRES_URL: ${{ secrets.JORD_TEST_POSTGRES_URL }}
+      JORD_TEST_POSTGRES_URL: postgres://postgres:postgres@localhost:5432/jord_test
     steps:
-      - name: Checkout
-        if: env.JORD_TEST_POSTGRES_URL != ''
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        if: env.JORD_TEST_POSTGRES_URL != ''
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10.27.0
 
-      - name: Setup Node
-        if: env.JORD_TEST_POSTGRES_URL != ''
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: pnpm
 
       - name: Install
-        if: env.JORD_TEST_POSTGRES_URL != ''
         run: pnpm install --frozen-lockfile
 
       - name: Test @altr/jord (Postgres live)
-        if: env.JORD_TEST_POSTGRES_URL != ''
         run: pnpm --filter @altr/jord test
+
+      - name: Test @altr/jord-server (Postgres live)
+        run: pnpm --filter @altr/jord-server test
+

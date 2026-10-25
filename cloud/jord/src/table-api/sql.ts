@@ -1,4 +1,4 @@
-import { quoteIdent, type JordTableInfo } from "@altr/jord";
+import { quoteIdent, rowScopeSql, type JordTableInfo, type RowScope } from "@altr/jord";
 
 import {
   pkColumns,
@@ -22,8 +22,11 @@ function placeholders(sql: string, dialect: "libsql" | "postgres"): string {
   });
 }
 
-function whereSql(filters: Filter[], args: SqlValue[]): string {
-  if (filters.length === 0) return "";
+function whereSql(
+  filters: Filter[],
+  args: SqlValue[],
+  scope?: { scope: RowScope; columns: string[] },
+): string {
   const parts = filters.map((filter) => {
     const col = quoteIdent(filter.column);
     if (filter.isNull) return `${col} IS NULL`;
@@ -52,7 +55,20 @@ function whereSql(filters: Filter[], args: SqlValue[]): string {
                   : "LIKE";
     return `${col} ${op} ?`;
   });
+  if (scope) {
+    const scopeArgs: Array<string | number | null> = [];
+    parts.push(rowScopeSql(scope.scope, scope.columns, scopeArgs));
+    args.push(...scopeArgs);
+  }
+  if (parts.length === 0) return "";
   return ` WHERE ${parts.join(" AND ")}`;
+}
+
+/** Row scope bound to a table's columns for the compile helpers. */
+export type ScopeFor = { scope: RowScope; columns: string[] };
+
+export function scopeFor(info: JordTableInfo, scope: RowScope | undefined): ScopeFor | undefined {
+  return scope ? { scope, columns: info.columns.map((col) => col.name) } : undefined;
 }
 
 function selectList(info: JordTableInfo, parsed: ParsedTableQuery): string {
@@ -86,9 +102,10 @@ export function compileSelect(
   info: JordTableInfo,
   parsed: ParsedTableQuery,
   dialect: "libsql" | "postgres",
+  scope?: ScopeFor,
 ): CompiledSql {
   const args: SqlValue[] = [];
-  const where = whereSql(parsed.filters, args);
+  const where = whereSql(parsed.filters, args, scope);
   const order =
     parsed.order.length === 0
       ? ""
@@ -107,9 +124,10 @@ export function compileCount(
   info: JordTableInfo,
   filters: Filter[],
   dialect: "libsql" | "postgres",
+  scope?: ScopeFor,
 ): CompiledSql {
   const args: SqlValue[] = [];
-  const where = whereSql(filters, args);
+  const where = whereSql(filters, args, scope);
   return {
     sql: placeholders(
       `SELECT COUNT(*) AS n FROM ${quoteIdent(info.name)}${where}`,
@@ -143,6 +161,7 @@ export function compileUpdate(
   dialect: "libsql" | "postgres",
   bumpVersion: boolean,
   allowUnfiltered = false,
+  scope?: ScopeFor,
 ): CompiledSql {
   const cols = Object.keys(values).filter((name) => name !== "version" || !bumpVersion);
   if (cols.length === 0 && !bumpVersion) {
@@ -151,7 +170,10 @@ export function compileUpdate(
   const args: SqlValue[] = cols.map((name) => values[name] ?? null);
   const sets = cols.map((name) => `${quoteIdent(name)} = ?`);
   if (bumpVersion) sets.push(`${quoteIdent("version")} = ${quoteIdent("version")} + 1`);
-  const where = whereSql(filters, args);
+  if (filters.length === 0 && !allowUnfiltered) {
+    throw new TableApiError(400, "filter_required", "PATCH requires a filter");
+  }
+  const where = whereSql(filters, args, scope);
   if (!where && !allowUnfiltered) {
     throw new TableApiError(400, "filter_required", "PATCH requires a filter");
   }
@@ -169,9 +191,13 @@ export function compileDelete(
   filters: Filter[],
   dialect: "libsql" | "postgres",
   allowUnfiltered = false,
+  scope?: ScopeFor,
 ): CompiledSql {
+  if (filters.length === 0 && !allowUnfiltered) {
+    throw new TableApiError(400, "filter_required", "DELETE requires a filter");
+  }
   const args: SqlValue[] = [];
-  const where = whereSql(filters, args);
+  const where = whereSql(filters, args, scope);
   if (!where && !allowUnfiltered) {
     throw new TableApiError(400, "filter_required", "DELETE requires a filter");
   }

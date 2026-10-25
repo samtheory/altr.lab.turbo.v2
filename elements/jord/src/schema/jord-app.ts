@@ -150,6 +150,12 @@ export async function runOwnerMigration(
     for (const sql of jordAppDmlGrants(dmlTables)) {
       await pool.query(sql);
     }
+    await pool.query(
+      `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${JORD_APP_ROLE}`,
+    );
+    await pool.query(
+      `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${JORD_APP_ROLE}`,
+    );
   } finally {
     await pool.end();
   }

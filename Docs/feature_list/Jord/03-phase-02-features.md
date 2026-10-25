@@ -14,7 +14,7 @@ tags:
 
 > **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Review brief: [[../../report/Jord-phase-02-plan-review]].
 
-**Process lock:** implement **one stop at a time**. **S0027** through **S0026** are complete for phase-02 execution (file libSQL for server stops; S0026 is ADR-only). Postgres tests were not run (`JORD_TEST_POSTGRES_URL` unset). Functions v2 **runtime** stays soft backlog until a follow-up sprint is approved.
+**Process lock:** implement **one stop at a time**. **Acceptance gaps → [[../../plan/Jord/phase-02.5/README|phase-02.5]]** (review [[../../report/Jord-phase-02-closeout-review]]). **S0027** through **S0026** have code in tree for phase-02 execution (file libSQL for server stops; S0026 is ADR-only). Phase-02.5 closed the gaps on 2026-10-25: every server suite now runs on file libSQL and live Postgres (`jord_app`, FORCE RLS). Functions v2 **runtime** stays soft backlog until a follow-up sprint is approved.
 
 ## Execution order
 
@@ -41,7 +41,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 |--|--|
 | **Why** | Ad-hoc `CREATE TABLE IF NOT EXISTS` cannot evolve schema safely |
 | **What** | Forward-only `jord_migrations`; baseline adopt; checksum = SHA-256 hex lowercase of LF-normalized SQL bytes; mismatch **refuses boot**; baseline body frozen. Postgres **advisory lock** on concurrent boot. Fixture from commit `eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c` via `git worktree add ../jord-p01` that commit, `pnpm install --frozen-lockfile`, dump script created in S0021-A, header `-- source: eb7d7fd25dfbda32a258b0ea1c1d6409fdacfe3c`, copy back, `git worktree remove`. Re-run dump diffs empty |
-| **Status** | In tree for file libSQL (2026-10-25). Postgres double-apply test is written and skipped until `JORD_TEST_POSTGRES_URL` is set |
+| **Status** | **Done** (2026-10-25). Postgres double-apply and advisory-lock wait tests pass on live Postgres (phase-02.5 S0030) |
 | **Acceptance** | Fresh DB and the fixture converge; seed row survives; stored checksum equals the file; re-run is a no-op; bad checksum does not boot; two PG boots do not double-apply |
 
 ## F2 — Principals (`jord-s0021-b`)
@@ -50,7 +50,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 |--|--|
 | **Why** | Shared-secret roles are Studio ops, not end-user identity |
 | **What** | `Principal { kind: service \| user \| anon \| operator, uid?, role, claims }`. Operator = admin/editor/readonly HMAC tokens (**stay valid**). `JORD_LEGACY_SECRET_ROLE`: **default `admin` for the S0021-B transition**, then **flip default to `service`** before the card closes; update curl / README / `.env.example` / `authHeaders("raw")` in the same sprint. User = JWT. Anon = long-lived JWT minted from `JORD_JWT_SECRET`. Async scrypt + maxmem; no email enumeration; `MailerPort` console adapter; JWT HS256 only, iss/aud/sub/role/iat/exp, kid rotation, 60s skew. SSE/WS close at exp |
-| **Status** | In tree for file libSQL (2026-10-25). Unset legacy default is `service`. Postgres identity tests were not run |
+| **Status** | **Done** (2026-10-25). Unset legacy default is `service`. User JWT identity reaches Postgres as the `jord.uid` / `jord.claims` session settings; proven by the dual-backend policy suite |
 | **Acceptance** | Route-group matrix documented and tested; HMAC stays operator; tests for both switch modes; caller list on the S0021-B card; docs/helpers updated before flip; refresh reuse kills family; enumeration tests; console mail only |
 
 ## F3 — Policies (`jord-s0021-c`)
@@ -59,7 +59,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 |--|--|
 | **Why** | Middleware rules do not express ownership, and a side route can bypass them |
 | **What** | Deny overrides allow. No policy → default-deny for anon and user. `rls_enabled` per table. UPDATE USING + WITH CHECK. Owner column immutable for non-service. Route inventory test. PG: **FORCE ROW LEVEL SECURITY** and non-owner role `jord_app`. Grants from `JORD_MIGRATE_URL`: create with `CREATEROLE`, or verify-only fallback (role exists, no `BYPASSRLS`, non-owner) then grants. Refuse boot if migrate and runtime URLs match (parsed host/port/db/user). Runtime stays **`DATABASE_URL`**. Startup refuses a Postgres role that owns tables or has `BYPASSRLS`. `file:` ignores the migrate URL. `SET LOCAL` in-transaction only. Shared dialect conformance suite. Threat model: [[../../plan/Jord/phase-02/Jord-S0021/ADR-threat-model]] |
-| **Status** | File libSQL enforcement is in the tree (2026-10-25). Postgres pool-leak and dialect-pair runs were not executed |
+| **Status** | **Done** (2026-10-25). Row scope covers `owner_eq` and `claim_eq`, ORed across matching allow policies ([[../../plan/Jord/phase-02.5/README\|S0032]]). On Postgres every `rls_enabled` user table gets compiled `CREATE POLICY` rows, not only `records`. Pool-leak and dialect-pair runs pass on live Postgres (S0030) |
 | **Acceptance** | Identical fixtures on libSQL and Postgres; pool uid-leak test; inventory test fails closed; migrate≠runtime URL test; CREATEROLE fallback verify path |
 
 ## F4 — Table API (`Jord-S0022`)
@@ -67,15 +67,15 @@ Sprint **ids are stable**. Execution order is not numeric order.
 | | |
 |--|--|
 | **What** | `/api/v1/:table`. Coerce query values by column type. libSQL `ilike` = `lower()`. Caps: limit default 100 / max 1000, `in` max 100, body 1 MiB. PATCH/DELETE without filter rejected; `?all=true` **service only**. Composite PKs supported; no stable key → no PATCH/DELETE. `count=planned` default-ish; `count=exact` documented as costly. `Prefer: return=representation` via RETURNING |
-| **Status** | File libSQL is in the tree (2026-10-25). Postgres RETURNING was not run |
+| **Status** | **Done** (2026-10-25). RETURNING and `count=exact` pass on file and live Postgres |
 | **Acceptance** | Caps, all=true, coerce, RETURNING, and ilike documented and tested. Test-folder fetch helper does not import `@altr/jord` (S0029 promotes it). No embeds |
 
 ## F5 — CDC (`Jord-S0023`)
 
 | | |
 |--|--|
-| **What** | Opt-in `jord_tracked_tables`. Same-transaction outbox. Watermark: libSQL relies on the write queue; Postgres withholds seqs that are ahead of an in-flight lower seq. Indexes on `seq` and `(table_name, seq)`. Retention default 7 days and 100_000 rows. `pg_notify` carries **seq only**. `since` past retention → **410**. Delivery-time policy filter. **Replace** the in-process producer; keep the event name `jord.change`. BLOBs omitted or referenced. libSQL Studio raw SQL is not captured |
-| **Status** | File libSQL is in the tree (2026-10-25). Live Postgres watermark race was not run |
+| **What** | Opt-in `jord_tracked_tables`. Same-transaction outbox. Watermark: libSQL relies on the write queue; Postgres withholds seqs that are ahead of an in-flight lower seq. Indexes on `seq` and `(table_name, seq)`. Retention default 7 days and 100_000 rows. A `pg_notify` trigger (seq only) exists in the Postgres migrations; **`LISTEN` fan-out is moved to phase-03** (multi-instance prerequisite), so fan-out is single-process. `since` past retention → **410**. Delivery-time policy filter. **Replace** the in-process producer; keep the event name `jord.change`. BLOBs omitted or referenced. libSQL Studio raw SQL is not captured |
+| **Status** | **Done** (2026-10-25, [[../../plan/Jord/phase-02.5/README\|S0031]]). One helper (`writeChangeAs` in `cloud/jord/src/app.ts`) runs the data write and the outbox insert in one `jord.transaction` inside the write queue. Studio rows, `/records`, `/api/v1/:table`, functions, and triggers all use it. A failed outbox insert fails the request and rolls back the data. The watermark holds seqs until commit. Not captured: SQL console writes, migrate wizard, hosted `libsql://` (no atomic transaction; see phase-02.75) |
 | **Acceptance** | Postgres race test does not skip; libSQL queue-order test; 410 test; one producer path |
 
 ## F6 — Studio tools (`Jord-S0024`)
@@ -128,7 +128,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 ## Invariants
 
 1. Studio / browser never import `@altr/jord`, open the DB, or see connection strings / tokens.
-2. libSQL hot writes → one in-process queue. Postgres: `JORD_PG_WRITE_CONCURRENCY` default 1. SQL **reads** use a different connection (F6).
+2. libSQL hot writes → one in-process queue. Postgres uses the same queue at concurrency 1; the planned `JORD_PG_WRITE_CONCURRENCY` knob is not built ([[../../plan/Jord/phase-02.75/README|phase-02.75]]). SQL **reads** use a different connection (F6).
 3. `records` OCC → 409.
 4. WAL / checkpoints only for `file:`.
 5. `@altr/base` stays a leaf. Studio = `@altr/apolyx` only.

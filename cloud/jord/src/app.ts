@@ -83,6 +83,8 @@ import {
   isBuiltinPolicyRuleKind,
   ownerUnchanged,
   policiesDisabledFromEnv,
+  scopeColumns,
+  stampInsertScope,
   type PolicyDecision,
 } from "./policies/index.js";
 import {
@@ -126,9 +128,10 @@ import {
   MAX_REALTIME_SUBSCRIBERS,
   REALTIME_V1_TABLE,
   RealtimeBus,
-  type JordChangeDraft,
   type JordChangeEvent,
 } from "./realtime/index.js";
+import type { OutboxRow } from "./realtime/outbox.js";
+import type { WriteWithChange } from "./realtime/types.js";
 import {
   isBuiltinTriggerActionKind,
   parseActionsJson,
@@ -152,6 +155,12 @@ const V1_TABLE = "records";
 
 export type JordAppDeps = {
   jord: JordDriverPort;
+  /**
+   * Table-owner connection for schema DDL and RLS sync. On Postgres the
+   * runtime pool is `jord_app`, which cannot CREATE/ALTER or CREATE POLICY.
+   * Defaults to `jord`.
+   */
+  ddl?: JordDriverPort;
   enqueueWrite: WriteQueue;
   auth: JordAuthConfig;
   /** Confirm / reset mail. Defaults to the console adapter. */
@@ -184,6 +193,17 @@ function publicRecord(row: JordRecord) {
     metadata: row.metadata,
     created_at: row.createdAt,
     updated_at: row.updatedAt,
+    version: row.version,
+  };
+}
+
+/** Outbox row image for `records` (no timestamps). */
+function recordChangeRow(row: JordRecord): Record<string, unknown> {
+  return {
+    id: row.id,
+    bucket: row.bucket,
+    body: row.body,
+    metadata: row.metadata,
     version: row.version,
   };
 }
@@ -446,6 +466,15 @@ export function createJordApp(deps: JordAppDeps) {
     }
     return stepRole(principal);
   }
+
+  function rlsSessionFor(principal: Principal, bucket?: string | null) {
+    return {
+      role: rlsSessionRole(principal),
+      bucket: bucket ?? "",
+      uid: principal.uid ?? "",
+      claims: principal.claims,
+    };
+  }
   const generatedApi =
     deps.generatedApi ?? createGeneratedApiRegistry(process.env);
   const logs =
@@ -457,53 +486,58 @@ export function createJordApp(deps: JordAppDeps) {
     })();
   const realtime = deps.realtime ?? new RealtimeBus();
   const outbox = createOutbox(deps.jord);
+  const ddlJord = deps.ddl ?? deps.jord;
 
   /**
-   * Single emit path: write jord_changes (when the table is tracked), then
-   * fan out jord.change. Do not publish to the bus without an outbox row.
+   * Single emit path. The data write and its jord_changes rows (tracked
+   * tables only) commit in one transaction on the write queue; fan-out runs
+   * after commit. An outbox failure fails the write.
    */
-  async function publishChange(
-    draft: JordChangeDraft,
-    principal?: Principal,
-  ): Promise<void> {
-    try {
-      const table = draft.table ?? REALTIME_V1_TABLE;
-      const newRow =
-        draft.newRow ??
-        (draft.version != null
-          ? { id: draft.id, version: draft.version }
-          : draft.op === "delete"
-            ? null
-            : { id: draft.id });
-      const row = await outbox.appendChange({
-        tableName: table,
-        op: draft.op,
-        pk: draft.id,
-        oldRow: draft.oldRow ?? null,
-        newRow,
-        blobColumns: new Set(draft.blobColumns ?? []),
-        actor: principal
-          ? {
-              kind: principal.kind,
-              uid: principal.uid ?? null,
-              role: principal.role,
+  function writeChangeAs(principal?: Principal): WriteWithChange {
+    const actor = principal
+      ? { kind: principal.kind, uid: principal.uid ?? null, role: principal.role }
+      : null;
+    return async (work, changes) => {
+      const appended: OutboxRow[] = [];
+      let result: Awaited<ReturnType<typeof work>>;
+      try {
+        result = await deps.enqueueWrite(() =>
+          deps.jord.transaction(async () => {
+            const value = await work();
+            const raw = changes(value);
+            const drafts = raw == null ? [] : Array.isArray(raw) ? raw : [raw];
+            for (const draft of drafts) {
+              const row = await outbox.appendChange({
+                tableName: draft.table ?? REALTIME_V1_TABLE,
+                op: draft.op,
+                pk: draft.id,
+                oldRow: draft.oldRow ?? null,
+                newRow:
+                  draft.newRow ??
+                  (draft.version != null
+                    ? { id: draft.id, version: draft.version }
+                    : draft.op === "delete"
+                      ? null
+                      : { id: draft.id }),
+                blobColumns: new Set(draft.blobColumns ?? []),
+                actor,
+              });
+              if (row) appended.push(row);
             }
-          : null,
-      });
-      if (!row) return;
-      realtime.publish(outbox.toEvent(row));
-    } catch (err) {
-      console.error("[@altr/jord-server] outbox fanout failed", err);
-    }
+            return value;
+          }),
+        );
+      } catch (err) {
+        for (const row of appended) outbox.settle(row.seq, false);
+        throw err;
+      }
+      for (const row of appended) {
+        outbox.settle(row.seq, true);
+        realtime.publish(outbox.toEvent(row));
+      }
+      return result;
+    };
   }
-
-  /** Records emit sites — outbox only when `records` is tracked (seeded). */
-  const publishRecordChange = (
-    draft: JordChangeDraft,
-    principal?: Principal,
-  ) => {
-    void publishChange(draft, principal);
-  };
 
   async function deliveryAllowed(
     principal: Principal,
@@ -590,12 +624,9 @@ export function createJordApp(deps: JordAppDeps) {
     }
   });
   protectedRoutes.use("*", async (c, next) => {
-    const sessionPrincipal = c.get("principal");
-    deps.jord.bindRlsSession?.({
-      role: rlsSessionRole(sessionPrincipal),
-      bucket: c.req.query("bucket") ?? "",
-      uid: sessionPrincipal.uid ?? "",
-    });
+    deps.jord.bindRlsSession?.(
+      rlsSessionFor(c.get("principal"), c.req.query("bucket")),
+    );
     await next();
   });
   protectedRoutes.use("*", async (c, next) => {
@@ -694,7 +725,7 @@ export function createJordApp(deps: JordAppDeps) {
     }
 
     const result = await deps.enqueueWrite(() =>
-      deps.jord.createTable({ name: body.name as string, columns }),
+      ddlJord.createTable({ name: body.name as string, columns }),
     );
     if (!result.ok) {
       const status = result.error === "table_exists" ? 409 : 400;
@@ -705,13 +736,15 @@ export function createJordApp(deps: JordAppDeps) {
     }
     // Opt-in capture: mark newly created tables tracked (S0023).
     await outbox.setTracked(body.name as string, true);
+    await syncPoliciesRls();
     const info = await deps.jord.describeTable(body.name);
     return c.json({ ok: true as const, sql: result.sql, table: info }, 201);
   });
 
   protectedRoutes.get("/schema/tables/:name/rows", async (c) => {
     const name = c.req.param("name");
-    const decision = await decide(c.get("principal"), name, "select");
+    const principal = c.get("principal");
+    const decision = await decide(principal, name, "select");
     if (!decision.allowed) {
       return c.json(policyDeniedBody(decision, "select"), 403);
     }
@@ -721,6 +754,7 @@ export function createJordApp(deps: JordAppDeps) {
       table: name,
       limit: Number.isFinite(limit) ? limit : 50,
       offset: Number.isFinite(offset) ? offset : 0,
+      rowScope: principal.kind === "service" ? undefined : decision.scope,
     });
     if (!result.ok) {
       const status = result.error === "table_not_found" ? 404 : 400;
@@ -743,28 +777,35 @@ export function createJordApp(deps: JordAppDeps) {
       if (!body || body.values == null || typeof body.values !== "object") {
         throw new HTTPException(400, { message: "values object is required" });
       }
-      const values = {
-        ...(body.values as Record<string, unknown>),
-      };
       const principal = c.get("principal");
       const decision = await decide(principal, name, "insert", {
         row: null,
-        nextRow: values,
+        nextRow: body.values as Record<string, unknown>,
       });
       if (!decision.allowed) {
         return c.json(policyDeniedBody(decision, "insert"), 403);
       }
-      if (
-        decision.constraint?.ownerColumn &&
-        principal.kind !== "service"
-      ) {
-        values[decision.constraint.ownerColumn] = principal.uid ?? "";
+      const values =
+        principal.kind === "service"
+          ? { ...(body.values as Record<string, unknown>) }
+          : stampInsertScope(decision.scope, body.values as Record<string, unknown>);
+      if (!values) {
+        return c.json(policyDeniedBody({ allowed: false }, "insert"), 403);
       }
-      const result = await deps.enqueueWrite(() =>
-        deps.jord.insertTableRow({
-          table: name,
-          values,
-        }),
+      const info = await deps.jord.describeTable(name);
+      const pkCol = info?.columns.find((col) => col.pk)?.name ?? "id";
+      const pkRaw = values[pkCol];
+      const result = await writeChangeAs(principal)(
+        () => deps.jord.insertTableRow({ table: name, values }),
+        (inserted) =>
+          inserted.ok
+            ? {
+                table: name,
+                op: "insert",
+                id: pkRaw == null ? "" : String(pkRaw),
+                newRow: values,
+              }
+            : null,
       );
       if (!result.ok) {
         return c.json(
@@ -772,18 +813,6 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
-      const info = await deps.jord.describeTable(name);
-      const pkCol = info?.columns.find((col) => col.pk)?.name ?? "id";
-      const pkRaw = values[pkCol];
-      await publishChange(
-        {
-          table: name,
-          op: "insert",
-          id: pkRaw == null ? "" : String(pkRaw),
-          newRow: values,
-        },
-        principal,
-      );
       return c.json({ ok: true as const }, 201);
     },
   );
@@ -810,11 +839,11 @@ export function createJordApp(deps: JordAppDeps) {
       if (!decision.allowed) {
         return c.json(policyDeniedBody(decision, "update"), 403);
       }
-      const ownerColumn = decision.constraint?.ownerColumn;
       if (
-        ownerColumn &&
         principal.kind !== "service" &&
-        !ownerUnchanged(existing, values, ownerColumn)
+        scopeColumns(decision.scope).some(
+          (column) => !ownerUnchanged(existing, values, column),
+        )
       ) {
         return c.json(
           {
@@ -825,12 +854,18 @@ export function createJordApp(deps: JordAppDeps) {
           403,
         );
       }
-      const result = await deps.enqueueWrite(() =>
-        deps.jord.updateTableRow({
-          table: name,
-          pk,
-          values,
-        }),
+      const result = await writeChangeAs(principal)(
+        () => deps.jord.updateTableRow({ table: name, pk, values }),
+        (updated) =>
+          updated.ok
+            ? {
+                table: name,
+                op: "update",
+                id: pk,
+                oldRow: existing,
+                newRow: { ...(existing ?? {}), ...values },
+              }
+            : null,
       );
       if (!result.ok) {
         return c.json(
@@ -838,16 +873,6 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
-      await publishChange(
-        {
-          table: name,
-          op: "update",
-          id: pk,
-          oldRow: existing,
-          newRow: { ...(existing ?? {}), ...values },
-        },
-        principal,
-      );
       return c.json({ ok: true as const });
     },
   );
@@ -866,8 +891,12 @@ export function createJordApp(deps: JordAppDeps) {
       if (!decision.allowed) {
         return c.json(policyDeniedBody(decision, "delete"), 403);
       }
-      const result = await deps.enqueueWrite(() =>
-        deps.jord.deleteTableRow({ table: name, pk }),
+      const result = await writeChangeAs(principal)(
+        () => deps.jord.deleteTableRow({ table: name, pk }),
+        (deleted) =>
+          deleted.ok
+            ? { table: name, op: "delete", id: pk, oldRow: existing, newRow: null }
+            : null,
       );
       if (!result.ok) {
         return c.json(
@@ -875,16 +904,6 @@ export function createJordApp(deps: JordAppDeps) {
           tableRowStatus(result.error),
         );
       }
-      await publishChange(
-        {
-          table: name,
-          op: "delete",
-          id: pk,
-          oldRow: existing,
-          newRow: null,
-        },
-        principal,
-      );
       return c.json({ ok: true as const });
     },
   );
@@ -920,6 +939,7 @@ export function createJordApp(deps: JordAppDeps) {
             ? undefined
             : (body.owner_column as string | null),
       });
+      await syncPoliciesRls();
       return c.json({
         table_name: saved.tableName,
         rls_enabled: saved.rlsEnabled,
@@ -987,7 +1007,7 @@ export function createJordApp(deps: JordAppDeps) {
           : null;
 
       const result = await deps.enqueueWrite(() =>
-        deps.jord.addColumn({ table, name: body.name!, type }),
+        ddlJord.addColumn({ table, name: body.name!, type }),
       );
 
       if (!result.ok) {
@@ -1014,7 +1034,7 @@ export function createJordApp(deps: JordAppDeps) {
     async (c) => {
       const name = c.req.param("name");
       const result = await deps.enqueueWrite(() =>
-        deps.jord.dropTable({ name }),
+        ddlJord.dropTable({ name }),
       );
       if (!result.ok) {
         return c.json(
@@ -1040,7 +1060,7 @@ export function createJordApp(deps: JordAppDeps) {
         });
       }
       const result = await deps.enqueueWrite(() =>
-        deps.jord.renameTable({ name, newName: body.name as string }),
+        ddlJord.renameTable({ name, newName: body.name as string }),
       );
       if (!result.ok) {
         return c.json(
@@ -1048,6 +1068,7 @@ export function createJordApp(deps: JordAppDeps) {
           schemaDdlStatus(result.error),
         );
       }
+      await syncPoliciesRls();
       const info = await deps.jord.describeTable(body.name as string);
       return c.json({ ok: true as const, table: info });
     },
@@ -1087,7 +1108,7 @@ export function createJordApp(deps: JordAppDeps) {
         });
       }
       const result = await deps.enqueueWrite(() =>
-        deps.jord.alterColumn({ table, column, ...patch }),
+        ddlJord.alterColumn({ table, column, ...patch }),
       );
       if (!result.ok) {
         return c.json(
@@ -1095,6 +1116,7 @@ export function createJordApp(deps: JordAppDeps) {
           schemaDdlStatus(result.error),
         );
       }
+      await syncPoliciesRls();
       const info = await deps.jord.describeTable(table);
       return c.json({ ok: true as const, table: info });
     },
@@ -1107,7 +1129,7 @@ export function createJordApp(deps: JordAppDeps) {
       const table = c.req.param("name");
       const column = c.req.param("column");
       const result = await deps.enqueueWrite(() =>
-        deps.jord.dropColumn({ table, column }),
+        ddlJord.dropColumn({ table, column }),
       );
       if (!result.ok) {
         return c.json(
@@ -1115,6 +1137,7 @@ export function createJordApp(deps: JordAppDeps) {
           schemaDdlStatus(result.error),
         );
       }
+      await syncPoliciesRls();
       const info = await deps.jord.describeTable(table);
       return c.json({ ok: true as const, table: info });
     },
@@ -1132,7 +1155,7 @@ export function createJordApp(deps: JordAppDeps) {
   async function syncPoliciesRls(): Promise<void> {
     if (policiesOff || deps.jord.dialect !== "postgres") return;
     try {
-      await deps.jord.syncRecordsPoliciesRls?.();
+      await ddlJord.syncRecordsPoliciesRls?.();
     } catch (err) {
       console.error("[@altr/jord-server] rls sync failed", err);
       throw new HTTPException(500, { message: "rls_sync_failed" });
@@ -1210,18 +1233,22 @@ export function createJordApp(deps: JordAppDeps) {
       return c.json(policyDeniedBody(decision, "insert"), 403);
     }
 
-    const row = await deps.enqueueWrite(() => {
-      deps.jord.bindRlsSession?.({
-        role: rlsSessionRole(principal),
-        bucket: body.bucket,
-        uid: principal.uid ?? "",
-      });
-      return deps.jord.insertRecord({
-        bucket: body.bucket!,
-        body: body.body!,
-        metadata: body.metadata,
-      });
-    });
+    deps.jord.bindRlsSession?.(rlsSessionFor(principal, body.bucket));
+    const write = writeChangeAs(principal);
+    const row = await write(
+      () =>
+        deps.jord.insertRecord({
+          bucket: body.bucket!,
+          body: body.body!,
+          metadata: body.metadata,
+        }),
+      (inserted) => ({
+        op: "insert",
+        id: inserted.id,
+        version: inserted.version,
+        newRow: recordChangeRow(inserted),
+      }),
+    );
     await runTriggersAfterWrite({
       jord: deps.jord,
       logs,
@@ -1233,23 +1260,8 @@ export function createJordApp(deps: JordAppDeps) {
       uid: principal.uid,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
-      onRecordChange: publishRecordChange,
+      writeChange: write,
     });
-    await publishChange(
-      {
-        op: "insert",
-        id: row.id,
-        version: row.version,
-        newRow: {
-          id: row.id,
-          bucket: row.bucket,
-          body: row.body,
-          metadata: row.metadata,
-          version: row.version,
-        },
-      },
-      principal,
-    );
     return c.json(publicRecord(row), 201);
   });
 
@@ -1264,11 +1276,7 @@ export function createJordApp(deps: JordAppDeps) {
     if (!bucket) {
       throw new HTTPException(400, { message: "query bucket= is required" });
     }
-    deps.jord.bindRlsSession?.({
-      role: rlsSessionRole(c.get("principal")),
-      bucket,
-      uid: c.get("principal").uid ?? "",
-    });
+    deps.jord.bindRlsSession?.(rlsSessionFor(c.get("principal"), bucket));
     const rows = await deps.jord.listRecordsByBucket(bucket);
     return c.json(rows.map(publicRecord));
   });
@@ -1334,20 +1342,30 @@ export function createJordApp(deps: JordAppDeps) {
       return c.json(policyDeniedBody(decision, "update"), 403);
     }
 
-    const result = await deps.enqueueWrite(() => {
-      deps.jord.bindRlsSession?.({
-        role: rlsSessionRole(principal),
-        bucket: body.bucket ?? existing.bucket,
-        uid: principal.uid ?? "",
-      });
-      return deps.jord.updateRecord({
-        id,
-        version: body.version!,
-        body: body.body,
-        metadata: body.metadata,
-        bucket: body.bucket,
-      });
-    });
+    deps.jord.bindRlsSession?.(
+      rlsSessionFor(principal, body.bucket ?? existing.bucket),
+    );
+    const write = writeChangeAs(principal);
+    const result = await write(
+      () =>
+        deps.jord.updateRecord({
+          id,
+          version: body.version!,
+          body: body.body,
+          metadata: body.metadata,
+          bucket: body.bucket,
+        }),
+      (updated) =>
+        updated.ok
+          ? {
+              op: "update",
+              id: updated.record.id,
+              version: updated.record.version,
+              oldRow: recordChangeRow(existing),
+              newRow: recordChangeRow(updated.record),
+            }
+          : null,
+    );
 
     if (!result.ok) {
       return c.json(
@@ -1367,30 +1385,8 @@ export function createJordApp(deps: JordAppDeps) {
       uid: principal.uid,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
-      onRecordChange: publishRecordChange,
+      writeChange: write,
     });
-    await publishChange(
-      {
-        op: "update",
-        id: result.record.id,
-        version: result.record.version,
-        oldRow: {
-          id: existing.id,
-          bucket: existing.bucket,
-          body: existing.body,
-          metadata: existing.metadata,
-          version: existing.version,
-        },
-        newRow: {
-          id: result.record.id,
-          bucket: result.record.bucket,
-          body: result.record.body,
-          metadata: result.record.metadata,
-          version: result.record.version,
-        },
-      },
-      principal,
-    );
     return c.json(publicRecord(result.record));
   });
 
@@ -1415,14 +1411,15 @@ export function createJordApp(deps: JordAppDeps) {
     if (!decision.allowed) {
       return c.json(policyDeniedBody(decision, "delete"), 403);
     }
-    const deleted = await deps.enqueueWrite(() => {
-      deps.jord.bindRlsSession?.({
-        role: rlsSessionRole(principal),
-        bucket: existing.bucket,
-        uid: principal.uid ?? "",
-      });
-      return deps.jord.deleteRecord(id);
-    });
+    deps.jord.bindRlsSession?.(rlsSessionFor(principal, existing.bucket));
+    const write = writeChangeAs(principal);
+    const deleted = await write(
+      () => deps.jord.deleteRecord(id),
+      (removed) =>
+        removed
+          ? { op: "delete", id, oldRow: recordChangeRow(existing), newRow: null }
+          : null,
+    );
     if (!deleted) {
       throw new HTTPException(404, { message: "record not found" });
     }
@@ -1438,23 +1435,8 @@ export function createJordApp(deps: JordAppDeps) {
       uid: principal.uid,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
-      onRecordChange: publishRecordChange,
+      writeChange: write,
     });
-    await publishChange(
-      {
-        op: "delete",
-        id,
-        oldRow: {
-          id: existing.id,
-          bucket: existing.bucket,
-          body: existing.body,
-          metadata: existing.metadata,
-          version: existing.version,
-        },
-        newRow: null,
-      },
-      principal,
-    );
     return c.json({ ok: true as const, id });
   });
 
@@ -1993,7 +1975,7 @@ export function createJordApp(deps: JordAppDeps) {
         uid: c.get("principal").uid,
         enqueueWrite: deps.enqueueWrite,
         logs,
-        onRecordChange: publishRecordChange,
+        writeChange: writeChangeAs(c.get("principal")),
         request: {
           method: "POST",
           path: `/functions/${id}/invoke`,
@@ -2218,7 +2200,7 @@ export function createJordApp(deps: JordAppDeps) {
       uid: c.get("principal").uid,
       enqueueWrite: deps.enqueueWrite,
       logs,
-      onRecordChange: publishRecordChange,
+      writeChange: writeChangeAs(c.get("principal")),
       request: {
         method,
         path: `/x/${slug}`,
@@ -2536,7 +2518,7 @@ export function createJordApp(deps: JordAppDeps) {
     "/api/v1",
     createTableApiRoutes({
       jord: deps.jord,
-      enqueueWrite: deps.enqueueWrite,
+      writeChangeAs,
       generatedRecordsEnabled: () => generatedApi.isEnabled("records"),
     }),
   );

@@ -38,6 +38,15 @@ export type JordChangeDraft = {
 };
 
 /**
+ * Run `work` on the write queue in one transaction with the outbox rows for
+ * its changes, then fan out after commit. A throw rolls back both.
+ */
+export type WriteWithChange = <T>(
+  work: () => Promise<T>,
+  changes: (result: T) => JordChangeDraft | JordChangeDraft[] | null,
+) => Promise<T>;
+
+/**
  * Subscribe channel: `records` or a user-table ident (not reserved).
  * Does not require the table to exist yet.
  */

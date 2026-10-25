@@ -4,6 +4,7 @@ import type { JordPolicy } from "../port.js";
 import {
   compilePolicySql,
   planSyncRecordsRls,
+  planSyncTableRls,
   quoteSqlLiteral,
 } from "./ddl-rls.js";
 
@@ -44,7 +45,7 @@ describe("ddl-rls planner", () => {
     expect(sql).toContain("current_setting('jord.role', true)");
   });
 
-  it("skips disabled, non-records, and unknown kinds", () => {
+  it("skips disabled policies, unknown kinds, and bucket rules on tables without a bucket", () => {
     expect(
       compilePolicySql(
         policy({
@@ -61,7 +62,7 @@ describe("ddl-rls planner", () => {
           operation: "select",
           effect: "allow",
           tableName: "notes",
-          rules: JSON.stringify([{ kind: "always" }]),
+          rules: JSON.stringify([{ kind: "bucket_eq", config: { bucket: "lab" } }]),
         }),
       ),
     ).toBeNull();
@@ -155,7 +156,27 @@ describe("ddl-rls planner", () => {
     expect(sql).toContain(`"owner_id" = current_setting('jord.uid', true)`);
   });
 
-  it("skips owner_eq with a non-ident column and claim_eq unless the claim is sub", () => {
+  it("compiles user-table policies on that table and plans FORCE RLS when enabled", () => {
+    const notes = policy({
+      operation: "select",
+      effect: "allow",
+      tableName: "notes",
+      rules: JSON.stringify([{ kind: "owner_eq", config: { column: "owner_id" } }]),
+    });
+    expect(compilePolicySql(notes)).toBe(
+      `CREATE POLICY "jord_rls_notes_select" ON "notes" FOR SELECT USING ((CASE WHEN ("owner_id" = current_setting('jord.uid', true)) THEN TRUE ELSE current_setting('jord.role', true) IN ('admin', 'editor', 'readonly') END))`,
+    );
+    const on = planSyncTableRls("notes", [notes, policy({ ...notes, tableName: "other" })], {
+      enable: true,
+    });
+    expect(on.statements).toContain('ALTER TABLE "notes" FORCE ROW LEVEL SECURITY');
+    expect(on.statements.filter((sql) => sql.startsWith("CREATE POLICY"))).toHaveLength(4);
+    expect(on.statements.join("\n")).not.toContain('"other"');
+    const off = planSyncTableRls("notes", [notes], { enable: false });
+    expect(off.statements).toContain('ALTER TABLE "notes" DISABLE ROW LEVEL SECURITY');
+  });
+
+  it("skips owner_eq with a non-ident column and compiles claim_eq from the claims GUC", () => {
     expect(
       compilePolicySql(
         policy({
@@ -184,10 +205,12 @@ describe("ddl-rls planner", () => {
           operation: "select",
           effect: "allow",
           rules: JSON.stringify([
-            { kind: "claim_eq", config: { claim: "email", column: "email" } },
+            { kind: "claim_eq", config: { claim: "tenant", column: "tenant_id" } },
           ]),
         }),
       ),
-    ).toBeNull();
+    ).toContain(
+      `"tenant_id" = (NULLIF(current_setting('jord.claims', true), '')::jsonb ->> 'tenant')`,
+    );
   });
 });

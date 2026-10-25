@@ -1,6 +1,6 @@
 ---
 title: "Jord — realtime"
-description: "Outbox CDC over SSE and WebSocket; resume with since; tracked tables only"
+description: "Transactional outbox CDC over SSE and WebSocket; resume with since; tracked tables only"
 created: 2026-10-24
 updated: 2026-10-25
 tags:
@@ -20,7 +20,7 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 
 ## What
 
-**Single emit path:** API (and function) writes that touch a **tracked** table insert into `jord_changes` and then fan out `jord.change`. There is no second direct-to-bus path. Event name stays `jord.change` so Studio subscribers stay valid. Payload still has `type`, `table`, `op`, `id`, `version?`, `at`, `dialect`, plus optional `seq` for resume.
+**Single emit path.** Every server write to a **tracked** table goes through one helper, `writeChangeAs(principal)` in `cloud/jord/src/app.ts`. Inside the write queue it opens `jord.transaction`, runs the data write, inserts the `jord_changes` row(s) (`outbox.appendChange`, the only `INSERT INTO jord_changes` in the source; a test greps for this), and commits. Only after commit does it publish `jord.change`. If the outbox insert fails, the data write rolls back and the request fails (5xx). Callers: Studio rows, `/records`, `/api/v1/:table` (using the `RETURNING` rows for `new` / `old`), functions (`records_insert`), triggers, and `/x/:slug`. Event name stays `jord.change`. Payload: `type`, `table`, `op`, `id`, `version?`, `at`, `dialect`, plus `seq` for resume.
 
 | Piece | Detail |
 |-------|--------|
@@ -29,8 +29,9 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 | Opt-in | Capture only for tracked tables. `records` is seeded tracked. `CREATE TABLE` marks the new table tracked. `PUT /schema/tables/:name/track` `{ tracked }` toggles |
 | Retention | Default **7 days** and **100_000** rows (`JORD_CHANGES_RETENTION_DAYS`, `JORD_CHANGES_RETENTION_ROWS`). Job kind `changes_prune` |
 | Resume | `GET /realtime?table=&since=` — catch up then live. `since` older than the retained range → **410** `{ error: "gone", hint: "resync" }` |
-| Watermark | libSQL: write-queue order; readable watermark is `MAX(seq)`. Postgres: withhold seqs above an in-flight lower seq; `pg_notify` payload is **seq only** |
-| Policy | Filter at delivery (catchup and live) using the subscriber's select policy on the **new** row ( **old** for deletes) |
+| Watermark | `appendChange` marks the seq in flight; the helper settles it after commit or rollback. Readers see `MAX(seq)`, held below the lowest seq still in flight in this process. Postgres BIGSERIAL can commit out of order; a live test proves a higher seq is not readable until the lower one commits |
+| Fan-out | In-process bus. A Postgres trigger sends `pg_notify('jord_changes', seq)`, but nothing `LISTEN`s yet. Multi-instance fan-out is phase-03 |
+| Policy | Filter at delivery (catchup and live) using the subscriber's select policy and row scope on the **new** row (**old** for deletes) |
 | BLOBs | Omitted from outbox JSON as `{ "$blob": true }` |
 | Cap | **48** shared SSE+WS subscribers → **503** `realtime_full` |
 
@@ -41,19 +42,23 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 
 Any authenticated principal may subscribe, including `user` and `anon`. When the access token `exp` passes, SSE emits `expired` and ends; WebSocket closes with **4401**.
 
-### libSQL raw SQL gap
+### Not captured
 
-**Raw SQL from the Studio editor on libSQL is not captured.** Only writes that go through jord-server (HTTP, functions, triggers that call the API write path) insert into `jord_changes`. Studio Help documents the same gap.
+- **Raw SQL** from the Studio SQL console and the migrate wizard. Only writes through the paths above insert into `jord_changes`. Studio Help documents the gap.
+- **Hosted `libsql://`.** `jord.transaction` runs without a transaction there (the remote client has no shared connection), so data and outbox are written in order but not atomically.
+- `/api/v1` PATCH emits `old: null` (the update does not read the prior row).
 
 ## How
 
 | Piece | Path |
 |-------|------|
+| Write helper | `writeChangeAs` in `cloud/jord/src/app.ts` · type `WriteWithChange` in `cloud/jord/src/realtime/types.ts` |
 | Outbox | `cloud/jord/src/realtime/outbox.ts` |
 | Watermark | `cloud/jord/src/realtime/watermark.ts` |
 | Bus (fanout only) | `cloud/jord/src/realtime/bus.ts` |
+| Transaction | `JordDriverPort.transaction` (libSQL `BEGIN IMMEDIATE` on the shared connection; Postgres one pooled client with the session GUCs) |
 | Migration | `elements/jord/migrations/{libsql,postgres}/0004_outbox.sql` |
-| Studio | Live switch on records / tables; Help note for raw-SQL gap |
+| Tests | `cloud/jord/src/realtime/outbox.test.ts` (file + live Postgres) |
 
 ## Example
 
@@ -61,4 +66,4 @@ Open `GET /realtime?table=notes` with a bearer, then `POST /schema/tables/notes/
 
 ## Not in Jord yet
 
-SQLite update hooks · Turso external-writer capture · multi-node presence · Redis fanout · Postgres watermark race live test when `JORD_TEST_POSTGRES_URL` is unset
+`LISTEN` fan-out across instances · SQLite update hooks · Turso external-writer capture · multi-node presence · Redis fanout

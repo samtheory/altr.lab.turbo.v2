@@ -59,7 +59,7 @@ Authenticated `GET|POST|PATCH|DELETE /api/v1/:table` and `GET /api/v1/openapi.js
 
 Caps: default limit **100**, max **1000**, `in(...)` max **100**, JSON body **1 MiB** (S0028). PATCH and DELETE without a filter return **400**. `?all=true` is **service only**. A table with no primary key rejects PATCH and DELETE. Composite keys are repeated `pk` query params in column order.
 
-`Prefer: count=planned` may return `count: null` on libSQL (no planner estimate). `Prefer: count=exact` runs `COUNT(*)` and is costly. It is not the default. `Prefer: return=representation` uses `RETURNING` (verified on file libSQL; Postgres not run here).
+`Prefer: count=planned` may return `count: null` on libSQL (no planner estimate). `Prefer: count=exact` runs `COUNT(*)` and is costly. It is not the default. `Prefer: return=representation` uses `RETURNING` (tested on file libSQL and live Postgres). Writes on tracked tables emit `jord.change` through the shared outbox helper; see [[../realtime/README]].
 
 `records` still honors `JORD_GENERATED_API_DISABLED` (**503**). User and anon stay default-deny until a policy allows the table. `/api/v1` shares the data-route limit (120 / minute) and idempotency.
 
@@ -98,4 +98,4 @@ Built-in steps above remain the only function execution path today.
 
 ## Not in Jord yet
 
-Embeds, joins, per-operation toggles, arbitrary SQL steps, user-uploaded code / Functions v2 runtime, a generated catalog per user table. Postgres RETURNING for this route was not run.
+Embeds, joins, per-operation toggles, arbitrary SQL steps, user-uploaded code / Functions v2 runtime, a generated catalog per user table.

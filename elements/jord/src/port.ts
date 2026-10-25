@@ -64,10 +64,24 @@ export type CreateTableResult =
 
 export type TableCell = string | number | boolean | null;
 
+/** `column = value` terms ANDed together. */
+export type RowPredicate = Array<{ column: string; value: string }>;
+
+/**
+ * Row scope from matching allow policies: a row is visible when any
+ * predicate matches (OR of ANDs). An empty list matches no rows.
+ */
+export type RowScope = { anyOf: RowPredicate[] };
+
 export type ListTableRowsInput = {
   table: string;
   limit: number;
   offset: number;
+  /**
+   * Restrict rows to the scope. A predicate on an unknown column matches
+   * nothing (fail closed); libSQL has no database RLS to fall back on.
+   */
+  rowScope?: RowScope;
 };
 
 export type ListTableRowsResult =
@@ -507,6 +521,12 @@ export interface JordDriverPort {
     args?: Array<string | number | null>,
   ): Promise<Array<Record<string, unknown>>>;
   /**
+   * Run `work` in one write transaction. Port calls made inside `work`
+   * join it; a throw rolls everything back. Nested calls join the outer one.
+   * Hosted `libsql://` runs `work` without a transaction (stateless streams).
+   */
+  transaction<T>(work: () => Promise<T>): Promise<T>;
+  /**
    * Studio SQL console. Read-only uses a dedicated connection with
    * `PRAGMA query_only=ON` (libSQL) or `BEGIN READ ONLY` (Postgres).
    * Writes use the main client; the server must enqueue them.
@@ -595,15 +615,16 @@ export interface JordDriverPort {
   compileTriggerSql?(def: JordTrigger): string | null;
 
   /**
-   * Bind request role/bucket/uid for Postgres RLS GUCs
-   * (`jord.role`, `jord.bucket`, `jord.uid`).
-   * No-op on libSQL. Uses async context — call inside the request (and again
-   * inside a write-queue callback) before records SQL.
+   * Bind request role/bucket/uid/claims for Postgres RLS GUCs
+   * (`jord.role`, `jord.bucket`, `jord.uid`, `jord.claims`).
+   * No-op on libSQL. Uses async context: every later port call in the same
+   * request (including write-queue callbacks enqueued from it) sees it.
    */
   bindRlsSession?(input: {
     role: string;
     bucket?: string | null;
     uid?: string | null;
+    claims?: Record<string, unknown> | null;
   }): void;
 
   /** Per-table RLS flag from `jord_table_rls`, or null when the row is absent. */
@@ -622,8 +643,9 @@ export interface JordDriverPort {
   compilePolicySql?(policy: JordPolicy): string | null;
 
   /**
-   * Rebuild Postgres RLS on `records` from `jord_policies`.
-   * No-op on libSQL. Throws if DDL fails.
+   * Rebuild Postgres RLS on `records` and every `rls_enabled` user table
+   * from `jord_policies`, and grant DML to `jord_app` when it exists.
+   * Needs the table owner (migrate connection). No-op on libSQL.
    */
   syncRecordsPoliciesRls?(): Promise<void>;
 

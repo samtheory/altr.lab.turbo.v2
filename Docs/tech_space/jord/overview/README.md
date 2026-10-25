@@ -76,7 +76,7 @@ Fixture: `cloud/jord/fixtures/phase-01-baseline.sql`. Header `-- source: eb7d7fd
 
 Opening that fixture and then booting keeps the seed row and writes one `jord_migrations` row whose checksum equals the baseline file.
 
-Postgres lock tests live in `elements/jord/src/schema/migrations/migrations.test.ts` and run only when `JORD_TEST_POSTGRES_URL` is set. They were not executed on the machine that landed this note.
+Postgres lock tests live in `elements/jord/src/schema/migrations/migrations.test.ts` and run only when `JORD_TEST_POSTGRES_URL` is set. They passed on live Postgres on 2026-10-25. The splitter (`split-sql.ts`) keeps `'…'` strings and `$tag$…$tag$` bodies whole; before that fix every Postgres boot failed on the outbox trigger function.
 
 ## CI
 
@@ -102,7 +102,15 @@ pnpm --filter @altr/jord-client test
 pnpm --filter @altr/jord-studio typecheck
 ```
 
-Postgres live tests use secret `JORD_TEST_POSTGRES_URL` in job **`jord-postgres`** (not a required check). The secret is bound to job `env` and each live step uses `if: env.JORD_TEST_POSTGRES_URL != ''` (GitHub does not allow `secrets` in a job-level `if`). When the secret is missing (including forks), live steps are skipped and the job stays green — a green **`jord-postgres`** does **not** prove Postgres was tested. The URL is never echoed.
+Job **`jord-postgres`** (not a required check yet) starts a `pgvector/pgvector:pg16` service container, sets `JORD_TEST_POSTGRES_URL` to it, and runs the `@altr/jord` and `@altr/jord-server` tests. No secret is needed, so forks run it too.
+
+Server tests use `cloud/jord/src/testing/harness.ts`. `TEST_BACKENDS` is `["file"]`, plus `"postgres"` when `JORD_TEST_POSTGRES_URL` is set. For Postgres each test gets a fresh database, the owner migration, and a runtime pool as `jord_app`, so FORCE RLS applies exactly as in production. Suites on both backends: table API, policies (part-c), outbox, SQL console, storage metadata. Local run:
+
+```powershell
+docker run -d --name jord-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=jord_test -p 55432:5432 pgvector/pgvector:pg16
+$env:JORD_TEST_POSTGRES_URL="postgres://postgres:postgres@localhost:55432/jord_test"
+pnpm --filter @altr/jord-server test
+```
 
 Branch protection: requiring status check **`jord`** is a **manual admin** step after the first Actions run. Exact check label in the GitHub UI may be `jord` or `jord / jord` — confirm on the first green run.
 
@@ -119,6 +127,8 @@ Before `/api/v1` exists, the server hardens the edge:
 | Shutdown | Drain the write queue, close realtime, then pools / WAL / HTTP |
 
 Modules: `cloud/jord/src/http/`, `cloud/jord/src/idempotency/`, `queue.drain`, `RealtimeBus.close`. Writes detail: [[../writes/README]].
+
+**Single-process stores.** The rate-limit buckets, the idempotency cache, and the SQL console history live **in memory** in one `jord-server` process. A restart clears them, and a second instance would not share them. The same holds for the realtime bus and the outbox commit watermark. Running more than one instance is phase-03 work.
 
 ## Not in Jord yet
 

@@ -2,8 +2,14 @@ import type { JordDriverPort } from "@altr/jord";
 import { Hono } from "hono";
 
 import type { JordAuthVariables } from "../auth/middleware.js";
-import type { WriteQueue } from "../queue.js";
-import { evaluatePolicies, policiesDisabledFromEnv } from "../policies/evaluate.js";
+import type { Principal } from "../auth/principal.js";
+import {
+  evaluatePolicies,
+  patchKeepsScope,
+  policiesDisabledFromEnv,
+  stampInsertScope,
+} from "../policies/evaluate.js";
+import type { JordChangeDraft, WriteWithChange } from "../realtime/types.js";
 import { buildOpenApi } from "./openapi.js";
 import {
   coerceColumnValue,
@@ -19,6 +25,7 @@ import {
   compileSelect,
   compileUpdate,
   filtersForWrite,
+  scopeFor,
   type CompiledSql,
 } from "./sql.js";
 
@@ -37,7 +44,7 @@ function jsonError(status: number, error: string, message: string): Response {
 
 export function createTableApiRoutes(deps: {
   jord: JordDriverPort;
-  enqueueWrite: WriteQueue;
+  writeChangeAs: (principal: Principal) => WriteWithChange;
   generatedRecordsEnabled: () => boolean;
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
@@ -101,13 +108,14 @@ export function createTableApiRoutes(deps: {
       if (!decision.allowed) {
         return jsonError(403, "policy_denied", "policy denied");
       }
+      const scope = principal.kind === "service" ? undefined : scopeFor(info, decision.scope);
 
       if (method === "GET") {
-        const compiled = compileSelect(info, parsed, dialect);
+        const compiled = compileSelect(info, parsed, dialect, scope);
         const rows = await deps.jord.query(compiled.sql, compiled.args);
         let count: number | null = null;
         if (parsed.count === "exact") {
-          const counted = compileCount(info, parsed.filters, dialect);
+          const counted = compileCount(info, parsed.filters, dialect, scope);
           const countRows = await deps.jord.query(counted.sql, counted.args);
           count = Number(countRows[0]?.n ?? 0);
         }
@@ -120,14 +128,35 @@ export function createTableApiRoutes(deps: {
         return c.json({ data: rows, count });
       }
 
-      const body = method === "DELETE" ? {} : await readBody(c);
-      if (decision.constraint?.ownerColumn && principal.uid && principal.kind !== "service") {
-        body[decision.constraint.ownerColumn] = principal.uid;
+      let body = method === "DELETE" ? {} : await readBody(c);
+      if (scope && method === "POST") {
+        const stamped = stampInsertScope(scope.scope, body);
+        if (!stamped) return jsonError(403, "policy_denied", "policy denied");
+        body = stamped;
+      }
+      if (scope && method === "PATCH" && !patchKeepsScope(scope.scope, body)) {
+        return jsonError(403, "policy_denied", "patch moves the row out of scope");
       }
       const values = coerceBody(info, body);
 
+      const keys = pkColumns(info).map((col) => col.name);
+      const blobColumns = info.columns
+        .filter((col) => /BLOB|BYTEA/i.test(col.type))
+        .map((col) => col.name);
+      const op = method === "POST" ? "insert" : method === "PATCH" ? "update" : "delete";
       const run = (compiled: CompiledSql) =>
-        deps.enqueueWrite(() => deps.jord.query(compiled.sql, compiled.args));
+        deps.writeChangeAs(principal)(
+          () => deps.jord.query(compiled.sql, compiled.args),
+          (rows): JordChangeDraft[] =>
+            rows.map((row) => ({
+              table,
+              op,
+              id: keys.map((key) => String(row[key] ?? "")).join(","),
+              oldRow: op === "insert" ? null : op === "delete" ? row : null,
+              newRow: op === "delete" ? null : row,
+              blobColumns,
+            })),
+        );
 
       if (method === "POST") {
         const rows = await run(compileInsert(info, values, dialect));
@@ -154,8 +183,9 @@ export function createTableApiRoutes(deps: {
               dialect,
               hasVersion && typeof body.version === "number",
               parsed.all,
+              scope,
             )
-          : compileDelete(info, filters, dialect, parsed.all);
+          : compileDelete(info, filters, dialect, parsed.all, scope);
       const rows = await run(compiled);
       if (rows.length === 0 && hasVersion && typeof body.version === "number") {
         return jsonError(409, "version_conflict", "version did not match");

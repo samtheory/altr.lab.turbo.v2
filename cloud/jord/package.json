@@ -28,7 +28,9 @@
   "devDependencies": {
     "@altr/jord-client": "workspace:*",
     "@types/node": "^22.16.5",
+    "@types/pg": "8.23.1",
     "@types/ws": "^8.18.2",
+    "pg": "8.23.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

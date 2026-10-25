@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -77,6 +78,7 @@ import {
   quoteIdent,
   toTableCell,
 } from "../schema/ddl.js";
+import { rowScopeSql } from "../schema/row-scope.js";
 import {
   buildRebuildCopySql,
   buildRebuildCreateSql,
@@ -84,6 +86,7 @@ import {
   planDropColumn,
   planDropTable,
   planRenameTable,
+  TABLE_NAME_METADATA,
   rebuildTempName,
   requireUserTableName,
 } from "../schema/ddl-alter.js";
@@ -347,6 +350,8 @@ async function probeLibsqlVectorBackend(client: Client): Promise<VectorBackend> 
   return "cosine";
 }
 
+const inLibsqlTx = new AsyncLocalStorage<boolean>();
+
 export class LibSqlAdapter implements JordDriverPort {
   readonly dialect = "libsql" as const;
   readonly urlScheme: Extract<JordUrlScheme, "file" | "libsql">;
@@ -420,6 +425,24 @@ export class LibSqlAdapter implements JordDriverPort {
       }
       return out;
     });
+  }
+
+  /**
+   * File libSQL: BEGIN IMMEDIATE on the shared connection, so drizzle and raw
+   * calls inside `work` join it. Callers must hold the write queue; any other
+   * statement issued on this connection meanwhile also lands in the transaction.
+   */
+  async transaction<T>(work: () => Promise<T>): Promise<T> {
+    if (this.urlScheme === "libsql" || inLibsqlTx.getStore()) return work();
+    await this.client.execute("BEGIN IMMEDIATE");
+    try {
+      const result = await inLibsqlTx.run(true, work);
+      await this.client.execute("COMMIT");
+      return result;
+    } catch (err) {
+      await this.client.execute("ROLLBACK").catch(() => undefined);
+      throw err;
+    }
   }
 
   async executeSql(input: {
@@ -1233,11 +1256,16 @@ export class LibSqlAdapter implements JordDriverPort {
       };
     }
     const window = clampRowWindow(input.limit, input.offset);
-    const rs = await this.client.execute({
-      sql: `SELECT * FROM ${quoteIdent(input.table)} LIMIT ? OFFSET ?`,
-      args: [window.limit, window.offset],
-    });
     const columns = described.columns.map((col) => col.name);
+    const args: Array<string | number | null> = [];
+    const where = input.rowScope
+      ? ` WHERE ${rowScopeSql(input.rowScope, columns, args)}`
+      : "";
+    args.push(window.limit, window.offset);
+    const rs = await this.client.execute({
+      sql: `SELECT * FROM ${quoteIdent(input.table)}${where} LIMIT ? OFFSET ?`,
+      args,
+    });
     const rows = rs.rows.map((row) => {
       const out: Record<string, ReturnType<typeof toTableCell>> = {};
       for (const name of columns) {
@@ -1340,9 +1368,17 @@ export class LibSqlAdapter implements JordDriverPort {
         message: `table ${plan.to} already exists`,
       };
     }
-    await this.client.execute(
-      `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
-    );
+    await this.transaction(async () => {
+      await this.client.execute(
+        `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
+      );
+      for (const meta of TABLE_NAME_METADATA) {
+        await this.client.execute({
+          sql: `UPDATE ${meta} SET table_name = ? WHERE table_name = ?`,
+          args: [plan.to, plan.from],
+        });
+      }
+    });
     return { ok: true };
   }
 

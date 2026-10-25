@@ -179,6 +179,7 @@ export function resolvePrincipal(
         claims: {
           iss: claims.iss,
           aud: claims.aud,
+          sub: claims.sub,
           ...(claims.email ? { email: claims.email } : {}),
         },
       },

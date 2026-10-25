@@ -8,7 +8,7 @@ import type {
 import type { JordRole } from "../auth/roles.js";
 import { runFunction } from "../functions/runner.js";
 import type { LogRing } from "../jobs/log-ring.js";
-import type { JordChangeDraft } from "../realtime/types.js";
+import type { WriteWithChange } from "../realtime/types.js";
 import {
   actionFailHard,
   isBuiltinTriggerActionKind,
@@ -27,7 +27,7 @@ export type TriggerFireInput = {
   uid?: string | null;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   disabled?: boolean;
-  onRecordChange?: (draft: JordChangeDraft) => void;
+  writeChange?: WriteWithChange;
 };
 
 export type TriggerFireResult = {
@@ -168,7 +168,7 @@ async function runAction(
           body: payload,
         },
         enqueueWrite: input.enqueueWrite,
-        onRecordChange: input.onRecordChange,
+        writeChange: input.writeChange,
       });
       if (!result.ok) {
         throw new Error(result.message);
