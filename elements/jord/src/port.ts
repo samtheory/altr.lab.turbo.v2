@@ -451,6 +451,12 @@ export type UpdateTriggerInput = {
 
 export type JordDb = LibSQLDatabase<typeof schema>;
 
+export type TableRlsFlag = {
+  tableName: string;
+  rlsEnabled: boolean;
+  ownerColumn: string | null;
+};
+
 export type JordDialect = "libsql" | "postgres";
 
 /** Safe URL scheme on the open client (no host/path). */
@@ -483,6 +489,14 @@ export interface JordDriverPort {
   readonly db?: JordDb;
 
   close(): Promise<void>;
+  /**
+   * Parameterized control-plane SQL for server modules (auth identity).
+   * Not an HTTP surface. Placeholders are dialect-native (`?` or `$1`).
+   */
+  query(
+    sql: string,
+    args?: Array<string | number | null>,
+  ): Promise<Array<Record<string, unknown>>>;
   /**
    * `PRAGMA wal_checkpoint(TRUNCATE)` on local file libSQL.
    * No-op on hosted `libsql://` and Postgres.
@@ -554,11 +568,25 @@ export interface JordDriverPort {
   compileTriggerSql?(def: JordTrigger): string | null;
 
   /**
-   * Bind request role/bucket for Postgres RLS GUCs (`jord.role`, `jord.bucket`).
+   * Bind request role/bucket/uid for Postgres RLS GUCs
+   * (`jord.role`, `jord.bucket`, `jord.uid`).
    * No-op on libSQL. Uses async context — call inside the request (and again
    * inside a write-queue callback) before records SQL.
    */
-  bindRlsSession?(input: { role: string; bucket?: string | null }): void;
+  bindRlsSession?(input: {
+    role: string;
+    bucket?: string | null;
+    uid?: string | null;
+  }): void;
+
+  /** Per-table RLS flag from `jord_table_rls`, or null when the row is absent. */
+  getTableRls(tableName: string): Promise<TableRlsFlag | null>;
+  /** Upsert `jord_table_rls` on `table_name`. */
+  setTableRls(input: {
+    tableName: string;
+    rlsEnabled: boolean;
+    ownerColumn?: string | null;
+  }): Promise<TableRlsFlag>;
 
   /**
    * Native CREATE POLICY for one Jord policy, or null when this dialect

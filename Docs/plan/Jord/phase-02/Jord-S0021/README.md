@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0021 — migration + principal auth + policies
 
-> Who: **mimir**. **Status: Part A implemented locally** (file libSQL, 2026-10-25). Part B not started. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]]. **S0027** is in tree. **Next:** [[02-auth]] after Part A review. **Next after C:** [[../Jord-S0028/README]] (execution #6).
+> Who: **mimir**. **Status: Parts A, B, and C are in the tree** for file libSQL (2026-10-25). [[ADR-threat-model]] **accepted for Part C**. Two Part C boxes stay open until Postgres is run (pool leak, dialect pair) and do not block later stops. S0028 is in the tree. **Next untouched stop:** [[../Jord-S0022/README]]. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]].
 
 **Sprint id:** `Jord-S0021`  
 **Owner:** mimir  
@@ -44,9 +44,9 @@ OAuth · magic links · real email provider · table API (S0022) · CDC (S0023) 
 ## Parent Definition of Done
 
 - [ ] A, B, and C each have their own DoD green
-- [ ] ADR accepted before C merged
-- [ ] Each part's PR already updated its `tech_space` page (R4). Verify only reconciles links
-- [ ] Typecheck `@altr/jord` and `@altr/jord-server` (CI from S0027 already required)
+- [x] ADR accepted before C merged
+- [x] Each part's PR already updated its `tech_space` page (R4). Verify only reconciles links
+- [x] Typecheck `@altr/jord` and `@altr/jord-server` (CI from S0027 already required)
 
 ## Links
 

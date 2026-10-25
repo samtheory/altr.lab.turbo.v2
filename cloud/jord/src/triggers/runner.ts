@@ -23,6 +23,8 @@ export type TriggerFireInput = {
   row: JordRecord | null;
   prior?: JordRecord | null;
   role: JordRole;
+  subject?: "service" | "user" | "anon" | "operator";
+  uid?: string | null;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   disabled?: boolean;
   onRecordChange?: (draft: JordChangeDraft) => void;
@@ -150,10 +152,14 @@ async function runAction(
       if (!fn) {
         throw new Error(`function ${functionId} not found`);
       }
+      const escalate = config.as === "service";
       const result = await runFunction({
         jord: input.jord,
         fn,
-        role: input.role,
+        role: escalate ? "editor" : input.role,
+        policyBypass: escalate || input.subject === "service",
+        subject: escalate ? "service" : input.subject,
+        uid: escalate ? null : input.uid,
         request: {
           method: "TRIGGER",
           path: `/triggers/${trigger.id}`,

@@ -42,6 +42,7 @@ import type {
   JordPolicyOperation,
   JordRecord,
   JordTableInfo,
+  TableRlsFlag,
   JordTrigger,
   JordTriggerEvent,
   JordTriggerTiming,
@@ -92,6 +93,7 @@ import {
   planInsertRow,
   planUpdateRow,
 } from "../schema/row-write.js";
+import { samePostgresConnection } from "../schema/connection-identity.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
 import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
@@ -280,6 +282,22 @@ function mapPolicy(row: QueryResultRow): JordPolicy {
   };
 }
 
+function rlsEnabledFlag(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "bigint") return value === 1n;
+  if (typeof value === "number") return value === 1;
+  return value === "1" || value === "t" || value === "true";
+}
+
+function mapTableRls(row: Record<string, unknown>): TableRlsFlag {
+  const owner = row.owner_column;
+  return {
+    tableName: String(row.table_name ?? ""),
+    rlsEnabled: rlsEnabledFlag(row.rls_enabled),
+    ownerColumn: owner == null ? null : String(owner),
+  };
+}
+
 function mapTrigger(row: QueryResultRow): JordTrigger {
   return {
     id: String(row.id),
@@ -322,14 +340,29 @@ export class PostgresAdapter implements JordDriverPort {
     this.vectorBackend = vectorBackend;
   }
 
-  static async open(connectionString: string): Promise<PostgresAdapter> {
+  static async open(
+    connectionString: string,
+    options?: { ddl?: boolean },
+  ): Promise<PostgresAdapter> {
     const pool = new Pool({ connectionString });
+    const ddl = options?.ddl !== false;
     try {
       await pool.query("SELECT 1");
-      await ensurePostgresSchema(pool, migrationLockKey(connectionString));
+      const migrateUrl = process.env.JORD_MIGRATE_URL;
+      if (migrateUrl && samePostgresConnection(migrateUrl, connectionString)) {
+        throw new Error(
+          "[@altr/jord] JORD_MIGRATE_URL and the runtime URL are the same connection",
+        );
+      }
+      if (ddl) {
+        await ensurePostgresSchema(pool, migrationLockKey(connectionString));
+      } else {
+        const { assertRuntimeRole } = await import("../schema/jord-app.js");
+        await assertRuntimeRole(pool);
+      }
       const vectorBackend = await probePgvector(pool);
       const adapter = new PostgresAdapter(pool, vectorBackend);
-      await adapter.syncRecordsPoliciesRls();
+      if (ddl) await adapter.syncRecordsPoliciesRls();
       return adapter;
     } catch (err) {
       await pool.end().catch(() => undefined);
@@ -337,11 +370,61 @@ export class PostgresAdapter implements JordDriverPort {
     }
   }
 
-  bindRlsSession(input: { role: string; bucket?: string | null }): void {
+  async query(
+    sql: string,
+    args: Array<string | number | null> = [],
+  ): Promise<Array<Record<string, unknown>>> {
+    const result = await this.pool.query(sql, args);
+    return result.rows as Array<Record<string, unknown>>;
+  }
+
+  bindRlsSession(input: {
+    role: string;
+    bucket?: string | null;
+    uid?: string | null;
+  }): void {
     rlsSession.enterWith({
       role: input.role,
       bucket: input.bucket ?? "",
+      uid: input.uid ?? "",
     });
+  }
+
+  async getTableRls(tableName: string): Promise<TableRlsFlag | null> {
+    const rows = await this.query(
+      `SELECT table_name, rls_enabled, owner_column FROM jord_table_rls WHERE table_name = $1 LIMIT 1`,
+      [tableName],
+    );
+    const row = rows[0];
+    return row ? mapTableRls(row) : null;
+  }
+
+  async setTableRls(input: {
+    tableName: string;
+    rlsEnabled: boolean;
+    ownerColumn?: string | null;
+  }): Promise<TableRlsFlag> {
+    const updatedAt = Date.now();
+    const ownerColumn = input.ownerColumn ?? null;
+    const enabled = input.rlsEnabled ? "TRUE" : "FALSE";
+    const rows = await this.query(
+      `INSERT INTO jord_table_rls (table_name, rls_enabled, owner_column, updated_at)
+       VALUES ($1, ${enabled}, $2, $3)
+       ON CONFLICT (table_name) DO UPDATE SET
+         rls_enabled = EXCLUDED.rls_enabled,
+         owner_column = EXCLUDED.owner_column,
+         updated_at = EXCLUDED.updated_at
+       RETURNING table_name, rls_enabled, owner_column`,
+      [input.tableName, ownerColumn, updatedAt],
+    );
+    const row = rows[0];
+    return row
+      ? mapTableRls(row)
+      : {
+          tableName: input.tableName,
+          rlsEnabled: input.rlsEnabled,
+          ownerColumn,
+        };
   }
 
   compilePolicySql(policy: JordPolicy): string | null {
@@ -368,7 +451,7 @@ export class PostgresAdapter implements JordDriverPort {
 
   /**
    * Records SQL. When a request bound a session, set GUCs in the same
-   * transaction so FORCE RLS sees `jord.role` / `jord.bucket`.
+   * transaction so FORCE RLS sees `jord.role` / `jord.bucket` / `jord.uid`.
    * `bypass` turns row_security off (table owner only) so get-by-id can
    * still return the row for the middleware 403 path.
    */
@@ -386,8 +469,8 @@ export class PostgresAdapter implements JordDriverPort {
       await client.query("BEGIN");
       if (ctx) {
         await client.query(
-          "SELECT set_config('jord.role', $1, true), set_config('jord.bucket', $2, true)",
-          [ctx.role, ctx.bucket],
+          "SELECT set_config('jord.role', $1, true), set_config('jord.bucket', $2, true), set_config('jord.uid', $3, true)",
+          [ctx.role, ctx.bucket, ctx.uid ?? ""],
         );
       }
       if (mode === "bypass") {

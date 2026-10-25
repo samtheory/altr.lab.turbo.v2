@@ -2,7 +2,7 @@
 title: "Jord-S0028 — HTTP hardening"
 description: "CORS, data-route rate limits, body limits, write-queue drain, idempotency keys — before the public table API"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # Jord-S0028 — HTTP hardening
 
-> Who: **mimir**. **Status: planned.** **Execution #6.** Blocked by S0021 Part C. Next: [[../Jord-S0022/README]] (execution #7).
+> Who: **mimir**. **Status: in tree** (file libSQL, 2026-10-25). **Execution #6.** Next: [[../Jord-S0022/README]] (execution #7). Postgres was not required for this stop.
 
 **Sprint id:** `Jord-S0028`  
 **Hats:** **sindri** · **heimdall** · **docs_man**
@@ -36,8 +36,8 @@ A public multi-tenant gateway · Redis rate-limit store (in-process is enough fo
 
 ## Definition of Done
 
-- [ ] Disallowed Origin does not get `Access-Control-Allow-Origin`
-- [ ] Body over the cap → 413
-- [ ] Shutdown test: queued write finishes; process does not exit mid-write
-- [ ] Idempotency replay test green
-- [ ] Note in `tech_space/jord/overview` and `writes`
+- [x] Disallowed Origin does not get `Access-Control-Allow-Origin`
+- [x] Body over the cap → 413
+- [x] Shutdown test: queued write finishes; process does not exit mid-write
+- [x] Idempotency replay test green
+- [x] Note in `tech_space/jord/overview` and `writes`

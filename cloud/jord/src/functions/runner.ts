@@ -14,6 +14,9 @@ export type RunFunctionInput = {
   jord: JordDriverPort;
   fn: JordFunction;
   role: JordRole;
+  policyBypass?: boolean;
+  subject?: "service" | "user" | "anon" | "operator";
+  uid?: string | null;
   request: FunctionRequestContext;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   logs?: LogRing;
@@ -77,6 +80,9 @@ export async function runFunction(
       const out = await handler({
         jord: input.jord,
         role: input.role,
+        policyBypass: input.policyBypass,
+        subject: input.subject,
+        uid: input.uid,
         request: input.request,
         prior,
         config: step.config ?? {},

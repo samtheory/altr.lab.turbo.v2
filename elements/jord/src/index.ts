@@ -24,6 +24,7 @@ export {
   type SearchVectorsResult,
   type VectorBackend,
   type TableCell,
+  type TableRlsFlag,
   type UpsertBlobMetaInput,
   type UpsertEmbeddingInput,
   type UpsertEmbeddingResult,
@@ -150,6 +151,18 @@ export {
   type RecordsRlsPlan,
   type RlsSessionContext,
 } from "./schema/ddl-rls.js";
+export {
+  JORD_APP_ROLE,
+  jordAppDmlGrants,
+  jordAppGrantStatements,
+  planJordApp,
+  runOwnerMigration,
+  type RoleProbe,
+} from "./schema/jord-app.js";
+export {
+  postgresConnectionIdentity,
+  samePostgresConnection,
+} from "./schema/connection-identity.js";
 export {
   JordMigrationChecksumError,
   JordSlice0UrlError,

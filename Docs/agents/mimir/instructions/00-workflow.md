@@ -40,7 +40,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 | Phase | Plans | As-built | Status |
 |-------|-------|----------|--------|
 | **01** | [[../../../plan/Jord/phase-01/README]] | [[../../../tech_space/jord/README]] (categories, not a phase folder) | **Closed** (S0001–S0020) |
-| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — S0027 and S0021-A in tree · next [[../../../plan/Jord/phase-02/Jord-S0021/02-auth\|S0021-B]] |
+| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Open** — S0027 through S0028 (file libSQL) in tree · next [[../../../plan/Jord/phase-02/Jord-S0022/README\|S0022]] |
 
 Do **not** put new sprint cards under phase-01. Phase-02 execution order is the numbered list on the phase-02 README (S0027, then S0021 A, B, ADR, C, then S0028, S0022, S0023, S0029, S0024, S0025, S0026). One stop, then review.
 

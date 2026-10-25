@@ -51,7 +51,10 @@ export default async function HelpPage() {
       <Alert variant="warning">
         <AlertTitle>Not for production</AlertTitle>
         <AlertDescription>
-          Lab operator password + shared <code className="font-mono">JORD_SERVER_TOKEN</code>. Do not
+          Lab operator password + shared <code className="font-mono">JORD_SERVER_TOKEN</code> used
+          as the HMAC key. Studio does not send that secret as a raw bearer. On the API, a raw
+          bearer is <code className="font-mono">service_role</code> unless{" "}
+          <code className="font-mono">JORD_LEGACY_SECRET_ROLE=admin</code>. Do not
           expose ports 3005 / 8787 beyond your machine. Optional{" "}
           <code className="font-mono">JORD_STUDIO_OPEN=1</code> skips the login page.
         </AlertDescription>

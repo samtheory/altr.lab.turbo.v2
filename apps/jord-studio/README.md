@@ -24,7 +24,7 @@ Copy `.env.example` → `.env.local`. Defaults:
 | `JORD_SERVER_TOKEN` | (required) | Shared secret with jord-server |
 | `JORD_STUDIO_PASSWORD` | (required for login) | Operator password |
 | `JORD_STUDIO_ROLE` | `admin` | Role minted into the session |
-| `JORD_DEFAULT_ROLE` | `admin` | Role for raw bearer on server |
+| `JORD_DEFAULT_ROLE` | `admin` | Operator role if the server escape `JORD_LEGACY_SECRET_ROLE=admin` is set. Studio sends HMAC, not the raw secret |
 | `JORD_STUDIO_OPEN` | `1` in example | Lab bypass (skip login UI) |
 
 ## Auth (S3)

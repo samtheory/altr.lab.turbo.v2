@@ -76,7 +76,7 @@ describe("ddl-rls planner", () => {
     ).toBeNull();
   });
 
-  it("orders deny before allow and default-allows via ELSE TRUE", () => {
+  it("lets a matching deny override a matching allow", () => {
     const plan = planSyncRecordsRls([
       policy({
         id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
@@ -102,7 +102,9 @@ describe("ddl-rls planner", () => {
     const allowAt = select!.indexOf("THEN TRUE");
     expect(denyAt).toBeGreaterThan(-1);
     expect(allowAt).toBeGreaterThan(denyAt);
-    expect(select).toContain("ELSE TRUE");
+    expect(select).toContain(
+      "ELSE current_setting('jord.role', true) IN ('admin', 'editor', 'readonly')",
+    );
     expect(plan.statements.some((sql) => sql.includes("FORCE ROW LEVEL SECURITY"))).toBe(
       true,
     );
@@ -138,5 +140,54 @@ describe("ddl-rls planner", () => {
     expect(sql).toContain("WITH CHECK");
     expect(sql).toContain("bucket = 'lab'");
     expect(sql).toContain("current_setting('jord.bucket', true) = 'lab'");
+  });
+
+  it("compiles owner_eq against jord.uid", () => {
+    const sql = compilePolicySql(
+      policy({
+        operation: "select",
+        effect: "allow",
+        rules: JSON.stringify([
+          { kind: "owner_eq", config: { column: "owner_id" } },
+        ]),
+      }),
+    );
+    expect(sql).toContain(`"owner_id" = current_setting('jord.uid', true)`);
+  });
+
+  it("skips owner_eq with a non-ident column and claim_eq unless the claim is sub", () => {
+    expect(
+      compilePolicySql(
+        policy({
+          operation: "select",
+          effect: "allow",
+          rules: JSON.stringify([
+            { kind: "owner_eq", config: { column: "owner-id" } },
+          ]),
+        }),
+      ),
+    ).toBeNull();
+    expect(
+      compilePolicySql(
+        policy({
+          operation: "select",
+          effect: "allow",
+          rules: JSON.stringify([
+            { kind: "claim_eq", config: { claim: "sub", column: "user_id" } },
+          ]),
+        }),
+      ),
+    ).toContain(`"user_id" = current_setting('jord.uid', true)`);
+    expect(
+      compilePolicySql(
+        policy({
+          operation: "select",
+          effect: "allow",
+          rules: JSON.stringify([
+            { kind: "claim_eq", config: { claim: "email", column: "email" } },
+          ]),
+        }),
+      ),
+    ).toBeNull();
   });
 });

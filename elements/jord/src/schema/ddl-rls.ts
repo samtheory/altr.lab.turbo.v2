@@ -1,5 +1,5 @@
 import type { JordPolicy, JordPolicyOperation } from "../port.js";
-import { quoteIdent } from "./ddl.js";
+import { isValidSqlIdent, quoteIdent } from "./ddl.js";
 
 /** Native policies are one per operation so priority + default-allow survive. */
 export const RLS_OPERATIONS = [
@@ -9,12 +9,21 @@ export const RLS_OPERATIONS = [
   "delete",
 ] as const satisfies readonly JordPolicyOperation[];
 
-const KNOWN_RULES = new Set(["always", "role_in", "bucket_in", "bucket_eq"]);
+const KNOWN_RULES = new Set([
+  "always",
+  "role_in",
+  "bucket_in",
+  "bucket_eq",
+  "owner_eq",
+  "claim_eq",
+]);
 
 export type RlsSessionContext = {
   role: string;
   /** Empty string when the request has no bucket yet. */
   bucket: string;
+  /** Empty string when the request has no end-user id. */
+  uid: string;
 };
 
 type PolicyRule = {
@@ -85,9 +94,21 @@ function ruleExpr(rule: PolicyRule): string | null {
       const list = buckets.map(quoteSqlLiteral).join(", ");
       return `(bucket = ANY (ARRAY[${list}]::text[]) AND current_setting('jord.bucket', true) = ANY (ARRAY[${list}]::text[]))`;
     }
+    case "owner_eq":
+      return ownerUidExpr(config.column);
+    case "claim_eq": {
+      if (config.claim !== "sub") return null;
+      return ownerUidExpr(config.column);
+    }
     default:
       return null;
   }
+}
+
+/** `"col" = current_setting('jord.uid', true)`, or null when `column` is not a simple ident. */
+function ownerUidExpr(column: unknown): string | null {
+  if (typeof column !== "string" || !isValidSqlIdent(column)) return null;
+  return `${quoteIdent(column)} = current_setting('jord.uid', true)`;
 }
 
 /** Boolean SQL for one policy, or null when it must not be compiled. */
@@ -118,25 +139,38 @@ export function comparePolicyOrder(a: JordPolicy, b: JordPolicy): number {
   return b.createdAt - a.createdAt;
 }
 
+const OPERATOR_SQL_DEFAULT =
+  "current_setting('jord.role', true) IN ('admin', 'editor', 'readonly')";
+
 /**
- * One expression: first matching policy wins; ELSE TRUE is Jord default-allow.
- * Deny → FALSE (row hidden / write rejected). Allow → TRUE.
+ * Deny overrides allow. Anything else is allowed only for operator roles.
+ * `user` / `anon` (and an empty role) do not match the ELSE.
  */
 export function buildOperationExpr(policies: readonly JordPolicy[]): string {
-  const whens = policies.map((policy) => {
+  const denies: string[] = [];
+  const allows: string[] = [];
+  for (const policy of policies) {
     const match = policyMatchExpr(policy);
-    const visible = policy.effect === "deny" ? "FALSE" : "TRUE";
-    return `WHEN (${match}) THEN ${visible}`;
-  });
-  if (whens.length === 0) return "TRUE";
-  return `(CASE ${whens.join(" ")} ELSE TRUE END)`;
+    if (!match) continue;
+    if (policy.effect === "deny") denies.push(match);
+    else allows.push(match);
+  }
+  const whens: string[] = [];
+  if (denies.length > 0) {
+    whens.push(`WHEN (${denies.join(" OR ")}) THEN FALSE`);
+  }
+  if (allows.length > 0) {
+    whens.push(`WHEN (${allows.join(" OR ")}) THEN TRUE`);
+  }
+  if (whens.length === 0) return `(${OPERATOR_SQL_DEFAULT})`;
+  return `(CASE ${whens.join(" ")} ELSE ${OPERATOR_SQL_DEFAULT} END)`;
 }
 
 export function compilePolicySql(policy: JordPolicy): string | null {
   const match = policyMatchExpr(policy);
   if (!match) return null;
   const name = quoteIdent(rlsPolicyName(policy.operation));
-  const expr = `(CASE WHEN (${match}) THEN ${policy.effect === "deny" ? "FALSE" : "TRUE"} ELSE TRUE END)`;
+  const expr = buildOperationExpr([policy]);
   return createPolicySql(policy.operation, name, expr);
 }
 

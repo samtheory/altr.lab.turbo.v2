@@ -2,7 +2,7 @@
 title: "ADR — Jord principal threat model (before S0021 Part C)"
 description: "Principals, trust boundaries, and the attacks phase-02 must defend against before policy code"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 # ADR — principal threat model
 
-> Sprint: [[README]]. **Execution #4.** Required before Part C code. Status: **accepted for planning** (2026-10-24). Hat: **heimdall**. Blocked by Part B being the subject of the model; the file itself is already written.
+> Sprint: [[README]]. **Execution #4.** Required before Part C code. Status: **accepted for Part C** (2026-10-25). Hat: **heimdall**. Part B shipped the subject. No attack, boundary, or non-goal was added. The 2026-10-24 text was already the contract (“accepted for planning”); this acceptance checks the parent gate **ADR accepted before C**.
 
 ## Context
 
@@ -33,7 +33,7 @@ type Principal = {
 
 | Kind | Who | How they authenticate | uid |
 |------|-----|------------------------|-----|
-| `service` | Trusted server / bot using the legacy shared secret | Raw secret as Bearer → `service_role` when `JORD_LEGACY_SECRET_ROLE` resolves to `service` (see Part B: transition default `admin`, then flip) | none |
+| `service` | Trusted server / bot using the legacy shared secret | Raw secret as Bearer → `service_role`. Unset `JORD_LEGACY_SECRET_ROLE` is `service` (the flip Part B required before that card closed). `JORD_LEGACY_SECRET_ROLE=admin` is a temporary escape back to an operator role | none |
 | `operator` | Studio human | HMAC session token (`signSessionToken`) carrying `admin` \| `editor` \| `readonly` | none |
 | `user` | End user | HS256 access JWT after signup/signin | `sub` |
 | `anon` | Public client | Long-lived anon JWT minted from `JORD_JWT_SECRET` | none |
@@ -72,3 +72,15 @@ OAuth, magic links, a real email provider, multi-node session store.
 ## Consequences
 
 Part C code that cannot point at a row in the attacks table does not ship. Route inventory is a failing test, not a comment.
+
+## Acceptance (2026-10-25)
+
+This is the Part C gate. It records shipped code against the rows above. It does not add a threat or change a defense.
+
+| Attack row | Check |
+|------------|--------|
+| Token replay, refresh reuse, email enumeration, auth-route brute force, expired realtime, HMAC vs user JWT | Shipped in S0021-B (`cloud/jord/src/auth/`). Unset legacy mode is `service`. |
+| uid leak, policy bypass via a secondary route, owner reassignment | Still the Part C contract. Not redefined here. |
+| Data-route rate limits | Still S0028. Not pulled into Part C. |
+
+Non-goals stay OAuth, magic links, a real email provider, and a multi-node session store. Refresh rotation is the B row (hash, rotate, reuse revokes the family). A cross-process lock is not required by that row.

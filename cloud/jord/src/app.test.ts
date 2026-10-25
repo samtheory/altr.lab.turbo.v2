@@ -24,8 +24,17 @@ const temps: string[] = [];
 const TEST_AUTH: JordAuthConfig = {
   secret: "test-jord-server-token",
   defaultRole: "admin",
+  legacyMode: "service",
+  jwtSecret: null,
+  jwtSecretPrevious: null,
+  jwtIss: "jord",
+  jwtAud: "jord",
 };
 
+/**
+ * `"raw"` sends `JORD_SERVER_TOKEN`. Unset legacy mode is `service` /
+ * `service_role`. Pass an HMAC role for an operator token.
+ */
 function authHeaders(
   roleOrRaw: JordRole | "raw" = "admin",
 ): Record<string, string> {

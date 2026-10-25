@@ -1,8 +1,9 @@
-import { createJordClient } from "@altr/jord";
+import { createJordClient, JORD_TABLE_NAMES, runOwnerMigration } from "@altr/jord";
 import { serve } from "@hono/node-server";
 
 import { createJordApp } from "./app.js";
 import { resolveAuthConfig } from "./auth/index.js";
+import { assertPostgresMigrateUrl } from "./auth/pg-url.js";
 import {
   LogRing,
   seedDefaultJobs,
@@ -10,6 +11,7 @@ import {
 } from "./jobs/index.js";
 import { loadLocalEnv } from "./load-env.js";
 import { createWriteQueue } from "./queue.js";
+import { RealtimeBus } from "./realtime/index.js";
 import {
   resolveWalCheckpointMs,
   startWalHygiene,
@@ -100,11 +102,27 @@ export async function startJordServer(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<{ close: () => Promise<void> }> {
   loadLocalEnv();
+  assertPostgresMigrateUrl(env);
   const auth = resolveAuthConfig(env);
+  const databaseUrl = env.DATABASE_URL?.trim() ?? "";
+  const postgres = /^postgres(ql)?:/i.test(databaseUrl);
+  if (postgres) {
+    const migrateUrl = env.JORD_MIGRATE_URL?.trim() ?? "";
+    await runOwnerMigration(migrateUrl, [
+      ...JORD_TABLE_NAMES,
+      "jord_migrations",
+      "jord_users",
+      "jord_auth_tokens",
+      "jord_refresh_tokens",
+      "jord_table_rls",
+    ]);
+  }
   const jord = await createJordClient({
     url: env.DATABASE_URL,
+    postgresDdl: postgres ? false : undefined,
   });
   const enqueueWrite = createWriteQueue();
+  const realtime = new RealtimeBus();
   const logs = new LogRing();
   await seedDefaultJobs(jord);
   const scheduler = startJobScheduler({ jord, enqueueWrite, logs });
@@ -114,6 +132,8 @@ export async function startJordServer(
     auth,
     logs,
     scheduler,
+    realtime,
+    env,
   });
   const useWal = jord.dialect === "libsql" && jord.urlScheme === "file";
   const hygiene = useWal
@@ -132,8 +152,11 @@ export async function startJordServer(
   const shutdown = async (signal: string) => {
     if (shuttingDown) return;
     shuttingDown = true;
+    console.log(`[@altr/jord-server] ${signal} — draining write queue`);
     scheduler.stop();
     hygiene.stop();
+    await enqueueWrite.drain();
+    realtime.close();
     if (useWal) {
       console.log(`[@altr/jord-server] ${signal} — wal_checkpoint(TRUNCATE)`);
       try {
@@ -141,8 +164,6 @@ export async function startJordServer(
       } catch (err) {
         console.error("[@altr/jord-server] shutdown checkpoint failed", err);
       }
-    } else {
-      console.log(`[@altr/jord-server] ${signal} — shutting down`);
     }
     await jord.close();
     server.close();
@@ -158,6 +179,8 @@ export async function startJordServer(
     async close() {
       scheduler.stop();
       hygiene.stop();
+      await enqueueWrite.drain();
+      realtime.close();
       if (useWal) {
         await truncateWalCheckpoint(jord);
       }

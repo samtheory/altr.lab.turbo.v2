@@ -1,12 +1,13 @@
 ---
 title: "Jord — auth and roles"
-description: "Bearer or signed session, admin / editor / readonly, and where each capability is enforced"
+description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, and the route matrix"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - tech-space
   - jord
   - auth
+  - principal
 ---
 
 # Jord — auth and roles
@@ -15,40 +16,103 @@ tags:
 
 ## Why
 
-One process serves Studio and API clients. Roles are feature gates, not database users. `GET /health` stays public so operators can see dialect without a token.
+One process serves Studio operators and, from S0021-B, end-user principals. Operator tokens administer Jord. User and anon tokens are the app's principals. They are not interchangeable. `GET /health` stays public and does not echo secrets.
 
 ## What
 
-| Role | Read | Write rows / blobs / vectors | Schema DDL, jobs, API toggles |
-|------|------|------------------------------|-------------------------------|
-| `readonly` | yes | 403 | 403 |
-| `editor` | yes | yes | 403 |
-| `admin` | yes | yes | yes |
+Every authenticated handler reads one subject:
+
+```ts
+type Principal = {
+  kind: "service" | "user" | "anon" | "operator"
+  uid?: string
+  role: string
+  claims: Record<string, unknown>
+}
+```
+
+| Kind | How it is presented | Role |
+|------|---------------------|------|
+| `operator` | HMAC session `base64url(json).base64url(hmac)` | `admin` / `editor` / `readonly` |
+| `service` | Raw `JORD_SERVER_TOKEN` when legacy mode is `service` | `service_role` (data-plane bypass) |
+| `user` | HS256 access JWT (`sub` = uid) | `user` |
+| `anon` | Long-lived HS256 JWT from `POST /auth/anon-key` | `anon` (no uid) |
+
+Unset `JORD_LEGACY_SECRET_ROLE` is **`service`**. Set it to `admin` only as a temporary escape: the raw secret then maps to `JORD_DEFAULT_ROLE` (default `admin`) and kind `operator`. Accepting a raw bearer logs one deprecation warning per process. The warning does not include the secret.
+
+Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards that bearer.
+
+### Route matrix
+
+`user` and `anon` are default-deny on data routes until Part C attaches a policy. `/api/v1` answers **403** until S0022.
+
+| Route group | operator `admin` | operator `editor` | operator `readonly` | `service` | `user` | `anon` |
+|-------------|------------------|-------------------|---------------------|-----------|--------|--------|
+| `GET /health` | yes | yes | yes | yes | yes | yes |
+| `POST /auth/signup\|signin\|refresh\|recover\|reset\|confirm` | public, rate-limited | public | public | public | public | public |
+| `POST /auth/logout`, `GET /auth/me` | yes | yes | yes | yes | yes | me = anon claims |
+| `POST /auth/anon-key` | yes | no | no | no | no | no |
+| `/records`, schema **row** DML | yes | write | read | yes (bypass) | no until Part C | no until Part C |
+| Schema **DDL** | yes | no | no | no | no | no |
+| Generated API, vectors, blobs | yes | write / read | read | yes (bypass) | no until Part C | no until Part C |
+| `/realtime`, `/realtime/ws` | yes | yes | yes | yes | yes until exp | yes until exp |
+| Custom `/x/:slug` | yes | yes | no | yes | as caller, no escalate | as caller, no escalate |
+| Jobs, policies, triggers | yes | no | inspect | no | no | no |
+| `/api/v1` | no until S0022 | no | no | no | no | no |
 
 | HTTP | Meaning |
 |------|---------|
 | 401 | Missing or invalid bearer |
-| 403 | Valid session, role too small |
-| 409 | OCC or other conflict (not an auth failure) |
+| 403 | Valid principal, route or role refused |
+| 429 | Auth route rate limit (30 / minute / client) |
 
-Bearer is either the raw `JORD_SERVER_TOKEN` (maps to `JORD_DEFAULT_ROLE`) or an HMAC session `payload.sig`. Studio login sets an HTTP-only `jord_session` cookie; the BFF turns it into `Authorization`. Unsigned Studio traffic redirects to `/login` unless `JORD_STUDIO_OPEN=1`.
+### JWT and passwords
+
+| Rule | Choice |
+|------|--------|
+| Signing secret | `JORD_JWT_SECRET` (sign + verify, kid `current`). `JORD_JWT_SECRET_PREVIOUS` verifies only (kid `previous`) |
+| Alg | HS256. `none` and every other alg are rejected |
+| Claims | `iss`, `aud`, `sub`, `role`, `iat`, `exp`. Default iss/aud `jord` |
+| Access TTL | 15 minutes. Clock skew 60s |
+| Anon key | Not stored. `role=anon`, about 10 years |
+| Passwords | Async scrypt. Hash string stores N, r, p, and maxmem. Compare with `timingSafeEqual`. Minimum 10 characters; must not equal the email |
+| Enumeration | Signup, signin, and recover return the same body whether the email exists. Unknown sign-in still runs scrypt against a dummy hash |
+| Mail | `MailerPort`. The console adapter records confirm and reset bodies and logs only `to` + subject |
+| Refresh | Opaque, SHA-256 hash only, rotate every use. Reuse revokes the family |
+
+SSE writes `event: expired` / `token_expired` and ends when `exp` passes. WebSocket closes with code **4401**.
+
+Accounts live in migration `0002_principals`: `jord_users`, `jord_auth_tokens`, `jord_refresh_tokens`.
 
 ## How
 
 | Module | Role |
 |--------|------|
-| `cloud/jord/src/auth/roles.ts` | `canWrite`, `canAlterSchema`, `canManageApis`, `canManageJobs`, `canSubscribeRealtime`, blob/vector helpers |
-| `cloud/jord/src/auth/token.ts` | Raw secret or HMAC |
-| `cloud/jord/src/auth/middleware.ts` | Hono guards |
-| `cloud/jord/src/auth/config.ts` | Token + default role |
-| `apps/jord-studio` middleware | Cookie gate + proxy bearer |
+| `cloud/jord/src/auth/principal.ts` | `Principal` |
+| `cloud/jord/src/auth/access.ts` | Route matrix and capability checks |
+| `cloud/jord/src/auth/token.ts` | Raw secret, HMAC operator, JWT → principal |
+| `cloud/jord/src/auth/jwt.ts` | HS256 sign / verify |
+| `cloud/jord/src/auth/password.ts` | Async scrypt |
+| `cloud/jord/src/auth/identity.ts` | Users, confirm/reset, refresh families |
+| `cloud/jord/src/auth/mailer.ts` | `ConsoleMailer` |
+| `cloud/jord/src/auth/routes.ts` | `/auth/*` |
+| `cloud/jord/src/auth/middleware.ts` | Sets `principal` on the Hono context |
+| `elements/jord/migrations/{libsql,postgres}/0002_principals.sql` | Account tables |
 
-Tokens in `cloud/jord/.env.example` and `apps/jord-studio/.env.example` must match.
+`JORD_SERVER_TOKEN` in `cloud/jord/.env.example` and `apps/jord-studio/.env.example` must still match. Studio keeps using it as the HMAC key.
 
 ## Example
 
-`editor` may `POST /records`. The same token `POST /schema/tables` returns **403**. `admin` gets **201**.
+```bash
+curl -s -X POST http://127.0.0.1:8787/auth/signup \
+  -H "content-type: application/json" \
+  -d "{\"email\":\"ada@lab.test\",\"password\":\"correct-horse\"}"
+```
+
+The console mailer prints the confirm subject. After `POST /auth/confirm`, `POST /auth/signin` returns `access_token` and `refresh_token`. `GET /auth/me` with that access token returns `kind: user`. The same token `GET /records` returns **403** until Part C.
+
+A raw `Authorization: Bearer $JORD_SERVER_TOKEN` is `service` / `service_role` unless `JORD_LEGACY_SECRET_ROLE=admin`.
 
 ## Not in Jord yet
 
-Multi-tenant users, OAuth, a user table for accounts.
+OAuth, SMTP, user policies (Part C), and the public table API (S0022).

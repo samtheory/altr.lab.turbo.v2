@@ -1,67 +1,70 @@
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 
+import {
+  allowsInvoke,
+  allowsManageApis,
+  allowsManageBlobs,
+  allowsManageJobs,
+  allowsRecordWrite,
+  allowsSchemaDdl,
+  allowsWriteBlobs,
+  allowsWriteVectors,
+  routeAllowed,
+} from "./access.js";
 import type { JordAuthConfig } from "./config.js";
-import {
-  canAlterSchema,
-  canInvokeApis,
-  canManageApis,
-  canManageBlobs,
-  canManageJobs,
-  canSubscribeRealtime,
-  canWriteBlobs,
-  canWriteRecords,
-  canWriteTableRows,
-  canWriteVectors,
-  type JordRole,
-} from "./roles.js";
-import {
-  parseAuthorizationHeader,
-  resolveBearerRole,
-} from "./token.js";
+import type { Principal } from "./principal.js";
+import { parseAuthorizationHeader, resolvePrincipal } from "./token.js";
 
 export type JordAuthVariables = {
-  jordRole: JordRole;
+  principal: Principal;
+  accessExp: number | null;
 };
 
 export function createAuthMiddleware(auth: JordAuthConfig) {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const bearer = parseAuthorizationHeader(
-        c.req.header("Authorization"),
-      );
+      const bearer = parseAuthorizationHeader(c.req.header("Authorization"));
       if (!bearer) {
         throw new HTTPException(401, {
           message: "missing Authorization Bearer token",
         });
       }
 
-      const role = resolveBearerRole(
-        bearer,
-        auth.secret,
-        auth.defaultRole,
-      );
-      if (!role) {
+      const resolved = resolvePrincipal(bearer, auth);
+      if (!resolved) {
         throw new HTTPException(401, {
           message: "invalid or expired credentials",
         });
       }
 
-      c.set("jordRole", role);
+      c.set("principal", resolved.principal);
+      c.set("accessExp", resolved.accessExp);
+      const path = c.req.path;
+      if (!routeAllowed(resolved.principal, c.req.method, path)) {
+        throw new HTTPException(403, {
+          message: "principal is not allowed on this route",
+        });
+      }
       await next();
     },
   );
 }
 
+function deny(
+  allowed: boolean,
+  message: string,
+): void {
+  if (!allowed) throw new HTTPException(403, { message });
+}
+
 export function requireWriteRecords() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canWriteRecords(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot write records",
-        });
-      }
+      deny(
+        allowsRecordWrite(c.get("principal")),
+        "role cannot write records",
+      );
       await next();
     },
   );
@@ -70,12 +73,10 @@ export function requireWriteRecords() {
 export function requireWriteTableRows() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canWriteTableRows(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot write table rows",
-        });
-      }
+      deny(
+        allowsRecordWrite(c.get("principal")),
+        "role cannot write table rows",
+      );
       await next();
     },
   );
@@ -84,12 +85,10 @@ export function requireWriteTableRows() {
 export function requireAlterSchema() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canAlterSchema(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot alter schema",
-        });
-      }
+      deny(
+        allowsSchemaDdl(c.get("principal")),
+        "role cannot alter schema",
+      );
       await next();
     },
   );
@@ -98,12 +97,10 @@ export function requireAlterSchema() {
 export function requireManageApis() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canManageApis(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot manage generated APIs",
-        });
-      }
+      deny(
+        allowsManageApis(c.get("principal")),
+        "role cannot manage generated APIs",
+      );
       await next();
     },
   );
@@ -112,12 +109,7 @@ export function requireManageApis() {
 export function requireManageJobs() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canManageJobs(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot manage jobs",
-        });
-      }
+      deny(allowsManageJobs(c.get("principal")), "role cannot manage jobs");
       await next();
     },
   );
@@ -126,12 +118,6 @@ export function requireManageJobs() {
 export function requireSubscribeRealtime() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canSubscribeRealtime(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot subscribe to realtime",
-        });
-      }
       await next();
     },
   );
@@ -140,12 +126,10 @@ export function requireSubscribeRealtime() {
 export function requireInvokeApis() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canInvokeApis(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot invoke custom or function APIs",
-        });
-      }
+      deny(
+        allowsInvoke(c.get("principal")),
+        "role cannot invoke custom or function APIs",
+      );
       await next();
     },
   );
@@ -154,12 +138,10 @@ export function requireInvokeApis() {
 export function requireManageBlobs() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canManageBlobs(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot manage blob buckets",
-        });
-      }
+      deny(
+        allowsManageBlobs(c.get("principal")),
+        "role cannot manage blob buckets",
+      );
       await next();
     },
   );
@@ -168,12 +150,10 @@ export function requireManageBlobs() {
 export function requireWriteBlobs() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canWriteBlobs(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot write blobs",
-        });
-      }
+      deny(
+        allowsWriteBlobs(c.get("principal")),
+        "role cannot write blobs",
+      );
       await next();
     },
   );
@@ -182,12 +162,23 @@ export function requireWriteBlobs() {
 export function requireWriteVectors() {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
-      const role = c.get("jordRole");
-      if (!canWriteVectors(role)) {
-        throw new HTTPException(403, {
-          message: "role cannot write vectors",
-        });
-      }
+      deny(
+        allowsWriteVectors(c.get("principal")),
+        "role cannot write vectors",
+      );
+      await next();
+    },
+  );
+}
+
+export function requireOperatorAdmin() {
+  return createMiddleware<{ Variables: JordAuthVariables }>(
+    async (c, next) => {
+      const principal = c.get("principal");
+      deny(
+        principal.kind === "operator" && principal.role === "admin",
+        "operator admin required",
+      );
       await next();
     },
   );

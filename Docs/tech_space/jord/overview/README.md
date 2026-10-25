@@ -102,6 +102,20 @@ Postgres live tests use secret `JORD_TEST_POSTGRES_URL` in job **`jord-postgres`
 
 Branch protection: requiring status check **`jord`** is a **manual admin** step after the first Actions run. Exact check label in the GitHub UI may be `jord` or `jord / jord` — confirm on the first green run.
 
+## HTTP edge (S0028)
+
+Before `/api/v1` exists, the server hardens the edge:
+
+| Control | Default |
+|---------|---------|
+| CORS | `JORD_CORS_ORIGINS` comma allow-list. Unset → no `Access-Control-Allow-Origin` for cross-origin |
+| JSON body | `JORD_MAX_JSON_BYTES` default **1 MiB** → **413** `payload_too_large`. Blob uploads keep the storage cap |
+| Data rate limits | **120 / 60s** per route bucket + client on `/records`, schema rows, `/vectors`, `/blobs`, `/apis/generated`, `/x`. Auth keeps S0021-B **30 / 60s** |
+| Idempotency | Optional `Idempotency-Key` on write paths; same key+principal+body replays; different body → **409**. TTL default 24h (`JORD_IDEMPOTENCY_TTL_MS`) |
+| Shutdown | Drain the write queue, close realtime, then pools / WAL / HTTP |
+
+Modules: `cloud/jord/src/http/`, `cloud/jord/src/idempotency/`, `queue.drain`, `RealtimeBus.close`. Writes detail: [[../writes/README]].
+
 ## Not in Jord yet
 
 Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/01-phase-02-candidates]] or later phase-02 cards (Studio tools are S0024).

@@ -14,7 +14,7 @@ tags:
 
 > **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Review brief: [[../../report/Jord-phase-02-plan-review]].
 
-**Process lock:** implement **one stop at a time**. **S0027** and **S0021-A** are in the tree (file libSQL). Postgres advisory-lock tests for A were not run (`JORD_TEST_POSTGRES_URL` unset). Next code is **S0021 Part B** after A is reviewed.
+**Process lock:** implement **one stop at a time**. **S0027**, **S0021-A**, and **S0021-B** are in the tree (file libSQL). Postgres tests were not run (`JORD_TEST_POSTGRES_URL` unset). Next is the **S0021 threat-model ADR** before Part C.
 
 ## Execution order
 
@@ -50,6 +50,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 |--|--|
 | **Why** | Shared-secret roles are Studio ops, not end-user identity |
 | **What** | `Principal { kind: service \| user \| anon \| operator, uid?, role, claims }`. Operator = admin/editor/readonly HMAC tokens (**stay valid**). `JORD_LEGACY_SECRET_ROLE`: **default `admin` for the S0021-B transition**, then **flip default to `service`** before the card closes; update curl / README / `.env.example` / `authHeaders("raw")` in the same sprint. User = JWT. Anon = long-lived JWT minted from `JORD_JWT_SECRET`. Async scrypt + maxmem; no email enumeration; `MailerPort` console adapter; JWT HS256 only, iss/aud/sub/role/iat/exp, kid rotation, 60s skew. SSE/WS close at exp |
+| **Status** | In tree for file libSQL (2026-10-25). Unset legacy default is `service`. Postgres identity tests were not run |
 | **Acceptance** | Route-group matrix documented and tested; HMAC stays operator; tests for both switch modes; caller list on the S0021-B card; docs/helpers updated before flip; refresh reuse kills family; enumeration tests; console mail only |
 
 ## F3 — Policies (`jord-s0021-c`)
@@ -58,6 +59,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 |--|--|
 | **Why** | Middleware rules do not express ownership, and a side route can bypass them |
 | **What** | Deny overrides allow. No policy → default-deny for anon and user. `rls_enabled` per table. UPDATE USING + WITH CHECK. Owner column immutable for non-service. Route inventory test. PG: **FORCE ROW LEVEL SECURITY** and non-owner role `jord_app`. Grants from `JORD_MIGRATE_URL`: create with `CREATEROLE`, or verify-only fallback (role exists, no `BYPASSRLS`, non-owner) then grants. Refuse boot if migrate and runtime URLs match (parsed host/port/db/user). Runtime stays **`DATABASE_URL`**. Startup refuses a Postgres role that owns tables or has `BYPASSRLS`. `file:` ignores the migrate URL. `SET LOCAL` in-transaction only. Shared dialect conformance suite. Threat model: [[../../plan/Jord/phase-02/Jord-S0021/ADR-threat-model]] |
+| **Status** | File libSQL enforcement is in the tree (2026-10-25). Postgres pool-leak and dialect-pair runs were not executed |
 | **Acceptance** | Identical fixtures on libSQL and Postgres; pool uid-leak test; inventory test fails closed; migrate≠runtime URL test; CREATEROLE fallback verify path |
 
 ## F4 — Table API (`Jord-S0022`)
@@ -106,6 +108,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 
 | | |
 |--|--|
+| **Status** | In tree for file libSQL (2026-10-25). Auth routes stay at 30/minute. Data routes 120/minute. CORS default deny. JSON 1 MiB. Idempotency TTL 24h |
 | **What** | CORS allow-list, data-route rate limits, body limit, shutdown drains the write queue, optional Idempotency-Key |
 | **Acceptance** | 413, CORS deny, drain test, idempotency replay — all green before S0022 |
 

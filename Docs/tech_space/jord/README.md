@@ -23,10 +23,10 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[dialects/README]] | `file:` / `libsql://` / `postgres://`, WAL, health |
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
 | [[schema/README]] | Introspect, CREATE, ADD, DROP, RENAME, type change |
-| [[auth/README]] | Bearer, session, roles |
+| [[auth/README]] | Principals, HMAC operators, JWT, scrypt, route matrix |
 | [[apis/README]] | Generated CRUD, function steps, `/x/:slug` |
 | [[jobs/README]] | Scheduler, built-in kinds, log ring |
-| [[policies/README]] | Policy middleware, AFTER triggers, Postgres RLS |
+| [[policies/README]] | Deny-overrides, user/anon default-deny, `jord_app`, Postgres RLS |
 | [[realtime/README]] | Write-path events, SSE, WebSocket |
 | [[blobs/README]] | Local buckets and bytes |
 | [[vectors/README]] | Embeddings, cosine, libSQL engine, pgvector |

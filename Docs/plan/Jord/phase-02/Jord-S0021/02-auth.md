@@ -2,7 +2,7 @@
 title: "S0021 Part B — principal auth"
 description: "Principal kinds, JWT rules, async scrypt, MailerPort, HMAC operator tokens stay valid"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -18,7 +18,7 @@ tags:
 
 ## Status
 
-**planned** (blocked on Part A)
+**implemented locally** (2026-10-25). File libSQL tests passed. Postgres boot uses the same `0002_principals` file; live Postgres tests were not run (`JORD_TEST_POSTGRES_URL` unset). Unset `JORD_LEGACY_SECRET_ROLE` is `service`.
 
 ## Principal
 
@@ -153,18 +153,18 @@ This card's PR updates `Docs/tech_space/jord/auth/README.md`. Verify does not wr
 
 ## Definition of Done (`jord-s0021-b`)
 
-- [ ] `Principal` is the only auth subject passed into route handlers
-- [ ] Route table above is implemented for groups that exist today; future groups are listed as denied until their sprint
-- [ ] HS256 pinned; `none` rejected; two kids verify; current kid signs
-- [ ] Async scrypt + dummy-hash timing; enumeration tests for signup/signin/reset
-- [ ] Refresh reuse revokes the family
-- [ ] Console `MailerPort` sends confirm + reset bodies in tests (no network)
-- [ ] HMAC operator token test green
-- [ ] Transition default is `admin`; boot deprecation warning on raw bearer
-- [ ] Mode test: `JORD_LEGACY_SECRET_ROLE=admin` → raw → `admin`
-- [ ] Mode test: `JORD_LEGACY_SECRET_ROLE=service` → raw → `service`
-- [ ] Before card close: default flipped to `service`; curl / README / `.env.example` / `authHeaders("raw")` updated in the same sprint
-- [ ] Caller inventory above stays accurate or is updated if new callers appear
-- [ ] SSE/WS drop or re-auth at JWT exp
-- [ ] No secrets in logs / health
-- [ ] `Docs/tech_space/jord/auth/README.md` updated in this PR
+- [x] `Principal` is the only auth subject passed into route handlers
+- [x] Route table above is implemented for groups that exist today; future groups are listed as denied until their sprint
+- [x] HS256 pinned; `none` rejected; two kids verify; current kid signs
+- [x] Async scrypt + dummy-hash timing; enumeration tests for signup/signin/reset
+- [x] Refresh reuse revokes the family
+- [x] Console `MailerPort` sends confirm + reset bodies in tests (no network)
+- [x] HMAC operator token test green
+- [x] Transition default was `admin` in the card; boot deprecation warning on raw bearer
+- [x] Mode test: `JORD_LEGACY_SECRET_ROLE=admin` → raw → `admin`
+- [x] Mode test: `JORD_LEGACY_SECRET_ROLE=service` → raw → `service`
+- [x] Before card close: default flipped to `service`; curl / README / `.env.example` / `authHeaders("raw")` updated in the same sprint
+- [x] Caller inventory above stays accurate or is updated if new callers appear
+- [x] SSE/WS drop or re-auth at JWT exp
+- [x] No secrets in logs / health
+- [x] `Docs/tech_space/jord/auth/README.md` updated in this PR

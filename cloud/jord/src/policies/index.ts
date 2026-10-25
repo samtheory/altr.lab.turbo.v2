@@ -1,5 +1,6 @@
 export {
   evaluatePolicies,
+  ownerUnchanged,
   policiesDisabledFromEnv,
   type EvaluatePoliciesInput,
   type PolicyDecision,

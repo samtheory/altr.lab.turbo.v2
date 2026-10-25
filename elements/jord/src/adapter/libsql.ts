@@ -43,6 +43,7 @@ import type {
   JordPolicyOperation,
   JordRecord,
   JordTableInfo,
+  TableRlsFlag,
   JordTrigger,
   JordTriggerEvent,
   JordTriggerTiming,
@@ -297,6 +298,22 @@ function mapPolicy(row: typeof jordPolicies.$inferSelect): JordPolicy {
   };
 }
 
+function rlsEnabledFlag(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "bigint") return value === 1n;
+  if (typeof value === "number") return value === 1;
+  return value === "1" || value === "t" || value === "true";
+}
+
+function mapTableRls(row: Record<string, unknown>): TableRlsFlag {
+  const owner = row.owner_column;
+  return {
+    tableName: String(row.table_name ?? ""),
+    rlsEnabled: rlsEnabledFlag(row.rls_enabled),
+    ownerColumn: owner == null ? null : String(owner),
+  };
+}
+
 function mapTrigger(row: typeof jordTriggers.$inferSelect): JordTrigger {
   return {
     id: row.id,
@@ -371,6 +388,23 @@ export class LibSqlAdapter implements JordDriverPort {
       client.close();
       throw err;
     }
+  }
+
+  async query(
+    sql: string,
+    args: Array<string | number | null> = [],
+  ): Promise<Array<Record<string, unknown>>> {
+    const result = await this.client.execute({ sql, args });
+    const columns = result.columns;
+    return result.rows.map((row) => {
+      const record = row as unknown as Record<string, unknown>;
+      const out: Record<string, unknown> = {};
+      for (let i = 0; i < columns.length; i++) {
+        const name = columns[i] ?? String(i);
+        out[name] = record[name] ?? record[i];
+      }
+      return out;
+    });
   }
 
   async close(): Promise<void> {
@@ -950,8 +984,48 @@ export class LibSqlAdapter implements JordDriverPort {
     return null;
   }
 
-  bindRlsSession(_input: { role: string; bucket?: string | null }): void {
+  bindRlsSession(_input: {
+    role: string;
+    bucket?: string | null;
+    uid?: string | null;
+  }): void {
     // libSQL keeps application middleware; no session GUCs.
+  }
+
+  async getTableRls(tableName: string): Promise<TableRlsFlag | null> {
+    const rows = await this.query(
+      `SELECT table_name, rls_enabled, owner_column FROM jord_table_rls WHERE table_name = ? LIMIT 1`,
+      [tableName],
+    );
+    const row = rows[0];
+    return row ? mapTableRls(row) : null;
+  }
+
+  async setTableRls(input: {
+    tableName: string;
+    rlsEnabled: boolean;
+    ownerColumn?: string | null;
+  }): Promise<TableRlsFlag> {
+    const updatedAt = Date.now();
+    const ownerColumn = input.ownerColumn ?? null;
+    const rows = await this.query(
+      `INSERT INTO jord_table_rls (table_name, rls_enabled, owner_column, updated_at)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(table_name) DO UPDATE SET
+         rls_enabled = excluded.rls_enabled,
+         owner_column = excluded.owner_column,
+         updated_at = excluded.updated_at
+       RETURNING table_name, rls_enabled, owner_column`,
+      [input.tableName, input.rlsEnabled ? 1 : 0, ownerColumn, updatedAt],
+    );
+    const row = rows[0];
+    return row
+      ? mapTableRls(row)
+      : {
+          tableName: input.tableName,
+          rlsEnabled: input.rlsEnabled,
+          ownerColumn,
+        };
   }
 
   compilePolicySql(_policy: JordPolicy): string | null {

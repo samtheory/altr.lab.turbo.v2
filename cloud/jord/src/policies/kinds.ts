@@ -1,10 +1,10 @@
-import type { JordRole } from "../auth/roles.js";
-
 export const BUILTIN_POLICY_RULE_KINDS = [
   "role_in",
   "bucket_in",
   "bucket_eq",
   "always",
+  "owner_eq",
+  "claim_eq",
 ] as const;
 
 export type BuiltinPolicyRuleKind =
@@ -22,9 +22,13 @@ export type PolicyRule = {
 };
 
 export type PolicyEvalContext = {
-  role: JordRole;
+  role: string;
   /** Bucket from query / body / row being touched. */
   bucket?: string | null;
+  uid?: string | null;
+  claims?: Record<string, unknown>;
+  row?: Record<string, unknown> | null;
+  nextRow?: Record<string, unknown> | null;
 };
 
 export function parseRulesJson(raw: string): PolicyRule[] {
@@ -69,6 +73,23 @@ export function ruleMatches(
       return (
         typeof config.bucket === "string" && config.bucket === ctx.bucket
       );
+    }
+    case "owner_eq": {
+      if (typeof config.column !== "string") return false;
+      if (ctx.row == null) {
+        return typeof ctx.uid === "string" && ctx.uid.length > 0;
+      }
+      return String(ctx.row[config.column] ?? "") === ctx.uid;
+    }
+    case "claim_eq": {
+      if (typeof config.claim !== "string" || typeof config.column !== "string") {
+        return false;
+      }
+      const claimValue = ctx.claims?.[config.claim];
+      if (ctx.row == null) {
+        return typeof claimValue === "string" && claimValue.length > 0;
+      }
+      return String(ctx.row[config.column] ?? "") === String(claimValue ?? "");
     }
     default:
       return false;

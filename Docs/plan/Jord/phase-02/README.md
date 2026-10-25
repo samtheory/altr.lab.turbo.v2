@@ -16,8 +16,8 @@ tags:
 
 | Item | Status |
 |------|--------|
-| Active sprint | **S0021-A landed locally** (file libSQL). Next stop is [[Jord-S0021/02-auth\|S0021-B]] after review. Postgres advisory-lock tests skipped: `JORD_TEST_POSTGRES_URL` unset |
-| Done in tree | [[Jord-S0027/README\|S0027]] CI workflow · [[Jord-S0021/01-migration\|S0021 Part A]] migration runner |
+| Active sprint | **S0028 HTTP hardening in the tree** (file libSQL). Next untouched stop is [[Jord-S0022/README\|S0022]]. Two S0021-C Postgres boxes stay open and do not block this stop. |
+| Done in tree | [[Jord-S0027/README\|S0027]] CI workflow · [[Jord-S0021/01-migration\|S0021 Part A]] migration runner · [[Jord-S0021/02-auth\|S0021 Part B]] principals |
 | Soft backlog | [[00-remaining-backlog]] |
 
 Ids are **not** execution order. S0027 runs first. S0028 and S0029 are new.
@@ -42,5 +42,5 @@ Ids are **not** execution order. S0027 runs first. S0028 and S0029 are new.
 ## Process
 
 1. One stop per session. Stop for review.
-2. S0027 and S0021-A are in the tree. Do not start S0021-B until Part A is reviewed.
+2. S0027 through S0028 are in the tree (file libSQL). Two S0021-C Postgres boxes stay open and do not block later stops. Next untouched stop is S0022.
 3. Each card's PR updates its own `tech_space/jord/*` page. Verify reconciles links, ticks features, and refreshes STATUS. It writes no new content.

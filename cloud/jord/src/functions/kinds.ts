@@ -48,6 +48,11 @@ export type StepContext = {
   logs?: LogRing;
   /** When set, successful record writes fan out a realtime event. */
   onRecordChange?: (draft: JordChangeDraft) => void;
+  /** Service callers skip user-policy checks inside steps. */
+  policyBypass?: boolean;
+  /** Caller principal. Omitted keeps the phase-01 operator default. */
+  subject?: "service" | "user" | "anon" | "operator";
+  uid?: string | null;
 };
 
 export type StepResult = {
@@ -108,7 +113,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     return { result: { echoed: message, body } };
   },
 
-  async records_list({ jord, role, config }) {
+  async records_list({ jord, role, config, policyBypass, subject, uid }) {
     const bucket =
       typeof config.bucket === "string" && config.bucket.length > 0
         ? config.bucket
@@ -118,14 +123,19 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       tableName: "records",
       operation: "select",
       role,
+      bypass: policyBypass,
       bucket,
+      subject,
+      uid,
       disabled: policiesDisabledFromEnv(),
     });
     if (!decision.allowed) {
       throw new FunctionStepError(
         403,
         "policy_denied",
-        `policy ${decision.policy.id} denied select`,
+        decision.policy
+          ? `policy ${decision.policy.id} denied select`
+          : "policy denied select",
       );
     }
     const limitRaw = config.limit;
@@ -133,7 +143,11 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       typeof limitRaw === "number" && Number.isFinite(limitRaw)
         ? Math.max(1, Math.min(Math.floor(limitRaw), 500))
         : 100;
-    jord.bindRlsSession?.({ role, bucket });
+    jord.bindRlsSession?.({
+      role: subject === "user" || subject === "anon" ? subject : role,
+      bucket,
+      uid: uid ?? "",
+    });
     const rows = await jord.listRecordsByBucket(bucket);
     return {
       result: {
@@ -145,7 +159,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     };
   },
 
-  async records_get({ jord, role, config, request }) {
+  async records_get({ jord, role, config, request, policyBypass, subject, uid }) {
     const body = bodyRecord(request.body);
     const id =
       (typeof config.id === "string" && config.id) ||
@@ -169,14 +183,19 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       tableName: "records",
       operation: "select",
       role,
+      bypass: policyBypass,
       bucket: row.bucket,
+      subject,
+      uid,
       disabled: policiesDisabledFromEnv(),
     });
     if (!decision.allowed) {
       throw new FunctionStepError(
         403,
         "policy_denied",
-        `policy ${decision.policy.id} denied select`,
+        decision.policy
+          ? `policy ${decision.policy.id} denied select`
+          : "policy denied select",
       );
     }
     return { result: publicRecord(row) };
@@ -187,6 +206,9 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     role,
     config,
     request,
+    policyBypass,
+    subject,
+    uid,
     enqueueWrite,
     logs,
     onRecordChange,
@@ -208,14 +230,19 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       tableName: "records",
       operation: "insert",
       role,
+      bypass: policyBypass,
       bucket,
+      subject,
+      uid,
       disabled: policiesDisabledFromEnv(),
     });
     if (!decision.allowed) {
       throw new FunctionStepError(
         403,
         "policy_denied",
-        `policy ${decision.policy.id} denied insert`,
+        decision.policy
+          ? `policy ${decision.policy.id} denied insert`
+          : "policy denied insert",
       );
     }
     const recordBody =
@@ -230,7 +257,11 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         : undefined;
 
     const row = await enqueueWrite(() => {
-      jord.bindRlsSession?.({ role, bucket });
+      jord.bindRlsSession?.({
+        role: subject === "user" || subject === "anon" ? subject : role,
+        bucket,
+        uid: uid ?? "",
+      });
       return jord.insertRecord({ bucket, body: recordBody, metadata });
     });
     if (logs) {
@@ -245,6 +276,8 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
         event: "insert",
         row,
         role,
+        subject,
+        uid,
         enqueueWrite,
         disabled: triggersDisabledFromEnv(),
         onRecordChange,
@@ -254,7 +287,7 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
     return { result: publicRecord(row) };
   },
 
-  async records_count({ jord, role, config }) {
+  async records_count({ jord, role, config, policyBypass, subject, uid }) {
     const bucket =
       typeof config.bucket === "string" && config.bucket.length > 0
         ? config.bucket
@@ -264,17 +297,26 @@ export const STEP_HANDLERS: Record<BuiltinStepKind, StepHandler> = {
       tableName: "records",
       operation: "select",
       role,
+      bypass: policyBypass,
       bucket,
+      subject,
+      uid,
       disabled: policiesDisabledFromEnv(),
     });
     if (!decision.allowed) {
       throw new FunctionStepError(
         403,
         "policy_denied",
-        `policy ${decision.policy.id} denied select`,
+        decision.policy
+          ? `policy ${decision.policy.id} denied select`
+          : "policy denied select",
       );
     }
-    jord.bindRlsSession?.({ role, bucket });
+    jord.bindRlsSession?.({
+      role: subject === "user" || subject === "anon" ? subject : role,
+      bucket,
+      uid: uid ?? "",
+    });
     const rows = await jord.listRecordsByBucket(bucket);
     return { result: { bucket, count: rows.length } };
   },

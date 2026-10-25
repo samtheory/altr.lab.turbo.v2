@@ -17,6 +17,7 @@ import {
   buildAddColumnSql,
   isJordColumnType,
   isValidSqlIdent,
+  quoteIdent,
 } from "@altr/jord";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
@@ -26,6 +27,8 @@ import { streamSSE } from "hono/streaming";
 
 import {
   createAuthMiddleware,
+  createAuthRoutes,
+  ConsoleMailer,
   requireAlterSchema,
   requireInvokeApis,
   requireManageApis,
@@ -33,8 +36,12 @@ import {
   requireSubscribeRealtime,
   requireWriteRecords,
   requireWriteTableRows,
+  isJordRole,
   type JordAuthConfig,
   type JordAuthVariables,
+  type JordRole,
+  type MailerPort,
+  type Principal,
 } from "./auth/index.js";
 import {
   buildRecordsResource,
@@ -61,13 +68,35 @@ import {
 import {
   evaluatePolicies,
   isBuiltinPolicyRuleKind,
+  ownerUnchanged,
   policiesDisabledFromEnv,
+  type PolicyDecision,
 } from "./policies/index.js";
 import {
   createBlobDiskStore,
   registerBlobRoutes,
   resolveBlobsRoot,
 } from "./blobs/index.js";
+import {
+  createCorsMiddleware,
+  createDataRateLimitMiddleware,
+  createJsonBodyLimitMiddleware,
+  parseCorsOrigins,
+  resolveDataRateLimit,
+  resolveMaxJsonBytes,
+} from "./http/index.js";
+import {
+  createIdempotencyStore,
+  resolveIdempotencyTtlMs,
+  type IdempotencyStore,
+} from "./idempotency/store.js";
+import {
+  hashBodyText,
+  isIdempotencyKeyBadRequest,
+  isIdempotentWriteMethod,
+  isIdempotentWritePath,
+  readIdempotencyKey,
+} from "./idempotency/middleware.js";
 import type { WriteQueue } from "./queue.js";
 import { registerVectorRoutes } from "./vectors/index.js";
 import {
@@ -102,6 +131,8 @@ export type JordAppDeps = {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
   auth: JordAuthConfig;
+  /** Confirm / reset mail. Defaults to the console adapter. */
+  mailer?: MailerPort;
   /** Defaults to env-seeded registry when omitted. */
   generatedApi?: GeneratedApiRegistry;
   logs?: LogRing;
@@ -112,6 +143,10 @@ export type JordAppDeps = {
   blobsRoot?: string;
   /** Max upload bytes (default 10 MiB). */
   maxBlobBytes?: number;
+  /** Optional process env for CORS / body / rate / idempotency knobs. */
+  env?: NodeJS.ProcessEnv;
+  /** Shared idempotency store. Created from env when omitted. */
+  idempotency?: IdempotencyStore;
 };
 
 function publicRecord(row: JordRecord) {
@@ -210,13 +245,26 @@ function publicTrigger(row: JordTrigger) {
   };
 }
 
-function policyDeniedBody(policy: JordPolicy, operation: JordPolicyOperation) {
-  return {
-    error: "policy_denied" as const,
-    policyId: policy.id,
-    table: policy.tableName,
+function policyDeniedBody(
+  decision: Extract<PolicyDecision, { allowed: false }>,
+  operation: JordPolicyOperation,
+) {
+  const body: {
+    error: "policy_denied";
+    operation: JordPolicyOperation;
+    policyId?: string;
+    table?: string;
+    reason?: string;
+  } = {
+    error: "policy_denied",
     operation,
   };
+  if (decision.policy) {
+    body.policyId = decision.policy.id;
+    body.table = decision.policy.tableName;
+  }
+  if (decision.reason) body.reason = decision.reason;
+  return body;
 }
 
 function validateRulesJson(raw: string): string | null {
@@ -312,10 +360,47 @@ function schemaDdlStatus(error: string): 400 | 404 | 409 {
   return 400;
 }
 
+async function assertPolicyTable(
+  jord: JordDriverPort,
+  tableName: string,
+): Promise<void> {
+  if (tableName === "records") return;
+  if (!isValidSqlIdent(tableName) || tableName.startsWith("jord_")) {
+    throw new HTTPException(400, { message: "table_name is not a user table" });
+  }
+  const info = await jord.describeTable(tableName);
+  if (!info) {
+    throw new HTTPException(400, { message: "table_name was not found" });
+  }
+}
+
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
   const { upgradeWebSocket, injectWebSocket } = createNodeWebSocket({ app });
   const requireAuth = createAuthMiddleware(deps.auth);
+  const mailer = deps.mailer ?? new ConsoleMailer();
+  const env = deps.env ?? process.env;
+  const idempotency =
+    deps.idempotency ?? createIdempotencyStore(resolveIdempotencyTtlMs(env));
+  const dataRate = resolveDataRateLimit(env);
+
+  app.use("*", createCorsMiddleware(parseCorsOrigins(env)));
+  app.use("*", createJsonBodyLimitMiddleware(resolveMaxJsonBytes(env)));
+
+  function stepRole(principal: Principal): JordRole {
+    if (principal.kind === "operator" && isJordRole(principal.role)) {
+      return principal.role;
+    }
+    if (principal.kind === "service") return "editor";
+    return "readonly";
+  }
+
+  function rlsSessionRole(principal: Principal): string {
+    if (principal.kind === "user" || principal.kind === "anon") {
+      return principal.kind;
+    }
+    return stepRole(principal);
+  }
   const generatedApi =
     deps.generatedApi ?? createGeneratedApiRegistry(process.env);
   const logs = deps.logs ?? new LogRing();
@@ -340,6 +425,22 @@ export function createJordApp(deps: JordAppDeps) {
   /** @deprecated alias — records emit sites */
   const publishRecordChange = publishChange;
 
+  app.all("/api/v1/*", () => {
+    throw new HTTPException(403, {
+      message: "table API is not available until S0022",
+    });
+  });
+
+  app.route(
+    "/auth",
+    createAuthRoutes({
+      jord: deps.jord,
+      auth: deps.auth,
+      mailer,
+      enqueueWrite: deps.enqueueWrite,
+    }),
+  );
+
   app.get("/health", (c) =>
     c.json({
       ok: true as const,
@@ -351,10 +452,56 @@ export function createJordApp(deps: JordAppDeps) {
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
   protectedRoutes.use("*", requireAuth);
+  protectedRoutes.use(
+    "*",
+    createDataRateLimitMiddleware({
+      maxHits: dataRate.maxHits,
+      windowMs: dataRate.windowMs,
+    }),
+  );
   protectedRoutes.use("*", async (c, next) => {
+    const method = c.req.method;
+    const path = c.req.path;
+    const key = readIdempotencyKey(c);
+    if (isIdempotencyKeyBadRequest(key)) {
+      throw new HTTPException(400, { message: "Idempotency-Key is too long" });
+    }
+    if (
+      !key ||
+      !isIdempotentWriteMethod(method) ||
+      !isIdempotentWritePath(path)
+    ) {
+      await next();
+      return;
+    }
+    const principal = c.get("principal");
+    const principalKey = `${principal.kind}:${principal.uid ?? principal.role}`;
+    const bodyText = await c.req.raw.clone().text();
+    const bodyHash = hashBodyText(bodyText);
+    const looked = idempotency.lookup(key, principalKey, bodyHash);
+    if (looked.kind === "hit") {
+      return c.json(looked.body as never, looked.status as never);
+    }
+    if (looked.kind === "conflict") {
+      return c.json({ error: "idempotency_conflict" }, 409);
+    }
+    await next();
+    try {
+      const storedBody = await c.res.clone().json();
+      idempotency.remember(key, principalKey, bodyHash, {
+        status: c.res.status,
+        body: storedBody,
+      });
+    } catch {
+      // Non-JSON responses are not stored.
+    }
+  });
+  protectedRoutes.use("*", async (c, next) => {
+    const sessionPrincipal = c.get("principal");
     deps.jord.bindRlsSession?.({
-      role: c.get("jordRole"),
+      role: rlsSessionRole(sessionPrincipal),
       bucket: c.req.query("bucket") ?? "",
+      uid: sessionPrincipal.uid ?? "",
     });
     await next();
   });
@@ -469,6 +616,10 @@ export function createJordApp(deps: JordAppDeps) {
 
   protectedRoutes.get("/schema/tables/:name/rows", async (c) => {
     const name = c.req.param("name");
+    const decision = await decide(c.get("principal"), name, "select");
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision, "select"), 403);
+    }
     const limit = Number(c.req.query("limit") ?? "50");
     const offset = Number(c.req.query("offset") ?? "0");
     const result = await deps.jord.listTableRows({
@@ -497,7 +648,23 @@ export function createJordApp(deps: JordAppDeps) {
       if (!body || body.values == null || typeof body.values !== "object") {
         throw new HTTPException(400, { message: "values object is required" });
       }
-      const values = body.values as Record<string, unknown>;
+      const values = {
+        ...(body.values as Record<string, unknown>),
+      };
+      const principal = c.get("principal");
+      const decision = await decide(principal, name, "insert", {
+        row: null,
+        nextRow: values,
+      });
+      if (!decision.allowed) {
+        return c.json(policyDeniedBody(decision, "insert"), 403);
+      }
+      if (
+        decision.constraint?.ownerColumn &&
+        principal.kind !== "service"
+      ) {
+        values[decision.constraint.ownerColumn] = principal.uid ?? "";
+      }
       const result = await deps.enqueueWrite(() =>
         deps.jord.insertTableRow({
           table: name,
@@ -534,11 +701,36 @@ export function createJordApp(deps: JordAppDeps) {
       if (!body || body.values == null || typeof body.values !== "object") {
         throw new HTTPException(400, { message: "values object is required" });
       }
+      const values = body.values as Record<string, unknown>;
+      const principal = c.get("principal");
+      const existing = await readUserTableRow(name, pk);
+      const decision = await decide(principal, name, "update", {
+        row: existing,
+        nextRow: values,
+      });
+      if (!decision.allowed) {
+        return c.json(policyDeniedBody(decision, "update"), 403);
+      }
+      const ownerColumn = decision.constraint?.ownerColumn;
+      if (
+        ownerColumn &&
+        principal.kind !== "service" &&
+        !ownerUnchanged(existing, values, ownerColumn)
+      ) {
+        return c.json(
+          {
+            error: "policy_denied",
+            reason: "owner_changed",
+            operation: "update",
+          },
+          403,
+        );
+      }
       const result = await deps.enqueueWrite(() =>
         deps.jord.updateTableRow({
           table: name,
           pk,
-          values: body.values as Record<string, unknown>,
+          values,
         }),
       );
       if (!result.ok) {
@@ -558,6 +750,14 @@ export function createJordApp(deps: JordAppDeps) {
     async (c) => {
       const name = c.req.param("name");
       const pk = c.req.param("pk");
+      const principal = c.get("principal");
+      const existing = await readUserTableRow(name, pk);
+      const decision = await decide(principal, name, "delete", {
+        row: existing,
+      });
+      if (!decision.allowed) {
+        return c.json(policyDeniedBody(decision, "delete"), 403);
+      }
       const result = await deps.enqueueWrite(() =>
         deps.jord.deleteTableRow({ table: name, pk }),
       );
@@ -569,6 +769,45 @@ export function createJordApp(deps: JordAppDeps) {
       }
       publishChange({ table: name, op: "delete", id: pk });
       return c.json({ ok: true as const });
+    },
+  );
+
+  protectedRoutes.put(
+    "/schema/tables/:name/rls",
+    requireAlterSchema(),
+    async (c) => {
+      const name = c.req.param("name");
+      const body = (await c.req.json().catch(() => null)) as {
+        rls_enabled?: unknown;
+        owner_column?: unknown;
+      } | null;
+      if (!body || typeof body.rls_enabled !== "boolean") {
+        throw new HTTPException(400, {
+          message: "rls_enabled (boolean) is required",
+        });
+      }
+      if (
+        body.owner_column !== undefined &&
+        body.owner_column !== null &&
+        typeof body.owner_column !== "string"
+      ) {
+        throw new HTTPException(400, {
+          message: "owner_column must be a string or null",
+        });
+      }
+      const saved = await deps.jord.setTableRls({
+        tableName: name,
+        rlsEnabled: body.rls_enabled,
+        ownerColumn:
+          body.owner_column === undefined
+            ? undefined
+            : (body.owner_column as string | null),
+      });
+      return c.json({
+        table_name: saved.tableName,
+        rls_enabled: saved.rlsEnabled,
+        owner_column: saved.ownerColumn,
+      });
     },
   );
 
@@ -759,6 +998,48 @@ export function createJordApp(deps: JordAppDeps) {
     }
   }
 
+  async function readUserTableRow(
+    table: string,
+    pk: string,
+  ): Promise<Record<string, unknown> | null> {
+    if (!isValidSqlIdent(table)) return null;
+    const info = await deps.jord.describeTable(table);
+    const pkCol = info?.columns.find((col) => col.pk)?.name;
+    if (!pkCol || !isValidSqlIdent(pkCol)) return null;
+    const sql = `SELECT * FROM ${quoteIdent(table)} WHERE ${quoteIdent(pkCol)} = ? LIMIT 1`;
+    const rows =
+      deps.jord.dialect === "postgres"
+        ? await deps.jord.query(sql.replace("?", "$1"), [pk])
+        : await deps.jord.query(sql, [pk]);
+    return rows[0] ?? null;
+  }
+
+  function decide(
+    principal: Principal,
+    tableName: string,
+    operation: JordPolicyOperation,
+    extra?: {
+      bucket?: string | null;
+      row?: Record<string, unknown> | null;
+      nextRow?: Record<string, unknown> | null;
+    },
+  ) {
+    return evaluatePolicies({
+      jord: deps.jord,
+      tableName,
+      operation,
+      role: principal.role,
+      subject: principal.kind,
+      uid: principal.uid ?? null,
+      claims: principal.claims,
+      bypass: principal.kind === "service",
+      bucket: extra?.bucket,
+      row: extra?.row,
+      nextRow: extra?.nextRow,
+      disabled: policiesOff,
+    });
+  }
+
   const recordsRoutes = new Hono<{ Variables: JordAuthVariables }>();
   recordsRoutes.use("*", requireGeneratedEnabled(generatedApi, "records"));
 
@@ -774,21 +1055,26 @@ export function createJordApp(deps: JordAppDeps) {
       });
     }
 
-    const role = c.get("jordRole");
-    const decision = await evaluatePolicies({
-      jord: deps.jord,
-      tableName: V1_TABLE,
-      operation: "insert",
-      role,
+    const principal = c.get("principal");
+    const role = stepRole(principal);
+    const decision = await decide(principal, V1_TABLE, "insert", {
       bucket: body.bucket,
-      disabled: policiesOff,
+      nextRow: {
+        bucket: body.bucket,
+        body: body.body,
+        metadata: body.metadata ?? null,
+      },
     });
     if (!decision.allowed) {
-      return c.json(policyDeniedBody(decision.policy, "insert"), 403);
+      return c.json(policyDeniedBody(decision, "insert"), 403);
     }
 
     const row = await deps.enqueueWrite(() => {
-      deps.jord.bindRlsSession?.({ role, bucket: body.bucket });
+      deps.jord.bindRlsSession?.({
+        role: rlsSessionRole(principal),
+        bucket: body.bucket,
+        uid: principal.uid ?? "",
+      });
       return deps.jord.insertRecord({
         bucket: body.bucket!,
         body: body.body!,
@@ -802,6 +1088,8 @@ export function createJordApp(deps: JordAppDeps) {
       event: "insert",
       row,
       role,
+      subject: principal.kind,
+      uid: principal.uid,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
       onRecordChange: publishRecordChange,
@@ -812,21 +1100,20 @@ export function createJordApp(deps: JordAppDeps) {
 
   recordsRoutes.get("/", async (c) => {
     const bucket = c.req.query("bucket");
+    const decision = await decide(c.get("principal"), V1_TABLE, "select", {
+      bucket: bucket ?? null,
+    });
+    if (!decision.allowed) {
+      return c.json(policyDeniedBody(decision, "select"), 403);
+    }
     if (!bucket) {
       throw new HTTPException(400, { message: "query bucket= is required" });
     }
-    const decision = await evaluatePolicies({
-      jord: deps.jord,
-      tableName: V1_TABLE,
-      operation: "select",
-      role: c.get("jordRole"),
+    deps.jord.bindRlsSession?.({
+      role: rlsSessionRole(c.get("principal")),
       bucket,
-      disabled: policiesOff,
+      uid: c.get("principal").uid ?? "",
     });
-    if (!decision.allowed) {
-      return c.json(policyDeniedBody(decision.policy, "select"), 403);
-    }
-    deps.jord.bindRlsSession?.({ role: c.get("jordRole"), bucket });
     const rows = await deps.jord.listRecordsByBucket(bucket);
     return c.json(rows.map(publicRecord));
   });
@@ -836,16 +1123,18 @@ export function createJordApp(deps: JordAppDeps) {
     if (!row) {
       throw new HTTPException(404, { message: "record not found" });
     }
-    const decision = await evaluatePolicies({
-      jord: deps.jord,
-      tableName: V1_TABLE,
-      operation: "select",
-      role: c.get("jordRole"),
+    const decision = await decide(c.get("principal"), V1_TABLE, "select", {
       bucket: row.bucket,
-      disabled: policiesOff,
+      row: {
+        id: row.id,
+        bucket: row.bucket,
+        body: row.body,
+        metadata: row.metadata,
+        version: row.version,
+      },
     });
     if (!decision.allowed) {
-      return c.json(policyDeniedBody(decision.policy, "select"), 403);
+      return c.json(policyDeniedBody(decision, "select"), 403);
     }
     return c.json(publicRecord(row));
   });
@@ -868,23 +1157,33 @@ export function createJordApp(deps: JordAppDeps) {
     if (!existing) {
       throw new HTTPException(404, { message: "record not found" });
     }
-    const role = c.get("jordRole");
-    const decision = await evaluatePolicies({
-      jord: deps.jord,
-      tableName: V1_TABLE,
-      operation: "update",
-      role,
+    const principal = c.get("principal");
+    const role = stepRole(principal);
+    const decision = await decide(principal, V1_TABLE, "update", {
       bucket: body.bucket ?? existing.bucket,
-      disabled: policiesOff,
+      row: {
+        id: existing.id,
+        bucket: existing.bucket,
+        body: existing.body,
+        metadata: existing.metadata,
+        version: existing.version,
+      },
+      nextRow: {
+        bucket: body.bucket ?? existing.bucket,
+        body: body.body ?? existing.body,
+        metadata: body.metadata === undefined ? existing.metadata : body.metadata,
+        version: body.version,
+      },
     });
     if (!decision.allowed) {
-      return c.json(policyDeniedBody(decision.policy, "update"), 403);
+      return c.json(policyDeniedBody(decision, "update"), 403);
     }
 
     const result = await deps.enqueueWrite(() => {
       deps.jord.bindRlsSession?.({
-        role,
+        role: rlsSessionRole(principal),
         bucket: body.bucket ?? existing.bucket,
+        uid: principal.uid ?? "",
       });
       return deps.jord.updateRecord({
         id,
@@ -909,6 +1208,8 @@ export function createJordApp(deps: JordAppDeps) {
       row: result.record,
       prior: existing,
       role,
+      subject: principal.kind,
+      uid: principal.uid,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
       onRecordChange: publishRecordChange,
@@ -927,20 +1228,27 @@ export function createJordApp(deps: JordAppDeps) {
     if (!existing) {
       throw new HTTPException(404, { message: "record not found" });
     }
-    const role = c.get("jordRole");
-    const decision = await evaluatePolicies({
-      jord: deps.jord,
-      tableName: V1_TABLE,
-      operation: "delete",
-      role,
+    const principal = c.get("principal");
+    const role = stepRole(principal);
+    const decision = await decide(principal, V1_TABLE, "delete", {
       bucket: existing.bucket,
-      disabled: policiesOff,
+      row: {
+        id: existing.id,
+        bucket: existing.bucket,
+        body: existing.body,
+        metadata: existing.metadata,
+        version: existing.version,
+      },
     });
     if (!decision.allowed) {
-      return c.json(policyDeniedBody(decision.policy, "delete"), 403);
+      return c.json(policyDeniedBody(decision, "delete"), 403);
     }
     const deleted = await deps.enqueueWrite(() => {
-      deps.jord.bindRlsSession?.({ role, bucket: existing.bucket });
+      deps.jord.bindRlsSession?.({
+        role: rlsSessionRole(principal),
+        bucket: existing.bucket,
+        uid: principal.uid ?? "",
+      });
       return deps.jord.deleteRecord(id);
     });
     if (!deleted) {
@@ -954,6 +1262,8 @@ export function createJordApp(deps: JordAppDeps) {
       row: existing,
       prior: existing,
       role,
+      subject: principal.kind,
+      uid: principal.uid,
       enqueueWrite: deps.enqueueWrite,
       disabled: triggersOff,
       onRecordChange: publishRecordChange,
@@ -975,15 +1285,13 @@ export function createJordApp(deps: JordAppDeps) {
       }
       const idFilter = c.req.query("id")?.trim() || null;
       if (table === REALTIME_V1_TABLE) {
-        const decision = await evaluatePolicies({
-          jord: deps.jord,
-          tableName: REALTIME_V1_TABLE,
-          operation: "select",
-          role: c.get("jordRole"),
-          disabled: policiesOff,
-        });
+        const decision = await decide(
+          c.get("principal"),
+          REALTIME_V1_TABLE,
+          "select",
+        );
         if (!decision.allowed) {
-          return c.json(policyDeniedBody(decision.policy, "select"), 403);
+          return c.json(policyDeniedBody(decision, "select"), 403);
         }
       }
       if (realtime.size >= MAX_REALTIME_SUBSCRIBERS) {
@@ -996,6 +1304,7 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
 
+      const accessExp = c.get("accessExp");
       return streamSSE(c, async (stream) => {
         const unsubscribe = realtime.trySubscribeFiltered(
           { table, id: idFilter },
@@ -1014,6 +1323,13 @@ export function createJordApp(deps: JordAppDeps) {
 
         try {
           while (!stream.aborted) {
+            if (accessExp != null && Date.now() >= accessExp) {
+              await stream.writeSSE({
+                event: "expired",
+                data: "token_expired",
+              });
+              break;
+            }
             await stream.sleep(1000);
           }
         } finally {
@@ -1036,15 +1352,13 @@ export function createJordApp(deps: JordAppDeps) {
         });
       }
       if (table === REALTIME_V1_TABLE) {
-        const decision = await evaluatePolicies({
-          jord: deps.jord,
-          tableName: REALTIME_V1_TABLE,
-          operation: "select",
-          role: c.get("jordRole"),
-          disabled: policiesOff,
-        });
+        const decision = await decide(
+          c.get("principal"),
+          REALTIME_V1_TABLE,
+          "select",
+        );
         if (!decision.allowed) {
-          return c.json(policyDeniedBody(decision.policy, "select"), 403);
+          return c.json(policyDeniedBody(decision, "select"), 403);
         }
       }
       if (realtime.size >= MAX_REALTIME_SUBSCRIBERS) {
@@ -1064,9 +1378,20 @@ export function createJordApp(deps: JordAppDeps) {
       const idFilter = c.req.query("id")?.trim() || null;
       let unsubscribe: (() => void) | null = null;
       let pingTimer: ReturnType<typeof setInterval> | null = null;
+      let expTimer: ReturnType<typeof setTimeout> | null = null;
+      const accessExp = c.get("accessExp");
 
       return {
         onOpen(_evt, ws) {
+          if (accessExp != null) {
+            expTimer = setTimeout(() => {
+              try {
+                ws.close(4401, "token_expired");
+              } catch {
+                /* already closed */
+              }
+            }, Math.max(0, accessExp - Date.now()));
+          }
           unsubscribe = realtime.trySubscribeFiltered(
             { table, id: idFilter },
             (event) => {
@@ -1097,10 +1422,12 @@ export function createJordApp(deps: JordAppDeps) {
         },
         onClose() {
           if (pingTimer) clearInterval(pingTimer);
+          if (expTimer) clearTimeout(expTimer);
           unsubscribe?.();
         },
         onError() {
           if (pingTimer) clearInterval(pingTimer);
+          if (expTimer) clearTimeout(expTimer);
           unsubscribe?.();
         },
       };
@@ -1429,7 +1756,10 @@ export function createJordApp(deps: JordAppDeps) {
       const run = await runFunction({
         jord: deps.jord,
         fn,
-        role: c.get("jordRole"),
+        role: stepRole(c.get("principal")),
+        policyBypass: c.get("principal").kind === "service",
+        subject: c.get("principal").kind,
+        uid: c.get("principal").uid,
         enqueueWrite: deps.enqueueWrite,
         logs,
         onRecordChange: publishRecordChange,
@@ -1651,7 +1981,10 @@ export function createJordApp(deps: JordAppDeps) {
     const run = await runFunction({
       jord: deps.jord,
       fn,
-      role: c.get("jordRole"),
+      role: stepRole(c.get("principal")),
+      policyBypass: c.get("principal").kind === "service",
+      subject: c.get("principal").kind,
+      uid: c.get("principal").uid,
       enqueueWrite: deps.enqueueWrite,
       logs,
       onRecordChange: publishRecordChange,
@@ -1704,11 +2037,7 @@ export function createJordApp(deps: JordAppDeps) {
       throw new HTTPException(400, { message: "name is required" });
     }
     const tableName = body.table_name ?? V1_TABLE;
-    if (tableName !== V1_TABLE) {
-      throw new HTTPException(400, {
-        message: `table_name must be "${V1_TABLE}" in S7`,
-      });
-    }
+    await assertPolicyTable(deps.jord, tableName);
     if (
       typeof body.operation !== "string" ||
       !POLICY_OPS.has(body.operation as JordPolicyOperation)
@@ -1767,10 +2096,8 @@ export function createJordApp(deps: JordAppDeps) {
       priority?: number;
       enabled?: boolean;
     }>();
-    if (body.table_name !== undefined && body.table_name !== V1_TABLE) {
-      throw new HTTPException(400, {
-        message: `table_name must be "${V1_TABLE}" in S7`,
-      });
+    if (body.table_name !== undefined) {
+      await assertPolicyTable(deps.jord, body.table_name);
     }
     if (
       body.operation !== undefined &&

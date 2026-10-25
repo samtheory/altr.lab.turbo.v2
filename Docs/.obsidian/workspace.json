@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "plan/Jord/phase-02/Jord-S0029/README.md",
+                "file": "plan/Jord/phase-02/Jord-S0021/ADR-threat-model.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "ADR-threat-model"
             }
           }
         ]
@@ -190,6 +190,11 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "plan/Jord/phase-02/Jord-S0021/04-verify.md",
+    "plan/Jord/phase-02/Jord-S0021/03-policy.md",
+    "plan/Jord/phase-02/Jord-S0021/02-auth.md",
+    "plan/Jord/phase-02/Jord-S0021/01-migration.md",
+    "plan/Jord/phase-02/Jord-S0029/README.md",
     "plan/Jord/phase-02/Jord-S0028/README.md",
     "plan/Jord/phase-02/Jord-S0027/README.md",
     "plan/Jord/phase-02/Jord-S0026/README.md",
@@ -199,11 +204,6 @@
     "plan/Jord/phase-02/Jord-S0022/README.md",
     "plan/Jord/phase-02/Jord-S0021/README.md",
     "plan/Jord/phase-02/Jord-S0021/ADR-threat-model.md",
-    "plan/Jord/phase-02/Jord-S0021/04-verify.md",
-    "plan/Jord/phase-02/Jord-S0021/03-policy.md",
-    "plan/Jord/phase-02/Jord-S0021/02-auth.md",
-    "plan/Jord/phase-02/Jord-S0021/01-migration.md",
-    "plan/Jord/phase-02/Jord-S0029/README.md",
     "plan/Jord/phase-02/Jord-S0029",
     "plan/Jord/phase-02/Jord-S0028",
     "report/Jord-phase-02-plan-review.md",

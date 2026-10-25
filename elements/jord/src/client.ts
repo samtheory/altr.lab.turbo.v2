@@ -12,6 +12,11 @@ export type CreateJordClientOptions = {
    * Ignored for `file:` and Postgres.
    */
   authToken?: string;
+  /**
+   * Postgres runtime pool. When false, skip owner DDL. The owner step is
+   * `runOwnerMigration` on `JORD_MIGRATE_URL`. Ignored for libSQL.
+   */
+  postgresDdl?: boolean;
 };
 
 /**
@@ -27,5 +32,7 @@ export async function createJordClient(
   if (resolved.scheme === "file" || resolved.scheme === "libsql") {
     return LibSqlAdapter.open(resolved.url, { authToken: options.authToken });
   }
-  return PostgresAdapter.open(resolved.url);
+  return PostgresAdapter.open(resolved.url, {
+    ddl: options.postgresDdl !== false,
+  });
 }

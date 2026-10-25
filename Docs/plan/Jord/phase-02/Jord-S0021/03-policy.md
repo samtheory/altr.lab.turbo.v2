@@ -2,7 +2,7 @@
 title: "S0021 Part C — unified policy model"
 description: "Deny-overrides, default-deny, route inventory, FORCE RLS, dialect conformance"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-25
 tags:
   - plan
   - jord
@@ -17,7 +17,7 @@ tags:
 
 ## Status
 
-**planned** (blocked on Part B + ADR)
+**in tree for file libSQL** (2026-10-25). ADR is accepted. Postgres pool-leak and dialect-conformance runs were not executed (`JORD_TEST_POSTGRES_URL` unset).
 
 ## Combination semantics
 
@@ -104,16 +104,16 @@ This card's PR updates `Docs/tech_space/jord/policies/README.md` (including the 
 
 ## Definition of Done (`jord-s0021-c`)
 
-- [ ] Deny-overrides and default-deny covered by tests
-- [ ] UPDATE USING + WITH CHECK; owner column immutable for non-service
-- [ ] `FORCE ROW LEVEL SECURITY` + non-owner `jord_app` documented in `tech_space/jord/policies` and applied by the migration using `JORD_MIGRATE_URL`
-- [ ] Grant step ownership (runner + when) documented; no silent manual-only grant in the happy path
-- [ ] `CREATEROLE` path creates `jord_app`; without `CREATEROLE`, verify-only path checks exists / no `BYPASSRLS` / non-owner then grants — clear fail on any miss
-- [ ] On Postgres, refuse to boot if migrate and runtime URLs match (parsed host, port, database, user); test covers it
-- [ ] Startup check refuses a Postgres runtime role that owns tables or has `BYPASSRLS`
-- [ ] Runtime stays **`DATABASE_URL`** (name unchanged; no second runtime env, no alias, no deprecation warning)
-- [ ] `file:` boot still works with only `DATABASE_URL` (no migrate URL)
-- [ ] Pool leak test green on Postgres
-- [ ] Shared dialect conformance suite green on file libSQL (Postgres opt-in)
-- [ ] Route inventory test fails on an undeclared route
-- [ ] `service` bypass and existing `role_in` / `bucket_in` still work
+- [x] Deny-overrides and default-deny covered by tests
+- [x] UPDATE USING + WITH CHECK; owner column immutable for non-service
+- [x] `FORCE ROW LEVEL SECURITY` + non-owner `jord_app` documented in `tech_space/jord/policies` and applied by the migration using `JORD_MIGRATE_URL`
+- [x] Grant step ownership (runner + when) documented; no silent manual-only grant in the happy path
+- [x] `CREATEROLE` path creates `jord_app`; without `CREATEROLE`, verify-only path checks exists / no `BYPASSRLS` / non-owner then grants — clear fail on any miss
+- [x] On Postgres, refuse to boot if migrate and runtime URLs match (parsed host, port, database, user); test covers it
+- [x] Startup check refuses a Postgres runtime role that owns tables or has `BYPASSRLS`
+- [x] Runtime stays **`DATABASE_URL`** (name unchanged; no second runtime env, no alias, no deprecation warning)
+- [x] `file:` boot still works with only `DATABASE_URL` (no migrate URL)
+- [ ] Pool leak test green on Postgres (file exists; skipped here)
+- [ ] Shared dialect conformance suite green on file libSQL (Postgres opt-in) — file HTTP tests cover the decisions; the paired Postgres run was not executed
+- [x] Route inventory test fails on an undeclared route
+- [x] `service` bypass and existing `role_in` / `bucket_in` still work

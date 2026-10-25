@@ -57,6 +57,19 @@ describe("RealtimeBus", () => {
     expect(bus.trySubscribe(() => {})).toBeNull();
     expect(bus.size).toBe(MAX_REALTIME_SUBSCRIBERS);
   });
+
+  it("close clears subscribers and ignores publish / subscribe", () => {
+    const bus = new RealtimeBus();
+    const seen: string[] = [];
+    bus.trySubscribe((event) => {
+      seen.push(event.id);
+    });
+    bus.close();
+    expect(bus.size).toBe(0);
+    expect(bus.trySubscribe(() => {})).toBeNull();
+    bus.publish(sample({ id: "after-close", table: "records" }));
+    expect(seen).toEqual([]);
+  });
 });
 
 describe("isRealtimeSubscribeTable", () => {

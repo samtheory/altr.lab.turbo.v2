@@ -16,15 +16,23 @@ export type RealtimeSubscribeFilter = {
  */
 export class RealtimeBus {
   private readonly listeners = new Set<RealtimeListener>();
+  private closed = false;
 
   get size(): number {
     return this.listeners.size;
+  }
+
+  /** Drop all subscribers; further publish / subscribe are no-ops (subscribe returns null). */
+  close(): void {
+    this.closed = true;
+    this.listeners.clear();
   }
 
   /**
    * @returns unsubscribe, or null when the subscriber cap is reached.
    */
   trySubscribe(listener: RealtimeListener): (() => void) | null {
+    if (this.closed) return null;
     if (this.listeners.size >= MAX_REALTIME_SUBSCRIBERS) return null;
     this.listeners.add(listener);
     return () => {
@@ -47,6 +55,7 @@ export class RealtimeBus {
   }
 
   publish(event: JordChangeEvent): void {
+    if (this.closed) return;
     for (const listener of this.listeners) {
       try {
         listener(event);
