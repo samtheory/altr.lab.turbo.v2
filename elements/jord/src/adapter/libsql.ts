@@ -3,7 +3,12 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-import { createClient, type Client, type Transaction } from "@libsql/client";
+import {
+  createClient,
+  type Client,
+  type ResultSet,
+  type Transaction,
+} from "@libsql/client";
 import { and, asc, desc, eq, isNotNull, isNull, lte, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
@@ -108,6 +113,12 @@ import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
   clampSqlRowCap,
   clampSqlTimeout,
+  countSqliteStatements,
+  isSqlTransactionControl,
+  raceSqlTimeout,
+  sqlMultiStatementError,
+  sqlTimeoutError,
+  sqlTxControlError,
 } from "../schema/sql-console.js";
 import {
   fileUrlToFsPath,
@@ -569,6 +580,33 @@ export class LibSqlAdapter implements JordDriverPort {
     const args = input.args ?? [];
     const started = Date.now();
 
+    // B11: libSQL `execute` silently runs only the first of several
+    // statements, so reject up front. Transaction control on the shared
+    // connection would leave it inside (or close) someone else's transaction.
+    if (countSqliteStatements(input.sql) > 1) throw sqlMultiStatementError();
+    if (isSqlTransactionControl(input.sql)) throw sqlTxControlError();
+
+    const shape = (result: ResultSet) => {
+      const columns = result.columns;
+      const mapped = result.rows.map((row) => {
+        const record = row as unknown as Record<string, unknown>;
+        const out: Record<string, unknown> = {};
+        for (let i = 0; i < columns.length; i++) {
+          const name = columns[i] ?? String(i);
+          out[name] = record[name] ?? record[i];
+        }
+        return out;
+      });
+      const truncated = mapped.length > rowCap;
+      return {
+        columns,
+        rows: truncated ? mapped.slice(0, rowCap) : mapped,
+        rowCount: mapped.length,
+        truncated,
+        elapsedMs: Date.now() - started,
+      };
+    };
+
     if (input.readOnly) {
       const readClient = createClient({
         url: this.connectionUrl,
@@ -576,60 +614,30 @@ export class LibSqlAdapter implements JordDriverPort {
       });
       try {
         await readClient.execute("PRAGMA query_only = ON");
-        const result = await Promise.race([
+        // A read cannot commit, so on timeout it is safe to stop waiting.
+        const raced = await raceSqlTimeout(
           readClient.execute({ sql: input.sql, args }),
-          new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error("sql_timeout")), timeoutMs);
-          }),
-        ]);
-        const columns = result.columns;
-        const mapped = result.rows.map((row) => {
-          const record = row as unknown as Record<string, unknown>;
-          const out: Record<string, unknown> = {};
-          for (let i = 0; i < columns.length; i++) {
-            const name = columns[i] ?? String(i);
-            out[name] = record[name] ?? record[i];
-          }
-          return out;
-        });
-        const truncated = mapped.length > rowCap;
-        const rows = truncated ? mapped.slice(0, rowCap) : mapped;
-        return {
-          columns,
-          rows,
-          rowCount: mapped.length,
-          truncated,
-          elapsedMs: Date.now() - started,
-        };
+          timeoutMs,
+        );
+        if (raced.kind === "timeout") throw sqlTimeoutError(timeoutMs, false);
+        return shape(raced.value);
       } finally {
         readClient.close();
       }
     }
 
-    const result = await Promise.race([
-      this.client.execute({ sql: input.sql, args }),
-      new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("sql_timeout")), timeoutMs);
-      }),
-    ]);
-    const columns = result.columns;
-    const mapped = result.rows.map((row) => {
-      const record = row as unknown as Record<string, unknown>;
-      const out: Record<string, unknown> = {};
-      for (let i = 0; i < columns.length; i++) {
-        const name = columns[i] ?? String(i);
-        out[name] = record[name] ?? record[i];
-      }
-      return out;
-    });
-    const truncated = mapped.length > rowCap;
-    return {
-      columns,
-      rows: truncated ? mapped.slice(0, rowCap) : mapped,
-      rowCount: mapped.length,
-      truncated,
-      elapsedMs: Date.now() - started,
-    };
+    // Writes: the statement cannot be cancelled once sent (file: runs it
+    // synchronously; hosted keeps it running server-side). On timeout, wait
+    // for it to settle so the caller's write-queue slot is not freed early,
+    // then report what really happened. A late failure is rethrown as-is
+    // (one statement in autocommit: nothing landed).
+    const pending = this.client.execute({ sql: input.sql, args });
+    const raced = await raceSqlTimeout(pending, timeoutMs);
+    if (raced.kind === "timeout") {
+      await pending;
+      throw sqlTimeoutError(timeoutMs, true);
+    }
+    return shape(raced.value);
   }
 
   async close(): Promise<void> {

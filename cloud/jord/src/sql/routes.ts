@@ -11,6 +11,24 @@ import type { LogSink } from "../logs/sink.js";
 
 const HISTORY_CAP = 50;
 
+/** B11 engine guard codes (`JordSqlConsoleError.code`), duck-typed. */
+const ENGINE_SQL_CODES = new Set([
+  "JORD_SQL_MULTI_STATEMENT",
+  "JORD_SQL_TX_CONTROL",
+  "JORD_SQL_TIMEOUT",
+]);
+
+function engineErrorCode(err: unknown): string | null {
+  const code = (err as { code?: unknown } | null)?.code;
+  return typeof code === "string" && ENGINE_SQL_CODES.has(code) ? code : null;
+}
+
+function engineCommitted(err: unknown): boolean {
+  return (
+    engineErrorCode(err) !== null && (err as { committed?: unknown }).committed === true
+  );
+}
+
 export function createSqlRoutes(deps: {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
@@ -64,16 +82,28 @@ export function createSqlRoutes(deps: {
 
     let result;
     let errorText: string | null = null;
+    let errorCode: string | null = null;
+    let committed = false;
     try {
       result = readOnly
         ? await run()
         : await deps.enqueueWrite(async () => {
-            const value = await run();
-            await deps.resyncTracked?.(principal);
-            return value;
+            try {
+              const value = await run();
+              await deps.resyncTracked?.(principal);
+              return value;
+            } catch (err) {
+              // B11: a write that outlived its timeout may still have landed
+              // (the engine waits for it to settle before throwing). Resync so
+              // live subscribers refetch, still inside the queue slot.
+              if (engineCommitted(err)) await deps.resyncTracked?.(principal);
+              throw err;
+            }
           });
     } catch (err) {
       errorText = err instanceof Error ? err.message : String(err);
+      errorCode = engineErrorCode(err);
+      committed = !readOnly && engineCommitted(err);
       result = null;
     }
 
@@ -124,7 +154,16 @@ export function createSqlRoutes(deps: {
     });
 
     if (!result) {
-      return c.json({ error: "sql_failed", message: errorText }, 400);
+      return c.json(
+        {
+          error: errorCode === "JORD_SQL_TIMEOUT" ? "sql_timeout" : "sql_failed",
+          message: errorText,
+          // B11: true only when the statement's changes landed despite the error.
+          committed,
+          ...(errorCode ? { code: errorCode } : {}),
+        },
+        400,
+      );
     }
     return c.json({
       columns: result.columns,

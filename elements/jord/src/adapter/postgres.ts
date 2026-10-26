@@ -1,7 +1,13 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 
-import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
+import {
+  Pool,
+  type PoolClient,
+  type QueryConfig,
+  type QueryResult,
+  type QueryResultRow,
+} from "pg";
 
 import { JordUnsupportedError } from "../errors.js";
 import type {
@@ -104,6 +110,10 @@ import { migrationLockKey } from "../schema/migrations/runner.js";
 import {
   clampSqlRowCap,
   clampSqlTimeout,
+  isSqlTransactionControl,
+  sqlMultiStatementError,
+  sqlTimeoutError,
+  sqlTxControlError,
 } from "../schema/sql-console.js";
 import {
   clampSearchLimit,
@@ -332,6 +342,25 @@ const rlsSession = new AsyncLocalStorage<RlsSessionContext>();
 const pgTx = new AsyncLocalStorage<PoolClient>();
 
 /** One simple-protocol round trip: BEGIN plus the session GUCs. */
+/**
+ * B11: map the server's console errors to clear, internals-free messages.
+ * 42601 "cannot insert multiple commands into a prepared statement" is the
+ * extended-protocol multi-statement rejection; 57014 with "statement timeout"
+ * is `statement_timeout` cancelling the statement (nothing committed).
+ */
+function mapPgConsoleError(err: unknown, timeoutMs: number): unknown {
+  const pgErr = err as { code?: unknown; message?: unknown } | null;
+  const code = typeof pgErr?.code === "string" ? pgErr.code : "";
+  const message = typeof pgErr?.message === "string" ? pgErr.message : "";
+  if (code === "42601" && /multiple commands/i.test(message)) {
+    return sqlMultiStatementError();
+  }
+  if (code === "57014" && /statement timeout/i.test(message)) {
+    return sqlTimeoutError(timeoutMs, false);
+  }
+  return err;
+}
+
 function beginWithSessionSql(ctx: RlsSessionContext | undefined, begin = "BEGIN"): string {
   if (!ctx) return begin;
   return `${begin}; SELECT set_config('jord.role', ${quoteSqlLiteral(ctx.role)}, true), set_config('jord.bucket', ${quoteSqlLiteral(ctx.bucket)}, true), set_config('jord.uid', ${quoteSqlLiteral(ctx.uid ?? "")}, true), set_config('jord.claims', ${quoteSqlLiteral(ctx.claims ?? "")}, true)`;
@@ -475,6 +504,8 @@ export class PostgresAdapter implements JordDriverPort {
     const rowCap = clampSqlRowCap(input.rowCap);
     const timeoutMs = clampSqlTimeout(input.timeoutMs);
     const args = input.args ?? [];
+    // B11: COMMIT / ROLLBACK / BEGIN would end or nest our BEGIN [READ ONLY].
+    if (isSqlTransactionControl(input.sql)) throw sqlTxControlError();
     const started = Date.now();
     const client = await this.pool.connect();
     try {
@@ -482,10 +513,27 @@ export class PostgresAdapter implements JordDriverPort {
         beginWithSessionSql(rlsSession.getStore(), input.readOnly ? "BEGIN READ ONLY" : "BEGIN"),
       );
       await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`);
-      const result = await client.query(input.sql, args);
+      // B11: force the extended protocol. With no values pg would use the
+      // simple protocol, which runs every `;`-separated statement, so
+      // `COMMIT; INSERT …` escaped BEGIN READ ONLY. In extended mode the
+      // server parses one statement and rejects `a; b` before running any.
+      const config: QueryConfig & { queryMode: "extended" } = {
+        text: input.sql,
+        values: args,
+        queryMode: "extended",
+      };
+      let result: QueryResult | QueryResult[];
+      try {
+        result = (await client.query(config)) as QueryResult | QueryResult[];
+      } catch (err) {
+        throw mapPgConsoleError(err, timeoutMs);
+      }
+      // Belt and braces: several results mean several statements ran.
+      // Throwing here rolls back before anything is committed.
+      if (Array.isArray(result)) throw sqlMultiStatementError();
       await client.query("COMMIT");
-      const columns = result.fields.map((field) => field.name);
-      const mapped = result.rows as Array<Record<string, unknown>>;
+      const columns = (result.fields ?? []).map((field) => field.name);
+      const mapped = (result.rows ?? []) as Array<Record<string, unknown>>;
       const truncated = mapped.length > rowCap;
       return {
         columns,
@@ -498,7 +546,10 @@ export class PostgresAdapter implements JordDriverPort {
       await client.query("ROLLBACK").catch(() => undefined);
       throw err;
     } finally {
-      client.release();
+      // B11: never hand a console connection back to the pool. A
+      // `SET SESSION …` / `SET ROLE …` run here must not leak into later
+      // requests that share pooled connections.
+      client.release(true);
     }
   }
 

@@ -42,13 +42,15 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 
 Any authenticated principal may subscribe, including `user` and `anon`. When the access token `exp` passes, SSE emits `expired` and ends; WebSocket closes with **4401**.
 
+**Every event is policy-checked, on both transports.** SSE (live and `since=` replay) and WebSocket share one gate, `canDeliverLive` → `liveDeliveryAllowed` in `cloud/jord/src/realtime/deliver.ts`. It loads the outbox row by `seq` and runs the table's select policy against it. The gate fails closed: no `seq`, a missing row (pruned between publish and lookup) or a lookup error means the event is not sent. WebSocket sends are chained per connection, so the async check cannot reorder events. Before phase-02.75 B10, WebSocket skipped this check.
+
 ### Table-level resync (raw SQL)
 
 Raw SQL from the Studio SQL console is not captured row by row. After a successful **non-read-only** console write, `resyncTrackedAs(principal)` in `cloud/jord/src/app.ts` appends one row per tracked table with `op: "resync"`, `pk: ""` and NULL `old_json` / `new_json`, all in one transaction, still inside the write queue slot. After commit each row is published on its table channel as `{ type: "jord.change", table, op: "resync", id: "", at, dialect, seq }`. Clients refetch the table. It is not in the same transaction as the user's SQL (raw SQL may carry its own `BEGIN` / `COMMIT`), so a failed resync is logged and the write still succeeds. Read-only and failed queries emit nothing. Resync rows pass the `?id=` filter (live and on `since=` replay) because they carry no row id. Delivery still goes through the policy check.
 
 ### Not captured
 
-- **Migrate wizard.** It only reads this database and writes the destination directly, so the destination's subscribers get no events for copied rows. Nothing changes here, so nothing is emitted here.
+- **Migrate wizard.** It only reads this database and writes the destination directly, so the destination's subscribers get no events for copied rows. Nothing changes here, so nothing is emitted here. A destination that resolves to the source database is refused with 400 (`targetIsSource` in `cloud/jord/src/migrate/wizard.ts`).
 
 ## How
 
