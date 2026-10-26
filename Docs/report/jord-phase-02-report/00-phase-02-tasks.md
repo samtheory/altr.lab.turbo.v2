@@ -18,7 +18,7 @@ tags:
 - **Remains:** 0
 - **Total:** 12
 
-Phase-02’s numbered execution queue (S0027 through S0026) has code in tree. The 2026-10-25 review ([[../Jord-phase-02-closeout-review]]) found S0021-C row-scope leaks, an S0023 outbox that was not transactional and was bypassed by `/api/v1`, and zero Postgres runs. [[../../plan/Jord/phase-02.5/README|Phase-02.5]] closed those the same day: every server suite now runs on file libSQL **and** live Postgres. Two items stay open and are not code: the first green `jord-postgres` Actions run, and branch protection (see [[../../plan/Jord/phase-02.75/README|phase-02.75]]).
+Phase-02’s numbered execution queue (S0027 through S0026) has code in tree. The 2026-10-25 review ([[../Jord-phase-02-closeout-review]]) found S0021-C row-scope leaks, an S0023 outbox that was not transactional and was bypassed by `/api/v1`, and zero Postgres runs. [[../../plan/Jord/phase-02.5/README|Phase-02.5]] closed those the same day. [[../../plan/Jord/phase-02.75/README|Phase-02.75]] closed 2026-10-26 (correctness leftovers + MinIO live + local CI mirror). Branch protection remains a one-shot admin step on S0027.
 
 ---
 
@@ -85,7 +85,7 @@ Phase-02’s numbered execution queue (S0027 through S0026) has code in tree. Th
 ### 11. S0025 — Storage v2
 - **Task:** Blob storage port + S3
 - **Description:** Unify local HMAC and S3 adapters with sign-time policy, pending/finalize/GC, and a copy-plan dry-run.
-- **What it does:** `JordStoragePort`, local HMAC + S3 adapters, sign-time policy, pending/finalize, `blobs_gc`, copy-plan dry-run (`delete_local: false`). Blob metadata tests pass on both dialects (phase-02.5). Live S3/R2 is still not exercised (phase-02.75).
+- **What it does:** `JordStoragePort`, local HMAC + S3 adapters, sign-time policy, pending/finalize, `blobs_gc`, copy-plan dry-run (`delete_local: false`). Blob metadata tests pass on both dialects (phase-02.5). MinIO live sign → upload → finalize exercised in phase-02.75 / `jord-postgres`.
 - **Status:** `done`
 
 ### 12. S0026 — Functions v2 ADR only

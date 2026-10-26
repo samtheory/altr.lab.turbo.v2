@@ -2,7 +2,7 @@
 title: "Jord — overview"
 description: "What Jord is, the three packages, the request path, and the invariants that still hold"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-26
 tags:
   - tech-space
   - jord
@@ -102,17 +102,21 @@ pnpm --filter @altr/jord-client test
 pnpm --filter @altr/jord-studio typecheck
 ```
 
-Job **`jord-postgres`** (not a required check yet) starts a `pgvector/pgvector:pg16` service container, sets `JORD_TEST_POSTGRES_URL` to it, and runs the `@altr/jord` and `@altr/jord-server` tests. No secret is needed, so forks run it too.
+Job **`jord-postgres`** starts `pgvector/pgvector:pg16` and a MinIO service container, sets `JORD_TEST_POSTGRES_URL` and `JORD_TEST_S3_*`, and runs `@altr/jord` + `@altr/jord-server` tests (including `s3-live`). No Postgres secret is needed, so forks run it too. Hosted libSQL secrets on the `jord` job are optional (see [[../dialects/README#hosted-libsql-transactions-phase-0275-b3--c2]]).
 
-Server tests use `cloud/jord/src/testing/harness.ts`. `TEST_BACKENDS` is `["file"]`, plus `"postgres"` when `JORD_TEST_POSTGRES_URL` is set. For Postgres each test gets a fresh database, the owner migration, and a runtime pool as `jord_app`, so FORCE RLS applies exactly as in production. `openTestDb("postgres", { owner: "plain" })` makes the table owner a `NOSUPERUSER NOBYPASSRLS` role (`jord_owner_test`), as on a managed Postgres, where FORCE RLS binds the owner too. Suites on both backends: table API, policies (part-c), outbox, SQL console, storage metadata. Local run:
+Server tests use `cloud/jord/src/testing/harness.ts`. `TEST_BACKENDS` is `["file"]`, plus `"postgres"` when `JORD_TEST_POSTGRES_URL` is set. For Postgres each test gets a fresh database, the owner migration, and a runtime pool as `jord_app`, so FORCE RLS applies exactly as in production. `openTestDb("postgres", { owner: "plain" })` makes the table owner a `NOSUPERUSER NOBYPASSRLS` role (`jord_owner_test`). Suites on both backends: table API, policies (part-c), outbox, SQL console / resync, storage metadata + MinIO live. Local mirror:
 
 ```powershell
 docker run -d --name jord-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=jord_test -p 55432:5432 pgvector/pgvector:pg16
+docker run -d --name jord-minio -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin -p 9000:9000 bitnamilegacy/minio@sha256:451fe6858cb770cc9d0e77ba811ce287420f781c7c1b806a386f6896471a349c
 $env:JORD_TEST_POSTGRES_URL="postgres://postgres:postgres@localhost:55432/jord_test"
+$env:JORD_TEST_S3_ENDPOINT="http://localhost:9000"
+$env:JORD_TEST_S3_ACCESS_KEY_ID="minioadmin"
+$env:JORD_TEST_S3_SECRET_ACCESS_KEY="minioadmin"
 pnpm --filter @altr/jord-server test
 ```
 
-Branch protection: requiring status check **`jord`** is a **manual admin** step after the first Actions run. Exact check label in the GitHub UI may be `jord` or `jord / jord` — confirm on the first green run.
+Branch protection requiring **`jord`** and **`jord-postgres`** is a **manual admin** step — commands on [[../../../plan/Jord/phase-02/Jord-S0027/README#branch-protection]].
 
 ## HTTP edge (S0028)
 

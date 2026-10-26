@@ -75,7 +75,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 | | |
 |--|--|
 | **What** | Opt-in `jord_tracked_tables`. Same-transaction outbox. Watermark: libSQL relies on the write queue; Postgres withholds seqs that are ahead of an in-flight lower seq. Indexes on `seq` and `(table_name, seq)`. Retention default 7 days and 100_000 rows. A `pg_notify` trigger (seq only) exists in the Postgres migrations; **`LISTEN` fan-out is moved to phase-03** (multi-instance prerequisite), so fan-out is single-process. `since` past retention → **410**. Delivery-time policy filter. **Replace** the in-process producer; keep the event name `jord.change`. BLOBs omitted or referenced. libSQL Studio raw SQL is not captured |
-| **Status** | **Done** (2026-10-25, [[../../plan/Jord/phase-02.5/README\|S0031]]). One helper (`writeChangeAs` in `cloud/jord/src/app.ts`) runs the data write and the outbox insert in one `jord.transaction` inside the write queue. Studio rows, `/records`, `/api/v1/:table`, functions, and triggers all use it. A failed outbox insert fails the request and rolls back the data. The watermark holds seqs until commit. Not captured: SQL console writes, migrate wizard, hosted `libsql://` (no atomic transaction; see phase-02.75) |
+| **Status** | **Done** (2026-10-25, [[../../plan/Jord/phase-02.5/README\|S0031]]; atomic hosted path + console resync in [[../../plan/Jord/phase-02.75/README\|phase-02.75]]). One helper (`writeChangeAs`) runs data + outbox in one `jord.transaction`. Console writes emit `op: "resync"` per tracked table. Migrate wizard intentionally emits nothing on the source. Hosted `libsql://` uses interactive transactions; live Turso is secret-gated |
 | **Acceptance** | Postgres race test does not skip; libSQL queue-order test; 410 test; one producer path |
 
 ## F6 — Studio tools (`Jord-S0024`)
@@ -128,7 +128,7 @@ Sprint **ids are stable**. Execution order is not numeric order.
 ## Invariants
 
 1. Studio / browser never import `@altr/jord`, open the DB, or see connection strings / tokens.
-2. libSQL hot writes → one in-process queue. Postgres uses the same queue at concurrency 1; the planned `JORD_PG_WRITE_CONCURRENCY` knob is not built ([[../../plan/Jord/phase-02.75/README|phase-02.75]]). SQL **reads** use a different connection (F6).
+2. libSQL hot writes → one in-process queue. Postgres uses the same queue at concurrency 1; `JORD_PG_WRITE_CONCURRENCY` is phase-03 P1 ([[../../feature_list/Jord/05-phase-03-candidates]]). SQL **reads** use a different connection (F6).
 3. `records` OCC → 409.
 4. WAL / checkpoints only for `file:`.
 5. `@altr/base` stays a leaf. Studio = `@altr/apolyx` only.

@@ -2,7 +2,7 @@
 title: "Jord-S0027 — CI for Jord packages"
 description: "First phase-02 execution step: typecheck + tests before auth work"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-26
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # Jord-S0027 — CI for Jord packages
 
-> Who: **mimir**. **Status: implemented locally — awaiting PR / Actions green + branch-protection admin.** Execution #1 — runs first, before any S0021 work. Feature F9. Next: [[../Jord-S0021/README]] Part A.
+> Who: **mimir**. **Status: workflow + local CI mirror done (2026-10-26).** Branch protection remains a one-shot repo-admin step (below). Execution #1. Feature F9.
 
 **Sprint id:** `Jord-S0027`  
 **Hats:** **sindri** · **docs_man**
@@ -51,7 +51,25 @@ npm publish · unrelated workspace packages · Strix
 
 ## Definition of Done
 
-- [x] Workflow file exists; local typecheck/test green on Phase 1/3 host (Windows). Ubuntu Actions green: **UNVERIFIED** until PR push.
-- [x] No secrets printed (workflow never echoes `JORD_TEST_POSTGRES_URL`)
+- [x] Workflow file exists; local typecheck/test green on Phase 1/3 host (Windows).
+- [x] Local CI mirror of `jord-postgres` (pgvector + MinIO) green 2026-10-26 — see [[../../phase-02.75/README]] proof log. Paste a GitHub Actions run URL here when `gh` can see the private repo.
+- [x] No secrets printed (workflow never echoes `JORD_TEST_POSTGRES_URL` / libSQL tokens)
 - [x] Documented in STATUS / overview
-- [ ] Branch protection requires check `jord` — **UNVERIFIED** (manual admin)
+- [ ] Branch protection requires checks `jord` and `jord-postgres` — **manual admin** (ops only; phase-02.75 code is closed)
+
+## Branch protection
+
+Repo admin, once, after the first green Actions run on `main`:
+
+```bash
+gh api -X PUT repos/samtheory/altr.lab.turbo.v2/branches/main/protection \
+  -H "Accept: application/vnd.github+json" \
+  -f required_status_checks='{"strict":true,"contexts":["jord","jord-postgres"]}' \
+  -F enforce_admins=true \
+  -f required_pull_request_reviews='{"required_approving_review_count":0}' \
+  -F restrictions=null \
+  -F allow_force_pushes=false \
+  -F allow_deletions=false
+```
+
+Confirm the exact check names in the Actions UI (`jord` / `jord-postgres` job `name:` fields). Paste the API JSON (or a screenshot) under this heading when done.

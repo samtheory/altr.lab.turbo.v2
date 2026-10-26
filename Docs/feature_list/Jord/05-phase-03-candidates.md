@@ -2,7 +2,7 @@
 title: "Jord — phase-03 candidates"
 description: "Proposed phase-03 features after phase-02.5 acceptance: ops, typed DX, Functions runtime, auth v2, API v2, storage/realtime v2, security pass"
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-26
 tags:
   - feature
   - jord
@@ -12,7 +12,7 @@ tags:
 
 # Jord — phase-03 candidates
 
-> **Proposed, not approved — needs a plan.** Gate: [[../../plan/Jord/phase-02.5/README|phase-02.5]] is code done (2026-10-25); start planning after [[../../plan/Jord/phase-02.75/README|phase-02.75]] group A (first green Actions run, branch protection). Phase-02.75 items moved here (decided 2026-10-26): B6 `JORD_PG_WRITE_CONCURRENCY` (P1), B7 custom JWT claims (P4). C1 MinIO S3 live test landed in phase-02.75, so P6 starts with the S3 adapter already exercised in CI. Rationale and rating: [[../../report/Jord-phase-02-closeout-review]]. Phase-02 features: [[03-phase-02-features]]. Older soft list: [[01-phase-02-candidates]].
+> **Proposed, not approved — needs a plan.** Gate: [[../../plan/Jord/phase-02.75/README|phase-02.75]] is **closed** (2026-10-26). Planning can start now. Phase-02.75 items moved here (decided 2026-10-26): B6 `JORD_PG_WRITE_CONCURRENCY` (P1), B7 custom JWT claims (P4). C1 MinIO S3 live landed in 02.75, so P6 starts with the S3 adapter already exercised. Rationale and rating: [[../../report/Jord-phase-02-closeout-review]]. Phase-02 features: [[03-phase-02-features]]. Older soft list: [[01-phase-02-candidates]].
 
 The overall rating after phase-02 is **6/10**: lab-grade on file libSQL. Phase-03 should move Jord to a backend an Altr app can run in production. Order is by what blocks real use first.
 
@@ -75,4 +75,4 @@ Embedded Turso replicas · hosted embedding API / embedding CDC · Redis · Bun 
 
 ## Rule
 
-Promote into a phase-03 plan (`plan/Jord/phase-03/`) only after phase-02.75 group A is green. One stop per session, with pasted proof for every ticked box.
+Promote into a phase-03 plan (`plan/Jord/phase-03/`) when this candidate list is approved. One stop per session, with pasted proof for every ticked box.

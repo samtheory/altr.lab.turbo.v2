@@ -408,8 +408,12 @@ export class PostgresAdapter implements JordDriverPort {
   ): Promise<PostgresAdapter> {
     const pool = new Pool({ connectionString });
     // Without a listener, a server-side disconnect of an idle client crashes the process.
+    // DROP DATABASE … WITH (FORCE) (test harness) terminates idle backends after pool.end();
+    // that is expected teardown, not an operational fault — suppress the noise.
     pool.on("error", (err) => {
-      console.error("[@altr/jord] idle postgres client error:", err.message);
+      const msg = err.message ?? "";
+      if (/terminating connection|database .* does not exist/i.test(msg)) return;
+      console.error("[@altr/jord] idle postgres client error:", msg);
     });
     const ddl = options?.ddl !== false;
     try {

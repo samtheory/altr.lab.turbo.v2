@@ -2,7 +2,7 @@
 title: "Jord — dialects"
 description: "file libSQL, hosted libsql://, and Postgres: scheme dispatch, WAL, timestamps, health"
 created: 2026-10-24
-updated: 2026-10-24
+updated: 2026-10-26
 tags:
   - tech-space
   - jord
@@ -56,8 +56,17 @@ LIBSQL_AUTH_TOKEN=…
 
 `/health` then includes `urlScheme: "libsql"` and still `dialect: "libsql"`. No host string.
 
-Live tests stay skipped unless `JORD_TEST_POSTGRES_URL` or `JORD_TEST_LIBSQL_URL` is set.
+Live Postgres tests run when `JORD_TEST_POSTGRES_URL` is set (always set on the `jord-postgres` Actions job).
+
+### Hosted `libsql://` transactions (phase-02.75 B3 / C2)
+
+`LibSqlAdapter.transaction` on `libsql://` uses an interactive `client.transaction("write")` and routes every `execute` / `batch` / `executeMultiple` into that stream, so data + outbox commit or roll back together. File `file:` keeps `BEGIN IMMEDIATE` on the shared connection.
+
+| Proof | When it runs |
+|-------|----------------|
+| Forced interactive path on `file:` (`openLibSqlWithInteractiveTxForTests`) | Every engine CI / local run |
+| Live Turso (`JORD_TEST_LIBSQL_URL` + `JORD_TEST_LIBSQL_AUTH_TOKEN`) | **Secret-gated / manual-only.** Wired in the `jord` job; skipped when secrets are absent. Do not use an org-wide token — one throwaway test database only |
 
 ## Not in Jord yet
 
-Embedded replicas, a file→Turso or file→Postgres wizard, a Studio field that pastes a URL.
+Embedded replicas, a Studio field that pastes a URL. (File→Turso/Postgres wizard shipped in S0024.)

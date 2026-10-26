@@ -16,7 +16,7 @@ tags:
 
 | Item | Status |
 |------|--------|
-| Active sprint | **Accepted on local proof (2026-10-25).** Stops 1–12 pass on file libSQL and live Postgres after [[../phase-02.5/README\|phase-02.5]] closed the review gaps. Formal sign-off waits on the first green `jord-postgres` Actions run and branch protection ([[../phase-02.75/README\|phase-02.75]] group A). Review: [[../../../report/Jord-phase-02-closeout-review]]. Functions **runtime** stays gated. |
+| Active sprint | **Accepted (2026-10-26).** Stops 1–12 + [[../phase-02.5/README\|phase-02.5]] + [[../phase-02.75/README\|phase-02.75]] closed. Local CI mirror (pgvector + MinIO) green. Branch protection remains a one-shot admin step on [[Jord-S0027/README\|S0027]]. Review: [[../../../report/Jord-phase-02-closeout-review]]. Functions **runtime** stays gated. |
 | Done in tree | [[Jord-S0027/README\|S0027]] · [[Jord-S0021/01-migration\|S0021-A]] · [[Jord-S0021/02-auth\|S0021-B]] · [[Jord-S0021/ADR-threat-model\|ADR]] · [[Jord-S0021/03-policy\|S0021-C]] · [[Jord-S0028/README\|S0028]] · [[Jord-S0022/README\|S0022]] · [[Jord-S0023/README\|S0023]] · [[Jord-S0029/README\|S0029]] · [[Jord-S0024/README\|S0024]] · [[Jord-S0025/README\|S0025]] · [[Jord-S0026/README\|S0026]] (ADR only) |
 | Soft backlog | [[00-remaining-backlog]] |
 | Progress report | [[../../../report/jord-phase-02-report/00-phase-02-tasks]] |
@@ -43,6 +43,6 @@ Ids are **not** execution order. This table is the order. S0027 runs first. S002
 ## Process
 
 1. One stop per session. Stop for review.
-2. S0027 through S0026 are done (S0026 is ADR-only). The acceptance gaps were fixed in [[../phase-02.5/README|phase-02.5]] (S0030–S0033). What is left is in [[../phase-02.75/README|phase-02.75]]. Do not reopen these cards; fix there. Functions **runtime** is soft backlog after ADR approval for implementation.
+2. S0027 through S0026 are done (S0026 is ADR-only). Acceptance gaps closed in [[../phase-02.5/README|phase-02.5]] and [[../phase-02.75/README|phase-02.75]]. Do not reopen these cards. Functions **runtime** is soft backlog / phase-03 P3.
 3. Each card's PR updates its own `tech_space/jord/*` page. Verify reconciles links, ticks features, and refreshes STATUS. It writes no new content.
 4. Task rollup: [[../../../report/jord-phase-02-report/00-phase-02-tasks]].

@@ -69,4 +69,4 @@ A `lab_notes` table with allow `claim_eq { claim: "email", column: "owner_email"
 
 ## Not in Jord yet
 
-Custom JWT claims (tokens carry `iss`, `aud`, `sub`, `email` only). Dropping the middleware once RLS is present. Native SQL triggers, column-level policies, BEFORE triggers. See [[../../../plan/Jord/phase-02.75/README|phase-02.75]].
+Custom JWT claims (tokens carry `iss`, `aud`, `sub`, `email` only) — phase-03 P4. Dropping the middleware once RLS is present. Native SQL triggers, column-level policies, BEFORE triggers.

@@ -12,9 +12,9 @@ tags:
 
 # plan / Jord / phase-02.5
 
-> Who: **mimir** (you fix, mimir reviews). Why this exists: [[../../../report/Jord-phase-02-closeout-review]]. Phase-02 queue: [[../phase-02/README]]. Leftovers: [[../phase-02.75/README|phase-02.75]]. Next phase intent: [[../../../feature_list/Jord/05-phase-03-candidates]].
+> Who: **mimir** (you fix, mimir reviews). Why this exists: [[../../../report/Jord-phase-02-closeout-review]]. Phase-02 queue: [[../phase-02/README]]. Leftovers closed in [[../phase-02.75/README|phase-02.75]] (2026-10-26). Next: [[../../../feature_list/Jord/05-phase-03-candidates]].
 
-**Status: code done (2026-10-25).** S0031, S0032, and S0033 are Done. S0030 is Done locally on live Postgres. Its two CI boxes (first green `jord-postgres` Actions run, required checks) need a push and a repo admin, so they moved to [[../phase-02.75/README|phase-02.75]] together with the other leftovers found during this phase.
+**Status: code done (2026-10-25).** S0031, S0032, and S0033 are Done. S0030 is Done locally on live Postgres. CI boxes and leftovers moved to [[../phase-02.75/README|phase-02.75]] and are now closed there (branch protection remains admin-only on S0027).
 
 ## Already fixed in the review (2026-10-25)
 
