@@ -14,7 +14,7 @@ tags:
 
 > Who: **mimir** (scope) · **saga** (SQL / timestamp width). Server and Studio implement against this note.
 
-Sprint index: [[README]] · Architecture: [[../../../../feature_list/Jord/02-architecture]] · Slice 0 URL gate: `elements/jord/src/url.ts` (`JordSlice0UrlError` today rejects every non-`file:` URL).
+Sprint index: [[README]] · Architecture: [[../../../../feature_list/Jord/done/jord-F0002-dialects]] · Slice 0 URL gate: `elements/jord/src/url.ts` (`JordSlice0UrlError` today rejects every non-`file:` URL).
 
 ## Status
 

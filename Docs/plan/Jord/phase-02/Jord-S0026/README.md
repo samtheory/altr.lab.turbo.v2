@@ -34,7 +34,7 @@ Choose a safe execution model for user TypeScript handlers. Write the decision; 
 ## Deliverable
 
 - Short ADR under `Docs/tech_space/jord/apis/` with risks, timeout model, and what stays out (arbitrary network, filesystem) — **shipped:** [[../../../tech_space/jord/apis/ADR-functions-v2]]
-- Update [[../../../../feature_list/Jord/03-phase-02-features]] F8 acceptance
+- Update [[../../../../feature_list/Jord/done/README]] F8 acceptance
 - **No code path for user workers until a follow-up sprint is approved**
 
 ## Out of scope

@@ -1,0 +1,39 @@
+---
+title: "jord-F0003 — writes"
+feature_id: jord-F0003
+description: "Shipped: write queue, OCC records, user-table row writes"
+created: 2026-10-18
+updated: 2026-10-27
+tags:
+  - feature
+  - jord
+  - done
+  - writes
+---
+
+# jord-F0003 — writes
+
+> Hot-path writes and OCC. As-built: [[../../../tech_space/jord/writes/README]]. Related: [[jord-F0002-dialects]] · [[jord-F0001-overview]].
+
+## Write queue
+
+libSQL hot writes multiplex through one in-process queue in `@altr/jord-server`. Postgres uses the same queue at concurrency 1 today; `JORD_PG_WRITE_CONCURRENCY` is [[../INDEX|jord-F0013]]. SQL **reads** use a different connection.
+
+Do not open the raw DB file from many OS processes for hot writes.
+
+## `records` OCC
+
+| Column | Notes |
+|--------|--------|
+| `id` | text PK |
+| `bucket` | app namespace |
+| `body` | JSON text (scratchpad — not trading entities) |
+| `metadata` | optional JSON |
+| `created_at` / `updated_at` | Unix ms, 64-bit-safe integers |
+| `version` | optimistic concurrency; default 1 |
+
+Mutation: `version = version + 1` only `WHERE id = ? AND version = ?`. No match → HTTP **409**. Index `(bucket, created_at)`.
+
+## User tables
+
+Row writes beyond `records` shipped (S0015). Plan: [[../../../plan/Jord/phase-01/Jord-S0015/README|S0015]] · Slice 0 [[../../../plan/Jord/phase-01/Jord-S0001/README|S0001]].

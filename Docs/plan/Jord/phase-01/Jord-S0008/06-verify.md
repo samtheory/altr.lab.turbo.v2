@@ -35,7 +35,7 @@ pnpm --filter @altr/jord-studio typecheck
 - [x] Write `Docs/tech_space/jord/apis/README.md`
 - [x] Mark this sprint **done** in [[README]] + [[../README]]
 - [x] Refresh [[../../../../report/STATUS]], [[../../../../brain/00-Docs-Brain]], [[../../../../brain/00-Docs-Hub]]
-- [x] Update [[../../../../feature_list/Jord/03-jord-studio]] S6 row → done
+- [x] Update [[../../../../feature_list/Jord/done/jord-F0012-studio]] S6 row → done
 - [x] Update [[../../../00-roadmap-apolyx-jord-artemis]] + mimir [[../../../../agents/mimir/instructions/00-workflow]]
 
 ## Done when

@@ -1,5 +1,6 @@
 ---
 title: "Apolyx-S0001 carry-overs"
+feature_id: apolyx-F0002
 description: "Deferred Apolyx items after S0001–S0005 — seeds for later waves"
 created: 2026-10-11
 updated: 2026-10-21

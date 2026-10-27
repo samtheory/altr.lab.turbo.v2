@@ -15,7 +15,7 @@ tags:
 
 > Who: **mimir** · **saga** · **heimdall**.
 
-Sprint: [[README]] · Prior policies: [[../../../../tech_space/jord/policies]] · Dialect: [[../../../../feature_list/Jord/02-architecture]]
+Sprint: [[README]] · Prior policies: [[../../../../tech_space/jord/policies]] · Dialect: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]
 
 ## Status
 

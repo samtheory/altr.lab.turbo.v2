@@ -1,5 +1,6 @@
 ---
 title: "Tia — data-source inventory"
+feature_id: tia-F0003
 description: "Coverage, access class, freshness, permissions, and fallbacks for Tia map and traffic inputs"
 created: 2026-10-19
 updated: 2026-10-19

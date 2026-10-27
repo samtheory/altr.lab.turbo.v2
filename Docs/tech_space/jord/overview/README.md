@@ -136,4 +136,4 @@ Modules: `cloud/jord/src/http/`, `cloud/jord/src/idempotency/`, `queue.drain`, `
 
 ## Not in Jord yet
 
-Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/01-phase-02-candidates]] or later phase-02 cards (Studio tools are S0024).
+Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024).

@@ -2,7 +2,7 @@
 title: "Template — structured note"
 description: "Default YAML frontmatter + layout for durable Docs notes"
 created: 2026-09-19
-updated: 2026-09-19
+updated: 2026-10-27
 tags:
   - template
   - frontmatter
@@ -13,12 +13,15 @@ tags:
 
 Copy this when creating a durable note under `Docs/`.
 
+Feature notes also set `feature_id: {app}-F####` and register on that app’s `INDEX.md` ([[../../feature_list/README#feature-ids]]). Omit `feature_id` for non-feature notes.
+
 ```markdown
 ---
 title: "Short human title"
 description: "One-line purpose for search and agents"
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
+feature_id: jord-F0013
 tags:
   - folder-role
   - topic

@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer. Writes that honor `version` are card 4.
 
-Sprint index: [[README]] · Columns: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · Columns: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 `records` is a JSON scratchpad. Do not add `orders`, `positions`, `trades`, or an embedding column.
 

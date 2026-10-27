@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0014 — Studio S11 vectors / searchVectors
 
-> Who: **mimir**. **Status: done (2026-10-24).** Intent S11: [[../../../../feature_list/Jord/03-jord-studio]]. Pillar: [[../../../../feature_list/Jord/01-phase-02-candidates]]. Prior: [[../Jord-S0013/README]]. As-built: [[../../../../tech_space/jord/vectors]]. Remaining: [[../../phase-02/00-remaining-backlog]].
+> Who: **mimir**. **Status: done (2026-10-24).** Intent S11: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Pillar: [[../../../../feature_list/Jord/INDEX]]. Prior: [[../Jord-S0013/README]]. As-built: [[../../../../tech_space/jord/vectors]]. Remaining: [[../../phase-02/00-remaining-backlog]].
 
 **Sprint id:** `Jord-S0014`  
 **Opened:** 2026-10-24 · **Closed:** 2026-10-24 · **Owner:** mimir  
@@ -69,5 +69,5 @@ Vectors are a **first-class Jord pillar**: `searchVectors` on `JordDriverPort`, 
 ## Links
 
 - Track: [[../README]] · Backlog: [[../../phase-02/00-remaining-backlog]]
-- Intent: [[../../../../feature_list/Jord/03-jord-studio]] · Architecture: [[../../../../feature_list/Jord/02-architecture]]
+- Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Architecture: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]
 - Review: [[../../../../report/Jord-implemented-review]]

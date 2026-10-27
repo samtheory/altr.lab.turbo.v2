@@ -1,5 +1,6 @@
 ---
 title: "Tia — offline design"
+feature_id: tia-F0008
 description: "Staged offline: map display, continuing a downloaded route, and on-device routing feasibility — without overclaiming SDKs"
 created: 2026-10-19
 updated: 2026-10-19

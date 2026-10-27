@@ -15,7 +15,7 @@ tags:
 
 > Who: **mimir** / **saga**. Implementers lock to this note.
 
-Sprint: [[README]] · Architecture: [[../../../../feature_list/Jord/02-architecture]]
+Sprint: [[README]] · Architecture: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]
 
 ## Status
 

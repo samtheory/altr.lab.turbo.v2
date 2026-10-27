@@ -12,7 +12,7 @@ tags:
 
 # plan / Jord / phase-01
 
-> **Closed archive.** All numbered Jord sprints through **S0020** (2026-10-24). Next work → [[../phase-02/README]]. Hub: [[../README]]. As-built: [[../../../tech_space/jord/README]]. Capabilities: [[../../../feature_list/Jord/04-phase-01-capabilities]].
+> **Closed archive.** All numbered Jord sprints through **S0020** (2026-10-24). Next work → [[../phase-02/README]]. Hub: [[../README]]. As-built: [[../../../tech_space/jord/README]]. Capabilities: [[../../../feature_list/Jord/done/README]].
 
 | Sprint | Scope | Closed | As-built |
 |--------|-------|--------|----------|

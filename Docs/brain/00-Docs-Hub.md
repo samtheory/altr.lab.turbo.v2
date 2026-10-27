@@ -11,6 +11,7 @@ tags:
   - Jord-S0010
   - Jord-S0012
   - Jord-S0013
+  - temp
 ---
 
 # Docs Hub
@@ -28,6 +29,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 | `report/` | Implemented / remaining / planned sum-up | [[../report/README]] · [[../report/STATUS]] |
 | `clickup/` | ClickUp task / project management notes | [[../clickup/README]] |
 | `agents/` | AI sub-agents, skills, prompts | [[../agents/README]] · [[../agents/docs_man/00-index]] · [[../agents/apollo/00-index]] |
+| `temp/` | **Ephemeral** staging — not vault truth | [[../temp/README]] · [[../temp/input/README\|input]] · [[../temp/output/README\|output]] |
 
 ## Promotion path
 
@@ -39,7 +41,7 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
 
-**Jord** (phase-01 S0001–**S0020** done; phase-02 **accepted**; phase-03 needs a plan): intent [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · phase-02 features [[../feature_list/Jord/03-phase-02-features]] · as-built [[../tech_space/jord/README]] · plans [[../plan/Jord/README]] · status [[../report/STATUS]] · phase-01 review [[../report/Jord-implemented-review]] · phase-02 rollup [[../plan/Jord/phase-02/00-task-rollup]].
+**Jord** (phase-01–02.75 closed/accepted; **phase-03 active**): **ids** [[../feature_list/Jord/INDEX]] (`jord-F####`) · [[../feature_list/Jord/README]] · tasks [[../plan/Jord/phase-03/README]] · as-built [[../tech_space/jord/README]] · status [[../report/STATUS]].
 
 ## Agent of record
 

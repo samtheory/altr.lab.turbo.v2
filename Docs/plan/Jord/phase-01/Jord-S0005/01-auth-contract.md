@@ -14,7 +14,7 @@ tags:
 
 > Who: **heimdall** (security contract) · **saga** (shared types if exported from a package). Studio and server implement against this note.
 
-Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/03-jord-studio]]
+Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 
 ## Status
 

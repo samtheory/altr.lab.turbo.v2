@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0021 — migration + principal auth + policies
 
-> Who: **mimir**. **Status: Done** (2026-10-25). Parts A, B, and C pass on file libSQL and live Postgres; the Postgres boxes were closed in [[../../phase-02.5/README|phase-02.5]] S0030. [[ADR-threat-model]] accepted. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/03-phase-02-features]].
+> Who: **mimir**. **Status: Done** (2026-10-25). Parts A, B, and C pass on file libSQL and live Postgres; the Postgres boxes were closed in [[../../phase-02.5/README|phase-02.5]] S0030. [[ADR-threat-model]] accepted. Resolutions **R1–R4 approved**. Features: [[../../../../feature_list/Jord/done/README]].
 
 **Sprint id:** `Jord-S0021`  
 **Owner:** mimir  
@@ -51,4 +51,4 @@ OAuth · magic links · real email provider · table API (S0022) · CDC (S0023) 
 ## Links
 
 - Track: [[../README]]
-- Features: [[../../../../feature_list/Jord/03-phase-02-features]]
+- Features: [[../../../../feature_list/Jord/done/README]]

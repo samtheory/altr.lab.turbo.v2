@@ -1,5 +1,6 @@
 ---
 title: "Tia — location quality"
+feature_id: tia-F0005
 description: "Providers, accuracy checks, map matching, degraded GNSS, mock signals, and honest UX under uncertainty"
 created: 2026-10-19
 updated: 2026-10-19

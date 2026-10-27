@@ -11,7 +11,7 @@ tags:
 
 # Jord Studio
 
-> Who: anyone changing `apps/jord-studio`. Product intent: [[../../../feature_list/Jord/03-jord-studio]]. Server behavior lives in the other categories — this note is only the control plane.
+> Who: anyone changing `apps/jord-studio`. Product intent: [[../../../feature_list/Jord/done/jord-F0012-studio]]. Server behavior lives in the other categories — this note is only the control plane.
 
 ## Why
 

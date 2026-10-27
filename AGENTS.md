@@ -13,6 +13,8 @@ Pipeline: `idea` → `feature_list` → `plan` → code → `tech_space` → `re
 
 Truth order: **code** > **tech_space** > **report/plan** > **feature_list**.
 
+Ephemeral staging (not truth): `Docs/temp/input` (inbound scratch) · `Docs/temp/output` (outbound scratch). See `Docs/temp/README.md`.
+
 ## Apolyx UI kit (apollo)
 
 **Apolyx-first (always):** product apps consume `@altr/apolyx` only. If a control is missing, build it in the kit with **apollo**, document it (**docs_man**), then import in the app — never fork local primitives. Rule: `.cursor/rules/apolyx-first.mdc`.

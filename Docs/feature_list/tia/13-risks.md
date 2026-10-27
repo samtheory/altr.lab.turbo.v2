@@ -1,5 +1,6 @@
 ---
 title: "Tia — risks and open questions"
+feature_id: tia-F0014
 description: "Blockers, uncertainties, and user choices required before pilot implementation"
 created: 2026-10-19
 updated: 2026-10-19

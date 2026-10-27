@@ -13,7 +13,7 @@ tags:
 
 # Jord-S0004 — Studio S2 schema foundation
 
-> Who: **mimir** · **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/schema]]. Intent S2: [[../../../../feature_list/Jord/03-jord-studio]].
+> Who: **mimir** · **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/schema]]. Intent S2: [[../../../../feature_list/Jord/done/jord-F0012-studio]].
 
 **Sprint id:** `Jord-S0004`  
 **Opened:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** mimir

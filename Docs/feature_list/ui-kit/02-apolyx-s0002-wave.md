@@ -1,5 +1,6 @@
 ---
 title: "Apolyx-S0002 wave — contrast, navigation, physics Switch, Field, data"
+feature_id: apolyx-F0003
 description: "Intent and acceptance for the second Apolyx wave: dark-mode hover contrast, navigation shells, tactile Switch, Field layouts, Table / List / Grid"
 created: 2026-10-11
 updated: 2026-10-14

@@ -14,7 +14,7 @@ tags:
 
 # Jord — implemented work review (S0001–S0020)
 
-> **Audience:** reviewers (human or agent). **Scope:** Jord **phase-01** closed through 2026-10-24. Truth order: **code** > tech_space > this report. Living map: [[../brain/00-Docs-Brain]]. Plans: [[../plan/Jord/README]] · archive [[../plan/Jord/phase-01/README]]. **Phase-02 queue:** empty — [[../plan/Jord/phase-02/README]]. Capabilities: [[../feature_list/Jord/04-phase-01-capabilities]].
+> **Audience:** reviewers (human or agent). **Scope:** Jord **phase-01** closed through 2026-10-24. Truth order: **code** > tech_space > this report. Living map: [[../brain/00-Docs-Brain]]. Plans: [[../plan/Jord/README]] · archive [[../plan/Jord/phase-01/README]]. **Phase-02 queue:** empty — [[../plan/Jord/phase-02/README]]. Capabilities: [[../feature_list/Jord/done/README]].
 
 **Packages:** `elements/jord` (`@altr/jord`) · `cloud/jord` (`@altr/jord-server`) · `apps/jord-studio` · data: `data/jord.db`, `data/blobs/` (gitignored)
 
@@ -105,4 +105,4 @@ Scope matches [[../plan/Jord/phase-01/README]]. Each row is closed.
 ## Links for deep dive
 
 - Plans [[../plan/Jord/README]] · Archive [[../plan/Jord/phase-01/README]] · Phase-02 [[../plan/Jord/phase-02/README]] · STATUS [[STATUS]] · As-built [[../tech_space/jord/README]]
-- Capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · Latest as-built [[../tech_space/jord/vectors]]
+- Capabilities [[../feature_list/Jord/done/README]] · Latest as-built [[../tech_space/jord/vectors]]

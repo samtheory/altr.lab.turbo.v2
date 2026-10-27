@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer for commands. **docs_man** for vault after code is in the tree.
 
-Sprint index: [[README]] · S1 acceptance: [[../../../../feature_list/Jord/03-jord-studio]]
+Sprint index: [[README]] · S1 acceptance: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 
 ## Status
 
@@ -31,7 +31,7 @@ Sprint index: [[README]] · S1 acceptance: [[../../../../feature_list/Jord/03-jo
 docs_man:
 
 1. [[../../../../tech_space/jord/studio]] — Studio S1 wiring (proxy, env, Apolyx pages)
-2. Tick S1 acceptance on [[../../../../feature_list/Jord/03-jord-studio]]
+2. Tick S1 acceptance on [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 3. Refresh [[../../../../report/STATUS]] and [[../../../../brain/00-Docs-Brain]]
 
 ## Done when

@@ -2,7 +2,7 @@
 title: "mimir workflow — Jord program master"
 description: "Standing instructions: mimir owns Jord end-to-end and routes specialists, apollo, docs_man"
 created: 2026-10-21
-updated: 2026-10-26
+updated: 2026-10-27
 tags:
   - agents
   - mimir
@@ -10,6 +10,7 @@ tags:
   - workflow
   - phase-01
   - phase-02
+  - phase-03
 ---
 
 # mimir — workflow instructions
@@ -26,11 +27,11 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 
 ## Read first
 
-1. [[../../../feature_list/Jord/README]] — intent map
-2. [[../../../feature_list/Jord/04-phase-01-capabilities]] — what phase-01 shipped
-3. [[../../../feature_list/Jord/02-architecture]] — ports, WAL, OCC
-4. [[../../../feature_list/Jord/03-jord-studio]] — Studio (when UI)
-5. Plan hub [[../../../plan/Jord/README]] — **phase-01** archive · **phase-02** next queue [[../../../plan/Jord/phase-02/README]]
+1. [[../../../feature_list/Jord/README]] — intent map (`done/` vs `todo/`)
+2. [[../../../feature_list/Jord/done/README]] — shipped intent by category
+3. [[../../../feature_list/Jord/done/jord-F0002-dialects]] · [[../../../feature_list/Jord/done/jord-F0003-writes]] — ports, WAL, OCC
+4. [[../../../feature_list/Jord/done/jord-F0012-studio]] — Studio (when UI)
+5. Open work [[../../../plan/Jord/phase-03/README]] (task queue) · parent intent [[../../../feature_list/Jord/INDEX]]
 6. As-built [[../../../tech_space/jord/README]]
 7. Review [[../../../report/Jord-implemented-review]]
 8. This file
@@ -43,18 +44,19 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 | **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Accepted** (file + live Postgres + local CI mirror) · branch protection = admin on S0027 · Functions runtime gated · rollup [[../../../plan/Jord/phase-02/00-task-rollup]] |
 | **02.5** | [[../../../plan/Jord/phase-02.5/README]] | same categories | **Code done** 2026-10-25 (S0030 locally, S0031–S0033) · acceptance closeout [[../../../plan/Jord/phase-02.5/README]] |
 | **02.75** | [[../../../plan/Jord/phase-02.75/README]] | same categories | **Closed** 2026-10-26 (B/C + MinIO live; hosted libSQL live secret-gated) |
-| **03** | not created | — | **Proposed — needs a plan**: [[../../../feature_list/Jord/05-phase-03-candidates]] |
+| **03** | [[../../../plan/Jord/phase-03/README]] | update matching category per task | **Active queue** — one file per AI task (examples [[../../../plan/Jord/phase-03/S0034-health-probes\|S0034]] · [[../../../plan/Jord/phase-03/S0035-structured-json-logs\|S0035]]) |
 
-Do **not** put new sprint cards under phase-01. Phase-02 execution order is the numbered list on the phase-02 README (S0027, then S0021 A, B, ADR, C, then S0028, S0022, S0023, S0029, S0024, S0025, S0026). One stop, then review.
+Do **not** put new sprint cards under phase-01 / closed 02.x. Phase-03+ uses [[../../templates/plan-task|single-task cards]].
 
 ## Conductor rules
 
-1. **One active Jord chunk at a time.** Under **phase-02**, finish the current card’s “Done when” (for S0021: one Part) before the next.
-2. **Stay mimir as the speaker of record.** When a card is UI, say you are acting as **mimir → apollo**, load [[../../apollo/instructions/00-workflow]] / apollo skill, and build with `@altr/apolyx` only.
-3. **Never invent kit primitives in `apps/jord-studio`.** Missing control → apollo builds in `elements/ui-kit` first, then import.
-4. **Never open `data/jord.db` from the browser.** Studio talks to `@altr/jord-server` (or the Next BFF that proxies it).
-5. **After verify → docs_man.** Tick intent/plan acceptance **only from pasted command proof** (a placeholder / env-only “test” counts as no test); update the matching `tech_space/jord/<category>/README.md`; refresh STATUS + brain.
-6. Pure Apolyx work with **no** Jord surface → user should call **apollo** alone. Vault-only → **docs_man** alone.
+1. **One active Jord task file at a time.** Open the next **todo** card under phase-03; finish its Done-when + proof before the next file.
+2. **Follow the card’s Routing table** (agent hat · skills · model · est. time). Do not expand scope into Out of scope / later cards.
+3. **Stay mimir as the speaker of record.** When a card is UI, say you are acting as **mimir → apollo**, load [[../../apollo/instructions/00-workflow]] / apollo skill, and build with `@altr/apolyx` only.
+4. **Never invent kit primitives in `apps/jord-studio`.** Missing control → apollo builds in `elements/ui-kit` first, then import.
+5. **Never open `data/jord.db` from the browser.** Studio talks to `@altr/jord-server` (or the Next BFF that proxies it).
+6. **After verify → docs_man.** Tick the task card **only from pasted command proof**; update the matching `tech_space/jord/<category>/README.md`; refresh STATUS + brain.
+7. Pure Apolyx work with **no** Jord surface → user should call **apollo** alone. Vault-only → **docs_man** alone.
 
 ## Hard constraints (engine — still true)
 
@@ -68,7 +70,7 @@ Do **not** put new sprint cards under phase-01. Phase-02 execution order is the 
 
 ## Closed — phase-01
 
-Full table: [[../../../plan/Jord/phase-01/README]]. System manual: [[../../../tech_space/jord/README]]. Capability inventory: [[../../../feature_list/Jord/04-phase-01-capabilities]].
+Full table: [[../../../plan/Jord/phase-01/README]]. System manual: [[../../../tech_space/jord/README]]. Capability inventory: [[../../../feature_list/Jord/done/README]].
 
 ## Skills discipline
 

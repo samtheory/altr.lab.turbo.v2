@@ -13,7 +13,7 @@ tags:
 
 # Jord — dialects
 
-> Who: anyone changing `DATABASE_URL` or adapters. Port contract: [[../../../feature_list/Jord/02-architecture]]. Overview: [[../overview/README]].
+> Who: anyone changing `DATABASE_URL` or adapters. Port contract: [[../../../feature_list/Jord/done/jord-F0002-dialects]]. Overview: [[../overview/README]].
 
 ## Why
 

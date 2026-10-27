@@ -1,5 +1,6 @@
 ---
 title: "Tia — feature backlog and roadmap"
+feature_id: tia-F0012
 description: "Phased features with acceptance criteria, metrics, licensing gates, and open questions"
 created: 2026-10-19
 updated: 2026-10-19
@@ -33,7 +34,7 @@ tags:
 ### TIA-0.1 Jord / Postgres / PostGIS path
 - **Outcome:** Documented decision: wait for Jord Postgres+PostGIS vs temporary Tia-owned Postgres.
 - **Priority:** P0 · **Complexity:** M · **Subsystem:** infrastructure
-- **Deps:** Jord track ([[../Jord/00-intent]])
+- **Deps:** Jord track ([[../Jord/done/overview]])
 - **Acceptance:** Written ADR addendum; env var names; no false claim that PostGIS works via Jord today.
 - **Metrics:** n/a
 - **Licensing:** n/a

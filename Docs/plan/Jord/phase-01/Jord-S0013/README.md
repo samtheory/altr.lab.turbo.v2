@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0013 — Studio S10 blob buckets
 
-> Who: **mimir**. **Status: done (2026-10-24).** Intent S10: [[../../../../feature_list/Jord/03-jord-studio]]. Pillar: [[../../../../feature_list/Jord/01-phase-02-candidates]]. Prior: [[../Jord-S0012/README]]. As-built: [[../../../../tech_space/jord/blobs]].
+> Who: **mimir**. **Status: done (2026-10-24).** Intent S10: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Pillar: [[../../../../feature_list/Jord/INDEX]]. Prior: [[../Jord-S0012/README]]. As-built: [[../../../../tech_space/jord/blobs]].
 
 **Sprint id:** `Jord-S0013`  
 **Opened:** 2026-10-24 · **Closed:** 2026-10-24 · **Owner:** mimir  
@@ -69,6 +69,6 @@ S0001–S0012 closed the engine + Studio control plane through multi-table. The 
 ## Links
 
 - Track: [[../README]]
-- Intent: [[../../../../feature_list/Jord/03-jord-studio]] · Later: [[../../../../feature_list/Jord/01-phase-02-candidates]]
+- Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Later: [[../../../../feature_list/Jord/INDEX]]
 - Roadmap: [[../../../00-roadmap-apolyx-jord-artemis]]
 - Status: [[../../../../report/STATUS]]

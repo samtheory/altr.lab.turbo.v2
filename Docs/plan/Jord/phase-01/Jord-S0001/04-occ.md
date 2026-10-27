@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer. HTTP 409 is card 6. This card is the library result.
 
-Sprint index: [[README]] · SQL: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · SQL: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 ## Operations
 

@@ -1,5 +1,6 @@
 ---
 title: "Tia — product definition"
+feature_id: tia-F0001
 description: "Users, scope, non-goals, pilot assumptions, multi-app reuse, and uncertainty visibility for Tia"
 created: 2026-10-19
 updated: 2026-10-19
@@ -104,4 +105,4 @@ Do not show a single confident ETA when provenance is mixed without labeling sou
 ## Links
 
 - Architecture: [[01-architecture]] · Backlog: [[11-backlog-roadmap]] · Risks: [[13-risks]]
-- Jord truth: [[../Jord/00-intent]] · [[../Jord/01-phase-02-candidates]] · [[../Jord/02-architecture]]
+- Jord truth: [[../Jord/done/overview]] · [[../Jord/todo/05-phase-03-candidates]] · [[../Jord/done/dialects]]

@@ -73,7 +73,7 @@ npx skills add <owner/repo> --skill '*' --agent cursor -y   # whole pack
 
 **Apolyx kit builder:** use the **apollo** sub-agent (`Docs/agents/apollo/`) — say `apollo` or `build apolyx`. Companion skills (React, Tailwind v4, Motion/animation, UX, tokens) are listed in [[../agents/apollo/skills/README]]. Do not stack competing aesthetics; repo intent in [[../feature_list/ui-kit/00-intent]] wins over generic skill defaults (no Radix).
 
-**Jord data plane:** use the **mimir** sub-agent (`Docs/agents/mimir/`) — say `mimir` or `build jord`. Specialists: **sindri** (engine), **saga** (schema), **heimdall** (security). Studio / dashboard UI → **apollo**. Companion skills (architecture, Hono, Drizzle, hardening) are listed in [[../agents/mimir/skills/README]]. Repo intent in [[../feature_list/Jord/00-intent]] wins (Slice 0 = `file:` only).
+**Jord data plane:** use the **mimir** sub-agent (`Docs/agents/mimir/`) — say `mimir` or `build jord`. Specialists: **sindri** (engine), **saga** (schema), **heimdall** (security). Studio / dashboard UI → **apollo**. Companion skills (architecture, Hono, Drizzle, hardening) are listed in [[../agents/mimir/skills/README]]. Repo intent in [[../feature_list/Jord/done/jord-F0001-overview]] wins (Slice 0 = `file:` only).
 
 ### Browser & 3D
 
@@ -116,7 +116,7 @@ Requires Strix CLI/cloud credentials per https://docs.strix.ai — skills teach 
 
 **Implement Jord Slice 0**
 
-> Use `mimir`. Read `Docs/feature_list/Jord/00-intent.md` and execute `Docs/plan/Jord/phase-01/Jord-S0001` from the first undone card. Say `mimir:sindri` / `mimir:saga` / `mimir:heimdall` for specialists. Studio UI later → `apollo`.
+> Use `mimir`. Read `Docs/feature_list/Jord/done/jord-F0001-overview.md` and execute `Docs/plan/Jord/phase-01/Jord-S0001` from the first undone card. Say `mimir:sindri` / `mimir:saga` / `mimir:heimdall` for specialists. Studio UI later → `apollo`.
 
 **Image to 3D**
 

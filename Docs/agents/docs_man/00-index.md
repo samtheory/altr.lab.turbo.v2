@@ -2,7 +2,7 @@
 title: "docs_man — documentation sub-agent"
 description: "Owns Docs vault updates for altr.lab: order, frontmatter, brain links, PDF and structured MD"
 created: 2026-09-19
-updated: 2026-10-24
+updated: 2026-10-27
 tags:
   - agents
   - docs_man
@@ -30,6 +30,8 @@ Use this agent when the user says any of:
 | Folder hub | [[../../brain/00-Docs-Hub]] |
 | Standing instructions | [[instructions/00-workflow]] — tech_space is **categories** (why/what/how), plans stay **phases** |
 | Structured MD template | [[../templates/structured-note]] |
+| **Plan task template** (one AI / one file) | [[../templates/plan-task]] · example [[../../plan/Jord/phase-03/README]] |
+| **Feature ids** (`{app}-F####`) | [[../../feature_list/README#feature-ids]] · Jord [[../../feature_list/Jord/INDEX]] |
 | Cursor skill (auto) | `.cursor/skills/docs-man/SKILL.md` |
 | Portable skill | `.agents/skills/docs-man/SKILL.md` |
 | Cursor rule | `.cursor/rules/docs-man.mdc` |

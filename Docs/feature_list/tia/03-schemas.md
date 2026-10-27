@@ -1,5 +1,6 @@
 ---
 title: "Tia — schemas and identity"
+feature_id: tia-F0004
 description: "Conceptual TypeScript contracts and DB models for geography, routing, traffic, transit, and offline — units and WGS84 explicit"
 created: 2026-10-19
 updated: 2026-10-19

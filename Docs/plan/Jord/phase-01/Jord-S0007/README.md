@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0007 — Studio S5 jobs / cron + logs
 
-> Who: **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/jobs]]. Intent S5: [[../../../../feature_list/Jord/03-jord-studio]]. Prior: [[../Jord-S0006/README]].
+> Who: **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/jobs]]. Intent S5: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Prior: [[../Jord-S0006/README]].
 
 **Sprint id:** `Jord-S0007`  
 **Opened:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** mimir

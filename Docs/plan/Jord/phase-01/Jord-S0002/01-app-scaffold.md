@@ -13,7 +13,7 @@ tags:
 
 > Who: **apollo**. Empty shell only. Data wiring is card 2+.
 
-Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/03-jord-studio]]
+Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 
 ## Status
 

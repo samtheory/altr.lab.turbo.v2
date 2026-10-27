@@ -13,7 +13,7 @@ tags:
 
 > Who: **apollo**. Mimics Slice 0 routes; does not open `data/jord.db`.
 
-Sprint index: [[README]] · Server routes: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · Server routes: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 ## Behavior
 

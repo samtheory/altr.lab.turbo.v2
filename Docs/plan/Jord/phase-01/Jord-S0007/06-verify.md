@@ -42,7 +42,7 @@ Manual smoke (`dev:jord` + Studio):
 - [ ] `Docs/tech_space/jord/jobs/README.md`
 - [ ] Tick cards + README DoD
 - [ ] Track / STATUS / brain / feature_list / roadmap / mimir workflow
-- [ ] [[../../../../feature_list/Jord/03-jord-studio]] S5 → done
+- [ ] [[../../../../feature_list/Jord/done/jord-F0012-studio]] S5 → done
 
 ## Done when
 

@@ -1,0 +1,9 @@
+# Keep folder structure + READMEs; ignore all scratch payloads.
+*
+!*/
+!.gitignore
+!README.md
+!input/
+!output/
+!input/README.md
+!output/README.md

@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer. The live file stays untracked.
 
-Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 ## Behavior
 

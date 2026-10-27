@@ -19,7 +19,7 @@ tags:
 
 Intent for **Apolyx** — portable design system for altr.lab and future publish. S0001–**S0005** closed. Lab next: Jord.
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Apolyx (ui-kit)/README]] · Builder: [[../../agents/apollo/00-index]] · Sprints: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]] · Roadmap: [[../../plan/00-roadmap-apolyx-jord-artemis]]
+**Feature ids:** [[INDEX]] (`apolyx-F####`). Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Apolyx (ui-kit)/README]] · Builder: [[../../agents/apollo/00-index]] · Sprints: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]] · Roadmap: [[../../plan/00-roadmap-apolyx-jord-artemis]]
 
 ## Truth for this track
 
@@ -33,15 +33,15 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Apolyx (ui-kit)/README]
 
 ## Features
 
-| Note | Status |
-|------|--------|
-| [[00-intent]] | Intent locked — v1 acceptance boxes ticked (**Apolyx-S0001** closed) |
-| [[01-apolyx-s0001-carryovers]] | Deferred backlog after S0005 (Command, grid engine, Slider, pickers, …) |
-| [[02-apolyx-s0002-wave]] | Hover contrast, navigation, physics Switch, Field, Table / List / Grid — (**Apolyx-S0002** closed) |
-| [[03-timeline]] | Timeline (ReUI parity) — shipped 2026-10-14 |
-| [[04-apolyx-s0003-switch-inputs]] | Switch + input catalog — (**Apolyx-S0003** closed; [[../../tech_space/ui-kit/08-s0003-switch-inputs]]) |
-| [[05-apolyx-s0004-popover]] | Popover — (**Apolyx-S0004** closed; [[../../tech_space/ui-kit/09-s0004-popover]]) |
-| [[06-apolyx-s0005-product-gate]] | Product gate Select / Combobox / data chrome — acceptance ticked (**Apolyx-S0005** closed 2026-10-21; [[../../tech_space/ui-kit/10-s0005-product-gate]]) |
+| Id | Note | Status |
+|----|------|--------|
+| **apolyx-F0001** | [[00-intent]] | Intent locked (**Apolyx-S0001** closed) |
+| **apolyx-F0002** | [[01-apolyx-s0001-carryovers]] | Deferred backlog after S0005 |
+| **apolyx-F0003** | [[02-apolyx-s0002-wave]] | **Apolyx-S0002** closed |
+| **apolyx-F0004** | [[03-timeline]] | shipped 2026-10-14 |
+| **apolyx-F0005** | [[04-apolyx-s0003-switch-inputs]] | **Apolyx-S0003** closed |
+| **apolyx-F0006** | [[05-apolyx-s0004-popover]] | **Apolyx-S0004** closed |
+| **apolyx-F0007** | [[06-apolyx-s0005-product-gate]] | **Apolyx-S0005** closed 2026-10-21 |
 
 ## Related shipped foundation (pre-Apolyx)
 

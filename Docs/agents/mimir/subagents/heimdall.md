@@ -46,4 +46,4 @@ Never point Strix or exploit tooling at third-party systems without explicit wri
 
 ## Read first
 
-[[../../../feature_list/Jord/00-intent]] · [[../../../plan/Jord/phase-01/Jord-S0001/04-occ]] · [[../../../plan/Jord/phase-01/Jord-S0001/08-verify]]
+[[../../../feature_list/Jord/done/jord-F0001-overview]] · [[../../../plan/Jord/phase-01/Jord-S0001/04-occ]] · [[../../../plan/Jord/phase-01/Jord-S0001/08-verify]]

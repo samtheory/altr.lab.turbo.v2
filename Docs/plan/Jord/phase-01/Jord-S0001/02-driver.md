@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer. Schema is card 3. This card opens the file.
 
-Sprint index: [[README]] · Contract: [[../../../../feature_list/Jord/02-architecture]]
+Sprint index: [[README]] · Contract: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]
 
 ## Surface
 

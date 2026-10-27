@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0012 — multi-table browse + CREATE TABLE
 
-> Who: **mimir**. **Status: done (2026-10-24).** Intent surfaces: [[../../../../feature_list/Jord/03-jord-studio]]. Prior schema: [[../Jord-S0004/README]] · realtime closed: [[../Jord-S0011/README]]. As-built: [[../../../../tech_space/jord/schema]].
+> Who: **mimir**. **Status: done (2026-10-24).** Intent surfaces: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Prior schema: [[../Jord-S0004/README]] · realtime closed: [[../Jord-S0011/README]]. As-built: [[../../../../tech_space/jord/schema]].
 
 **Sprint id:** `Jord-S0012`  
 **Opened:** 2026-10-24 · **Closed:** 2026-10-24 · **Owner:** mimir  
@@ -69,5 +69,5 @@ Blobs (old S10) and vectors stay later. Finishing Jord’s core control plane me
 ## Links
 
 - Track: [[../README]]
-- Intent: [[../../../../feature_list/Jord/03-jord-studio]] · Later: [[../../../../feature_list/Jord/01-phase-02-candidates]]
+- Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Later: [[../../../../feature_list/Jord/INDEX]]
 - Roadmap: [[../../../00-roadmap-apolyx-jord-artemis]]

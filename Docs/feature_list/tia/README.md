@@ -14,7 +14,7 @@ tags:
 
 Intent for **Tia** — Iran-focused reusable mapping, navigation, and live-traffic platform.
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Tia (Map Engine)/README]] · Sharpen: [[../../idea/Tia (Map Engine)/2026-10-19-sharpen]]
+**Feature ids:** [[INDEX]] (`tia-F####`). Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Tia (Map Engine)/README]] · Sharpen: [[../../idea/Tia (Map Engine)/2026-10-19-sharpen]]
 
 > **docs_man placement:** vault pipeline uses `feature_list/tia/` (not a parallel `Docs/tia/`). Overview = this file. Architecture, inventory, backlog, ADRs, and risks are the numbered notes below.
 
@@ -45,11 +45,11 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Tia (Map Engine)/README
 | Monorepo has TypeScript, React/Next (`apps/apolyx`), `@altr/apolyx`, `@altr/base` stubs | **Verified repo** |
 | Hono / Bun API packages for products | **Deferred / planned** — sample Hono server removed; Jord-S0001 plans Node Hono for `cloud/jord` (not in tree) |
 | `elements/jord`, `cloud/jord`, `data/jord.db` | **Do not exist** — Jord-S0001 ready to implement, not shipped |
-| Jord Slice 0 = libSQL `file:` + `LibSqlAdapter` + `records` CRUD | **Verified intent** ([[../Jord/00-intent]]); **not verified in code** |
-| Jord `PostgresAdapter` | **Proposed seam / later** — reserved, uninstantiated ([[../Jord/02-architecture]]) |
+| Jord Slice 0 = libSQL `file:` + `LibSqlAdapter` + `records` CRUD | **Verified intent** ([[../Jord/done/overview]]); **not verified in code** |
+| Jord `PostgresAdapter` | **Proposed seam / later** — reserved, uninstantiated ([[../Jord/done/dialects]]) |
 | PostGIS through Jord | **Unresolved** — not mentioned in Jord intent; Tia needs it as **Proposed** dependency on a future Jord Postgres+PostGIS capability or an explicitly Tia-owned Postgres until Jord catches up |
-| Jord jobs, retries, ack, replay, DLQ, backpressure, WebSocket | **Deferred later** in Jord ([[../Jord/01-phase-02-candidates]], Studio S5/S9). **Not in Slice 0.** Do not treat as available runtime |
-| Redis / cache via Jord | **Deferred later** ([[../Jord/01-phase-02-candidates]]) |
+| Jord jobs, retries, ack, replay, DLQ, backpressure, WebSocket | **Deferred later** in Jord ([[../Jord/todo/05-phase-03-candidates]], Studio S5/S9). **Not in Slice 0.** Do not treat as available runtime |
+| Redis / cache via Jord | **Deferred later** ([[../Jord/todo/05-phase-03-candidates]]) |
 | Jord local blob storage | **Deferred later** pillar |
 | Dedicated Jord-managed DB instance for Tia | **Proposed** product rule once Jord can provision/select Postgres URLs |
 

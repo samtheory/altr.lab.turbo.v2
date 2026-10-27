@@ -15,10 +15,10 @@ tags:
 |-------|--------|
 | Frontends | React / Next.js. Today that is the Apolyx docs app (`apps/apolyx`) plus Tailwind and `@altr/apolyx` |
 | API | Hono on Node (`engines.node` >= 20). `@altr/jord-server` in `cloud/jord` (default port 8787) |
-| Primary DB | **Jord** — libSQL file `data/jord.db` via `@altr/jord`. Drizzle on libSQL. Intent: [[../feature_list/Jord/00-intent]] · as-built: [[../tech_space/jord/overview]] · layout: [[../feature_list/Jord/02-architecture]] |
-| Studio | Planned `@altr/jord-studio` in `apps/jord-studio` — [[../feature_list/Jord/03-jord-studio]] |
+| Primary DB | **Jord** — libSQL file `data/jord.db` via `@altr/jord`. Drizzle on libSQL. Intent: [[../feature_list/Jord/done/jord-F0001-overview]] · as-built: [[../tech_space/jord/overview]] · layout: [[../feature_list/Jord/done/jord-F0002-dialects]] |
+| Studio | Planned `@altr/jord-studio` in `apps/jord-studio` — [[../feature_list/Jord/done/jord-F0012-studio]] |
 | Optional | PocketBase for a quick admin side path. It is not Jord |
-| Later | Hosted Turso URL, then Postgres as a second Drizzle driver. Plugins need dialect adapters. See [[../feature_list/Jord/01-phase-02-candidates]] |
+| Later | Hosted Turso URL, then Postgres as a second Drizzle driver. Plugins need dialect adapters. See [[../feature_list/Jord/INDEX]] |
 
 ## Why a libSQL file first
 
@@ -26,7 +26,7 @@ tags:
 - Same `@libsql/client` talks to Turso later by changing `DATABASE_URL`
 - Relational fit for a future Artemis bot (rows in a bucket on this file)
 - Vector via sqlite-vec on this file when retrieval is in scope (dialect adapter, not a free Drizzle switch)
-- Table CRUD ports to Postgres through Drizzle; triggers, policies, and extensions stay dialect-aware ([[../feature_list/Jord/02-architecture]])
+- Table CRUD ports to Postgres through Drizzle; triggers, policies, and extensions stay dialect-aware ([[../feature_list/Jord/done/jord-F0002-dialects]])
 
 Jord-S0001 shipped 2026-10-21: `@altr/jord` + `@altr/jord-server`. `@altr/base/db` only redirects callers to Jord (leaf utils; no live client).
 

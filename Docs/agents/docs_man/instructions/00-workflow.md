@@ -2,11 +2,13 @@
 title: "docs_man workflow — document order"
 description: "Standing instructions for how docs_man updates the altr.lab Docs vault"
 created: 2026-09-19
-updated: 2026-10-24
+updated: 2026-10-27
 tags:
   - agents
   - docs_man
   - workflow
+  - temp
+  - plan-task
 ---
 
 # docs_man — workflow instructions
@@ -74,12 +76,31 @@ tags:
 
 | Layer | Holds | Agent opens it for |
 |-------|--------|-------------------|
-| `feature_list/` | Intent — what we mean to build | Scope and non-goals |
-| `plan/` | Sprint cards, phased | History and the next checkbox |
+| `feature_list/` | Intent — each feature has `{app}-F####` | Scope and non-goals · [[../../feature_list/README#feature-ids]] |
+| `plan/` | **One file = one AI task** (phased folders) | Next checkbox + full implement brief |
 | `tech_space/<product>/<category>/` | Current why / what / how / one example | How to change the code |
 | `report/` | Shipped vs remaining | Status only |
 
-Rules:
+### feature ids (`{app}-F####`)
+
+1. Every durable feature note has `feature_id:` in frontmatter and an entry on `feature_list/<app>/INDEX.md`.
+2. Prefer filenames `{app}-F####-slug.md` (Jord already uses this).
+3. Plan tasks **must** cite the parent feature id. Never invent parallel numbering for intent.
+4. Ids are stable — do not reuse. Next free id lives on that app’s INDEX.
+
+### plan task shape (phase-03 onward)
+
+From Jord phase-03 forward (and any **new** plan phase in this vault):
+
+1. **One markdown file per task** under `plan/<product>/phase-NN/`. Filename: `S00xx-slug.md`.
+2. Each file must be finishable by **one AI session** (~≤3 h). If larger → split before coding.
+3. Required sections (template [[../templates/plan-task]]): **Routing** (agent · skills · model · est. time) · Goal · Context links · In/Out of scope · **mermaid diagram** · Steps · Done when · Proof table · After ship.
+4. Phase `README.md` is only the **queue index** (order, status, parent P-item) — not the implementation brief.
+5. Do not revive multi-day mega-cards like early phase-02 folders for new work.
+
+Example queue: [[../../plan/Jord/phase-03/README]].
+
+### tech_space rules
 
 1. One category answers one concern. Jord’s map is [[../../tech_space/jord/README]].
 2. Each category entry is `README.md` with: **why**, **what** (contract), **how** (code paths), **example**, **not in yet**.
@@ -97,11 +118,21 @@ Rules:
 - Tags: lowercase, hyphenated, include folder role (`tech-space`, `feature`, `plan`, `report`, `brain`, `agents`)
 - Obsidian-friendly: wikilinks, no reliance on absolute disk paths in body text
 
+## `temp/` (ephemeral staging)
+
+`Docs/temp/input/` — drop inbound scratch (prompts, exports from elsewhere).  
+`Docs/temp/output/` — write outbound scratch (generated prompts/drafts to pass elsewhere).
+
+- **Not** in the truth order. Never prefer `temp/` over code / `tech_space` / `feature_list`.
+- Do not archive product docs here. Promote lasting work into `idea/` → `feature_list/` → …
+- Payload files are gitignored; only the README files are tracked. Entry: [[../../temp/README]].
+
 ## Do not
 
 - Invent features in `report/` that are not in code or `feature_list`
 - Skip `tech_space` after a non-trivial implementation
 - Treat `idea/` as shipped
+- Treat `temp/` as durable vault content or product truth
 - Dump large code blocks into Docs — point to paths instead
 - Create `next-step/` as a permanent folder (use `plan/` instead)
 
@@ -111,3 +142,4 @@ Rules:
 2. `.agents/skills/pdf/SKILL.md` when PDFs involved
 3. `.agents/skills/doc-coauthoring/SKILL.md` for large new docs
 4. `.cursor/skills/docs-brain/SKILL.md` when editing the living map
+5. When authoring plan tasks: copy [[../templates/plan-task]]

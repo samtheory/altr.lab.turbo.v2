@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0011 — Studio S9 realtime subscriptions
 
-> Who: **mimir**. **Status: done (2026-10-24).** Intent S9: [[../../../../feature_list/Jord/03-jord-studio]]. Pillar: [[../../../../feature_list/Jord/01-phase-02-candidates]]. Prior: [[../Jord-S0010/README]]. As-built: [[../../../../tech_space/jord/realtime]].
+> Who: **mimir**. **Status: done (2026-10-24).** Intent S9: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Pillar: [[../../../../feature_list/Jord/INDEX]]. Prior: [[../Jord-S0010/README]]. As-built: [[../../../../tech_space/jord/realtime]].
 
 **Sprint id:** `Jord-S0011`  
 **Opened:** 2026-10-24 · **Closed:** 2026-10-24 · **Owner:** mimir  
@@ -60,5 +60,5 @@ Studio S1–S8 and Slice 0 are closed. Lab roadmap also allows **Artemis** as th
 ## Links
 
 - Track: [[../README]]
-- Intent: [[../../../../feature_list/Jord/03-jord-studio]] · Later pillars: [[../../../../feature_list/Jord/01-phase-02-candidates]]
+- Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Later pillars: [[../../../../feature_list/Jord/INDEX]]
 - Roadmap fork: [[../../../00-roadmap-apolyx-jord-artemis]]

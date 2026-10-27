@@ -1,5 +1,6 @@
 ---
 title: "Apolyx-S0004 wave — Popover family"
+feature_id: apolyx-F0006
 description: "Intent for the fourth Apolyx wave: an owned Popover primitive, origin-aware motion, and docs recipes for every Shadcn Studio popover kind"
 created: 2026-10-18
 updated: 2026-10-18

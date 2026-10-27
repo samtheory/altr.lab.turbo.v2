@@ -30,7 +30,7 @@ Sprint index: [[README]]
 ## Docs_man checklist
 
 - [ ] `Docs/tech_space/jord/realtime/README.md` written from **code**
-- [ ] Tick S9 acceptance on [[../../../../feature_list/Jord/03-jord-studio]]
+- [ ] Tick S9 acceptance on [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 - [ ] Close this sprint on [[../README]]; set active → none or next card
 - [ ] Refresh [[../../../../report/STATUS]] + [[../../../../brain/00-Docs-Brain]]
 - [ ] Bump roadmap note if Artemis vs S10 order changes

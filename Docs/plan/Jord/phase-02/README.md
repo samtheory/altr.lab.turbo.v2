@@ -12,7 +12,7 @@ tags:
 
 # plan / Jord / phase-02
 
-> Phase-01 archive: [[../phase-01/README]]. Features: [[../../../feature_list/Jord/03-phase-02-features]]. Acceptance closeout: [[../phase-02.5/README]]. Task rollup: [[00-task-rollup]].
+> Phase-01 archive: [[../phase-01/README]]. Features: [[../../../feature_list/Jord/done/README]]. Acceptance closeout: [[../phase-02.5/README]]. Task rollup: [[00-task-rollup]].
 
 | Item | Status |
 |------|--------|

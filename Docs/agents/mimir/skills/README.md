@@ -42,7 +42,7 @@ All paths under repo `.agents/skills/` unless noted. Install/restore: `npx skill
 ## Do not load together
 
 - Postgres skills as permission to add `PostgresAdapter` runtime in Slice 0
-- Competing “BaaS clone” skills that fight [[../../../feature_list/Jord/00-intent]]
+- Competing “BaaS clone” skills that fight [[../../../feature_list/Jord/done/jord-F0001-overview]]
 - Full Strix pack + casual localhost probes without user authorization
 
 ## Reinstall commands

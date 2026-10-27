@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0006 — Studio S4 generated CRUD API
 
-> Who: **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/apis]]. Intent S4: [[../../../../feature_list/Jord/03-jord-studio]]. Prior: [[../Jord-S0005/README]].
+> Who: **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/apis]]. Intent S4: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Prior: [[../Jord-S0005/README]].
 
 **Sprint id:** `Jord-S0006`  
 **Opened:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** mimir  

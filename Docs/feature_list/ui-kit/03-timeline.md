@@ -1,5 +1,6 @@
 ---
 title: "Apolyx Timeline — intent"
+feature_id: apolyx-F0004
 description: "Timeline component for Apolyx with parity to the ReUI timeline examples, built on Apolyx tokens with no Base UI"
 created: 2026-10-14
 updated: 2026-10-14

@@ -1,5 +1,6 @@
 ---
 title: "Apolyx UI kit — intent (infra, tech, first components)"
+feature_id: apolyx-F0001
 description: "What to build for Apolyx: registry/CLI, apps/apolyx MDX docs, own primitives, tokens, motion, charts — no Radix/Base UI"
 created: 2026-10-10
 updated: 2026-10-18

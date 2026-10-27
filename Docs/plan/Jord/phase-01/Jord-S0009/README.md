@@ -15,7 +15,7 @@ tags:
 
 # Jord-S0009 — Studio S7 triggers + policies
 
-> Who: **mimir**. **Status: done (2026-10-23).** As-built: [[../../../../tech_space/jord/policies]]. Intent S7: [[../../../../feature_list/Jord/03-jord-studio]]. Prior: [[../Jord-S0008/README]].
+> Who: **mimir**. **Status: done (2026-10-23).** As-built: [[../../../../tech_space/jord/policies]]. Intent S7: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Prior: [[../Jord-S0008/README]].
 
 **Sprint id:** `Jord-S0009`  
 **Opened:** 2026-10-23 · **Closed:** 2026-10-23 · **Owner:** mimir  

@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer for commands. **docs_man** for vault after code lands.
 
-Sprint index: [[README]] · S3 intent: [[../../../../feature_list/Jord/03-jord-studio]]
+Sprint index: [[README]] · S3 intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 
 ## Status
 
@@ -34,7 +34,7 @@ Sprint index: [[README]] · S3 intent: [[../../../../feature_list/Jord/03-jord-s
 docs_man:
 
 1. Write [[../../../../tech_space/jord/auth]] (as-built)
-2. Tick S3 progress on [[../../../../feature_list/Jord/03-jord-studio]] + [[../../../../feature_list/Jord/01-phase-02-candidates]]
+2. Tick S3 progress on [[../../../../feature_list/Jord/done/jord-F0012-studio]] + [[../../../../feature_list/Jord/INDEX]]
 3. Close this sprint README; refresh [[../README]], [[../../README]], [[../../../../report/STATUS]], [[../../../../brain/00-Docs-Brain]], [[../../../../brain/00-Docs-Hub]]
 4. Point mimir workflow active sprint at next card or “none”
 

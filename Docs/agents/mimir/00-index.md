@@ -51,8 +51,8 @@ Saying **`mimir`** (or `mimir build … with apollo`) means: *run the active Jor
 | Studio | `apps/jord-studio` | `@altr/jord-studio` | mimir → **apollo** (UI) |
 | Vault | `Docs/…` | — | mimir → **docs_man** |
 
-Canonical: [[../../feature_list/Jord/README]] · capabilities [[../../feature_list/Jord/04-phase-01-capabilities]] · [[../../feature_list/Jord/02-architecture]] · Studio [[../../feature_list/Jord/03-jord-studio]]  
-**Active plan:** phase-02 — **execution complete** (S0027…S0026 ADR); Functions runtime gated ([[../../plan/Jord/phase-02/README]] · [[../../plan/Jord/phase-02/00-task-rollup]]) · Archive [[../../plan/Jord/phase-01/README]] · As-built [[../../tech_space/jord/README]] · Status [[../../report/STATUS]]
+Canonical: [[../../feature_list/Jord/README]] · [[../../feature_list/Jord/done/README\|done]] · [[../../feature_list/Jord/todo/README\|todo]] · capabilities [[../../feature_list/Jord/done/README]] · [[../../feature_list/Jord/done/jord-F0002-dialects]] · Studio [[../../feature_list/Jord/done/jord-F0012-studio]] · next [[../../feature_list/Jord/INDEX]]  
+**Active plan:** [[../../plan/Jord/phase-03/README]] (one-file AI tasks; start [[../../plan/Jord/phase-03/S0034-health-probes|S0034]]) · Hub [[../../plan/Jord/README]] · As-built [[../../tech_space/jord/README]] · Status [[../../report/STATUS]]
 
 ## Specialist routing
 

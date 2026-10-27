@@ -40,4 +40,4 @@ Parent: [[../00-index]] · Workflow: [[../instructions/00-workflow]]
 
 ## Read first
 
-[[../../../feature_list/Jord/02-architecture]] · [[../../../plan/Jord/phase-01/Jord-S0001/03-schema]] · [[../../../plan/Jord/phase-01/Jord-S0001/04-occ]]
+[[../../../feature_list/Jord/done/jord-F0002-dialects]] · [[../../../plan/Jord/phase-01/Jord-S0001/03-schema]] · [[../../../plan/Jord/phase-01/Jord-S0001/04-occ]]

@@ -15,7 +15,7 @@ tags:
 
 > Who: **mimir** (scope) · **heimdall** (roles). Server and Studio implement against this note.
 
-Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/03-jord-studio]] · Auth: [[../../../../tech_space/jord/auth]]
+Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Auth: [[../../../../tech_space/jord/auth]]
 
 ## Status
 

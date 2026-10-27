@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer. Empty packages only. Driver behavior is card 2.
 
-Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · Intent: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 Workspaces already include `elements/*` and `cloud/*` (`pnpm-workspace.yaml`). New folders are picked up without a workspace edit.
 

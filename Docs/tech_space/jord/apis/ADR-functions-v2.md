@@ -102,6 +102,6 @@ Until a **follow-up sprint is explicitly approved**:
 ## Links
 
 - Plan card: [[../../../plan/Jord/phase-02/Jord-S0026/README]]
-- Feature F8: [[../../../feature_list/Jord/03-phase-02-features#f8--functions-v2-jord-s0026-adr-only]]
+- Feature F8 (intent): [[../../../feature_list/Jord/done/jord-F0006-apis#functions-v2-f8]]
 - As-built APIs (built-in steps today): [[README]]
 - Phase-02 queue: [[../../../plan/Jord/phase-02/README]]

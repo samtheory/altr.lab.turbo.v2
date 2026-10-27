@@ -12,7 +12,7 @@ tags:
 
 # Jord
 
-> **Read this file.** Current idea brief. Decision record: [[2026-10-18-sharpen]]. Build contract: [[../../feature_list/Jord/00-intent]]. Architecture (ports, concurrency): [[../../feature_list/Jord/02-architecture]].
+> **Read this file.** Current idea brief. Decision record: [[2026-10-18-sharpen]]. Build contract: [[../../feature_list/Jord/done/jord-F0001-overview]]. Architecture (ports, concurrency): [[../../feature_list/Jord/done/jord-F0002-dialects]].
 
 **Status:** name locked. Intent written. Apolyx-S0005 closed. Plan [[../../plan/Jord/phase-01/Jord-S0001/README]] is **implement now** (start at card 1). No Jord packages in the repo yet.
 
@@ -52,7 +52,7 @@ Agent / JSON scratchpad. Columns: `id`, `bucket`, `body`, `metadata?`, `created_
 
 ## Later (not Slice 0)
 
-[[../../feature_list/Jord/01-phase-02-candidates]] — hosted libSQL, `PostgresAdapter`, vectors, **realtime CDC**, **local blob storage**, **in-process vector pipelines**. Studio: [[../../feature_list/Jord/03-jord-studio]].
+[[../../feature_list/Jord/INDEX]] — hosted libSQL, `PostgresAdapter`, vectors, **realtime CDC**, **local blob storage**, **in-process vector pipelines**. Studio: [[../../feature_list/Jord/done/jord-F0012-studio]].
 
 ## Repo today
 
@@ -60,4 +60,4 @@ Agent / JSON scratchpad. Columns: `id`, `bucket`, `body`, `metadata?`, `created_
 
 ## Links
 
-- [[2026-10-18-sharpen]] · [[../../feature_list/Jord/00-intent]] · [[../../plan/Jord/phase-01/Jord-S0001/README]]
+- [[2026-10-18-sharpen]] · [[../../feature_list/Jord/done/jord-F0001-overview]] · [[../../plan/Jord/phase-01/Jord-S0001/README]]

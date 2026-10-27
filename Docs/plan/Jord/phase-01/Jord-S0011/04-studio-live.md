@@ -15,7 +15,7 @@ tags:
 
 > Who: **mimir → apollo**. Depends on [[03-server-sse]]. Apolyx-first.
 
-Sprint index: [[README]] · Studio intent: [[../../../../feature_list/Jord/03-jord-studio]]
+Sprint index: [[README]] · Studio intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 
 ## Status
 

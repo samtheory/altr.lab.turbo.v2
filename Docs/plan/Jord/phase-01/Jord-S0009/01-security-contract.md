@@ -16,7 +16,7 @@ tags:
 
 > Who: **mimir** (scope) · **heimdall** (enforcement / roles). Server and Studio implement against this note.
 
-Sprint index: [[README]] · Intent S7: [[../../../../feature_list/Jord/03-jord-studio]] · Dialect seam: [[../../../../feature_list/Jord/02-architecture]] · Auth: [[../../../../tech_space/jord/auth]]
+Sprint index: [[README]] · Intent S7: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Dialect seam: [[../../../../feature_list/Jord/done/jord-F0002-dialects]] · Auth: [[../../../../tech_space/jord/auth]]
 
 ## Status
 
@@ -106,7 +106,7 @@ Feature roles (`admin` / `editor` / `readonly`) stay as S3. Policies are **not**
 ### Runtime (locked for libSQL v1)
 
 - **Application hooks** after successful `enqueueWrite` mutations on `records` — not browser, not SQLite `CREATE TRIGGER` as the primary path.
-- Port may expose `compileTriggerSql(def)` as a **stub / TODO** for Postgres / future dialect emit ([[../../../../feature_list/Jord/02-architecture]]); S7 does not require native SQL triggers to pass verify.
+- Port may expose `compileTriggerSql(def)` as a **stub / TODO** for Postgres / future dialect emit ([[../../../../feature_list/Jord/done/jord-F0002-dialects]]); S7 does not require native SQL triggers to pass verify.
 
 ## Roles
 

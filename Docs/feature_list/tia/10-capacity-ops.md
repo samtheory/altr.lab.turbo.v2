@@ -1,5 +1,6 @@
 ---
 title: "Tia — capacity and operations"
+feature_id: tia-F0011
 description: "Scenario estimates for pilot and growth; failures, observability, graph rollout — labeled assumptions, no fake benchmarks"
 created: 2026-10-19
 updated: 2026-10-19

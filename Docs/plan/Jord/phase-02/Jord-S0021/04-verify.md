@@ -29,7 +29,7 @@ Verify only reconciles links, ticks F1–F3, and refreshes STATUS. It writes no 
 - [x] Part A, Part B, and Part C Definitions of Done are all checked. The last Postgres boxes (advisory lock, pool leak, dialect pair) were closed from a live Postgres run on 2026-10-25
 - [x] [[ADR-threat-model]] matches the code that shipped. Principals, trust zones, and the libSQL capture boundary are unchanged. Row predicates (`owner_eq`, `claim_eq`, OR across allows) live in [[../../../../tech_space/jord/policies/README]]
 - [x] Links among overview / auth / policies still resolve. A wikilink check over those pages and this sprint folder found 0 broken links
-- [x] Tick F1–F3 in [[../../../../feature_list/Jord/03-phase-02-features]]
+- [x] Tick F1–F3 in [[../../../../feature_list/Jord/done/README]]
 - [x] Refresh [[../../../../report/STATUS]] when the sprint closes
 
 ## Proof (2026-10-25, local `pgvector/pgvector:pg16`, `JORD_TEST_POSTGRES_URL` set)

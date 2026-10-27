@@ -13,7 +13,7 @@ tags:
 
 > Who: **apollo**. Empty chrome structure; live links only for what S1 already ships.
 
-Sprint index: [[README]] · Intent surfaces: [[../../../../feature_list/Jord/03-jord-studio]]
+Sprint index: [[README]] · Intent surfaces: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 
 ## UI
 

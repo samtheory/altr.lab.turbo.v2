@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0010 — Studio S8 Postgres connection
 
-> Who: **mimir**. **Status: done (2026-10-24).** Intent S8: [[../../../../feature_list/Jord/03-jord-studio]]. Dialect port: [[../../../../feature_list/Jord/02-architecture]]. As-built: [[../../../../tech_space/jord/dialects]]. Prior: [[../Jord-S0009/README]].
+> Who: **mimir**. **Status: done (2026-10-24).** Intent S8: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Dialect port: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]. As-built: [[../../../../tech_space/jord/dialects]]. Prior: [[../Jord-S0009/README]].
 
 **Sprint id:** `Jord-S0010`  
 **Opened:** 2026-10-24 · **Closed:** 2026-10-24 · **Owner:** mimir  

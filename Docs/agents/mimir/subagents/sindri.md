@@ -44,4 +44,4 @@ Parent: [[../00-index]] · Workflow: [[../instructions/00-workflow]]
 
 ## Read first
 
-[[../../../feature_list/Jord/00-intent]] · [[../../../plan/Jord/phase-01/Jord-S0001/01-packages]] · [[../../../plan/Jord/phase-01/Jord-S0001/02-driver]] · [[../../../plan/Jord/phase-01/Jord-S0001/06-server]]
+[[../../../feature_list/Jord/done/jord-F0001-overview]] · [[../../../plan/Jord/phase-01/Jord-S0001/01-packages]] · [[../../../plan/Jord/phase-01/Jord-S0001/02-driver]] · [[../../../plan/Jord/phase-01/Jord-S0001/06-server]]

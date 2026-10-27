@@ -1,5 +1,6 @@
 ---
 title: "Apolyx-S0005 wave — product gate (Select, Combobox, data chrome)"
+feature_id: apolyx-F0007
 description: "Intent for the fifth Apolyx wave: listbox Select / Combobox, Pagination, Accordion, Scroll Area, Progress, Radio Group — gate Jord Studio S1 and Artemis shell"
 created: 2026-10-21
 updated: 2026-10-21

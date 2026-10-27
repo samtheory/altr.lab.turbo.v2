@@ -12,7 +12,7 @@ tags:
 
 # Jord-S0001 — libSQL file and one server
 
-> Who: **mimir** (or specialists). **Status: done** (2026-10-21). As-built: [[../../../../tech_space/jord/overview]]. Contract: [[../../../../feature_list/Jord/00-intent]]. Architecture: [[../../../../feature_list/Jord/02-architecture]]. Decisions: [[../../../../idea/Jord/2026-10-18-sharpen]]. Roadmap: [[../../../00-roadmap-apolyx-jord-artemis]]. Agent: [[../../../../agents/mimir/00-index]].
+> Who: **mimir** (or specialists). **Status: done** (2026-10-21). As-built: [[../../../../tech_space/jord/overview]]. Contract: [[../../../../feature_list/Jord/done/jord-F0001-overview]]. Architecture: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]. Decisions: [[../../../../idea/Jord/2026-10-18-sharpen]]. Roadmap: [[../../../00-roadmap-apolyx-jord-artemis]]. Agent: [[../../../../agents/mimir/00-index]].
 
 **Sprint id:** `Jord-S0001`  
 **Opened:** 2026-10-18 · **Ready:** 2026-10-18 · **Active:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** mimir  
@@ -39,7 +39,7 @@ Run in order. A later card may assume the files from the earlier ones.
 
 ## Plan-level decisions
 
-Locked here so implementation does not reopen them. The feature contract stays in [[../../../../feature_list/Jord/00-intent]].
+Locked here so implementation does not reopen them. The feature contract stays in [[../../../../feature_list/Jord/done/jord-F0001-overview]].
 
 1. **Node 20+, not a Bun install gate.** Repo `engines.node` is `>=20`. `@altr/jord-server` is Hono on `@hono/node-server`. Do not use Bun-only APIs. [[../../../../Altr.lab/stack]] still names Hono; Bun is not required to finish this sprint.
 2. **Deps stay inside the new packages.** Runtime: `drizzle-orm`, `@libsql/client` in `@altr/jord`; `hono`, `@hono/node-server` in `@altr/jord-server`. No `postgres`, `drizzle-orm/pg`, Redis, Mongo, or `sqlite-vec` packages.
@@ -54,7 +54,7 @@ Locked here so implementation does not reopen them. The feature contract stays i
 ## Definition of done
 
 - [x] Every card's "Done when" holds
-- [x] [[../../../../feature_list/Jord/00-intent]] acceptance is true
+- [x] [[../../../../feature_list/Jord/done/jord-F0001-overview]] acceptance is true
 - [x] `pnpm --filter @altr/jord test` and `pnpm --filter @altr/jord typecheck` pass
 - [x] `pnpm --filter @altr/jord-server typecheck` passes
 - [x] A `tech_space` note exists only after the code is in the tree (card 8, docs_man) → [[../../../../tech_space/jord/overview]]
@@ -62,6 +62,6 @@ Locked here so implementation does not reopen them. The feature contract stays i
 ## Links
 
 - Track: [[../README]]
-- Intent: [[../../../../feature_list/Jord/00-intent]]
-- Architecture: [[../../../../feature_list/Jord/02-architecture]]
-- Later (do not build): [[../../../../feature_list/Jord/01-phase-02-candidates]] · [[../../../../feature_list/Jord/03-jord-studio]]
+- Intent: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
+- Architecture: [[../../../../feature_list/Jord/done/jord-F0002-dialects]]
+- Later (do not build): [[../../../../feature_list/Jord/INDEX]] · [[../../../../feature_list/Jord/done/jord-F0012-studio]]

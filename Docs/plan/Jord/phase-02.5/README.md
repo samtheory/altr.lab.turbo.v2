@@ -12,7 +12,7 @@ tags:
 
 # plan / Jord / phase-02.5
 
-> Who: **mimir** (you fix, mimir reviews). Why this exists: the 2026-10-25 code-truth closeout found phase-02 **built on file libSQL but not accepted** — `owner_eq` row leak on `/api/v1` + Studio rows, outbox not same-transaction / `/api/v1` bypassed, zero live Postgres runs, CI Postgres never green. Those gaps are this queue. Phase-02 queue: [[../phase-02/README]]. Leftovers closed in [[../phase-02.75/README|phase-02.75]] (2026-10-26). Next: [[../../../feature_list/Jord/05-phase-03-candidates]].
+> Who: **mimir** (you fix, mimir reviews). Why this exists: the 2026-10-25 code-truth closeout found phase-02 **built on file libSQL but not accepted** — `owner_eq` row leak on `/api/v1` + Studio rows, outbox not same-transaction / `/api/v1` bypassed, zero live Postgres runs, CI Postgres never green. Those gaps are this queue. Phase-02 queue: [[../phase-02/README]]. Leftovers closed in [[../phase-02.75/README|phase-02.75]] (2026-10-26). Next: [[../../../feature_list/Jord/INDEX]].
 
 **Status: code done (2026-10-25).** S0031, S0032, and S0033 are Done. S0030 is Done locally on live Postgres. CI boxes and leftovers moved to [[../phase-02.75/README|phase-02.75]] and are now closed there (branch protection remains admin-only on S0027).
 
@@ -130,7 +130,7 @@ Dual-backend harness: `cloud/jord/src/testing/harness.ts`. On Postgres each test
 
 - [x] [[../phase-02/Jord-S0021/04-verify]] boxes ticked from command output
 - [x] [[../phase-02/Jord-S0021/README]] "A, B, and C each have their own DoD green" ticked
-- [x] F1–F5 statuses in [[../../../feature_list/Jord/03-phase-02-features]] updated from proof
+- [x] F1–F5 statuses in [[../../../feature_list/Jord/done/README]] updated from proof
 - [x] [[../phase-02/00-task-rollup]] "single change event path" is now true
 - [x] Pre-approval plan-review snapshot retired (plan cards + this closeout are the record)
 - [x] In-memory stores (rate limit, idempotency, SQL history, realtime bus, watermark) stated in [[../../../tech_space/jord/overview/README]]
@@ -138,4 +138,4 @@ Dual-backend harness: `cloud/jord/src/testing/harness.ts`. On Postgres each test
 
 ## Rule
 
-No new features here. Anything that is not a phase-02 acceptance gap goes to [[../../../feature_list/Jord/05-phase-03-candidates]] or, if it is a leftover gap, [[../phase-02.75/README|phase-02.75]].
+No new features here. Anything that is not a phase-02 acceptance gap goes to [[../../../feature_list/Jord/INDEX]] or, if it is a leftover gap, [[../phase-02.75/README|phase-02.75]].

@@ -13,7 +13,7 @@ tags:
 
 # Jord-S0002 — Jord Studio S1 (records browser)
 
-> Who: **apollo** (UI) under **mimir**. **Status: done (2026-10-21).** Intent: [[../../../../feature_list/Jord/03-jord-studio]]. As-built: [[../../../../tech_space/jord/studio]]. Engine: [[../Jord-S0001/README]] · [[../../../../tech_space/jord/overview]]. Roadmap: [[../../../00-roadmap-apolyx-jord-artemis]].
+> Who: **apollo** (UI) under **mimir**. **Status: done (2026-10-21).** Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. As-built: [[../../../../tech_space/jord/studio]]. Engine: [[../Jord-S0001/README]] · [[../../../../tech_space/jord/overview]]. Roadmap: [[../../../00-roadmap-apolyx-jord-artemis]].
 
 **Sprint id:** `Jord-S0002`  
 **Opened:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** apollo (UI) under mimir  
@@ -36,7 +36,7 @@ Ship `apps/jord-studio`: a local Next.js app that **lists and browses `records`*
 
 ## Plan-level decisions
 
-Locked so implementation does not reopen them. Studio contract stays in [[../../../../feature_list/Jord/03-jord-studio]].
+Locked so implementation does not reopen them. Studio contract stays in [[../../../../feature_list/Jord/done/jord-F0012-studio]].
 
 1. **App = Next.js** under `apps/jord-studio` (`@altr/jord-studio`), similar stack to `apps/apolyx` (App Router, Tailwind, workspace `@altr/apolyx`).
 2. **Apolyx-first.** No Radix / Base UI / local Button-Input-Table forks. Compose Table, Field, Button, Pagination, Scroll Area, Select/Combobox from `@altr/apolyx`. Missing control → stop and build in kit with **apollo**, then import.
@@ -50,7 +50,7 @@ Locked so implementation does not reopen them. Studio contract stays in [[../../
 ## Definition of done
 
 - [x] Every card's "Done when" holds
-- [x] [[../../../../feature_list/Jord/03-jord-studio]] S1 acceptance is true
+- [x] [[../../../../feature_list/Jord/done/jord-F0012-studio]] S1 acceptance is true
 - [x] `pnpm --filter @altr/jord-studio typecheck` passes
 - [x] Manual: with `dev:jord` up, Studio lists a bucket and round-trips create / patch / stale 409
 - [x] `tech_space` note after code lands ([[../../../../tech_space/jord/studio]])
@@ -59,7 +59,7 @@ Locked so implementation does not reopen them. Studio contract stays in [[../../
 ## Links
 
 - Track: [[../README]]
-- Studio intent: [[../../../../feature_list/Jord/03-jord-studio]]
+- Studio intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 - Engine (done): [[../Jord-S0001/README]] · [[../../../../tech_space/jord/overview]]
 - As-built S1: [[../../../../tech_space/jord/studio]]
 - Apolyx-first: `.cursor/rules/apolyx-first.mdc`

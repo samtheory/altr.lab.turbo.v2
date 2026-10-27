@@ -48,6 +48,7 @@ tags:
 | ClickUp / task cards | [[../clickup/README]] |
 | AI sub-agents | [[../agents/README]] · [[../agents/docs_man/00-index]] · [[../agents/apollo/00-index]] |
 | AI run prompts for the repo | [[../Altr.lab/prompts]] |
+| Ephemeral staging (not truth) | [[../temp/README]] · [[../temp/input/README\|input]] · [[../temp/output/README\|output]] |
 
 ```mermaid
 flowchart LR
@@ -69,6 +70,10 @@ flowchart LR
     CU[clickup]
     AG[agents]
   end
+  subgraph ephemeral [Ephemeral not truth]
+    TIN[temp/input]
+    TOUT[temp/output]
+  end
   ID --> FL
   AL --> FL
   FL --> PL
@@ -81,9 +86,13 @@ flowchart LR
   AG --> TS
   PL -->|implement| CODE[apps / cloud / elements]
   CODE --> TS
+  TIN -.->|optional promote| ID
+  TIN -.->|optional promote| FL
+  AG -.->|write scratch| TOUT
+  TIN -.-> AG
 ```
 
-Truth order when they disagree: **code** (`apps/`, `cloud/`, `elements/`) > **tech_space** > **report/plan** > **feature_list**. Spec still wins for “what we intend to build.”
+Truth order when they disagree: **code** (`apps/`, `cloud/`, `elements/`) > **tech_space** > **report/plan** > **feature_list**. Spec still wins for “what we intend to build.” **`temp/` is never truth** — scratch only.
 
 ---
 
@@ -120,9 +129,9 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Data plane (**Jord**) | `elements/jord` · `elements/jord-client` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` (gitignored) | Manual: [[../tech_space/jord/README]] · Intent: [[../feature_list/Jord/README]] · Plans [[../plan/Jord/README]] · Review [[../report/Jord-implemented-review]] · Builder: [[../agents/mimir/00-index]] |
 | Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02 execution complete** (S0027…S0026) → **phase-02.5** [[../plan/Jord/phase-02.5/README]] (**code done**) → **phase-02.75** [[../plan/Jord/phase-02.75/README]] (**closed 2026-10-26**: correctness gaps, MinIO S3 live, local CI mirror; hosted libSQL live secret-gated; branch protection = admin on S0027) → phase-02 **accepted** → phase-03 (**needs a plan**) [[../feature_list/Jord/05-phase-03-candidates]]. Rollup: [[../plan/Jord/phase-02/00-task-rollup]]. Functions v2 **runtime** still gated ([[../tech_space/jord/apis/ADR-functions-v2]]).
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02** accepted → **phase-02.5** / **02.75** closed → **phase-03** [[../plan/Jord/phase-03/README]] (**active**: one-file-per-AI-task; examples [[../plan/Jord/phase-03/S0034-health-probes|S0034]] · [[../plan/Jord/phase-03/S0035-structured-json-logs|S0035]]; intent [[../feature_list/Jord/INDEX]]). Template: [[../agents/templates/plan-task]]. Functions v2 **runtime** still gated ([[../tech_space/jord/apis/ADR-functions-v2]]).
 
-Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane through phase-01. Intent [[../feature_list/Jord/README]] · Phase-02 features [[../feature_list/Jord/03-phase-02-features]] · Plans [[../plan/Jord/README]]. PocketBase stays optional.
+Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane through phase-01. Intent [[../feature_list/Jord/README]] ([[../feature_list/Jord/done/README\|done]] / [[../feature_list/Jord/todo/README\|todo]]) · Phase-02 shipped [[../feature_list/Jord/done/README]] · Plans [[../plan/Jord/README]]. PocketBase stays optional.
 
 ---
 
@@ -131,13 +140,14 @@ Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane throug
 | Layer | Role | Freshness |
 |-------|------|-----------|
 | `idea/` | Raw R&D before promotion | Catalog v2.3: [[../idea/2026-10-18-product-catalog]]. Apolyx · Jord · API client · Search · **Tia** ([[../idea/Tia (Map Engine)/README]], promoted). Sharpen: [[../idea/Tia (Map Engine)/2026-10-19-sharpen]] |
-| `feature_list/` | Intent / what to build | [[../feature_list/ui-kit/README]] · **Jord:** [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · phase-02 features [[../feature_list/Jord/03-phase-02-features]] · soft [[../feature_list/Jord/01-phase-02-candidates]] · **Tia:** [[../feature_list/tia/README]] |
-| `plan/` | Checkbox overlay + next steps | Jord: [[../plan/Jord/README]] · [[../plan/Jord/phase-01/README\|phase-01]] · [[../plan/Jord/phase-02/README\|phase-02]] (accepted) · [[../plan/Jord/phase-02.5/README\|phase-02.5]] (code done) · [[../plan/Jord/phase-02.75/README\|phase-02.75]] (**closed**) · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] |
+| `feature_list/` | Intent (`{app}-F####`) | [[../feature_list/README#feature-ids]] · Jord [[../feature_list/Jord/INDEX]] · Apolyx [[../feature_list/ui-kit/INDEX]] · Tia [[../feature_list/tia/INDEX]] |
+| `plan/` | One-file AI tasks (phase-03+) + archived sprints | Jord: [[../plan/Jord/README]] · [[../plan/Jord/phase-03/README\|phase-03]] · template [[../agents/templates/plan-task]] · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] |
 | `report/` | Audited complete vs remaining | [[../report/STATUS]] · phase-01 review [[../report/Jord-implemented-review]] · phase-02 rollup [[../plan/Jord/phase-02/00-task-rollup]] · as-built [[../tech_space/jord/README]] |
 | `tech_space/` | Living system manuals by category | Jord: [[../tech_space/jord/README]] · Apolyx: [[../tech_space/ui-kit/10-s0005-product-gate]] · index [[../tech_space/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |
 | `Altr.lab/` | Root turbo how-tos | Edit when structure/commands change |
+| `temp/` | Ephemeral input/output staging | **Not truth** · [[../temp/README]] · payloads gitignored |
 | `brain/` | This living map | Update when folders or truth order change |
 
 **Latest durable audit:** [[../report/STATUS]].

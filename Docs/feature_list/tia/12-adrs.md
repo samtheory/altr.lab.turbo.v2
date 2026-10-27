@@ -1,5 +1,6 @@
 ---
 title: "Tia — architecture decision records"
+feature_id: tia-F0013
 description: "ADRs for Postgres/PostGIS, Valhalla, MapLibre, memory store, offline staging, partners, and versioning"
 created: 2026-10-19
 updated: 2026-10-19

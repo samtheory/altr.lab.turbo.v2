@@ -13,7 +13,7 @@ tags:
 
 # Jord-S0003 — Studio shell + table-editor UX
 
-> Who: **apollo** under **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/studio]]. Intent: [[../../../../feature_list/Jord/03-jord-studio]]. Prior: [[../Jord-S0002/README]] · [[../../../../tech_space/jord/studio]].
+> Who: **apollo** under **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/studio]]. Intent: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Prior: [[../Jord-S0002/README]] · [[../../../../tech_space/jord/studio]].
 
 **Sprint id:** `Jord-S0003`  
 **Opened:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** apollo (UI) under mimir

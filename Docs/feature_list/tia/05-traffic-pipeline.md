@@ -1,5 +1,6 @@
 ---
 title: "Tia — traffic and learning pipeline"
+feature_id: tia-F0006
 description: "Consented collection, matching, aggregation, Valhalla publication, evaluation, and anti-feedback safeguards"
 created: 2026-10-19
 updated: 2026-10-19

@@ -13,7 +13,7 @@ tags:
 
 # plan / Jord / phase-02.75
 
-> Who: **mimir**. Comes from: [[../phase-02.5/README|phase-02.5]] (code done 2026-10-25). **Status: closed 2026-10-26.** Next: phase-03 planning from [[../../../feature_list/Jord/05-phase-03-candidates]].
+> Who: **mimir**. Comes from: [[../phase-02.5/README|phase-02.5]] (code done 2026-10-25). **Status: closed 2026-10-26.** Next: phase-03 planning from [[../../../feature_list/Jord/INDEX]].
 
 Phase-02 and phase-02.5 already passed every engine and server suite on file libSQL **and** live Postgres. This phase closed the leftover correctness gaps, exercised S3 against MinIO, and locked hosted `libsql://` live as secret-gated. No product features were added; B6 / B7 stay on phase-03.
 
@@ -34,7 +34,7 @@ Phase-02 and phase-02.5 already passed every engine and server suite on file lib
 | B3 | Hosted `libsql://` atomic `jord.transaction` | **Done 2026-10-26.** Interactive `client.transaction("write")` with statement routing. Always-on proof: `openLibSqlWithInteractiveTxForTests` on `file:`. Live Turso: secret-gated (C2) |
 | B4 | SQL console / migrate CDC | **Done 2026-10-26.** Console writes emit one `op: "resync"` per tracked table. Migrate wizard intentionally emits nothing here (writes the destination; same-DB target refused with 400) |
 | B5 | `/api/v1` PATCH `old_json` | **Done 2026-10-26** |
-| B6 | `JORD_PG_WRITE_CONCURRENCY` | **Moved to phase-03 P1** (concurrency 1 stays correct) |
+| B6 | `JORD_PG_WRITE_CONCURRENCY` | **Moved to jord-F0013** (concurrency 1 stays correct) |
 | B7 | Custom JWT claims | **Moved to phase-03 P4** |
 | B8 | Idle postgres client teardown noise | **Done 2026-10-26.** Harness waits for disconnect before `DROP DATABASE … WITH (FORCE)`; pool `error` handler suppresses expected terminate / missing-database messages |
 
@@ -66,4 +66,4 @@ Extra (same window): WebSocket live delivery uses the same fail-closed policy ga
 
 ## Phase-03
 
-Candidates: [[../../../feature_list/Jord/05-phase-03-candidates]] (**Proposed — needs a plan**). Create `plan/Jord/phase-03/` when the list is approved. B6, B7, and `LISTEN` fan-out stay there.
+Candidates: [[../../../feature_list/Jord/INDEX]] (**Proposed — needs a plan**). Create `plan/Jord/phase-03/` when the list is approved. B6, B7, and `LISTEN` fan-out stay there.

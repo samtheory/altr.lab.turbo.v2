@@ -15,7 +15,7 @@ tags:
 
 > Who: **mimir** (scope) · **heimdall** (auth on stream). Engine and Studio implement against this note.
 
-Sprint index: [[README]] · Intent S9: [[../../../../feature_list/Jord/03-jord-studio]] · Pillar: [[../../../../feature_list/Jord/01-phase-02-candidates]]
+Sprint index: [[README]] · Intent S9: [[../../../../feature_list/Jord/done/jord-F0012-studio]] · Pillar: [[../../../../feature_list/Jord/INDEX]]
 
 ## Status
 

@@ -43,8 +43,8 @@ Default suite must pass when that variable is unset.
 - [x] Write `Docs/tech_space/jord/dialects/README.md`
 - [x] Mark this sprint **done** in [[README]] + [[../README]]
 - [x] Refresh [[../../../../report/STATUS]], [[../../../../brain/00-Docs-Brain]], [[../../../../brain/00-Docs-Hub]]
-- [x] Update [[../../../../feature_list/Jord/03-jord-studio]] S8 row → done
-- [x] Update [[../../../../feature_list/Jord/01-phase-02-candidates]], [[../../../../feature_list/Jord/02-architecture]] scheme table, [[../../../00-roadmap-apolyx-jord-artemis]], mimir [[../../../../agents/mimir/instructions/00-workflow]]
+- [x] Update [[../../../../feature_list/Jord/done/jord-F0012-studio]] S8 row → done
+- [x] Update [[../../../../feature_list/Jord/INDEX]], [[../../../../feature_list/Jord/done/jord-F0002-dialects]] scheme table, [[../../../00-roadmap-apolyx-jord-artemis]], mimir [[../../../../agents/mimir/instructions/00-workflow]]
 - [x] Note that the Slice 0 “`file:` only” rule is lifted for `postgres:` / `postgresql:` only
 
 ## Done when

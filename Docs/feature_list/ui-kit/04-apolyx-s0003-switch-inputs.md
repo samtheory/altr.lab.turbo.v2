@@ -1,5 +1,6 @@
 ---
 title: "Apolyx-S0003 wave — Switch motion and family, input catalog"
+feature_id: apolyx-F0005
 description: "Intent and acceptance for the third Apolyx wave: smoother Switch physics, a categorized Switch family, and the input catalog (InputGroup, OTP, mask, password, number, form patterns)"
 created: 2026-10-14
 updated: 2026-10-14

@@ -1,5 +1,6 @@
 ---
 title: "Tia — rendering and search"
+feature_id: tia-F0007
 description: "MapLibre styles, vector tiles, Persian/RTL, traffic overlays, and geocoding as a separate service"
 created: 2026-10-19
 updated: 2026-10-19

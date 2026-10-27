@@ -2,7 +2,7 @@
 title: "tech_space/jord — system manual"
 description: "Living as-built categories for Jord: why, what, how. Update a category when code changes; do not add sprint folders"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-27
 tags:
   - tech-space
   - jord
@@ -11,7 +11,7 @@ tags:
 
 # tech_space / jord
 
-> **The Jord system manual.** Open one category. Sprint history stays in [[../../plan/Jord/phase-01/README]]. Intent inventory: [[../../feature_list/Jord/04-phase-01-capabilities]]. Code wins if this folder disagrees.
+> **The Jord system manual.** Open one category. Sprint history stays in [[../../plan/Jord/phase-01/README]]. Intent inventory: [[../../feature_list/Jord/done/README]] · open [[../../feature_list/Jord/INDEX]]. Code wins if this folder disagrees.
 
 When something ships, **edit the category** (or add a note inside that category). Do not create `phase-NN/` or `s00xx` files here.
 

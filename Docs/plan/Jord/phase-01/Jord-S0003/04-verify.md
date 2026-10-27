@@ -31,7 +31,7 @@ Sprint index: [[README]]
 docs_man:
 
 1. [[../../../../tech_space/jord/studio]]
-2. Tick S0003 acceptance; refresh [[../../../../feature_list/Jord/03-jord-studio]]
+2. Tick S0003 acceptance; refresh [[../../../../feature_list/Jord/done/jord-F0012-studio]]
 3. Refresh [[../../../../report/STATUS]] and [[../../../../brain/00-Docs-Brain]]
 
 ## Done when

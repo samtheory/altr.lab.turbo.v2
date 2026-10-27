@@ -1,5 +1,6 @@
 ---
 title: "Tia — realtime and infrastructure"
+feature_id: tia-F0009
 description: "Ingest, subscriptions, durable vs transient paths, object storage, rate limits, and version compatibility"
 created: 2026-10-19
 updated: 2026-10-19

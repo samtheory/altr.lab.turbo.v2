@@ -1,5 +1,6 @@
 ---
 title: "Tia — security and data stewardship"
+feature_id: tia-F0010
 description: "Consent, minimization, retention, authorization, anti-spam, and no individual-driver broadcast"
 created: 2026-10-19
 updated: 2026-10-19

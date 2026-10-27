@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer for the commands. **docs_man** for the vault after the code is actually in the tree. Do not write `tech_space` before that.
 
-Sprint index: [[README]] · Acceptance: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · Acceptance: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 ## Commands
 
@@ -26,7 +26,7 @@ Sprint index: [[README]] · Acceptance: [[../../../../feature_list/Jord/00-inten
 
 ## Acceptance map
 
-Tick the boxes in [[../../../../feature_list/Jord/00-intent]] only when the command or test above proves that line. Leave them unchecked until then.
+Tick the boxes in [[../../../../feature_list/Jord/done/jord-F0001-overview]] only when the command or test above proves that line. Leave them unchecked until then.
 
 ## After the code lands
 

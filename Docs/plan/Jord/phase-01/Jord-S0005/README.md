@@ -14,7 +14,7 @@ tags:
 
 # Jord-S0005 — Studio S3 auth + feature roles
 
-> Who: **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/auth]]. Intent S3: [[../../../../feature_list/Jord/03-jord-studio]]. Prior: [[../Jord-S0004/README]].
+> Who: **mimir**. **Status: done (2026-10-21).** As-built: [[../../../../tech_space/jord/auth]]. Intent S3: [[../../../../feature_list/Jord/done/jord-F0012-studio]]. Prior: [[../Jord-S0004/README]].
 
 **Sprint id:** `Jord-S0005`  
 **Opened:** 2026-10-21 · **Closed:** 2026-10-21 · **Owner:** mimir

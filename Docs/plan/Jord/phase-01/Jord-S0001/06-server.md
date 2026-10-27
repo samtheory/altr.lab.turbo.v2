@@ -13,7 +13,7 @@ tags:
 
 > Who: implementer. This is the only process that should take hot writes.
 
-Sprint index: [[README]] · Routes: [[../../../../feature_list/Jord/00-intent]]
+Sprint index: [[README]] · Routes: [[../../../../feature_list/Jord/done/jord-F0001-overview]]
 
 Runtime: Node + Hono + `@hono/node-server` (sprint decision 1). Default port is an env `PORT` with a documented fallback (use `8787` if nothing else in the repo claims it).
 
