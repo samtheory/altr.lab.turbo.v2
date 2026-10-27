@@ -40,8 +40,8 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 | Phase | Plans | As-built | Status |
 |-------|-------|----------|--------|
 | **01** | [[../../../plan/Jord/phase-01/README]] | [[../../../tech_space/jord/README]] (categories, not a phase folder) | **Closed** (S0001–S0020) |
-| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Accepted** (file + live Postgres + local CI mirror) · branch protection = admin on S0027 · Functions runtime gated · rollup [[../../../report/jord-phase-02-report/00-phase-02-tasks]] |
-| **02.5** | [[../../../plan/Jord/phase-02.5/README]] | same categories | **Code done** 2026-10-25 (S0030 locally, S0031–S0033) · review [[../../../report/Jord-phase-02-closeout-review]] |
+| **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Accepted** (file + live Postgres + local CI mirror) · branch protection = admin on S0027 · Functions runtime gated · rollup [[../../../plan/Jord/phase-02/00-task-rollup]] |
+| **02.5** | [[../../../plan/Jord/phase-02.5/README]] | same categories | **Code done** 2026-10-25 (S0030 locally, S0031–S0033) · acceptance closeout [[../../../plan/Jord/phase-02.5/README]] |
 | **02.75** | [[../../../plan/Jord/phase-02.75/README]] | same categories | **Closed** 2026-10-26 (B/C + MinIO live; hosted libSQL live secret-gated) |
 | **03** | not created | — | **Proposed — needs a plan**: [[../../../feature_list/Jord/05-phase-03-candidates]] |
 
@@ -53,7 +53,7 @@ Do **not** put new sprint cards under phase-01. Phase-02 execution order is the 
 2. **Stay mimir as the speaker of record.** When a card is UI, say you are acting as **mimir → apollo**, load [[../../apollo/instructions/00-workflow]] / apollo skill, and build with `@altr/apolyx` only.
 3. **Never invent kit primitives in `apps/jord-studio`.** Missing control → apollo builds in `elements/ui-kit` first, then import.
 4. **Never open `data/jord.db` from the browser.** Studio talks to `@altr/jord-server` (or the Next BFF that proxies it).
-5. **After verify → docs_man.** Tick intent/plan acceptance from command proof; update the matching `tech_space/jord/<category>/README.md`; refresh STATUS + brain.
+5. **After verify → docs_man.** Tick intent/plan acceptance **only from pasted command proof** (a placeholder / env-only “test” counts as no test); update the matching `tech_space/jord/<category>/README.md`; refresh STATUS + brain.
 6. Pure Apolyx work with **no** Jord surface → user should call **apollo** alone. Vault-only → **docs_man** alone.
 
 ## Hard constraints (engine — still true)

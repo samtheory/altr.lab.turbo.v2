@@ -12,9 +12,9 @@ tags:
 
 # Jord — phase-02 features
 
-> **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Review brief: [[../../report/Jord-phase-02-plan-review]].
+> **What to build next.** Baseline: [[04-phase-01-capabilities]]. Soft leftovers: [[01-phase-02-candidates]]. Plans: [[../../plan/Jord/phase-02/README]]. Acceptance closeout: [[../../plan/Jord/phase-02.5/README]].
 
-**Process lock:** implement **one stop at a time**. **Acceptance gaps → [[../../plan/Jord/phase-02.5/README|phase-02.5]]** (review [[../../report/Jord-phase-02-closeout-review]]). **S0027** through **S0026** have code in tree for phase-02 execution (file libSQL for server stops; S0026 is ADR-only). Phase-02.5 closed the gaps on 2026-10-25: every server suite now runs on file libSQL and live Postgres (`jord_app`, FORCE RLS). Functions v2 **runtime** stays soft backlog until a follow-up sprint is approved.
+**Process lock:** implement **one stop at a time**. **Acceptance gaps → [[../../plan/Jord/phase-02.5/README|phase-02.5]]**. **S0027** through **S0026** have code in tree for phase-02 execution (file libSQL for server stops; S0026 is ADR-only). Phase-02.5 closed the gaps on 2026-10-25: every server suite now runs on file libSQL and live Postgres (`jord_app`, FORCE RLS). Functions v2 **runtime** stays soft backlog until a follow-up sprint is approved.
 
 ## Execution order
 

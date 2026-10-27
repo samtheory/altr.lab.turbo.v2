@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-02.5 — phase-02 acceptance closeout"
 description: "Fix queue for phase-02 acceptance gaps found in the 2026-10-25 mimir review: Postgres gate, outbox correctness, policy row scope, paperwork"
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-27
 tags:
   - plan
   - jord
@@ -12,9 +12,11 @@ tags:
 
 # plan / Jord / phase-02.5
 
-> Who: **mimir** (you fix, mimir reviews). Why this exists: [[../../../report/Jord-phase-02-closeout-review]]. Phase-02 queue: [[../phase-02/README]]. Leftovers closed in [[../phase-02.75/README|phase-02.75]] (2026-10-26). Next: [[../../../feature_list/Jord/05-phase-03-candidates]].
+> Who: **mimir** (you fix, mimir reviews). Why this exists: the 2026-10-25 code-truth closeout found phase-02 **built on file libSQL but not accepted** — `owner_eq` row leak on `/api/v1` + Studio rows, outbox not same-transaction / `/api/v1` bypassed, zero live Postgres runs, CI Postgres never green. Those gaps are this queue. Phase-02 queue: [[../phase-02/README]]. Leftovers closed in [[../phase-02.75/README|phase-02.75]] (2026-10-26). Next: [[../../../feature_list/Jord/05-phase-03-candidates]].
 
 **Status: code done (2026-10-25).** S0031, S0032, and S0033 are Done. S0030 is Done locally on live Postgres. CI boxes and leftovers moved to [[../phase-02.75/README|phase-02.75]] and are now closed there (branch protection remains admin-only on S0027).
+
+**Process lock:** tick a box only with pasted command output; a placeholder or env-only “test” counts as **no test**.
 
 ## Already fixed in the review (2026-10-25)
 
@@ -129,8 +131,8 @@ Dual-backend harness: `cloud/jord/src/testing/harness.ts`. On Postgres each test
 - [x] [[../phase-02/Jord-S0021/04-verify]] boxes ticked from command output
 - [x] [[../phase-02/Jord-S0021/README]] "A, B, and C each have their own DoD green" ticked
 - [x] F1–F5 statuses in [[../../../feature_list/Jord/03-phase-02-features]] updated from proof
-- [x] [[../../../report/jord-phase-02-report/00-phase-02-tasks]] "single change event path" is now true
-- [x] [[../../../report/Jord-phase-02-plan-review]] marked historical
+- [x] [[../phase-02/00-task-rollup]] "single change event path" is now true
+- [x] Pre-approval plan-review snapshot retired (plan cards + this closeout are the record)
 - [x] In-memory stores (rate limit, idempotency, SQL history, realtime bus, watermark) stated in [[../../../tech_space/jord/overview/README]]
 - [x] STATUS + brain refreshed. Phase-02 is **accepted on local proof**; the CI run and branch protection are tracked in phase-02.75
 

@@ -12,7 +12,7 @@ tags:
 
 # Jord phase-02 — remaining backlog
 
-> Who: **mimir**. Numbered queue: [[README]] (**complete** through S0026 ADR). Features: [[../../../feature_list/Jord/03-phase-02-features]]. Soft candidates: [[../../../feature_list/Jord/01-phase-02-candidates]]. Prompt: [[../../../report/Jord-next-phase2-prompt]]. Progress: [[../../../report/jord-phase-02-report/00-phase-02-tasks]].
+> Who: **mimir**. Numbered queue: [[README]] (**complete** through S0026 ADR). Features: [[../../../feature_list/Jord/03-phase-02-features]]. Soft candidates: [[../../../feature_list/Jord/01-phase-02-candidates]]. Progress: [[00-task-rollup]].
 
 **Numbered queue:** finished (S0027…S0026). Soft leftovers below are not automatic next work.
 

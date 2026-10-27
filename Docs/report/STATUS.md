@@ -2,7 +2,7 @@
 title: "Status — complete vs remaining"
 description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed 2026-10-26; phase-03 candidates open for planning; Functions runtime still gated"
 created: 2026-09-19
-updated: 2026-10-26
+updated: 2026-10-27
 tags:
   - report
   - status
@@ -13,15 +13,15 @@ tags:
 
 # Status
 
-Last updated: 2026-10-26 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] (hosted libSQL atomic tx, console `resync`, PATCH `old`, MinIO S3 live, teardown noise filtered; local CI mirror with pgvector + MinIO) · **Phase-01 closed** · **Phase-02 accepted** · Closeout review [[Jord-phase-02-closeout-review]] · Plan review (historical): [[Jord-phase-02-plan-review]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[jord-phase-02-report/00-phase-02-tasks]]
+Last updated: 2026-10-27 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] (hosted libSQL atomic tx, console `resync`, PATCH `old`, MinIO S3 live, teardown noise filtered; local CI mirror with pgvector + MinIO) · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
-- **Jord phase-01 (S0001–S0020)** — matrix in [[Jord-implemented-review]] · handoff [[Jord-technical-brief]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]]
-- Plans archive: [[../plan/Jord/phase-01/README]] · As-built manual: [[../tech_space/jord/README]]
-- **`@altr/apolyx`** through **S0005** · Apolyx-first
+- **Jord phase-01 (S0001–S0020)** — matrix in [[Jord-implemented-review]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · as-built [[../tech_space/jord/README]]
+- Plans archive: [[../plan/Jord/phase-01/README]]
+- **`@altr/apolyx`** through **S0005** · Apolyx-first · screenshots [[../tech_space/ui-kit/assets]]
 - **Jord-S0027** — `.github/workflows/jord.yml` (`jord` + `jord-postgres` with MinIO) · local CI mirror green 2026-10-26 · branch protection still a one-shot admin step · [[../tech_space/jord/overview/README#ci]] · card [[../plan/Jord/phase-02/Jord-S0027/README]]
-- **Jord-S0021-A/B/ADR/C** through **Jord-S0026** — as before; see prior STATUS lines and the phase-02 rollup
+- **Jord-S0021-A/B/ADR/C** through **Jord-S0026** — see [[../plan/Jord/phase-02/00-task-rollup]]
 - **Phase-02.5 (S0030–S0033)** — live Postgres gate, transactional outbox, row scope · [[../plan/Jord/phase-02.5/README]]
 - **Phase-02.75** — B1–B5, B8, C1 done; B6/B7 → phase-03; C2 secret-gated / manual-only · [[../plan/Jord/phase-02.75/README]]
 
@@ -40,7 +40,7 @@ _(Postgres + MinIO exercised locally 2026-10-26. Hosted `libsql://` live test ru
 
 ## Planned (repo)
 
-Phase-02 features: [[../feature_list/Jord/03-phase-02-features]] · Queue: [[../plan/Jord/README]] · Task rollup: [[jord-phase-02-report/00-phase-02-tasks]] · Phase-03 candidates: [[../feature_list/Jord/05-phase-03-candidates]]
+Phase-02 features: [[../feature_list/Jord/03-phase-02-features]] · Queue: [[../plan/Jord/README]] · Task rollup: [[../plan/Jord/phase-02/00-task-rollup]] · Phase-03 candidates: [[../feature_list/Jord/05-phase-03-candidates]]
 
 Soft leftovers: [[../feature_list/Jord/01-phase-02-candidates]] · Artemis · Tia
 

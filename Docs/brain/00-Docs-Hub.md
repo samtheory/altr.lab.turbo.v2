@@ -2,7 +2,7 @@
 title: "Docs Hub — folder index"
 description: "Canonical index of every Docs/ folder in the altr.lab vault"
 created: 2026-09-19
-updated: 2026-10-24
+updated: 2026-10-27
 tags:
   - brain
   - hub
@@ -39,7 +39,7 @@ App-scoped tracks use matching subfolders: `idea/<app>/` → `feature_list/<app>
 
 **Apolyx** (promoted): idea [[../idea/Apolyx (ui-kit)/README]] · [[../feature_list/ui-kit/README]] · [[../plan/ui-kit/README]] (**S0001**–**S0005** closed) · [[../tech_space/ui-kit/README]] (latest [[../tech_space/ui-kit/10-s0005-product-gate]]).
 
-**Jord** (phase-01 S0001–**S0020** done; phase-02 **hardening addendum planned, not started**): intent [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · phase-02 features [[../feature_list/Jord/03-phase-02-features]] · as-built [[../tech_space/jord/README]] · plans [[../plan/Jord/README]] ([[../plan/Jord/phase-01/README|phase-01]] · [[../plan/Jord/phase-02/README|phase-02]]) · **shipped review** [[../report/Jord-implemented-review]] · **handoff** [[../report/Jord-technical-brief]] · **phase-02 plan review** [[../report/Jord-phase-02-plan-review]] · **prompt** [[../report/Jord-next-phase2-prompt]].
+**Jord** (phase-01 S0001–**S0020** done; phase-02 **accepted**; phase-03 needs a plan): intent [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · phase-02 features [[../feature_list/Jord/03-phase-02-features]] · as-built [[../tech_space/jord/README]] · plans [[../plan/Jord/README]] · status [[../report/STATUS]] · phase-01 review [[../report/Jord-implemented-review]] · phase-02 rollup [[../plan/Jord/phase-02/00-task-rollup]].
 
 ## Agent of record
 

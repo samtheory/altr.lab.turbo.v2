@@ -64,7 +64,7 @@ Horizontal: items are `flex-1` with indicators on top; the separator runs from t
 - `pnpm --filter @altr/apolyx test` for the timeline file: 5 passed; `typecheck` clean
 - Registry build: 52 items (was 51)
 - Docs app `tsc --noEmit` clean; `/docs/components/timeline` renders all nine demos
-- Screenshots (headless Edge, default theme dark): `Docs/report/assets/apolyx-timeline/`
+- Screenshots (headless Edge, default theme dark): `Docs/tech_space/ui-kit/assets/apolyx-timeline/`
 
 ## Known limits
 

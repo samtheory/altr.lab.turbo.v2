@@ -47,7 +47,7 @@ pnpm --filter apolyx exec tsc --noEmit
 
 Manual: keyboard-only pass on the Popover story (open, tab to a field, Esc, focus back on the trigger). Repeat with a popover opened from inside a dialog. Toggle OS reduced motion and confirm the panel fades with no slide or scale.
 
-Screenshots, light and dark, saved under `Docs/report/assets/apolyx-s0004/`:
+Screenshots, light and dark, saved under `Docs/tech_space/ui-kit/assets/apolyx-s0004/`:
 
 - Popover page with the default `pop` panel open
 - A `slide` demo open (coupon or share)
@@ -58,7 +58,7 @@ Screenshots, light and dark, saved under `Docs/report/assets/apolyx-s0004/`:
 - [x] Sidebar entry, MDX page, props table
 - [x] Barrel export + registry manifest
 - [x] Tests from cards 1–2 still green; typecheck and registry build green
-- [x] Screenshots in `Docs/report/assets/apolyx-s0004/`
+- [x] Screenshots in `Docs/tech_space/ui-kit/assets/apolyx-s0004/`
 
 ## Done when
 

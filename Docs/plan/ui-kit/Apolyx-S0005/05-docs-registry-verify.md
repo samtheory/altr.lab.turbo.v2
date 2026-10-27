@@ -22,7 +22,7 @@ Sprint index: [[README]]
 1. Finish MDX for Select, Combobox, Pagination, Scroll Area, Progress, Accordion, Radio Group under Forms / Components as appropriate (mirror sidebar grouping conventions).
 2. Registry build includes every new item; CLI `apolyx add` smoke for `select` and `combobox` at minimum.
 3. Forms / data recipes: one Studio-style filter bar using Select + Combobox + Pagination on Table.
-4. Screenshots light + dark → `Docs/report/assets/apolyx-s0005/`.
+4. Screenshots light + dark → `Docs/tech_space/ui-kit/assets/apolyx-s0005/`.
 5. Run kit `test` / `typecheck` / registry `build`; docs `tsc`.
 
 ## Done when

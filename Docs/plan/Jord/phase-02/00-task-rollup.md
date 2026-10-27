@@ -1,10 +1,10 @@
 ---
 title: "Jord phase-02 — task completion rollup"
-description: "Every execution-order stop from plan/Jord/phase-02 with status after S0026"
+description: "Every execution-order stop from plan/Jord/phase-02 with status after S0026 + 02.5/02.75"
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-27
 tags:
-  - report
+  - plan
   - jord
   - phase-02
   - tasks
@@ -12,13 +12,15 @@ tags:
 
 # Jord phase-02 — task completion rollup
 
-> Source order: [[../../plan/Jord/phase-02/README]]. Code/docs truth after **S0026**. Folder: [[README]].
+> Source order: [[README]]. Code/docs truth after **S0026**. Acceptance closeout: [[../phase-02.5/README]] · leftovers: [[../phase-02.75/README]]. Living status: [[../../../report/STATUS]].
 
 - **Done:** 12
 - **Remains:** 0
 - **Total:** 12
 
-Phase-02’s numbered execution queue (S0027 through S0026) has code in tree. The 2026-10-25 review ([[../Jord-phase-02-closeout-review]]) found S0021-C row-scope leaks, an S0023 outbox that was not transactional and was bypassed by `/api/v1`, and zero Postgres runs. [[../../plan/Jord/phase-02.5/README|Phase-02.5]] closed those the same day. [[../../plan/Jord/phase-02.75/README|Phase-02.75]] closed 2026-10-26 (correctness leftovers + MinIO live + local CI mirror). Branch protection remains a one-shot admin step on S0027.
+Phase-02’s numbered execution queue (S0027 through S0026) has code in tree. The 2026-10-25 closeout found S0021-C row-scope leaks, an S0023 outbox that was not transactional and was bypassed by `/api/v1`, and zero Postgres runs — those drove [[../phase-02.5/README|phase-02.5]] (closed the same day). [[../phase-02.75/README|Phase-02.75]] closed 2026-10-26 (correctness leftovers + MinIO live + local CI mirror). Branch protection remains a one-shot admin step on S0027.
+
+**Process lock (from that closeout):** a plan box is ticked only with pasted command output; a placeholder / env-only “test” counts as **no test**.
 
 ---
 

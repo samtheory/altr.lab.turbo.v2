@@ -15,7 +15,7 @@ tags:
 
 > **Intent layer** for Jord (engine) and Jord Studio (control plane). Open this first when deciding *what* Jord is meant to be. As-built detail lives in `tech_space/jord/`. Sprint cards live in `plan/Jord/`.
 
-Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: [[../../plan/Jord/README]] · As-built: [[../../tech_space/jord/README]] · Review: [[../../report/Jord-implemented-review]] · Phase-02 prompt: [[../../report/Jord-next-phase2-prompt]] · Builder: [[../../agents/mimir/00-index|mimir]]
+Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: [[../../plan/Jord/README]] · As-built: [[../../tech_space/jord/README]] · Review: [[../../report/Jord-implemented-review]] · Status: [[../../report/STATUS]] · Builder: [[../../agents/mimir/00-index|mimir]]
 
 ## How to read this folder
 
@@ -34,7 +34,7 @@ Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Jord/README]] · Plan: 
 |-------|------|-------|
 | Intent (this folder) | `feature_list/Jord/` | Living |
 | Shipped plans | [[../../plan/Jord/phase-01/README\|plan/Jord/phase-01]] | **phase-01 done** (S0001–S0020) |
-| Next plans | [[../../plan/Jord/phase-02/README\|plan/Jord/phase-02]] | **Execution complete** (S0027…S0026); Functions runtime soft backlog · [[../../report/jord-phase-02-report/00-phase-02-tasks]] |
+| Next plans | [[../../plan/Jord/phase-02/README\|plan/Jord/phase-02]] | **Execution complete** (S0027…S0026); Functions runtime soft backlog · [[../../plan/Jord/phase-02/00-task-rollup]] |
 | As-built | [[../../tech_space/jord/README]] | Living categories |
 | Code | `elements/jord` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` | Source of truth |
 

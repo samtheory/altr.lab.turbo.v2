@@ -60,7 +60,7 @@ pnpm --filter @altr/apolyx build
 pnpm --filter @altr/apolyx-docs exec tsc --noEmit
 ```
 
-Screenshots under `Docs/report/assets/apolyx-s0005/` were not captured at close (optional follow-up).
+Screenshots under `Docs/tech_space/ui-kit/assets/apolyx-s0005/` were not captured at close (optional follow-up).
 
 ## Next
 

@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-02 — next Jord sprints"
 description: "Execution order after the hardening addendum: S0027 first, then S0021, S0028, S0022…"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-27
 tags:
   - plan
   - jord
@@ -12,14 +12,14 @@ tags:
 
 # plan / Jord / phase-02
 
-> Phase-01 archive: [[../phase-01/README]]. Features: [[../../../feature_list/Jord/03-phase-02-features]]. Review: [[../../../report/Jord-phase-02-plan-review]].
+> Phase-01 archive: [[../phase-01/README]]. Features: [[../../../feature_list/Jord/03-phase-02-features]]. Acceptance closeout: [[../phase-02.5/README]]. Task rollup: [[00-task-rollup]].
 
 | Item | Status |
 |------|--------|
-| Active sprint | **Accepted (2026-10-26).** Stops 1–12 + [[../phase-02.5/README\|phase-02.5]] + [[../phase-02.75/README\|phase-02.75]] closed. Local CI mirror (pgvector + MinIO) green. Branch protection remains a one-shot admin step on [[Jord-S0027/README\|S0027]]. Review: [[../../../report/Jord-phase-02-closeout-review]]. Functions **runtime** stays gated. |
+| Active sprint | **Accepted (2026-10-26).** Stops 1–12 + [[../phase-02.5/README\|phase-02.5]] + [[../phase-02.75/README\|phase-02.75]] closed. Local CI mirror (pgvector + MinIO) green. Branch protection remains a one-shot admin step on [[Jord-S0027/README\|S0027]]. Functions **runtime** stays gated. |
 | Done in tree | [[Jord-S0027/README\|S0027]] · [[Jord-S0021/01-migration\|S0021-A]] · [[Jord-S0021/02-auth\|S0021-B]] · [[Jord-S0021/ADR-threat-model\|ADR]] · [[Jord-S0021/03-policy\|S0021-C]] · [[Jord-S0028/README\|S0028]] · [[Jord-S0022/README\|S0022]] · [[Jord-S0023/README\|S0023]] · [[Jord-S0029/README\|S0029]] · [[Jord-S0024/README\|S0024]] · [[Jord-S0025/README\|S0025]] · [[Jord-S0026/README\|S0026]] (ADR only) |
 | Soft backlog | [[00-remaining-backlog]] |
-| Progress report | [[../../../report/jord-phase-02-report/00-phase-02-tasks]] |
+| Progress report | [[00-task-rollup]] |
 
 Ids are **not** execution order. This table is the order. S0027 runs first. S0028 and S0029 are new. When a stop lands, update that row's **Status**, **Implemented**, and **Remains**.
 
@@ -45,4 +45,4 @@ Ids are **not** execution order. This table is the order. S0027 runs first. S002
 1. One stop per session. Stop for review.
 2. S0027 through S0026 are done (S0026 is ADR-only). Acceptance gaps closed in [[../phase-02.5/README|phase-02.5]] and [[../phase-02.75/README|phase-02.75]]. Do not reopen these cards. Functions **runtime** is soft backlog / phase-03 P3.
 3. Each card's PR updates its own `tech_space/jord/*` page. Verify reconciles links, ticks features, and refreshes STATUS. It writes no new content.
-4. Task rollup: [[../../../report/jord-phase-02-report/00-phase-02-tasks]].
+4. Task rollup: [[00-task-rollup]].

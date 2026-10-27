@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-25
+updated: 2026-10-27
 tags:
   - brain
   - index
@@ -120,7 +120,7 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Data plane (**Jord**) | `elements/jord` · `elements/jord-client` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` (gitignored) | Manual: [[../tech_space/jord/README]] · Intent: [[../feature_list/Jord/README]] · Plans [[../plan/Jord/README]] · Review [[../report/Jord-implemented-review]] · Builder: [[../agents/mimir/00-index]] |
 | Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02 execution complete** (S0027…S0026) → **phase-02.5** [[../plan/Jord/phase-02.5/README]] (**code done**) → **phase-02.75** [[../plan/Jord/phase-02.75/README]] (**closed 2026-10-26**: correctness gaps, MinIO S3 live, local CI mirror; hosted libSQL live secret-gated; branch protection = admin on S0027) → phase-02 **accepted** → phase-03 (**needs a plan**) [[../feature_list/Jord/05-phase-03-candidates]]. Rollup: [[../report/jord-phase-02-report/00-phase-02-tasks]]. Functions v2 **runtime** still gated ([[../tech_space/jord/apis/ADR-functions-v2]]).
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02 execution complete** (S0027…S0026) → **phase-02.5** [[../plan/Jord/phase-02.5/README]] (**code done**) → **phase-02.75** [[../plan/Jord/phase-02.75/README]] (**closed 2026-10-26**: correctness gaps, MinIO S3 live, local CI mirror; hosted libSQL live secret-gated; branch protection = admin on S0027) → phase-02 **accepted** → phase-03 (**needs a plan**) [[../feature_list/Jord/05-phase-03-candidates]]. Rollup: [[../plan/Jord/phase-02/00-task-rollup]]. Functions v2 **runtime** still gated ([[../tech_space/jord/apis/ADR-functions-v2]]).
 
 Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane through phase-01. Intent [[../feature_list/Jord/README]] · Phase-02 features [[../feature_list/Jord/03-phase-02-features]] · Plans [[../plan/Jord/README]]. PocketBase stays optional.
 
@@ -133,7 +133,7 @@ Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane throug
 | `idea/` | Raw R&D before promotion | Catalog v2.3: [[../idea/2026-10-18-product-catalog]]. Apolyx · Jord · API client · Search · **Tia** ([[../idea/Tia (Map Engine)/README]], promoted). Sharpen: [[../idea/Tia (Map Engine)/2026-10-19-sharpen]] |
 | `feature_list/` | Intent / what to build | [[../feature_list/ui-kit/README]] · **Jord:** [[../feature_list/Jord/README]] · capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · phase-02 features [[../feature_list/Jord/03-phase-02-features]] · soft [[../feature_list/Jord/01-phase-02-candidates]] · **Tia:** [[../feature_list/tia/README]] |
 | `plan/` | Checkbox overlay + next steps | Jord: [[../plan/Jord/README]] · [[../plan/Jord/phase-01/README\|phase-01]] · [[../plan/Jord/phase-02/README\|phase-02]] (accepted) · [[../plan/Jord/phase-02.5/README\|phase-02.5]] (code done) · [[../plan/Jord/phase-02.75/README\|phase-02.75]] (**closed**) · Roadmap: [[../plan/00-roadmap-apolyx-jord-artemis]] |
-| `report/` | Audited complete vs remaining | [[../report/STATUS]] · **Phase-02 tasks:** [[../report/jord-phase-02-report/00-phase-02-tasks]] · **Shipped review:** [[../report/Jord-implemented-review]] · **Handoff:** [[../report/Jord-technical-brief]] · **Phase-02 plan review:** [[../report/Jord-phase-02-plan-review]] · **Phase-02 prompt:** [[../report/Jord-next-phase2-prompt]] |
+| `report/` | Audited complete vs remaining | [[../report/STATUS]] · phase-01 review [[../report/Jord-implemented-review]] · phase-02 rollup [[../plan/Jord/phase-02/00-task-rollup]] · as-built [[../tech_space/jord/README]] |
 | `tech_space/` | Living system manuals by category | Jord: [[../tech_space/jord/README]] · Apolyx: [[../tech_space/ui-kit/10-s0005-product-gate]] · index [[../tech_space/README]] |
 | `clickup/` | External task sync notes | Edit when extracting work |
 | `agents/` | Sub-agent defs (docs_man, …) | Edit when agent behaviour changes |

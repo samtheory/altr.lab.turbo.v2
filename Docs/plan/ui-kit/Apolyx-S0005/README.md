@@ -56,7 +56,7 @@ Ship the **product gate** components so Jord Studio S1 and an Artemis shell can 
 
 - [x] Every card's "Done when" holds.
 - [x] `pnpm --filter @altr/apolyx test`, `typecheck`, `build` (registry) green; `tsc` clean in `apps/apolyx`.
-- [ ] Light and dark screenshots under `Docs/report/assets/apolyx-s0005/` (optional follow-up; not blocking close).
+- [ ] Light and dark screenshots under `Docs/tech_space/ui-kit/assets/apolyx-s0005/` (optional follow-up; not blocking close).
 - [x] docs_man handoff done (card 6). As-built: [[../../../tech_space/ui-kit/10-s0005-product-gate]].
 
 **Next:** [[../../Jord/Jord-S0001/README]].

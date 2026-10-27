@@ -47,7 +47,7 @@ Code: `src/components/site/sidebar-nav.tsx` (`SidebarNav` → one `SidebarGroup`
 
 If you change the `<ul>` padding (`pl-2`) or border width, update the `before:-left-[9px]` offset too, or the active segment stops lining up with the guide line.
 
-Screenshot: `Docs/report/assets/apolyx-sidebar/sidebar-open.png` (default family, dark, 1280 px).
+Screenshot: `Docs/tech_space/ui-kit/assets/apolyx-sidebar/sidebar-open.png` (default family, dark, 1280 px).
 
 ### Forms group (Apolyx-S0003)
 
@@ -91,7 +91,7 @@ Landing `/` shows a live Card + LineChart sample and the badge `Apolyx-S0001 · 
 
 ## Screenshots (verify)
 
-Saved under `Docs/report/assets/apolyx-s0001/`:
+Saved under `Docs/tech_space/ui-kit/assets/apolyx-s0001/`:
 
 - `docs-home-default-light.png`
 - `docs-button-default-light.png`
@@ -100,6 +100,6 @@ Saved under `Docs/report/assets/apolyx-s0001/`:
 
 (CDP capture; `browser_take_screenshot` timed out in this environment.)
 
-S0003 screenshots are in `Docs/report/assets/apolyx-s0003/`. They were taken with headless Edge at 1280 px. Two Edge runs shared one `--user-data-dir`: the first loaded a throwaway same-origin page that set `localStorage` `apolyx-theme` (the family) and `theme` (the mode), and the second took the screenshot. Redirecting inside a single run produced no file.
+S0003 screenshots are in `Docs/tech_space/ui-kit/assets/apolyx-s0003/`. They were taken with headless Edge at 1280 px. Two Edge runs shared one `--user-data-dir`: the first loaded a throwaway same-origin page that set `localStorage` `apolyx-theme` (the family) and `theme` (the mode), and the second took the screenshot. Redirecting inside a single run produced no file.
 
-S0004 screenshots are in `Docs/report/assets/apolyx-s0004/` (see [[09-s0004-popover]]).
+S0004 screenshots are in `Docs/tech_space/ui-kit/assets/apolyx-s0004/` (see [[09-s0004-popover]]).

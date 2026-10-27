@@ -71,7 +71,7 @@ Extra manifest: `mask` (type `lib`, `src/lib/mask.ts`) — the CLI writes every 
 - [x] `pnpm --filter @altr/apolyx build` — `Registry OK — wrote 66 items to dist/r (imports resolved)`
 - [x] `apps/apolyx`: `npx tsc --noEmit -p .` clean; `node scripts/copy-registry.mjs` copied to `public/r`
 - [x] CLI smoke: `apolyx add input-group password-input number-input input-otp input-mask switch --overwrite` into `%TEMP%\apolyx-smoke` (+10 deps, `lib/mask.ts` under `lib/`); `/forms` page using all of them → `npm run build` OK (Next 16.4); no `@radix-ui` / `@base-ui` / `input-otp` / `react-imask` in installed files
-- [x] Screenshots (headless Edge, 1280 px; theme set through `localStorage` in a shared profile) in `Docs/report/assets/apolyx-s0003/`: `switch-default-dark.png`, `switch-power-blue-light.png`, `input-group-default-light.png`, `input-otp-default-light.png` (verification code hero), `form-patterns-dark.png` (Forms sidebar group + patterns page)
+- [x] Screenshots (headless Edge, 1280 px; theme set through `localStorage` in a shared profile) in `Docs/tech_space/ui-kit/assets/apolyx-s0003/`: `switch-default-dark.png`, `switch-power-blue-light.png`, `input-group-default-light.png`, `input-otp-default-light.png` (verification code hero), `form-patterns-dark.png` (Forms sidebar group + patterns page)
 - [x] Reduced-motion check: emulated `prefers-reduced-motion: reduce` → OTP caret `animation-name: none`; Switch reads `useReducedMotion()` and skips spring / stretch (physics covered by `switch-physics.test.ts` "is rigid under reduced motion")
 
 ## Done when

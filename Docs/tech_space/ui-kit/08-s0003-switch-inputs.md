@@ -188,7 +188,7 @@ The shared helpers live in `src/demos/form-shared.tsx`: `useFormAction`, `Submit
 | CLI smoke | `apolyx add input-group password-input number-input input-otp input-mask switch` into `%TEMP%\apolyx-smoke`, then `npm run build` OK (Next 16.4); no `@radix-ui` / `@base-ui` / `input-otp` / `react-imask` in the installed files |
 | Reduced motion | Emulated `reduce` → OTP caret `animation-name: none`; Switch physics rigid (unit test) |
 
-Screenshots (headless Edge, 1280 px) in `Docs/report/assets/apolyx-s0003/`:
+Screenshots (headless Edge, 1280 px) in `Docs/tech_space/ui-kit/assets/apolyx-s0003/`:
 
 - `switch-default-dark.png`
 - `switch-power-blue-light.png`

@@ -104,5 +104,5 @@ Scope matches [[../plan/Jord/phase-01/README]]. Each row is closed.
 
 ## Links for deep dive
 
-- Plans [[../plan/Jord/README]] · Archive [[../plan/Jord/phase-01/README]] · Phase-02 [[../plan/Jord/phase-02/README]] · STATUS [[STATUS]] · Handoff [[Jord-technical-brief]]
+- Plans [[../plan/Jord/README]] · Archive [[../plan/Jord/phase-01/README]] · Phase-02 [[../plan/Jord/phase-02/README]] · STATUS [[STATUS]] · As-built [[../tech_space/jord/README]]
 - Capabilities [[../feature_list/Jord/04-phase-01-capabilities]] · Latest as-built [[../tech_space/jord/vectors]]

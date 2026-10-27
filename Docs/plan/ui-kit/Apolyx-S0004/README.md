@@ -58,7 +58,7 @@ Ship one Popover that can hold any interactive panel, animate it from the trigge
 
 - [x] Every card's "Done when" holds.
 - [x] `pnpm --filter @altr/apolyx test`, `typecheck`, `build` (registry) green; `tsc` clean in `apps/apolyx`.
-- [x] Light and dark screenshots under `Docs/report/assets/apolyx-s0004/`.
+- [x] Light and dark screenshots under `Docs/tech_space/ui-kit/assets/apolyx-s0004/`.
 - [x] docs_man handoff done (card 5).
 
 ## Links

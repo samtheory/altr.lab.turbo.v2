@@ -64,7 +64,7 @@ Cards 1 and 2 touch only Switch and can ship alone. Cards 5–7 depend on card 4
 
 - Every card's "Done when" holds.
 - `pnpm --filter @altr/apolyx test`, `typecheck`, `build` (registry) green; `tsc` clean in `apps/apolyx`.
-- Light / dark screenshots of the Switch page and the Input Group page saved under `Docs/report/assets/apolyx-s0003/`.
+- Light / dark screenshots of the Switch page and the Input Group page saved under `Docs/tech_space/ui-kit/assets/apolyx-s0003/`.
 - docs_man handoff done (card 10).
 
 ## Links

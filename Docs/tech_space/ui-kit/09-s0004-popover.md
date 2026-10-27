@@ -86,7 +86,7 @@ pnpm --filter @altr/apolyx build
 pnpm --filter apolyx exec tsc --noEmit
 ```
 
-Screenshots in `Docs/report/assets/apolyx-s0004/`:
+Screenshots in `Docs/tech_space/ui-kit/assets/apolyx-s0004/`:
 
 | File | Captures |
 |------|----------|
