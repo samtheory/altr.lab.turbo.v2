@@ -15,4 +15,10 @@ tags:
 
 Agents: write throwaway deliverables here when the user asks for a temp doc to pass elsewhere. Prefer this over polluting `plan/` or `report/`.
 
+## Current exports
+
+| File | Use |
+|------|-----|
+| [[jord-phase-03-ai-handoff]] | Self-contained Jord phase-03 backlog to paste into another AI chat |
+
 Parent: [[../README]].
