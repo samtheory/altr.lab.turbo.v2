@@ -2,7 +2,7 @@
 title: "Docs Brain — living map"
 description: "Cross-cutting graph of the altr.lab vault, product loop, and doc types for humans and agents"
 created: 2026-09-19
-updated: 2026-10-27
+updated: 2026-10-28
 tags:
   - brain
   - index
@@ -129,7 +129,9 @@ Deep dives: [[../Altr.lab/stack]] · [[../idea/README]] · [[../report/STATUS]]
 | Data plane (**Jord**) | `elements/jord` · `elements/jord-client` · `cloud/jord` · `apps/jord-studio` · `data/jord.db` · `data/blobs/` (gitignored) | Manual: [[../tech_space/jord/README]] · Intent: [[../feature_list/Jord/README]] · Plans [[../plan/Jord/README]] · Review [[../report/Jord-implemented-review]] · Builder: [[../agents/mimir/00-index]] |
 | Shared libs | `elements/base` (`@altr/base` **leaf**) | Rules: [[../feature_list/00-elements-dependency-rules]] · base README · historical [[../tech_space/01-hub-ui-kit-base]] |
 
-**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02** accepted → **phase-02.5** / **02.75** closed → **phase-03** [[../plan/Jord/phase-03/README]] (**active**: one-file-per-AI-task; examples [[../plan/Jord/phase-03/S0034-health-probes|S0034]] · [[../plan/Jord/phase-03/S0035-structured-json-logs|S0035]]; intent [[../feature_list/Jord/INDEX]]). Template: [[../agents/templates/plan-task]]. Functions v2 **runtime** still gated ([[../tech_space/jord/apis/ADR-functions-v2]]).
+**Lab sequence:** [[../plan/00-roadmap-apolyx-jord-artemis]] — Apolyx-S0005 (**done**) → Jord **phase-01** S0001–**S0020** (**done**) → Jord **phase-02** accepted → **phase-02.5** / **02.75** closed → **phase-03** [[../plan/Jord/phase-03/README]] (**active**: **63 one-file AI cards S0034–S0096**, waves A–P ops → Studio v2 → auth/storage → security; start [[../plan/Jord/phase-03/S0034-health-probes|S0034]]; intent [[../feature_list/Jord/INDEX]]). Template: [[../agents/templates/plan-task]]. Functions v2 **runtime** still gated ([[../tech_space/jord/apis/ADR-functions-v2]]).
+
+**Studio v2 intent** added 2026-10-28 (features only, no plan cards): `jord-F0021`…`jord-F0030` — projects/provisioning + dashboard, three-pane shell (schema picker, ordered table sidebar, workspace tabs), column model v2, DataGrid tables workspace (primitive [[../feature_list/ui-kit/apolyx-F0008-datagrid|apolyx-F0008]]), live client data, ERD canvas, SQL editor v2, per-bucket storage providers, auth console. Table: [[../feature_list/Jord/INDEX]].
 
 Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane through phase-01. Intent [[../feature_list/Jord/README]] ([[../feature_list/Jord/done/README\|done]] / [[../feature_list/Jord/todo/README\|todo]]) · Phase-02 shipped [[../feature_list/Jord/done/README]] · Plans [[../plan/Jord/README]]. PocketBase stays optional.
 

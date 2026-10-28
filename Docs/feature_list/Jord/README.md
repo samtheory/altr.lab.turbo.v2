@@ -2,7 +2,7 @@
 title: "feature_list/Jord — intent map"
 description: "Jord intent indexed as jord-F####. done/ shipped, todo/ open, INDEX is the id table."
 created: 2026-10-18
-updated: 2026-10-27
+updated: 2026-10-28
 tags:
   - feature
   - jord
@@ -35,3 +35,7 @@ flowchart LR
 1. ~~Phase-01 / 02 / 02.5 / 02.75~~ — closed or accepted.
 2. **Phase-03** — implement plan tasks under parent feature **jord-F0013+** ([[../../plan/Jord/phase-03/README]]).
 3. Apps stay Apolyx-first.
+
+## Studio v2 intent (added 2026-10-28)
+
+`jord-F0021`…`jord-F0030` describe the next Studio generation: multi-project provisioning + dashboard · three-pane shell with schema picker, ordered table sidebar and workspace tabs · richer columns/relations · Apolyx DataGrid tables workspace · app-facing realtime · ERD canvas · SQL editor v2 · per-bucket storage providers · Supabase-style auth console. Index: [[INDEX|INDEX]]. No plan cards yet — split into phase-04 one-file tasks when scheduled.

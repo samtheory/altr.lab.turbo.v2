@@ -3,7 +3,7 @@ title: "jord-F0015 — Functions v2 runtime"
 feature_id: jord-F0015
 description: "Implement worker_threads Functions runtime per ADR; principal-bound client; timeout/memory caps"
 created: 2026-10-25
-updated: 2026-10-27
+updated: 2026-10-28
 tags:
   - feature
   - jord
@@ -35,3 +35,12 @@ Infinite loop killed at timeout; worker cannot read env secrets; writes respect 
 | [[../done/jord-F0006-apis\|jord-F0006]] | F8 ADR → runtime |
 | [[../done/jord-F0008-policies\|jord-F0008]] | Worker must use same policy path |
 | [[../done/jord-F0012-studio\|jord-F0012]] | Function editor targets new runtime |
+
+## Plan tasks
+
+| Task | Est. | Status |
+|------|------|--------|
+| [[../../../plan/Jord/phase-03/S0090-functions-worker-pool\|S0090]] — worker pool + caps (GATED) | 3 h | todo |
+| [[../../../plan/Jord/phase-03/S0091-functions-client-logs\|S0091]] — principal-bound client + logs (GATED) | 3 h | todo |
+
+Queue: [[../../../plan/Jord/phase-03/README]].

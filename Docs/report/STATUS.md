@@ -1,8 +1,8 @@
 ---
 title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed 2026-10-26; phase-03 candidates open for planning; Functions runtime still gated"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed 2026-10-26; phase-03 queue fully carded (63 tasks, S0034–S0096); Functions runtime still gated"
 created: 2026-09-19
-updated: 2026-10-27
+updated: 2026-10-28
 tags:
   - report
   - status
@@ -13,7 +13,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-27 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] (hosted libSQL atomic tx, console `resync`, PATCH `old`, MinIO S3 live, teardown noise filtered; local CI mirror with pgvector + MinIO) · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-10-28 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] (hosted libSQL atomic tx, console `resync`, PATCH `old`, MinIO S3 live, teardown noise filtered; local CI mirror with pgvector + MinIO) · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -27,7 +27,7 @@ Last updated: 2026-10-27 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]]. First cards: [[../plan/Jord/phase-03/S0034-health-probes|S0034]] · [[../plan/Jord/phase-03/S0035-structured-json-logs|S0035]] under parent **[[../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]]**. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P covering [[../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. First cards: [[../plan/Jord/phase-03/S0034-health-probes|S0034]] · [[../plan/Jord/phase-03/S0035-structured-json-logs|S0035]]. Feature index + per-feature plan links: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet
@@ -41,6 +41,8 @@ _(Postgres + MinIO exercised locally 2026-10-26. Hosted `libsql://` live test ru
 ## Planned (repo)
 
 Feature map: [[../feature_list/Jord/README]] · **done/** [[../feature_list/Jord/done/README]] · **todo/** [[../feature_list/Jord/todo/README]] · Phase-03 tasks: [[../plan/Jord/phase-03/README]] · Queue hub: [[../plan/Jord/README]] · Task template: [[../agents/templates/plan-task]] · Phase-02 rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+
+**Studio v2 intent + plan cards 2026-10-28** (every feature carded in [[../plan/Jord/phase-03/README]]): [[../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] projects & provisioning · [[../feature_list/Jord/todo/jord-F0022-project-dashboard|F0022]] dashboard · [[../feature_list/Jord/todo/jord-F0023-studio-shell-v2|F0023]] shell v2 · [[../feature_list/Jord/todo/jord-F0024-column-model-v2|F0024]] column model · [[../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|F0025]] tables workspace · [[../feature_list/Jord/todo/jord-F0026-live-data-client|F0026]] live client data · [[../feature_list/Jord/todo/jord-F0027-relationship-canvas|F0027]] ERD canvas · [[../feature_list/Jord/todo/jord-F0028-sql-editor-v2|F0028]] SQL editor v2 · [[../feature_list/Jord/todo/jord-F0029-storage-buckets|F0029]] storage buckets & providers · [[../feature_list/Jord/todo/jord-F0030-auth-console|F0030]] auth console · grid primitive [[../feature_list/ui-kit/apolyx-F0008-datagrid|apolyx-F0008]].
 
 Soft leftovers: [[../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] · Artemis · Tia
 

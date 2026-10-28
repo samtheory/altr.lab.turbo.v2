@@ -3,7 +3,7 @@ title: "jord-F0017 — table API v2"
 feature_id: jord-F0017
 description: "FK embeds with per-table policies, keyset pagination, bulk upsert, RPC"
 created: 2026-10-25
-updated: 2026-10-27
+updated: 2026-10-28
 tags:
   - feature
   - jord
@@ -30,3 +30,13 @@ Embed never returns a row the caller could not read directly; keyset paging stab
 |----|--------|
 | [[../done/jord-F0006-apis\|jord-F0006]] | F4 has no embeds today |
 | [[../done/jord-F0008-policies\|jord-F0008]] | Must apply per embedded table |
+
+## Plan tasks
+
+| Task | Est. | Status |
+|------|------|--------|
+| [[../../../plan/Jord/phase-03/S0078-fk-embeds\|S0078]] — FK embeds with per-table policies | 3 h | todo |
+| [[../../../plan/Jord/phase-03/S0079-keyset-pagination\|S0079]] — keyset pagination | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/S0080-bulk-upsert-rpc\|S0080]] — bulk upsert + RPC | 3 h | todo |
+
+Queue: [[../../../plan/Jord/phase-03/README]].

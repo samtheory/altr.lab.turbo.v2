@@ -1,8 +1,8 @@
 ---
 title: "plan/Jord — phase hub"
-description: "Jord plan root: phase-01–02.75 closed; phase-03 active with one-file-per-AI-task cards"
+description: "Jord plan root: phase-01–02.75 closed; phase-03 active queue with 63 one-file-per-AI-task cards"
 created: 2026-10-18
-updated: 2026-10-27
+updated: 2026-10-28
 tags:
   - plan
   - jord
@@ -26,7 +26,7 @@ Intent: [[../../feature_list/Jord/README]] ([[../../feature_list/Jord/done/READM
 | **02** | [[phase-02/README]] | **Accepted** · [[phase-02/00-task-rollup]] | Features archived under [[../../feature_list/Jord/done/README]] |
 | **02.5** | [[phase-02.5/README]] | **Code done** (2026-10-25) | Acceptance closeout |
 | **02.75** | [[phase-02.75/README]] | **Closed 2026-10-26** | Leftovers before phase-03 |
-| **03** | [[phase-03/README]] | **Active** — single-task queue | First cards: [[phase-03/S0034-health-probes\|S0034]] · [[phase-03/S0035-structured-json-logs\|S0035]] · parent [[../../feature_list/Jord/INDEX]] |
+| **03** | [[phase-03/README]] | **Active** — single-task queue, **63 cards** | Waves A–P: ops [[phase-03/S0034-health-probes\|S0034]] → Studio v2 [[phase-03/S0042-control-plane-store-adr\|S0042]]…[[phase-03/S0096-dashboard-ui\|S0096]] · gated Functions [[phase-03/S0090-functions-worker-pool\|S0090]] · parent [[../../feature_list/Jord/INDEX]] |
 
 ```mermaid
 flowchart LR

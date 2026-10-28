@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "feature_list/Jord/done/jord-F0002-dialects.md",
+                "file": "plan/Jord/phase-03/S0094-dependency-audit-ci.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "jord-F0002-dialects"
+              "title": "S0094-dependency-audit-ci"
             }
           }
         ]
@@ -188,10 +188,23 @@
       "graph-styler:Graph Styler": false
     }
   },
-  "active": "83951ac55895cc18",
+  "active": "0d0147ae7713d13c",
   "lastOpenFiles": [
-    "temp/output/jord-phase-03-ai-handoff.md",
+    "plan/Jord/phase-03/S0091-functions-client-logs.md",
+    "plan/Jord/phase-03/S0094-dependency-audit-ci.md",
+    "plan/Jord/phase-03/S0095-project-stats-endpoint.md",
+    "plan/Jord/phase-03/S0096-dashboard-ui.md",
+    "plan/Jord/phase-03/S0071-auth-console-sections.md",
+    "plan/Jord/phase-03/S0056-grid-column-ops.md",
+    "plan/Jord/phase-03/S0048-right-inspector.md",
+    "plan/Jord/phase-03/S0045-project-scoped-routes.md",
+    "plan/Jord/phase-03/S0041-dockerfile-deploy.md",
     "plan/Jord/phase-03/S0034-health-probes.md",
+    "plan/Jord/phase-03/README.md",
+    "feature_list/Jord/todo/jord-F0026-live-data-client.md",
+    "feature_list/Jord/todo/05-phase-03-candidates.md",
+    "feature_list/Jord/done/jord-F0002-dialects.md",
+    "temp/output/jord-phase-03-ai-handoff.md",
     "feature_list/tia/INDEX.md",
     "feature_list/ui-kit/INDEX.md",
     "feature_list/Jord/todo/jord-F0020-soft-leftovers.md",
@@ -203,19 +216,6 @@
     "feature_list/Jord/todo/jord-F0014-typed-dx.md",
     "feature_list/Jord/todo/jord-F0013-production-ops.md",
     "feature_list/Jord/INDEX.md",
-    "feature_list/Jord/done/jord-F0012-studio.md",
-    "feature_list/Jord/done/jord-F0011-vectors.md",
-    "feature_list/Jord/done/jord-F0010-blobs.md",
-    "feature_list/Jord/done/jord-F0009-realtime.md",
-    "feature_list/Jord/done/jord-F0008-policies.md",
-    "feature_list/Jord/done/jord-F0007-jobs.md",
-    "feature_list/Jord/done/jord-F0006-apis.md",
-    "feature_list/Jord/done/jord-F0005-auth.md",
-    "feature_list/Jord/done/jord-F0004-schema.md",
-    "feature_list/Jord/done/jord-F0003-writes.md",
-    "feature_list/Jord/done/jord-F0002-dialects.md",
-    "feature_list/Jord/done/jord-F0001-overview.md",
-    "plan/Jord/phase-03/README.md",
     "plan/Jord/phase-03",
     "feature_list/Jord/todo",
     "feature_list/Jord/done",
