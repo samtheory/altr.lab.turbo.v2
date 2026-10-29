@@ -26,7 +26,7 @@ Intent: [[../../feature_list/Jord/README]] ([[../../feature_list/Jord/done/READM
 | **02** | [[phase-02/README]] | **Accepted** · [[phase-02/00-task-rollup]] | Features archived under [[../../feature_list/Jord/done/README]] |
 | **02.5** | [[phase-02.5/README]] | **Code done** (2026-10-25) | Acceptance closeout |
 | **02.75** | [[phase-02.75/README]] | **Closed 2026-10-26** | Leftovers before phase-03 |
-| **03** | [[phase-03/README]] | **Active** — single-task queue, **63 cards** · **S0034 done** | Waves A–P: next [[phase-03/S0035-structured-json-logs\|S0035]] → Studio v2 [[phase-03/S0042-control-plane-store-adr\|S0042]]…[[phase-03/S0096-dashboard-ui\|S0096]] · gated Functions [[phase-03/S0090-functions-worker-pool\|S0090]] · parent [[../../feature_list/Jord/INDEX]] |
+| **03** | [[phase-03/README]] | **Active** — single-task queue, **63 cards** · **S0034–S0035 done** | Waves A–P: next [[phase-03/S0036-shared-rate-limit-idempotency\|S0036]] → Studio v2 [[phase-03/S0042-control-plane-store-adr\|S0042]]…[[phase-03/S0096-dashboard-ui\|S0096]] · gated Functions [[phase-03/S0090-functions-worker-pool\|S0090]] · parent [[../../feature_list/Jord/INDEX]] |
 
 ```mermaid
 flowchart LR

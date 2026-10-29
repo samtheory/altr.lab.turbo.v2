@@ -2,7 +2,7 @@
 title: "S0035 — structured JSON request logs"
 description: "Emit one JSON log line per HTTP request on stdout/stderr for ops (no secrets); keep LogBatcher/Studio ring separate"
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-29
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # S0035 — structured JSON request logs
 
-> **Status:** todo  
+> **Status:** done  
 > **Phase:** [[README]] · Parent feature: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/overview/README]] (and jobs/logs if ring behavior is mentioned)
 
 ## Routing (who / how long / which model)
@@ -102,18 +102,20 @@ sequenceDiagram
 
 ## Done when (acceptance)
 
-- [ ] One JSON object per finished request (when enabled)
-- [ ] Fields: `level`, `msg`, `requestId`, `method`, `path`, `status`, `ms`, `principal`
-- [ ] No Authorization / cookie / body content in the line
-- [ ] `JORD_HTTP_LOG=0` disables
-- [ ] Test proves shape; proof pasted below
+- [x] One JSON object per finished request (when enabled)
+- [x] Fields: `level`, `msg`, `requestId`, `method`, `path`, `status`, `ms`, `principal`
+- [x] No Authorization / cookie / body content in the line
+- [x] `JORD_HTTP_LOG=0` disables
+- [x] Test proves shape; proof pasted below
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server typecheck` | |
-| | `pnpm --filter @altr/jord-server exec vitest run` *(request-log test path)* | |
+| 2026-10-29 | `pnpm --filter @altr/jord-server typecheck` | exit 0 |
+| 2026-10-29 | `pnpm --filter @altr/jord-server exec vitest run src/http/request-log.test.ts` | **7 passed** |
+
+**Shipped:** `cloud/jord/src/http/request-log.ts` · wired in `createJordApp` · `/health*` skipped (LB spam) · 4xx=`info`, 5xx=`error` · inject `deps.httpLog`.
 
 ## After ship
 
@@ -121,4 +123,4 @@ sequenceDiagram
 |--------|------|
 | tech_space | [[../../../tech_space/jord/overview/README]] |
 | Phase queue | [[README]] status → done |
-| Next suggested split | OTel metrics card · Postgres rate-limit store card (still P1) |
+| Next suggested split | [[S0036-shared-rate-limit-idempotency\|S0036]] · OTel later ([[S0039-otel-traces\|S0039]]) |

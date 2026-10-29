@@ -10,6 +10,8 @@ tags:
   - ci
   - migrations
   - health
+  - http-log
+  - s0035
 ---
 
 # Jord — overview
@@ -57,6 +59,28 @@ Public, unauthenticated. Module: `cloud/jord/src/http/health.ts`. Never returns 
 | `GET /health` | **Back-compat alias** of live **plus** dialect labels | `{ ok, dialect, urlScheme, vectorBackend }` → **200** |
 
 Load balancers / k8s should use **live** for liveness and **ready** for readiness. Prefer those over `/health` for new wiring.
+
+### Structured JSON request logs (S0035)
+
+Ops access log on **stdout** (`info`) / **stderr** (`error` for 5xx). Separate from Studio `LogBatcher` / `jord_logs`. Module: `cloud/jord/src/http/request-log.ts`. Wired early in `createJordApp` (after CORS).
+
+| Field | Meaning |
+|-------|---------|
+| `level` | `info` (2xx/3xx/4xx) or `error` (5xx) |
+| `msg` | always `"http"` |
+| `requestId` | `x-request-id` when short/`[A-Za-z0-9._-]{1,64}`, else UUID |
+| `method` / `path` | request method and path (no query) |
+| `status` / `ms` | response status and elapsed ms |
+| `principal` | kind only: `anon` \| `user` \| `service` \| `operator` \| `none` |
+
+**Never** logged: Authorization, cookies, bodies, header dumps.
+
+| Knob | Default |
+|------|---------|
+| `JORD_HTTP_LOG=0` (or `false` / `off`) | disables; otherwise **on** |
+| `/health` and `/health/*` | **skipped** (avoid LB/k8s probe spam) |
+
+Tests inject `deps.httpLog`. Product log ring unchanged.
 
 ## Example
 

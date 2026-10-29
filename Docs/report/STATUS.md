@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034 health probes done; next S0035); Functions runtime still gated"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0035 done; next S0036); Functions runtime still gated"
 created: 2026-09-19
 updated: 2026-10-29
 tags:
@@ -14,7 +14,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-29 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0034 health probes** (`/health/live` + `/health/ready`) · Prior: **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-10-29 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0035 structured JSON request logs** · Prior: **S0034 health probes** · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -28,7 +28,7 @@ Last updated: 2026-10-29 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P covering [[../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. **S0034 done** (live/ready probes · [[../tech_space/jord/overview/README#health-probes-s0034]]). **Next:** [[../plan/Jord/phase-03/S0035-structured-json-logs|S0035]]. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P covering [[../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. **S0034–S0035 done** (health · JSON HTTP logs · [[../tech_space/jord/overview/README#structured-json-request-logs-s0035]]). **Next:** [[../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency|S0036]]. Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet

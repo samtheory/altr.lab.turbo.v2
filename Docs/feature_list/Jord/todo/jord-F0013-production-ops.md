@@ -10,6 +10,7 @@ tags:
   - todo
   - jord-F0013
   - phase-03
+  - s0035
 ---
 
 # jord-F0013 — production ops (multi-instance ready)
@@ -43,7 +44,7 @@ Two server instances behind one URL: shared rate limit, cross-instance idempoten
 | Task | Est. | Status |
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/S0034-health-probes\|S0034]] — health live/ready | 45–75 min | **done** 2026-10-29 |
-| [[../../../plan/Jord/phase-03/S0035-structured-json-logs\|S0035]] — structured JSON logs | 60–90 min | todo |
+| [[../../../plan/Jord/phase-03/S0035-structured-json-logs\|S0035]] — structured JSON logs | 60–90 min | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency\|S0036]] — shared rate limit + idempotency | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0037-listen-seq-fanout\|S0037]] — LISTEN fan-out + shared watermark | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0038-pg-write-concurrency\|S0038]] — JORD_PG_WRITE_CONCURRENCY | 45–75 min | todo |

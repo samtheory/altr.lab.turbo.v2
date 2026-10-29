@@ -26,3 +26,15 @@ export {
   type HealthReadyOk,
   type HealthReadyReasons,
 } from "./health.js";
+export {
+  createHttpRequestLogMiddleware,
+  defaultHttpLogWriter,
+  isHttpLogSkippedPath,
+  resolveHttpLogEnabled,
+  resolveRequestId,
+  type HttpLogPrincipal,
+  type HttpRequestLog,
+  type HttpRequestLogLevel,
+  type HttpRequestLogOptions,
+  type HttpRequestLogWriter,
+} from "./request-log.js";

@@ -103,11 +103,14 @@ import {
 import {
   createCorsMiddleware,
   createDataRateLimitMiddleware,
+  createHttpRequestLogMiddleware,
   createJsonBodyLimitMiddleware,
   parseCorsOrigins,
   registerHealthRoutes,
   resolveDataRateLimit,
+  resolveHttpLogEnabled,
   resolveMaxJsonBytes,
+  type HttpRequestLogWriter,
 } from "./http/index.js";
 import {
   createIdempotencyStore,
@@ -182,10 +185,15 @@ export type JordAppDeps = {
   storage?: JordStoragePort;
   /** HMAC secret for local signed blob URLs. */
   blobSigningSecret?: string;
-  /** Optional process env for CORS / body / rate / idempotency knobs. */
+  /** Optional process env for CORS / body / rate / idempotency / HTTP log knobs. */
   env?: NodeJS.ProcessEnv;
   /** Shared idempotency store. Created from env when omitted. */
   idempotency?: IdempotencyStore;
+  /**
+   * Structured JSON request log sink (S0035). Defaults to stdout/stderr.
+   * Inject in tests; set `JORD_HTTP_LOG=0` to disable.
+   */
+  httpLog?: HttpRequestLogWriter;
 };
 
 function publicRecord(row: JordRecord) {
@@ -447,6 +455,13 @@ export function createJordApp(deps: JordAppDeps) {
     });
 
   app.use("*", createCorsMiddleware(parseCorsOrigins(env)));
+  app.use(
+    "*",
+    createHttpRequestLogMiddleware({
+      enabled: resolveHttpLogEnabled(env),
+      write: deps.httpLog,
+    }),
+  );
   app.use("*", createJsonBodyLimitMiddleware(resolveMaxJsonBytes(env)));
 
   registerSignedBlobRoutes(app, {
