@@ -105,6 +105,7 @@ import {
   createDataRateLimitMiddleware,
   createJsonBodyLimitMiddleware,
   parseCorsOrigins,
+  registerHealthRoutes,
   resolveDataRateLimit,
   resolveMaxJsonBytes,
 } from "./http/index.js";
@@ -620,14 +621,10 @@ export function createJordApp(deps: JordAppDeps) {
     }),
   );
 
-  app.get("/health", (c) =>
-    c.json({
-      ok: true as const,
-      dialect: deps.jord.dialect,
-      urlScheme: deps.jord.urlScheme,
-      vectorBackend: deps.jord.vectorBackend,
-    }),
-  );
+  registerHealthRoutes(app, {
+    jord: deps.jord,
+    enqueueWrite: deps.enqueueWrite,
+  });
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
   protectedRoutes.use("*", requireAuth);

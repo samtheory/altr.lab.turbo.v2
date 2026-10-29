@@ -160,6 +160,8 @@ async function readSseUntil(
 
 const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "GET", path: "/health" },
+  { method: "GET", path: "/health/live" },
+  { method: "GET", path: "/health/ready" },
   { method: "POST", path: "/auth/signup" },
   { method: "GET", path: "/auth/me" },
   { method: "GET", path: "/records" },

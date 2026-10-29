@@ -2,7 +2,7 @@
 title: "Jord — auth and roles"
 description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, and the route matrix"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-29
 tags:
   - tech-space
   - jord
@@ -16,7 +16,7 @@ tags:
 
 ## Why
 
-One process serves Studio operators and, from S0021-B, end-user principals. Operator tokens administer Jord. User and anon tokens are the app's principals. They are not interchangeable. `GET /health` stays public and does not echo secrets.
+One process serves Studio operators and, from S0021-B, end-user principals. Operator tokens administer Jord. User and anon tokens are the app's principals. They are not interchangeable. `GET /health`, `/health/live`, and `/health/ready` stay public and do not echo secrets.
 
 ## What
 
@@ -48,7 +48,7 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 
 | Route group | operator `admin` | operator `editor` | operator `readonly` | `service` | `user` | `anon` |
 |-------------|------------------|-------------------|---------------------|-----------|--------|--------|
-| `GET /health` | yes | yes | yes | yes | yes | yes |
+| `GET /health`, `/health/live`, `/health/ready` | public (no auth) | public | public | public | public | public |
 | `POST /auth/signup\|signin\|refresh\|recover\|reset\|confirm` | public, rate-limited | public | public | public | public | public |
 | `POST /auth/logout`, `GET /auth/me` | yes | yes | yes | yes | yes | me = anon claims |
 | `POST /auth/anon-key` | yes | no | no | no | no | no |

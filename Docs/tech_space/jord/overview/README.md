@@ -2,13 +2,14 @@
 title: "Jord — overview"
 description: "What Jord is, the three packages, the request path, and the invariants that still hold"
 created: 2026-10-24
-updated: 2026-10-26
+updated: 2026-10-29
 tags:
   - tech-space
   - jord
   - overview
   - ci
   - migrations
+  - health
 ---
 
 # Jord — overview
@@ -43,16 +44,30 @@ Studio browser
           → LibSqlAdapter | PostgresAdapter
 ```
 
-`createJordClient({ url })` picks the adapter from `DATABASE_URL`. Boot runs the forward-only migration runner (below). `GET /health` returns `ok`, `dialect`, `urlScheme`, and `vectorBackend`. It never returns a URL or token.
+`createJordClient({ url })` picks the adapter from `DATABASE_URL`. Boot runs the forward-only migration runner (below).
+
+### Health probes (S0034)
+
+Public, unauthenticated. Module: `cloud/jord/src/http/health.ts`. Never returns a URL or token.
+
+| Path | Meaning | Body |
+|------|---------|------|
+| `GET /health/live` | Process is serving (no DB) | `{ ok: true }` → **200** |
+| `GET /health/ready` | DB ping + baseline migration (`0001` in `jord_migrations`) + write queue present with finite `pending()` | `{ ok: true }` → **200**; else `{ ok: false, reasons: { db?, migrations?, queue? } }` → **503** |
+| `GET /health` | **Back-compat alias** of live **plus** dialect labels | `{ ok, dialect, urlScheme, vectorBackend }` → **200** |
+
+Load balancers / k8s should use **live** for liveness and **ready** for readiness. Prefer those over `/health` for new wiring.
 
 ## Example
 
 ```bash
 pnpm dev:jord
+curl -s http://127.0.0.1:8787/health/live
+curl -s http://127.0.0.1:8787/health/ready
 curl -s http://127.0.0.1:8787/health
 ```
 
-A file install answers `dialect: "libsql"` and `urlScheme: "file"`.
+A file install answers `dialect: "libsql"` and `urlScheme: "file"` on `/health`.
 
 ## Boot migrations
 

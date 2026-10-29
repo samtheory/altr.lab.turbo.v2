@@ -14,7 +14,9 @@ export function surfaceFor(method: string, path: string): string | null {
   const normalized = normalizePath(path);
   const verb = method.toUpperCase();
 
-  if (normalized === "/health") return "health";
+  if (normalized === "/health" || normalized.startsWith("/health/")) {
+    return "health";
+  }
   if (normalized === "/api/v1" || normalized.startsWith("/api/v1/")) {
     return "api/v1";
   }

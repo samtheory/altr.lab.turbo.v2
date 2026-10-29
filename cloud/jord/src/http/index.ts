@@ -14,3 +14,15 @@ export {
   WINDOW_MS,
   type DataRateLimitOptions,
 } from "./data-rate-limit.js";
+export {
+  checkReady,
+  healthCompatBody,
+  healthLiveBody,
+  registerHealthRoutes,
+  type HealthCompatBody,
+  type HealthLiveBody,
+  type HealthReadyDeps,
+  type HealthReadyFail,
+  type HealthReadyOk,
+  type HealthReadyReasons,
+} from "./health.js";

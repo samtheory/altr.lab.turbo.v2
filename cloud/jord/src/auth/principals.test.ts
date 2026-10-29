@@ -178,6 +178,8 @@ describe("route matrix", () => {
 
   it("matches the groups that exist today and denies the table API", () => {
     expect(routeAllowed(operator("admin"), "GET", "/health")).toBe(true);
+    expect(routeAllowed(operator("admin"), "GET", "/health/live")).toBe(true);
+    expect(routeAllowed(operator("admin"), "GET", "/health/ready")).toBe(true);
     expect(routeAllowed(operator("readonly"), "GET", "/records")).toBe(true);
     expect(routeAllowed(operator("editor"), "POST", "/records")).toBe(true);
     expect(routeAllowed(operator("editor"), "POST", "/schema/tables")).toBe(false);

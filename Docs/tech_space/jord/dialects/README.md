@@ -2,7 +2,7 @@
 title: "Jord — dialects"
 description: "file libSQL, hosted libsql://, and Postgres: scheme dispatch, WAL, timestamps, health"
 created: 2026-10-24
-updated: 2026-10-26
+updated: 2026-10-29
 tags:
   - tech-space
   - jord
@@ -54,7 +54,7 @@ DATABASE_URL=libsql://your-db.turso.io
 LIBSQL_AUTH_TOKEN=…
 ```
 
-`/health` then includes `urlScheme: "libsql"` and still `dialect: "libsql"`. No host string.
+`GET /health` (and dialect labels on the back-compat alias) then includes `urlScheme: "libsql"` and still `dialect: "libsql"`. No host string. Readiness is `GET /health/ready` — see [[../overview/README#health-probes-s0034]].
 
 Live Postgres tests run when `JORD_TEST_POSTGRES_URL` is set (always set on the `jord-postgres` Actions job).
 

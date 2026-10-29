@@ -2,7 +2,7 @@
 title: "S0034 — health live + ready probes"
 description: "Add /health/live and /health/ready for process liveness and dependency readiness (DB + migrations + write queue)"
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-29
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # S0034 — health live + ready probes
 
-> **Status:** todo  
+> **Status:** done  
 > **Phase:** [[README]] · Parent feature: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/overview/README]]
 
 ## Routing (who / how long / which model)
@@ -40,11 +40,11 @@ jord-F0013 needs deployability. Operators cannot put Jord behind a load balancer
 |------|------|
 | Intent | [[../../../feature_list/Jord/INDEX]] P1 · [[../../../feature_list/Jord/done/jord-F0006-apis]] |
 | As-built | [[../../../tech_space/jord/overview/README]] |
-| Code today | `cloud/jord/src/app.ts` — `GET /health` returns `{ ok, dialect, urlScheme, vectorBackend }` (~line 623) |
-| Auth | `cloud/jord/src/auth/route-inventory.ts` treats `/health` as public `health` |
-| Tests | `cloud/jord/src/app.test.ts` (`health reports dialect without auth`) · `http-hardening.test.ts` · `principals.test.ts` |
+| Code today | `cloud/jord/src/http/health.ts` · wired from `cloud/jord/src/app.ts` |
+| Auth | `cloud/jord/src/auth/route-inventory.ts` treats `/health` and `/health/*` as public `health` |
+| Tests | `cloud/jord/src/http/health.test.ts` · `app.test.ts` · `http-hardening.test.ts` · `principals.test.ts` · `part-c.test.ts` inventory |
 
-**Do not break:** public unauthenticated access to probes; CORS behavior on health paths; existing clients that hit `/health` (keep it working — prefer alias to live or document redirect).
+**Do not break:** public unauthenticated access to probes; CORS behavior on health paths; existing clients that hit `/health` (kept as live + dialect metadata).
 
 ## In scope
 
@@ -53,7 +53,7 @@ jord-F0013 needs deployability. Operators cannot put Jord behind a load balancer
   - DB: one cheap query / ping via `deps.jord`
   - Migrations: baseline applied (reuse existing migration bookkeeping if present; do not invent a second ledger)
   - Write queue: `enqueueWrite` exists and `pending()` is finite (queue object present — not “draining forever”)
-- Keep `GET /health` as **alias of live** (or live + dialect metadata for back-compat — pick one and document in tech_space)
+- Keep `GET /health` as **live + dialect metadata** for back-compat
 - Route inventory + principal tests updated so probes stay public
 - Vitest coverage for live 200, ready 200 on healthy fixture, ready 503 when jord ping fails (mock or close client)
 
@@ -94,23 +94,26 @@ flowchart TB
 
 ## Done when (acceptance)
 
-- [ ] `GET /health/live` → 200 without DB
-- [ ] `GET /health/ready` → 200 on normal test app; 503 when DB ping fails
-- [ ] `/health` still works for existing callers (alias or documented equivalent)
-- [ ] Route inventory / auth tests still green for public health
-- [ ] Proof commands pasted below
+- [x] `GET /health/live` → 200 without DB
+- [x] `GET /health/ready` → 200 on normal test app; 503 when DB ping fails
+- [x] `/health` still works for existing callers (alias or documented equivalent)
+- [x] Route inventory / auth tests still green for public health
+- [x] Proof commands pasted below
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server typecheck` | |
-| | `pnpm --filter @altr/jord-server exec vitest run` *(or targeted health test file)* | |
+| 2026-10-29 | `pnpm --filter @altr/jord-server typecheck` | exit 0 |
+| 2026-10-29 | `pnpm --filter @altr/jord-server exec vitest run src/http/health.test.ts` | 5 passed |
+| 2026-10-29 | `pnpm --filter @altr/jord-server exec vitest run src/app.test.ts -t "health reports"` | 1 passed |
+| 2026-10-29 | `pnpm --filter @altr/jord-server exec vitest run src/policies/part-c.test.ts -t "fails the inventory"` | 1 passed |
+| 2026-10-29 | `pnpm --filter @altr/jord-server exec vitest run src/auth/principals.test.ts` | 11 passed |
 
 ## After ship
 
 | Update | Path |
 |--------|------|
-| tech_space | [[../../../tech_space/jord/overview/README]] |
-| feature_list (if contract listed) | [[../../../feature_list/Jord/done/jord-F0006-apis]] or overview |
-| Phase queue | [[README]] status → done |
+| tech_space | [[../../../tech_space/jord/overview/README]] · [[../../../tech_space/jord/auth/README]] |
+| feature_list | [[../../../feature_list/Jord/todo/jord-F0013-production-ops\|jord-F0013]] (S0034 row → done) |
+| Phase queue | [[README]] S0034 → done |
