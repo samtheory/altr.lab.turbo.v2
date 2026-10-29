@@ -12,6 +12,9 @@ tags:
   - health
   - http-log
   - s0035
+  - s0036
+  - rate-limit
+  - idempotency
 ---
 
 # Jord — overview
@@ -165,13 +168,27 @@ Before `/api/v1` exists, the server hardens the edge:
 |---------|---------|
 | CORS | `JORD_CORS_ORIGINS` comma allow-list. Unset → no `Access-Control-Allow-Origin` for cross-origin |
 | JSON body | `JORD_MAX_JSON_BYTES` default **1 MiB** → **413** `payload_too_large`. Blob uploads keep the storage cap |
-| Data rate limits | **120 / 60s** per route bucket + client on `/records`, schema rows, `/vectors`, `/blobs`, `/apis/generated`, `/x`. Auth keeps S0021-B **30 / 60s** |
+| Data rate limits | **120 / 60s** per route bucket + client on `/records`, schema rows, `/vectors`, `/blobs`, `/apis/generated`, `/x`. Auth keeps S0021-B **30 / 60s** (still in-process) |
 | Idempotency | Optional `Idempotency-Key` on write paths; same key+principal+body replays; different body → **409**. TTL default 24h (`JORD_IDEMPOTENCY_TTL_MS`) |
 | Shutdown | Drain the write queue, close realtime, then pools / WAL / HTTP |
 
-Modules: `cloud/jord/src/http/`, `cloud/jord/src/idempotency/`, `queue.drain`, `RealtimeBus.close`. Writes detail: [[../writes/README]].
+Modules: `cloud/jord/src/http/`, `cloud/jord/src/idempotency/`, `queue.drain`, `RealtimeBus.close`. Writes detail: [[../writes/README]]. Shared PG stores: [[../apis/README#shared-rate-limit--idempotency-s0036]].
 
-**Single-process stores.** The rate-limit buckets, the idempotency cache, and the SQL console history live **in memory** in one `jord-server` process. A restart clears them, and a second instance would not share them. The same holds for the realtime bus and the outbox commit watermark. Running more than one instance is phase-03 work.
+### Shared rate limit + idempotency (S0036)
+
+On **Postgres**, data-route rate counters and idempotency replay live in the project DB so N instances share one budget and one cache. **libSQL** keeps the in-process memory path (offline / single file). Migration `0007_rate_limit_idempotency`. No Redis.
+
+| Store | Table | Selection |
+|-------|-------|-----------|
+| Rate limit | `jord_rate_limits(bucket, window_start, count)` | `dialect === "postgres"` → `createPostgresRateLimitStore`; else memory |
+| Idempotency | `jord_idempotency(key, principal, route, request_hash, status, response_json, expires_at)` | same dialect gate → `createPostgresIdempotencyStore` |
+
+- Rate check is one upsert: `INSERT … ON CONFLICT DO UPDATE … RETURNING count`. PG windows are **fixed** and aligned to the **DB clock** (memory still opens a window on first hit).
+- Idempotency key is `(key, principal)`; `route` is informational. Replay returns stored status + body; hash mismatch → **409** `idempotency_conflict`.
+- Sweeper job kind `shared_state_sweep` (seeded on Postgres only) deletes expired idempotency rows and old rate windows. Modules: `http/rate-limit-store.ts`, `idempotency/pg-store.ts`, `idempotency/sweep.ts`.
+- Failure policy: rate-limit DB errors **fail open** (log + allow); idempotency lookup failure → **500**; failed `remember` after a committed write is logged only.
+
+**Still process-local:** SQL console history, auth route rate limits (30/min), realtime bus, outbox commit watermark → later phase-03 cards (e.g. [[../../../plan/Jord/phase-03/S0037-listen-seq-fanout|S0037]]).
 
 ## Not in Jord yet
 

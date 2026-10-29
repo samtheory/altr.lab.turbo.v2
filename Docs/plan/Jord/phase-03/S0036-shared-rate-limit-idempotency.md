@@ -2,7 +2,7 @@
 title: "S0036 — shared rate limit + idempotency in Postgres"
 description: "Move data rate limits and idempotency keys from process memory into Postgres tables so two instances enforce the same limits"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-10-29
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # S0036 — shared rate limit + idempotency in Postgres
 
-> **Status:** todo · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/apis/README]]
+> **Status:** **done** 2026-10-29 · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/apis/README]]
 
 ## Routing (who / how long / which model)
 
@@ -83,18 +83,20 @@ flowchart LR
 
 ## Done when
 
-- [ ] Two app instances on one Postgres share one budget (test)
-- [ ] Replayed idempotent POST returns the original response, second instance included
-- [ ] Different body with the same key → 409
-- [ ] libSQL tests unchanged and green
-- [ ] Proof pasted below
+- [x] Two app instances on one Postgres share one budget (test)
+- [x] Replayed idempotent POST returns the original response, second instance included
+- [x] Different body with the same key → 409
+- [x] libSQL tests unchanged and green
+- [x] Proof pasted below
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server typecheck` | |
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-10-29 | `pnpm --filter @altr/jord-server typecheck` | pass (tsc --noEmit, 0 errors) |
+| 2026-10-29 | `pnpm --filter @altr/jord-server test` (no PG, file only) | 23 files passed · 141 tests passed · 15 skipped (PG-gated) |
+| 2026-10-29 | `pnpm --filter @altr/jord-server test` (`JORD_TEST_POSTGRES_URL` → pgvector/pg16) | 23 files passed · 201 tests passed · 8 skipped (pre-existing, unrelated) · incl. 12/12 in `idempotency/shared-state.test.ts` |
+| 2026-10-29 | `pnpm --filter @altr/jord typecheck && test` | pass · 84 passed · 9 skipped (PG-gated) |
 
 ## After ship
 

@@ -1,12 +1,15 @@
 ---
 title: "Jord — APIs"
-description: "Generated records CRUD catalog, built-in function steps, custom /x/:slug bindings, and Functions v2 ADR"
+description: "Generated records CRUD catalog, built-in function steps, custom /x/:slug bindings, shared PG rate/idempotency (S0036), and Functions v2 ADR"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-29
 tags:
   - tech-space
   - jord
   - apis
+  - s0036
+  - rate-limit
+  - idempotency
 ---
 
 # Jord — APIs
@@ -64,6 +67,22 @@ Caps: default limit **100**, max **1000**, `in(...)` max **100**, JSON body **1 
 `records` still honors `JORD_GENERATED_API_DISABLED` (**503**). User and anon stay default-deny until a policy allows the table. `/api/v1` shares the data-route limit (120 / minute) and idempotency.
 
 Studio playground: `/apis/table` (Apolyx). Apps call the same routes through `@altr/jord-client` (`tableFetch` and `JordClient`). That package does not import `@altr/jord`. Studio keeps its own BFF and does not embed the client.
+
+## Shared rate limit + idempotency (S0036)
+
+Data-route limits and `Idempotency-Key` replay are **shared across instances on Postgres** via migration `0007_rate_limit_idempotency`. libSQL stays in-memory. Overview: [[../overview/README#shared-rate-limit--idempotency-s0036]].
+
+| Piece | Path |
+|-------|------|
+| Rate middleware | `cloud/jord/src/http/data-rate-limit.ts` (optional `RateLimitStore`) |
+| Memory / PG rate store | `cloud/jord/src/http/rate-limit-store.ts` |
+| Memory idempotency | `cloud/jord/src/idempotency/store.ts` |
+| PG idempotency | `cloud/jord/src/idempotency/pg-store.ts` |
+| TTL sweep | `cloud/jord/src/idempotency/sweep.ts` · job `shared_state_sweep` |
+| Wiring | `cloud/jord/src/app.ts` — `deps.jord.dialect === "postgres"` selects PG stores; `deps.rateLimit` / `deps.idempotency` override for tests |
+| Migration | `elements/jord/migrations/{postgres,libsql}/0007_rate_limit_idempotency.sql` |
+
+**429** body for data routes is unchanged: `{ error: "too_many_requests" }`. Auth signup/signin limits remain process-local (S0021-B).
 
 ## Client (S0029)
 

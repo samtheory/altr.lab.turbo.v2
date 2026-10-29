@@ -1,5 +1,10 @@
 import type { MiddlewareHandler } from "hono";
 
+import {
+  createMemoryRateLimitStore,
+  type RateLimitStore,
+} from "./rate-limit-store.js";
+
 export const DEFAULT_DATA_MAX_HITS = 120;
 export const WINDOW_MS = 60_000;
 
@@ -49,27 +54,10 @@ function clientKey(header: string | undefined): string {
   return header?.split(",")[0]?.trim() || "local";
 }
 
-function allowHit(
-  store: Map<string, { count: number; reset: number }>,
-  key: string,
-  maxHits: number,
-  windowMs: number,
-): boolean {
-  const now = Date.now();
-  const slot = store.get(key);
-  if (!slot || slot.reset <= now) {
-    store.set(key, { count: 1, reset: now + windowMs });
-    return true;
-  }
-  slot.count += 1;
-  return slot.count <= maxHits;
-}
-
 export function createDataRateLimitMiddleware(
   opts: DataRateLimitOptions,
+  store: RateLimitStore = createMemoryRateLimitStore(),
 ): MiddlewareHandler {
-  const store = new Map<string, { count: number; reset: number }>();
-
   return async (c, next) => {
     const bucket = dataRouteBucket(c.req.path);
     if (!bucket) {
@@ -78,7 +66,16 @@ export function createDataRateLimitMiddleware(
     }
 
     const key = `${bucket}:${clientKey(c.req.header("x-forwarded-for"))}`;
-    if (!allowHit(store, key, opts.maxHits, opts.windowMs)) {
+    let count: number;
+    try {
+      count = await store.hit(key, opts.windowMs);
+    } catch (err) {
+      // A limiter outage must not take the data API down with it.
+      console.error("[@altr/jord-server] rate-limit store failed, allowing", err);
+      await next();
+      return;
+    }
+    if (count > opts.maxHits) {
       return c.json({ error: "too_many_requests" }, 429);
     }
 

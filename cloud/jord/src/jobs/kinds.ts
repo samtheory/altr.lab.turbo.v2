@@ -6,6 +6,7 @@ export const BUILTIN_JOB_KINDS = [
   "records_count",
   "changes_prune",
   "blobs_gc",
+  "shared_state_sweep",
 ] as const;
 
 export type BuiltinJobKind = (typeof BUILTIN_JOB_KINDS)[number];
@@ -99,6 +100,19 @@ export const JOB_KIND_HANDLERS: Record<BuiltinJobKind, JobKindHandler> = {
       publicBaseUrl: resolvePublicBaseUrl(env),
     });
     const result = await gcExpiredPendingBlobs({ jord, storage });
+    return { result };
+  },
+
+  async shared_state_sweep({ jord, job }) {
+    const { sweepSharedState } = await import("../idempotency/sweep.js");
+    const { resolveDataRateLimit } = await import("../http/data-rate-limit.js");
+    const config = parseConfig(job.config);
+    const windowMs = resolveDataRateLimit(process.env).windowMs;
+    const rateRetainMs =
+      typeof config.rate_retain_ms === "number" && config.rate_retain_ms > 0
+        ? config.rate_retain_ms
+        : Math.max(windowMs * 2, 60_000);
+    const result = await sweepSharedState(jord, { rateRetainMs });
     return { result };
   },
 };

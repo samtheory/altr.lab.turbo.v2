@@ -2,12 +2,14 @@
 title: "Jord — writes"
 description: "One write queue, OCC on records, and primary-key writes on user tables"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-10-29
 tags:
   - tech-space
   - jord
   - writes
   - occ
+  - s0036
+  - idempotency
 ---
 
 # Jord — writes
@@ -50,7 +52,7 @@ Duplicate primary key → **409** `pk_exists`. Missing row → **404**. Reserved
 | User-table planner | `elements/jord/src/schema/row-write.ts` |
 | HTTP | `cloud/jord/src/app.ts` |
 | Queue drain | `createWriteQueue().drain()` on shutdown, before pools close |
-| Idempotency | optional `Idempotency-Key` on record, schema-row, and blob-object writes. Same key + principal + body replays the stored response. Different body → **409** `idempotency_conflict`. TTL default 24h |
+| Idempotency | optional `Idempotency-Key` on record, schema-row, and blob-object writes. Same key + principal + body replays the stored response. Different body → **409** `idempotency_conflict`. TTL default 24h. **Postgres** stores rows in `jord_idempotency` (shared across instances, S0036); **libSQL** keeps the in-memory map — see [[../apis/README#shared-rate-limit--idempotency-s0036]] |
 
 Studio edits `records` at `/records` (column fields, optional JSON check on `body`). Other tables use `/tables/[name]`. `/tables/records` redirects to the OCC editor.
 

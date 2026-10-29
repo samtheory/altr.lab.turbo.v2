@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]].
 
-**Queue status (2026-10-29):** **S0034–S0035 done** (health probes · structured JSON request logs). Next open card: [[S0036-shared-rate-limit-idempotency|S0036]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-10-29):** **S0034–S0036 done** (health probes · structured JSON request logs · shared PG rate limit + idempotency). Next open card: [[S0037-listen-seq-fanout|S0037]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -66,7 +66,7 @@ flowchart LR
 |--:|----|------|------|
 | A1 | [[S0034-health-probes\|S0034]] | `/health/live` + `/health/ready` | **done** 2026-10-29 |
 | A2 | [[S0035-structured-json-logs\|S0035]] | Structured JSON request logs | **done** 2026-10-29 |
-| A3 | [[S0036-shared-rate-limit-idempotency\|S0036]] | Shared rate limit + idempotency in Postgres | 2–3 h |
+| A3 | [[S0036-shared-rate-limit-idempotency\|S0036]] | Shared rate limit + idempotency in Postgres | **done** 2026-10-29 |
 | A4 | [[S0037-listen-seq-fanout\|S0037]] | LISTEN/NOTIFY fan-out + shared watermark | 2–3 h |
 | A5 | [[S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | 45–75 min |
 | A6 | [[S0039-otel-traces\|S0039]] | OpenTelemetry traces + metrics | 2–3 h |

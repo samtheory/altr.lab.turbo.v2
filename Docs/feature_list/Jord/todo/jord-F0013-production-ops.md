@@ -11,15 +11,16 @@ tags:
   - jord-F0013
   - phase-03
   - s0035
+  - s0036
 ---
 
 # jord-F0013 — production ops (multi-instance ready)
 
-> **Status:** todo · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · Tasks: [[../../../plan/Jord/phase-03/README]]
+> **Status:** todo (partial) · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · Tasks: [[../../../plan/Jord/phase-03/README]]
 
 ## Why
 
-Rate limits, idempotency, SQL history, and realtime fan-out are process-local. A second instance breaks them.
+Rate limits and idempotency are shared on Postgres (S0036). SQL history and realtime fan-out are still process-local — a second instance breaks those until later cards.
 
 ## What
 
@@ -34,7 +35,7 @@ Two server instances behind one URL: shared rate limit, cross-instance idempoten
 | Id | Note | Change |
 |----|------|--------|
 | [[../done/jord-F0009-realtime\|jord-F0009]] | realtime | Finish LISTEN side of `pg_notify` |
-| [[../done/jord-F0006-apis\|jord-F0006]] | apis (F10) | In-memory rate/idempotency → Postgres-backed |
+| [[../done/jord-F0006-apis\|jord-F0006]] | apis (F10) | In-memory rate/idempotency → Postgres-backed (**S0036 done**; libSQL still memory) |
 | [[../done/jord-F0003-writes\|jord-F0003]] | writes | `JORD_PG_WRITE_CONCURRENCY` |
 | [[../done/jord-F0002-dialects\|jord-F0002]] | dialects | Multi-instance assumptions |
 
@@ -45,7 +46,7 @@ Two server instances behind one URL: shared rate limit, cross-instance idempoten
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/S0034-health-probes\|S0034]] — health live/ready | 45–75 min | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/S0035-structured-json-logs\|S0035]] — structured JSON logs | 60–90 min | **done** 2026-10-29 |
-| [[../../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency\|S0036]] — shared rate limit + idempotency | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency\|S0036]] — shared rate limit + idempotency | 2–3 h | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/S0037-listen-seq-fanout\|S0037]] — LISTEN fan-out + shared watermark | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0038-pg-write-concurrency\|S0038]] — JORD_PG_WRITE_CONCURRENCY | 45–75 min | todo |
 | [[../../../plan/Jord/phase-03/S0039-otel-traces\|S0039]] — OpenTelemetry traces + metrics | 2–3 h | todo |

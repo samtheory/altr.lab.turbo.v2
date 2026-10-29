@@ -15,6 +15,11 @@ export {
   type DataRateLimitOptions,
 } from "./data-rate-limit.js";
 export {
+  createMemoryRateLimitStore,
+  createPostgresRateLimitStore,
+  type RateLimitStore,
+} from "./rate-limit-store.js";
+export {
   checkReady,
   healthCompatBody,
   healthLiveBody,

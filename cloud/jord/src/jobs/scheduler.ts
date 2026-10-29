@@ -216,4 +216,17 @@ export async function seedDefaultJobs(jord: JordDriverPort): Promise<void> {
       config: "{}",
     });
   }
+  // S0036: shared rate-limit / idempotency rows exist only on Postgres.
+  if (jord.dialect === "postgres") {
+    const latest = await jord.listJobs();
+    if (!latest.some((job) => job.kind === "shared_state_sweep")) {
+      await jord.insertJob({
+        name: "Shared state sweep",
+        kind: "shared_state_sweep",
+        enabled: true,
+        intervalMs: 10 * 60_000,
+        config: "{}",
+      });
+    }
+  }
 }

@@ -30,18 +30,26 @@ export type IdempotencyLookup =
     }
   | { kind: "conflict" };
 
+type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * Memory store is synchronous; the Postgres store (S0036) is async. Callers
+ * must `await` both.
+ */
 export type IdempotencyStore = {
   lookup(
     key: string,
     principalKey: string,
     bodyHash: string,
-  ): IdempotencyLookup;
+  ): MaybePromise<IdempotencyLookup>;
   remember(
     key: string,
     principalKey: string,
     bodyHash: string,
     response: { status: number; body: unknown },
-  ): void;
+    /** Informational, e.g. "POST /records". */
+    route?: string,
+  ): MaybePromise<void>;
 };
 
 function compositeKey(key: string, principalKey: string): string {

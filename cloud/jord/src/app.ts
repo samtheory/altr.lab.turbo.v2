@@ -105,18 +105,22 @@ import {
   createDataRateLimitMiddleware,
   createHttpRequestLogMiddleware,
   createJsonBodyLimitMiddleware,
+  createMemoryRateLimitStore,
+  createPostgresRateLimitStore,
   parseCorsOrigins,
   registerHealthRoutes,
   resolveDataRateLimit,
   resolveHttpLogEnabled,
   resolveMaxJsonBytes,
   type HttpRequestLogWriter,
+  type RateLimitStore,
 } from "./http/index.js";
 import {
   createIdempotencyStore,
   resolveIdempotencyTtlMs,
   type IdempotencyStore,
 } from "./idempotency/store.js";
+import { createPostgresIdempotencyStore } from "./idempotency/pg-store.js";
 import {
   hashBodyText,
   isIdempotencyKeyBadRequest,
@@ -187,8 +191,16 @@ export type JordAppDeps = {
   blobSigningSecret?: string;
   /** Optional process env for CORS / body / rate / idempotency / HTTP log knobs. */
   env?: NodeJS.ProcessEnv;
-  /** Shared idempotency store. Created from env when omitted. */
+  /**
+   * Idempotency store. When omitted: Postgres-backed (shared across
+   * instances, S0036) on a postgres port, in-process memory on libSQL.
+   */
   idempotency?: IdempotencyStore;
+  /**
+   * Data-route rate-limit counters. When omitted: Postgres-backed (shared
+   * across instances, S0036) on a postgres port, in-process memory on libSQL.
+   */
+  rateLimit?: RateLimitStore;
   /**
    * Structured JSON request log sink (S0035). Defaults to stdout/stderr.
    * Inject in tests; set `JORD_HTTP_LOG=0` to disable.
@@ -438,8 +450,18 @@ export function createJordApp(deps: JordAppDeps) {
   const requireAuth = createAuthMiddleware(deps.auth);
   const mailer = deps.mailer ?? new ConsoleMailer();
   const env = deps.env ?? process.env;
+  const sharedState = deps.jord.dialect === "postgres";
+  const idempotencyTtlMs = resolveIdempotencyTtlMs(env);
   const idempotency =
-    deps.idempotency ?? createIdempotencyStore(resolveIdempotencyTtlMs(env));
+    deps.idempotency ??
+    (sharedState
+      ? createPostgresIdempotencyStore(deps.jord, idempotencyTtlMs)
+      : createIdempotencyStore(idempotencyTtlMs));
+  const rateLimitStore =
+    deps.rateLimit ??
+    (sharedState
+      ? createPostgresRateLimitStore(deps.jord)
+      : createMemoryRateLimitStore());
   const dataRate = resolveDataRateLimit(env);
   const blobsRoot = resolveBlobsRoot(env, deps.blobsRoot);
   const maxBlobBytes = resolveMaxBlobBytes(env, deps.maxBlobBytes);
@@ -645,10 +667,13 @@ export function createJordApp(deps: JordAppDeps) {
   protectedRoutes.use("*", requireAuth);
   protectedRoutes.use(
     "*",
-    createDataRateLimitMiddleware({
-      maxHits: dataRate.maxHits,
-      windowMs: dataRate.windowMs,
-    }),
+    createDataRateLimitMiddleware(
+      {
+        maxHits: dataRate.maxHits,
+        windowMs: dataRate.windowMs,
+      },
+      rateLimitStore,
+    ),
   );
   protectedRoutes.use("*", async (c, next) => {
     const method = c.req.method;
@@ -669,7 +694,7 @@ export function createJordApp(deps: JordAppDeps) {
     const principalKey = `${principal.kind}:${principal.uid ?? principal.role}`;
     const bodyText = await c.req.raw.clone().text();
     const bodyHash = hashBodyText(bodyText);
-    const looked = idempotency.lookup(key, principalKey, bodyHash);
+    const looked = await idempotency.lookup(key, principalKey, bodyHash);
     if (looked.kind === "hit") {
       return c.json(looked.body as never, looked.status as never);
     }
@@ -679,12 +704,19 @@ export function createJordApp(deps: JordAppDeps) {
     await next();
     try {
       const storedBody = await c.res.clone().json();
-      idempotency.remember(key, principalKey, bodyHash, {
-        status: c.res.status,
-        body: storedBody,
-      });
-    } catch {
-      // Non-JSON responses are not stored.
+      await idempotency.remember(
+        key,
+        principalKey,
+        bodyHash,
+        { status: c.res.status, body: storedBody },
+        `${method} ${path}`,
+      );
+    } catch (err) {
+      // Non-JSON responses are not stored; a failed store write must not
+      // fail a write that already committed.
+      if (!(err instanceof SyntaxError)) {
+        console.error("[@altr/jord-server] idempotency remember failed", err);
+      }
     }
   });
   protectedRoutes.use("*", async (c, next) => {
