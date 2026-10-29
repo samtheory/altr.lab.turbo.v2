@@ -179,10 +179,56 @@ export function createOutbox(jord: JordDriverPort) {
     return mapped;
   }
 
-  /** After the transaction ends: committed seqs become readable. */
-  function settle(seq: number, committed: boolean): void {
-    if (committed) watermark.complete(seq);
-    else watermark.abandon(seq);
+  /**
+   * Walk `jord_commit_watermark` forward while the next seq is either
+   * committed in `jord_changes` or recorded in `jord_changes_abandoned`.
+   * Concurrent settlers retry on a lost CAS.
+   */
+  async function advanceSharedWatermark(): Promise<void> {
+    for (;;) {
+      const curRows = await jord.query(
+        `SELECT seq FROM jord_commit_watermark WHERE id = 1`,
+      );
+      const cur = Number(curRows[0]?.seq ?? 0);
+      const next = cur + 1;
+      const hit = await jord.query(
+        `SELECT 1 AS ok FROM jord_changes WHERE seq = $1
+         UNION ALL
+         SELECT 1 FROM jord_changes_abandoned WHERE seq = $1
+         LIMIT 1`,
+        [next],
+      );
+      if (hit.length === 0) return;
+      const updated = await jord.query(
+        `UPDATE jord_commit_watermark SET seq = $1
+         WHERE id = 1 AND seq = $2
+         RETURNING seq`,
+        [next, cur],
+      );
+      if (updated.length === 0) continue;
+    }
+  }
+
+  /**
+   * After the transaction ends: committed seqs become readable.
+   * On Postgres, also advances the shared watermark (and records abandoned
+   * BIGSERIAL gaps so other instances do not stall).
+   */
+  async function settle(seq: number, committed: boolean): Promise<void> {
+    if (committed) {
+      watermark.complete(seq);
+    } else {
+      watermark.abandon(seq);
+      if (dialect === "postgres") {
+        await jord.query(
+          `INSERT INTO jord_changes_abandoned (seq, abandoned_at)
+           VALUES ($1, $2)
+           ON CONFLICT (seq) DO NOTHING`,
+          [seq, Date.now()],
+        );
+      }
+    }
+    if (dialect === "postgres") await advanceSharedWatermark();
   }
 
   function watermarkApi(): CommitWatermark {
@@ -208,24 +254,38 @@ export function createOutbox(jord: JordDriverPort) {
   }
 
   /**
-   * Highest seq a reader may see: MAX(seq) of committed rows, held below
-   * any lower seq still in flight in this process (Postgres BIGSERIAL can
-   * commit out of order; libSQL shares the connection, so it can see its
-   * own uncommitted row).
+   * Highest seq a reader may see.
+   * Postgres: shared `jord_commit_watermark`, held below any lower seq still
+   * in flight in this process (BIGSERIAL can commit out of order across
+   * instances). libSQL: MAX(seq) with the same local in-flight hold.
    */
   async function readableWatermark(): Promise<number> {
-    const rows = await jord.query(`SELECT MAX(seq) AS n FROM jord_changes`);
-    const dbMax = Number(rows[0]?.n ?? 0);
+    let dbMax: number;
+    if (dialect === "postgres") {
+      const rows = await jord.query(
+        `SELECT seq FROM jord_commit_watermark WHERE id = 1`,
+      );
+      dbMax = Number(rows[0]?.seq ?? 0);
+    } else {
+      const rows = await jord.query(`SELECT MAX(seq) AS n FROM jord_changes`);
+      dbMax = Number(rows[0]?.n ?? 0);
+    }
     if (!watermark.hasInFlight()) return dbMax;
     return Math.min(watermark.get(), dbMax);
   }
 
   async function listAfter(
     since: number,
-    opts?: { table?: string; limit?: number },
+    opts?: { table?: string; limit?: number; ignoreWatermark?: boolean },
   ): Promise<OutboxRow[]> {
     const limit = Math.min(Math.max(opts?.limit ?? 500, 1), 1000);
-    const readable = await readableWatermark();
+    const readable = opts?.ignoreWatermark
+      ? Number(
+          (
+            await jord.query(`SELECT COALESCE(MAX(seq), 0) AS n FROM jord_changes`)
+          )[0]?.n ?? 0,
+        )
+      : await readableWatermark();
     const args: Array<string | number | null> = [since, readable];
     let sql = `SELECT seq, table_name, op, pk, old_json, new_json, actor, ts
       FROM jord_changes

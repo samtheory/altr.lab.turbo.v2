@@ -1,7 +1,7 @@
 ---
 title: "jord-F0013 — production ops (multi-instance ready)"
 feature_id: jord-F0013
-description: "Postgres-backed rate-limit/idempotency, LISTEN fan-out, health, OTel, JSON logs, backup drill, Dockerfile, JORD_PG_WRITE_CONCURRENCY"
+description: "Postgres-backed rate-limit/idempotency + LISTEN fan-out shipped; remaining: PG concurrency, OTel, backup drill, Dockerfile"
 created: 2026-10-25
 updated: 2026-10-29
 tags:
@@ -11,7 +11,6 @@ tags:
   - partial
   - jord-F0013
   - phase-03
-  - s0037
   - s0038
   - s0039
   - s0040
@@ -20,11 +19,11 @@ tags:
 
 # jord-F0013 — production ops (multi-instance ready)
 
-> **Status:** partial · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · As-shipped: [[../done/jord-F0013-production-ops|jord-F0013]] · Remaining: S0037–S0041 on [[../../../plan/Jord/phase-03/README]]
+> **Status:** partial · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · As-shipped: [[../done/jord-F0013-production-ops|jord-F0013]] · Remaining: S0038–S0041 on [[../../../plan/Jord/phase-03/README]]
 
 ## Why
 
-Rate limits and idempotency are shared on Postgres (S0036). SQL history and realtime fan-out are still process-local — a second instance breaks those until later cards.
+Rate limits, idempotency, and realtime LISTEN fan-out are shared on Postgres (S0034–S0037). SQL history is still process-local; PG write concurrency / OTel / backup / Dockerfile remain.
 
 ## What
 
@@ -51,7 +50,7 @@ Two server instances behind one URL: shared rate limit, cross-instance idempoten
 | [[../../../plan/Jord/phase-03/S0034-health-probes\|S0034]] — health live/ready | 45–75 min | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/S0035-structured-json-logs\|S0035]] — structured JSON logs | 60–90 min | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency\|S0036]] — shared rate limit + idempotency | 2–3 h | **done** 2026-10-29 |
-| [[../../../plan/Jord/phase-03/S0037-listen-seq-fanout\|S0037]] — LISTEN fan-out + shared watermark | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/S0037-listen-seq-fanout\|S0037]] — LISTEN fan-out + shared watermark | 2–3 h | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/S0038-pg-write-concurrency\|S0038]] — JORD_PG_WRITE_CONCURRENCY | 45–75 min | todo |
 | [[../../../plan/Jord/phase-03/S0039-otel-traces\|S0039]] — OpenTelemetry traces + metrics | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0040-backup-restore-drill\|S0040]] — backup + restore drill | 60–90 min | todo |

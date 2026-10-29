@@ -133,11 +133,13 @@ import { registerVectorRoutes } from "./vectors/index.js";
 import { createTableApiRoutes } from "./table-api/routes.js";
 import {
   createOutbox,
+  createOutboxListenBridge,
   isRealtimeSubscribeTable,
   MAX_REALTIME_SUBSCRIBERS,
   REALTIME_V1_TABLE,
   RealtimeBus,
   type JordChangeEvent,
+  type OutboxListenBridge,
 } from "./realtime/index.js";
 import { liveDeliveryAllowed } from "./realtime/deliver.js";
 import type { OutboxRow } from "./realtime/outbox.js";
@@ -181,6 +183,12 @@ export type JordAppDeps = {
   scheduler?: JobScheduler;
   /** In-process change fanout. Created when omitted. */
   realtime?: RealtimeBus;
+  /**
+   * Postgres URL for a dedicated LISTEN connection (S0037). When set on a
+   * postgres dialect, the app starts one LISTEN bridge and stops it via
+   * `stopRealtimeListen`. Omit in unit tests that do not need cross-instance fan-out.
+   */
+  realtimeListenUrl?: string;
   /** Absolute or relative blob disk root. Defaults to data/blobs or JORD_BLOBS_ROOT. */
   blobsRoot?: string;
   /** Max upload bytes (default 10 MiB). */
@@ -527,6 +535,20 @@ export function createJordApp(deps: JordAppDeps) {
   const realtime = deps.realtime ?? new RealtimeBus();
   const outbox = createOutbox(deps.jord);
   const ddlJord = deps.ddl ?? deps.jord;
+  const listenUrl = deps.realtimeListenUrl?.trim() ?? "";
+  let listenBridge: OutboxListenBridge | null = null;
+  let listenStarted: Promise<void> | null = null;
+  if (deps.jord.dialect === "postgres" && listenUrl) {
+    listenBridge = createOutboxListenBridge({
+      connectionString: listenUrl,
+      outbox,
+      bus: realtime,
+    });
+    listenStarted = listenBridge.start();
+    void listenStarted.catch((err) => {
+      console.error("[@altr/jord-server] realtime LISTEN start failed", err);
+    });
+  }
 
   /**
    * Single emit path. The data write and its jord_changes rows (tracked
@@ -568,11 +590,12 @@ export function createJordApp(deps: JordAppDeps) {
           }),
         );
       } catch (err) {
-        for (const row of appended) outbox.settle(row.seq, false);
+        for (const row of appended) await outbox.settle(row.seq, false);
         throw err;
       }
       for (const row of appended) {
-        outbox.settle(row.seq, true);
+        await outbox.settle(row.seq, true);
+        listenBridge?.noteLocalSeq(row.seq);
         realtime.publish(outbox.toEvent(row));
       }
       return result;
@@ -607,12 +630,13 @@ export function createJordApp(deps: JordAppDeps) {
         }
       });
     } catch (err) {
-      for (const row of appended) outbox.settle(row.seq, false);
+      for (const row of appended) await outbox.settle(row.seq, false);
       console.error("[@altr/jord-server] resync emit failed", err);
       return;
     }
     for (const row of appended) {
-      outbox.settle(row.seq, true);
+      await outbox.settle(row.seq, true);
+      listenBridge?.noteLocalSeq(row.seq);
       realtime.publish(outbox.toEvent(row));
     }
   }
@@ -2730,7 +2754,13 @@ export function createJordApp(deps: JordAppDeps) {
 
   app.route("/", protectedRoutes);
 
-  return Object.assign(app, { injectWebSocket });
+  async function stopRealtimeListen(): Promise<void> {
+    await listenStarted?.catch(() => undefined);
+    await listenBridge?.stop();
+    listenBridge = null;
+  }
+
+  return Object.assign(app, { injectWebSocket, stopRealtimeListen });
 }
 
 export type JordApp = ReturnType<typeof createJordApp>;

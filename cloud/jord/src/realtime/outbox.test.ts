@@ -169,7 +169,7 @@ describe.each(TEST_BACKENDS)("S0023 / S0031 outbox CDC (%s)", (backend) => {
       });
 
     const ok = await write("ok", false);
-    outbox.settle(ok!.seq, true);
+    await outbox.settle(ok!.seq, true);
     await expect(write("boom", true)).rejects.toThrow("crash after outbox insert");
 
     expect(await jord.query("SELECT id FROM tx_notes ORDER BY id")).toEqual([{ id: "ok" }]);
@@ -292,7 +292,7 @@ describe.each(TEST_BACKENDS)("S0023 / S0031 outbox CDC (%s)", (backend) => {
         const row = await outbox.appendChange({ tableName: "records", op: "insert", pk: "high", newRow: { id: "high" } });
         return row!;
       });
-      outbox.settle(high.seq, true);
+      await outbox.settle(high.seq, true);
       expect(high.seq).toBeGreaterThan(lowSeq);
 
       const committedMax = await jord.query("SELECT MAX(seq) AS n FROM jord_changes");
@@ -301,7 +301,7 @@ describe.each(TEST_BACKENDS)("S0023 / S0031 outbox CDC (%s)", (backend) => {
       expect((await outbox.listAfter(0)).map((row) => row.pk)).not.toContain("high");
 
       lowMayCommit.release();
-      outbox.settle((await low).seq, true);
+      await outbox.settle((await low).seq, true);
       expect(await outbox.readableWatermark()).toBe(high.seq);
       expect((await outbox.listAfter(0)).map((row) => row.pk)).toEqual(["low", "high"]);
     },

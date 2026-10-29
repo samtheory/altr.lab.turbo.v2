@@ -188,7 +188,7 @@ On **Postgres**, data-route rate counters and idempotency replay live in the pro
 - Sweeper job kind `shared_state_sweep` (seeded on Postgres only) deletes expired idempotency rows and old rate windows. Modules: `http/rate-limit-store.ts`, `idempotency/pg-store.ts`, `idempotency/sweep.ts`.
 - Failure policy: rate-limit DB errors **fail open** (log + allow); idempotency lookup failure → **500**; failed `remember` after a committed write is logged only.
 
-**Still process-local:** SQL console history, auth route rate limits (30/min), realtime bus, outbox commit watermark → later phase-03 cards (e.g. [[../../../plan/Jord/phase-03/S0037-listen-seq-fanout|S0037]]).
+**Still process-local:** SQL console history, auth route rate limits (30/min). Realtime LISTEN fan-out + shared watermark are multi-instance on Postgres ([[../../../plan/Jord/phase-03/S0037-listen-seq-fanout|S0037]]).
 
 ## Not in Jord yet
 

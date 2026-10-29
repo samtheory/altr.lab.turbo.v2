@@ -97,7 +97,10 @@ export {
   MAX_REALTIME_SUBSCRIBERS,
   RealtimeBus,
   REALTIME_V1_TABLE,
+  createOutboxListenBridge,
+  parseNotifyPayload,
   type JordChangeEvent,
+  type OutboxListenBridge,
 } from "./realtime/index.js";
 export {
   DEFAULT_WAL_CHECKPOINT_MS,
@@ -154,6 +157,7 @@ export async function startJordServer(
     logs,
     scheduler,
     realtime,
+    realtimeListenUrl: postgres ? databaseUrl : undefined,
     env,
   });
   const useWal = jord.dialect === "libsql" && jord.urlScheme === "file";
@@ -177,6 +181,7 @@ export async function startJordServer(
     scheduler.stop();
     hygiene.stop();
     await enqueueWrite.drain();
+    await app.stopRealtimeListen();
     realtime.close();
     if (useWal) {
       console.log(`[@altr/jord-server] ${signal} — wal_checkpoint(TRUNCATE)`);
@@ -202,6 +207,7 @@ export async function startJordServer(
       scheduler.stop();
       hygiene.stop();
       await enqueueWrite.drain();
+      await app.stopRealtimeListen();
       realtime.close();
       if (useWal) {
         await truncateWalCheckpoint(jord);

@@ -8,6 +8,14 @@ export {
   type Outbox,
   type OutboxRow,
 } from "./outbox.js";
+export {
+  createOutboxListenBridge,
+  parseNotifyPayload,
+  JORD_CHANGES_CHANNEL,
+  type NotifyPayload,
+  type OutboxListenBridge,
+  type OutboxListenOptions,
+} from "./listen.js";
 export { CommitWatermark } from "./watermark.js";
 export {
   isRealtimeSubscribeTable,

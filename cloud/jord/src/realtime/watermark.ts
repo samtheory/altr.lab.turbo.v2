@@ -1,8 +1,9 @@
 /**
- * Commit watermark for outbox resume.
- * Watermark is the largest seq such that every allocated seq <= it has completed.
- * Higher seq committing first does not advance the watermark past a lower in-flight seq.
- * In-process only: it sees writers in this server, not other processes.
+ * Local in-flight hold for outbox resume.
+ * Watermark is the largest seq such that every allocated seq <= it has completed
+ * in this process. Higher seq committing first does not advance past a lower
+ * in-flight seq. On Postgres, `readableWatermark` also reads the shared
+ * `jord_commit_watermark` table (S0037) and takes the min of both.
  */
 
 export class CommitWatermark {

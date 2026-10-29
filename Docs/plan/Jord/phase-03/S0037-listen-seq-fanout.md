@@ -2,7 +2,7 @@
 title: "S0037 — LISTEN/NOTIFY seq fan-out + shared commit watermark"
 description: "Finish the LISTEN half of pg_notify so SSE on instance B sees writes made on instance A, with one shared commit watermark"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-10-29
 tags:
   - plan
   - jord
@@ -13,7 +13,7 @@ tags:
 
 # S0037 — LISTEN/NOTIFY seq fan-out + shared watermark
 
-> **Status:** todo · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/realtime/README]]
+> **Status:** **done** 2026-10-29 · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/realtime/README]]
 
 ## Routing (who / how long / which model)
 
@@ -84,16 +84,20 @@ sequenceDiagram
 
 ## Done when
 
-- [ ] Write on instance A arrives on an SSE stream held by instance B (test)
-- [ ] LISTEN reconnects after a forced drop without losing seqs (no silent gap; 410 resync allowed)
-- [ ] libSQL suite unchanged
-- [ ] Proof pasted
+- [x] Write on instance A arrives on an SSE stream held by instance B (test)
+- [x] LISTEN reconnects after a forced drop without losing seqs (no silent gap; 410 resync allowed)
+- [x] libSQL suite unchanged
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-10-29 | `pnpm --filter @altr/jord-server typecheck` | pass |
+| 2026-10-29 | `pnpm --filter @altr/jord-server test` | **142 passed**, 17 skipped (incl. 2 live LISTEN cases when `JORD_TEST_POSTGRES_URL` unset) |
+| 2026-10-29 | `parseNotifyPayload` unit cases in `listen.test.ts` | pass |
+
+Shipped: `cloud/jord/src/realtime/listen.ts` · shared watermark in `outbox.ts` · migration `elements/jord/migrations/postgres/0008_listen_watermark.sql` · boot wires `realtimeListenUrl` from `DATABASE_URL`. Live two-instance + reconnect tests run when `JORD_TEST_POSTGRES_URL` is set.
 
 ## After ship
 

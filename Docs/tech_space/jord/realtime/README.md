@@ -1,13 +1,14 @@
 ---
 title: "Jord — realtime"
-description: "Transactional outbox CDC over SSE and WebSocket; resume with since; tracked tables only"
+description: "Transactional outbox CDC over SSE and WebSocket; LISTEN fan-out across Postgres instances; resume with since; tracked tables only"
 created: 2026-10-24
-updated: 2026-10-26
+updated: 2026-10-29
 tags:
   - tech-space
   - jord
   - realtime
   - cdc
+  - s0037
 ---
 
 # Jord — realtime
@@ -29,8 +30,8 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 | Opt-in | Capture only for tracked tables. `records` is seeded tracked. `CREATE TABLE` marks the new table tracked. `PUT /schema/tables/:name/track` `{ tracked }` toggles |
 | Retention | Default **7 days** and **100_000** rows (`JORD_CHANGES_RETENTION_DAYS`, `JORD_CHANGES_RETENTION_ROWS`). Job kind `changes_prune` |
 | Resume | `GET /realtime?table=&since=` — catch up then live. `since` older than the retained range → **410** `{ error: "gone", hint: "resync" }` |
-| Watermark | `appendChange` marks the seq in flight; the helper settles it after commit or rollback. Readers see `MAX(seq)`, held below the lowest seq still in flight in this process. Postgres BIGSERIAL can commit out of order; a live test proves a higher seq is not readable until the lower one commits |
-| Fan-out | In-process bus. A Postgres trigger sends `pg_notify('jord_changes', seq)`, but nothing `LISTEN`s yet. Multi-instance fan-out is phase-03 |
+| Watermark | `appendChange` marks the seq in flight; `settle` after commit or rollback. **libSQL:** readers see `MAX(seq)`, held below the lowest seq still in flight in this process. **Postgres (S0037):** shared `jord_commit_watermark` advances contiguously across committed rows and `jord_changes_abandoned` gaps; readers take `min(shared, local in-flight hold)`. BIGSERIAL can commit out of order; a live test proves a higher seq is not readable for `since=` catchup until the lower one commits |
+| Fan-out | In-process `RealtimeBus` per process. **Postgres (S0037):** one dedicated `LISTEN jord_changes` connection (`application_name=jord-realtime-listen`) reconnects with backoff; NOTIFY payload is `{ table, seq, txid }` (legacy plain seq still parsed) — rows are always re-read from the outbox. Local publishes are deduped so the writer does not double-deliver its own NOTIFY echo. **libSQL:** local bus only (no LISTEN) |
 | Policy | Filter at delivery (catchup and live) using the subscriber's select policy and row scope on the **new** row (**old** for deletes) |
 | BLOBs | Omitted from outbox JSON as `{ "$blob": true }` |
 | Cap | **48** shared SSE+WS subscribers → **503** `realtime_full` |
@@ -58,11 +59,12 @@ Raw SQL from the Studio SQL console is not captured row by row. After a successf
 |-------|------|
 | Write helper | `writeChangeAs` in `cloud/jord/src/app.ts` · type `WriteWithChange` in `cloud/jord/src/realtime/types.ts` |
 | Outbox | `cloud/jord/src/realtime/outbox.ts` |
-| Watermark | `cloud/jord/src/realtime/watermark.ts` |
+| Watermark | `cloud/jord/src/realtime/watermark.ts` (local in-flight) · shared table via outbox `settle` on Postgres |
+| LISTEN bridge | `cloud/jord/src/realtime/listen.ts` — started when `realtimeListenUrl` is set (boot passes `DATABASE_URL`) |
 | Bus (fanout only) | `cloud/jord/src/realtime/bus.ts` |
 | Transaction | `JordDriverPort.transaction`: file libSQL `BEGIN IMMEDIATE` on the shared connection; hosted `libsql://` an interactive `client.transaction("write")`, with every adapter statement routed into it; Postgres one pooled client with the session GUCs. All three are atomic. Do not start detached jord work inside `work` |
-| Migration | `elements/jord/migrations/{libsql,postgres}/0004_outbox.sql` |
-| Tests | `cloud/jord/src/realtime/outbox.test.ts` (file + live Postgres) · resync `cloud/jord/src/sql/resync.test.ts` · hosted atomicity `elements/jord/src/adapter/libsql-transaction.test.ts` (forced interactive path on `file:`; live run needs `JORD_TEST_LIBSQL_URL` + `JORD_TEST_LIBSQL_AUTH_TOKEN`) |
+| Migration | `elements/jord/migrations/{libsql,postgres}/0004_outbox.sql` · Postgres `0008_listen_watermark.sql` (shared watermark + abandoned gaps + JSON NOTIFY) |
+| Tests | `cloud/jord/src/realtime/outbox.test.ts` (file + live Postgres) · `listen.test.ts` (parse always; two-instance + reconnect when `JORD_TEST_POSTGRES_URL` is set) · resync `cloud/jord/src/sql/resync.test.ts` · hosted atomicity `elements/jord/src/adapter/libsql-transaction.test.ts` (forced interactive path on `file:`; live run needs `JORD_TEST_LIBSQL_URL` + `JORD_TEST_LIBSQL_AUTH_TOKEN`) |
 
 ## Example
 
@@ -70,4 +72,4 @@ Open `GET /realtime?table=notes` with a bearer, then `POST /schema/tables/notes/
 
 ## Not in Jord yet
 
-`LISTEN` fan-out across instances · SQLite update hooks · Turso external-writer capture · multi-node presence · Redis fanout
+SQLite update hooks · Turso external-writer capture · multi-node presence · Redis fanout · presence/broadcast ([[../../../plan/Jord/phase-03/S0083-presence-broadcast|S0083]])
