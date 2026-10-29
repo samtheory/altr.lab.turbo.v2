@@ -190,6 +190,7 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "feature_list/Jord/done/jord-F0013-production-ops.md",
     "plan/Jord/phase-03/S0036-shared-rate-limit-idempotency.md",
     "plan/Jord/phase-03/S0035-structured-json-logs.md",
     "plan/Jord/phase-03/S0034-health-probes.md",
@@ -215,7 +216,6 @@
     "feature_list/Jord/todo/jord-F0018-storage-realtime-v2.md",
     "feature_list/Jord/todo/jord-F0017-table-api-v2.md",
     "feature_list/Jord/todo/jord-F0016-auth-v2.md",
-    "feature_list/Jord/todo/jord-F0015-functions-runtime.md",
     "plan/Jord/phase-03",
     "feature_list/Jord/todo",
     "feature_list/Jord/done",

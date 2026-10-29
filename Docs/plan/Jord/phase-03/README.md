@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]].
 
-**Queue status (2026-10-29):** **S0034–S0036 done** (health probes · structured JSON request logs · shared PG rate limit + idempotency). Next open card: [[S0037-listen-seq-fanout|S0037]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-10-29):** **S0034–S0036 done** (health probes · structured JSON request logs · shared PG rate limit + idempotency). As-shipped note: [[../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] (partial). Next open card: [[S0037-listen-seq-fanout|S0037]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 

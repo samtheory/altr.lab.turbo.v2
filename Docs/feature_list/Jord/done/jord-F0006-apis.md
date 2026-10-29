@@ -27,15 +27,23 @@ Coerce by column type; libSQL `ilike` = `lower()`; caps (limit 100/1000, `in` 10
 
 ## HTTP hardening (F10)
 
-CORS allow-list; data rate 120/min; auth 30/min; JSON 1 MiB; shutdown drains write queue; Idempotency-Key TTL 24h (in-process — shared store is jord-F0013).
+CORS allow-list; data rate 120/min; auth 30/min; JSON 1 MiB; shutdown drains write queue; Idempotency-Key TTL 24h.
 
-**Done**. Plan: [[../../../plan/Jord/phase-02/Jord-S0028/README|S0028]].
+**Rate limit + idempotency storage.** libSQL is in-process; Postgres is shared on `jord_rate_limits` / `jord_idempotency` (S0036). Auth signup/signin limits stay process-local (S0021-B).
+
+**Done**. Plan: [[../../../plan/Jord/phase-02/Jord-S0028/README|S0028]] · [[../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency|S0036]].
 
 ## Client SDK (F11)
 
 `@altr/jord-client` — fetch, auto refresh, table API, realtime `since`, 410 → resync. Must not depend on `@altr/jord`.
 
 **Done**. Plan: [[../../../plan/Jord/phase-02/Jord-S0029/README|S0029]]. Typed builders / React hooks → phase-03 P2.
+
+## Shared rate limit + idempotency (S0036)
+
+Data-route limits and `Idempotency-Key` replay are **shared across instances on Postgres** via migration `0007_rate_limit_idempotency` (`jord_rate_limits`, `jord_idempotency` + TTL index + sweep). libSQL stays in-process. Auth signup/signin limits remain process-local. 429 body unchanged: `{ error: "too_many_requests" }`.
+
+**Done** 2026-10-29. Plan: [[../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency|S0036]]. As-built: [[../../../tech_space/jord/apis/README#shared-rate-limit--idempotency-s0036]] · [[../../../tech_space/jord/writes/README]].
 
 ## Functions v2 (F8)
 

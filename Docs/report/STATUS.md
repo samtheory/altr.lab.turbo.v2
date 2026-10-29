@@ -14,7 +14,7 @@ tags:
 
 # Status
 
-Last updated: 2026-10-29 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0036 shared PG rate limit + idempotency** · Prior: **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-10-29 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0036 shared PG rate limit + idempotency (jord-F0013 partial)** · Prior: **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 

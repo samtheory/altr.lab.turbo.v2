@@ -1,8 +1,8 @@
 ---
 title: "feature_list/Jord/done — shipped intent"
-description: "Shipped Jord features jord-F0001…F0012. Cite IDs from INDEX."
+description: "Shipped Jord features jord-F0001…F0013. Cite IDs from INDEX."
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-29
 tags:
   - feature
   - jord
@@ -28,5 +28,8 @@ tags:
 | [[jord-F0010-blobs\|jord-F0010]] | blobs | [[../../../tech_space/jord/blobs/README\|blobs]] |
 | [[jord-F0011-vectors\|jord-F0011]] | vectors | [[../../../tech_space/jord/vectors/README\|vectors]] |
 | [[jord-F0012-studio\|jord-F0012]] | studio | [[../../../tech_space/jord/studio/README\|studio]] |
+| [[jord-F0013-production-ops\|jord-F0013]] | production ops (partial) | [[jord-F0013-production-ops\|jord-F0013]] |
+
+Partial: [[jord-F0013-production-ops|jord-F0013]] — S0034–S0036 shipped (health probes · structured JSON logs · shared PG rate limit + idempotency); remaining production-ops cards (fan-out, PG concurrency, OTel, backup drill, Dockerfile) are still open: [[../todo/jord-F0013-production-ops|jord-F0013]] · [[../../plan/Jord/phase-03/README]].
 
 Hub: [[../README]] · Open: [[../todo/README]].

@@ -8,15 +8,19 @@ tags:
   - feature
   - jord
   - todo
+  - partial
   - jord-F0013
   - phase-03
-  - s0035
-  - s0036
+  - s0037
+  - s0038
+  - s0039
+  - s0040
+  - s0041
 ---
 
 # jord-F0013 — production ops (multi-instance ready)
 
-> **Status:** todo (partial) · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · Tasks: [[../../../plan/Jord/phase-03/README]]
+> **Status:** partial · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · As-shipped: [[../done/jord-F0013-production-ops|jord-F0013]] · Remaining: S0037–S0041 on [[../../../plan/Jord/phase-03/README]]
 
 ## Why
 
@@ -35,7 +39,7 @@ Two server instances behind one URL: shared rate limit, cross-instance idempoten
 | Id | Note | Change |
 |----|------|--------|
 | [[../done/jord-F0009-realtime\|jord-F0009]] | realtime | Finish LISTEN side of `pg_notify` |
-| [[../done/jord-F0006-apis\|jord-F0006]] | apis (F10) | In-memory rate/idempotency → Postgres-backed (**S0036 done**; libSQL still memory) |
+| [[../done/jord-F0006-apis\|jord-F0006]] | apis (F10) | In-memory rate/idempotency → Postgres-backed (**S0036 shipped**; libSQL still memory) |
 | [[../done/jord-F0003-writes\|jord-F0003]] | writes | `JORD_PG_WRITE_CONCURRENCY` |
 | [[../done/jord-F0002-dialects\|jord-F0002]] | dialects | Multi-instance assumptions |
 

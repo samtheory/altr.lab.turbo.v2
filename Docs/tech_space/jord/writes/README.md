@@ -53,6 +53,8 @@ Duplicate primary key → **409** `pk_exists`. Missing row → **404**. Reserved
 | HTTP | `cloud/jord/src/app.ts` |
 | Queue drain | `createWriteQueue().drain()` on shutdown, before pools close |
 | Idempotency | optional `Idempotency-Key` on record, schema-row, and blob-object writes. Same key + principal + body replays the stored response. Different body → **409** `idempotency_conflict`. TTL default 24h. **Postgres** stores rows in `jord_idempotency` (shared across instances, S0036); **libSQL** keeps the in-memory map — see [[../apis/README#shared-rate-limit--idempotency-s0036]] |
+| Rate-limit / idempotency stores | `cloud/jord/src/http/rate-limit-store.ts` + `cloud/jord/src/idempotency/pg-store.ts` + `cloud/jord/src/idempotency/store.ts` + `cloud/jord/src/idempotency/sweep.ts` (job `shared_state_sweep`) |
+| Migration | `elements/jord/migrations/{postgres,libsql}/0007_rate_limit_idempotency.sql` |
 
 Studio edits `records` at `/records` (column fields, optional JSON check on `body`). Other tables use `/tables/[name]`. `/tables/records` redirects to the OCC editor.
 
