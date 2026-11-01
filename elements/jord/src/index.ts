@@ -12,6 +12,7 @@ export {
   type RenameTableInput,
   type SchemaDdlError,
   type SchemaDdlResult,
+  type ResolveSchemaResult,
   type JordBlob,
   type JordBlobStatus,
   JORD_BLOB_STATUSES,
@@ -180,6 +181,14 @@ export {
   type RlsSessionContext,
   type RlsTableShape,
 } from "./schema/ddl-rls.js";
+export {
+  defaultSchemaFor,
+  isSystemSchemaName,
+  LIBSQL_SCHEMA,
+  PG_DEFAULT_SCHEMA,
+  quoteQualified,
+  type JordSchemaInfo,
+} from "./schema/schema-scope.js";
 export { rowScopeSql } from "./schema/row-scope.js";
 export {
   JORD_APP_ROLE,

@@ -13,7 +13,7 @@ tags:
 
 # S0050 — schema picker + scoped table list
 
-> **Status:** todo · **Depends on** [[S0049-schema-scoped-introspection|S0049]] + [[done/S0047-contextual-sidebar|S0047]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0049-schema-scoped-introspection|S0049]] + [[done/S0047-contextual-sidebar|S0047]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -31,7 +31,7 @@ The Data sidebar reads top to bottom as: **schema dropdown → + Add new table �
 
 ## Why now
 
-The schema server contract landed in [[S0049-schema-scoped-introspection|S0049]]; this is the control that makes it usable. It is also the anchor for [[S0051-workspace-tabs|S0051]], because tabs are keyed `schema.table`.
+The schema server contract landed in [[done/S0049-schema-scoped-introspection|S0049]]; this is the control that makes it usable. It is also the anchor for [[S0051-workspace-tabs|S0051]], because tabs are keyed `schema.table`.
 
 ## Context (read before coding)
 

@@ -22,7 +22,7 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[overview/README]] | Packages, boot, **migration runner**, request path, invariants, **CI**, **Dockerfile / compose deploy** |
 | [[dialects/README]] | `file:` / `libsql://` / `postgres://`, WAL, health |
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
-| [[schema/README]] | Introspect, CREATE, ADD, DROP, RENAME, type change |
+| [[schema/README]] | Schema-scoped introspect/DDL (`?schema=`), CREATE, ADD, DROP, RENAME, type change |
 | [[auth/README]] | Principals, HMAC operators, JWT, scrypt, route matrix |
 | [[apis/README]] | Generated CRUD, function steps, `/x/:slug`, `/api/v1` table API, [[apis/ADR-functions-v2\|Functions v2 ADR]] |
 | [[jobs/README]] | Scheduler, built-in kinds, log ring |

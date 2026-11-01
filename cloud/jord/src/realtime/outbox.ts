@@ -79,36 +79,49 @@ export function createOutbox(jord: JordDriverPort) {
   const watermark = new CommitWatermark();
   const dialect = dialectOf(jord);
 
-  async function isTracked(tableName: string): Promise<boolean> {
+  async function isTracked(
+    tableName: string,
+    schema: string = jord.defaultSchema,
+  ): Promise<boolean> {
     const rows = await jord.query(
-      `SELECT 1 AS hit FROM jord_tracked_tables WHERE table_name = ${ph(dialect, 1)} LIMIT 1`,
-      [tableName],
+      `SELECT 1 AS hit FROM jord_tracked_tables
+       WHERE schema_name = ${ph(dialect, 1)} AND table_name = ${ph(dialect, 2)} LIMIT 1`,
+      [schema, tableName],
     );
     return rows.length > 0;
   }
 
-  /** Every tracked table name, sorted (resync fan-out). */
-  async function listTracked(): Promise<string[]> {
+  /** Every tracked `(schema, table)`, sorted (resync fan-out). */
+  async function listTracked(): Promise<Array<{ schema: string; table: string }>> {
     const rows = await jord.query(
-      `SELECT table_name FROM jord_tracked_tables ORDER BY table_name ASC`,
+      `SELECT schema_name, table_name FROM jord_tracked_tables
+       ORDER BY schema_name ASC, table_name ASC`,
     );
-    return rows.map((row) => String(row.table_name));
+    return rows.map((row) => ({
+      schema: String(row.schema_name),
+      table: String(row.table_name),
+    }));
   }
 
-  async function setTracked(tableName: string, tracked: boolean): Promise<void> {
+  async function setTracked(
+    tableName: string,
+    tracked: boolean,
+    schema: string = jord.defaultSchema,
+  ): Promise<void> {
     if (tracked) {
       await jord.query(
         dialect === "postgres"
-          ? `INSERT INTO jord_tracked_tables (table_name, tracked_at) VALUES ($1, $2)
-             ON CONFLICT (table_name) DO UPDATE SET tracked_at = EXCLUDED.tracked_at`
-          : `INSERT OR REPLACE INTO jord_tracked_tables (table_name, tracked_at) VALUES (?, ?)`,
-        [tableName, Date.now()],
+          ? `INSERT INTO jord_tracked_tables (schema_name, table_name, tracked_at) VALUES ($1, $2, $3)
+             ON CONFLICT (schema_name, table_name) DO UPDATE SET tracked_at = EXCLUDED.tracked_at`
+          : `INSERT OR REPLACE INTO jord_tracked_tables (schema_name, table_name, tracked_at) VALUES (?, ?, ?)`,
+        [schema, tableName, Date.now()],
       );
       return;
     }
     await jord.query(
-      `DELETE FROM jord_tracked_tables WHERE table_name = ${ph(dialect, 1)}`,
-      [tableName],
+      `DELETE FROM jord_tracked_tables
+       WHERE schema_name = ${ph(dialect, 1)} AND table_name = ${ph(dialect, 2)}`,
+      [schema, tableName],
     );
   }
 
@@ -131,6 +144,11 @@ export function createOutbox(jord: JordDriverPort) {
    */
   async function appendChange(input: {
     tableName: string;
+    /**
+     * Schema of the tracked table; defaults to `jord.defaultSchema`.
+     * `jord_changes` itself stays table_name-only (S0049).
+     */
+    schema?: string;
     op: JordChangeOp;
     pk: string;
     oldRow?: Record<string, unknown> | null;
@@ -138,7 +156,7 @@ export function createOutbox(jord: JordDriverPort) {
     blobColumns?: Set<string>;
     actor?: OutboxActor | null;
   }): Promise<OutboxRow | null> {
-    if (!(await isTracked(input.tableName))) return null;
+    if (!(await isTracked(input.tableName, input.schema))) return null;
     const blobs = input.blobColumns ?? new Set<string>();
     // A table-level resync carries no row: SQL NULL, not the string "null".
     const resync = input.op === "resync";

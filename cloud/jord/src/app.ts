@@ -21,6 +21,7 @@ import {
   isJordColumnType,
   isValidSqlIdent,
   quoteIdent,
+  quoteQualified,
 } from "@altr/jord";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
@@ -465,12 +466,13 @@ function schemaDdlStatus(error: string): 400 | 404 | 409 {
 async function assertPolicyTable(
   jord: JordDriverPort,
   tableName: string,
+  schema?: string,
 ): Promise<void> {
   if (tableName === "records") return;
   if (!isValidSqlIdent(tableName) || tableName.startsWith("jord_")) {
     throw new HTTPException(400, { message: "table_name is not a user table" });
   }
-  const info = await jord.describeTable(tableName);
+  const info = await jord.describeTable(tableName, schema);
   if (!info) {
     throw new HTTPException(400, { message: "table_name was not found" });
   }
@@ -614,6 +616,7 @@ export function createJordApp(deps: JordAppDeps) {
             for (const draft of drafts) {
               const row = await outbox.appendChange({
                 tableName: draft.table ?? REALTIME_V1_TABLE,
+                schema: draft.schema,
                 op: draft.op,
                 pk: draft.id,
                 oldRow: draft.oldRow ?? null,
@@ -662,9 +665,10 @@ export function createJordApp(deps: JordAppDeps) {
     const appended: OutboxRow[] = [];
     try {
       await deps.jord.transaction(async () => {
-        for (const tableName of await outbox.listTracked()) {
+        for (const tracked of await outbox.listTracked()) {
           const row = await outbox.appendChange({
-            tableName,
+            tableName: tracked.table,
+            schema: tracked.schema,
             op: "resync",
             pk: "",
             actor,
@@ -843,8 +847,33 @@ export function createJordApp(deps: JordAppDeps) {
     },
   );
 
+  /**
+   * `?schema=` → validated schema (default `deps.jord.defaultSchema`).
+   * Unknown or malformed → 400. `fallback` is a body-supplied schema used
+   * only when the query param is absent.
+   */
+  async function resolveSchemaQuery(
+    c: { req: { query: (name: string) => string | undefined } },
+    fallback?: string | null,
+  ): Promise<string> {
+    const fromQuery = c.req.query("schema");
+    const requested =
+      fromQuery !== undefined && fromQuery !== "" ? fromQuery : fallback;
+    const resolved = await deps.jord.resolveSchema(requested);
+    if (!resolved.ok) {
+      throw new HTTPException(400, { message: resolved.message });
+    }
+    return resolved.schema;
+  }
+
+  protectedRoutes.get("/schema/schemas", async (c) => {
+    const schemas = await deps.jord.listSchemas();
+    return c.json({ schemas });
+  });
+
   protectedRoutes.get("/schema/tables", async (c) => {
-    const tables = await deps.jord.listTables();
+    const schema = await resolveSchemaQuery(c);
+    const tables = await deps.jord.listTables(schema);
     return c.json({ tables });
   });
 
@@ -852,7 +881,12 @@ export function createJordApp(deps: JordAppDeps) {
     const body = await c.req.json<{
       name?: unknown;
       columns?: unknown;
+      schema?: unknown;
     }>();
+    if (body.schema !== undefined && typeof body.schema !== "string") {
+      throw new HTTPException(400, { message: "schema must be a string" });
+    }
+    const schema = await resolveSchemaQuery(c, body.schema);
     if (typeof body.name !== "string" || !Array.isArray(body.columns)) {
       throw new HTTPException(400, {
         message: "name (string) and columns (array) are required",
@@ -888,7 +922,7 @@ export function createJordApp(deps: JordAppDeps) {
     }
 
     const result = await enqueueWrite(() =>
-      ddlJord.createTable({ name: body.name as string, columns }),
+      ddlJord.createTable({ name: body.name as string, columns, schema }),
     );
     if (!result.ok) {
       const status = result.error === "table_exists" ? 409 : 400;
@@ -898,16 +932,17 @@ export function createJordApp(deps: JordAppDeps) {
       );
     }
     // Opt-in capture: mark newly created tables tracked (S0023).
-    await outbox.setTracked(body.name as string, true);
+    await outbox.setTracked(body.name as string, true, schema);
     await syncPoliciesRls();
-    const info = await deps.jord.describeTable(body.name);
+    const info = await deps.jord.describeTable(body.name, schema);
     return c.json({ ok: true as const, sql: result.sql, table: info }, 201);
   });
 
   protectedRoutes.get("/schema/tables/:name/rows", async (c) => {
     const name = c.req.param("name");
     const principal = c.get("principal");
-    const decision = await decide(principal, name, "select");
+    const schema = await resolveSchemaQuery(c);
+    const decision = await decide(principal, name, "select", { schema });
     if (!decision.allowed) {
       return c.json(policyDeniedBody(decision, "select"), 403);
     }
@@ -915,6 +950,7 @@ export function createJordApp(deps: JordAppDeps) {
     const offset = Number(c.req.query("offset") ?? "0");
     const result = await deps.jord.listTableRows({
       table: name,
+      schema,
       limit: Number.isFinite(limit) ? limit : 50,
       offset: Number.isFinite(offset) ? offset : 0,
       rowScope: principal.kind === "service" ? undefined : decision.scope,
@@ -941,9 +977,11 @@ export function createJordApp(deps: JordAppDeps) {
         throw new HTTPException(400, { message: "values object is required" });
       }
       const principal = c.get("principal");
+      const schema = await resolveSchemaQuery(c);
       const decision = await decide(principal, name, "insert", {
         row: null,
         nextRow: body.values as Record<string, unknown>,
+        schema,
       });
       if (!decision.allowed) {
         return c.json(policyDeniedBody(decision, "insert"), 403);
@@ -955,15 +993,16 @@ export function createJordApp(deps: JordAppDeps) {
       if (!values) {
         return c.json(policyDeniedBody({ allowed: false }, "insert"), 403);
       }
-      const info = await deps.jord.describeTable(name);
+      const info = await deps.jord.describeTable(name, schema);
       const pkCol = info?.columns.find((col) => col.pk)?.name ?? "id";
       const pkRaw = values[pkCol];
       const result = await writeChangeAs(principal)(
-        () => deps.jord.insertTableRow({ table: name, values }),
+        () => deps.jord.insertTableRow({ table: name, schema, values }),
         (inserted) =>
           inserted.ok
             ? {
                 table: name,
+                schema,
                 op: "insert",
                 id: pkRaw == null ? "" : String(pkRaw),
                 newRow: values,
@@ -994,10 +1033,12 @@ export function createJordApp(deps: JordAppDeps) {
       }
       const values = body.values as Record<string, unknown>;
       const principal = c.get("principal");
-      const existing = await readUserTableRow(name, pk);
+      const schema = await resolveSchemaQuery(c);
+      const existing = await readUserTableRow(name, pk, schema);
       const decision = await decide(principal, name, "update", {
         row: existing,
         nextRow: values,
+        schema,
       });
       if (!decision.allowed) {
         return c.json(policyDeniedBody(decision, "update"), 403);
@@ -1018,11 +1059,12 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
       const result = await writeChangeAs(principal)(
-        () => deps.jord.updateTableRow({ table: name, pk, values }),
+        () => deps.jord.updateTableRow({ table: name, schema, pk, values }),
         (updated) =>
           updated.ok
             ? {
                 table: name,
+                schema,
                 op: "update",
                 id: pk,
                 oldRow: existing,
@@ -1047,18 +1089,27 @@ export function createJordApp(deps: JordAppDeps) {
       const name = c.req.param("name");
       const pk = c.req.param("pk");
       const principal = c.get("principal");
-      const existing = await readUserTableRow(name, pk);
+      const schema = await resolveSchemaQuery(c);
+      const existing = await readUserTableRow(name, pk, schema);
       const decision = await decide(principal, name, "delete", {
         row: existing,
+        schema,
       });
       if (!decision.allowed) {
         return c.json(policyDeniedBody(decision, "delete"), 403);
       }
       const result = await writeChangeAs(principal)(
-        () => deps.jord.deleteTableRow({ table: name, pk }),
+        () => deps.jord.deleteTableRow({ table: name, schema, pk }),
         (deleted) =>
           deleted.ok
-            ? { table: name, op: "delete", id: pk, oldRow: existing, newRow: null }
+            ? {
+                table: name,
+                schema,
+                op: "delete",
+                id: pk,
+                oldRow: existing,
+                newRow: null,
+              }
             : null,
       );
       if (!result.ok) {
@@ -1094,8 +1145,10 @@ export function createJordApp(deps: JordAppDeps) {
           message: "owner_column must be a string or null",
         });
       }
+      const schema = await resolveSchemaQuery(c);
       const saved = await deps.jord.setTableRls({
         tableName: name,
+        schema,
         rlsEnabled: body.rls_enabled,
         ownerColumn:
           body.owner_column === undefined
@@ -1105,6 +1158,7 @@ export function createJordApp(deps: JordAppDeps) {
       await syncPoliciesRls();
       return c.json({
         table_name: saved.tableName,
+        schema: saved.schema ?? schema,
         rls_enabled: saved.rlsEnabled,
         owner_column: saved.ownerColumn,
       });
@@ -1124,13 +1178,14 @@ export function createJordApp(deps: JordAppDeps) {
           message: "tracked (boolean) is required",
         });
       }
+      const schema = await resolveSchemaQuery(c);
       if (name !== REALTIME_V1_TABLE) {
-        const info = await deps.jord.describeTable(name);
+        const info = await deps.jord.describeTable(name, schema);
         if (!info) {
           throw new HTTPException(404, { message: "table not found" });
         }
       }
-      await outbox.setTracked(name, body.tracked);
+      await outbox.setTracked(name, body.tracked, schema);
       return c.json({ table_name: name, tracked: body.tracked });
     },
   );
@@ -1140,7 +1195,8 @@ export function createJordApp(deps: JordAppDeps) {
     if (!isValidSqlIdent(name)) {
       throw new HTTPException(400, { message: "invalid table name" });
     }
-    const info = await deps.jord.describeTable(name);
+    const schema = await resolveSchemaQuery(c);
+    const info = await deps.jord.describeTable(name, schema);
     if (!info) {
       throw new HTTPException(404, { message: "table not found" });
     }
@@ -1164,13 +1220,19 @@ export function createJordApp(deps: JordAppDeps) {
         });
       }
       const type = body.type as JordColumnType;
+      const schema = await resolveSchemaQuery(c);
       const preview =
         isValidSqlIdent(table) && isValidSqlIdent(body.name)
-          ? buildAddColumnSql(table, body.name, type)
+          ? buildAddColumnSql(
+              table,
+              body.name,
+              type,
+              deps.jord.dialect === "postgres" ? schema : undefined,
+            )
           : null;
 
       const result = await enqueueWrite(() =>
-        ddlJord.addColumn({ table, name: body.name!, type }),
+        ddlJord.addColumn({ table, name: body.name!, type, schema }),
       );
 
       if (!result.ok) {
@@ -1186,7 +1248,7 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
 
-      const info = await deps.jord.describeTable(table);
+      const info = await deps.jord.describeTable(table, schema);
       return c.json({ ok: true as const, sql: preview, table: info }, 201);
     },
   );
@@ -1196,8 +1258,9 @@ export function createJordApp(deps: JordAppDeps) {
     requireAlterSchema(),
     async (c) => {
       const name = c.req.param("name");
+      const schema = await resolveSchemaQuery(c);
       const result = await enqueueWrite(() =>
-        ddlJord.dropTable({ name }),
+        ddlJord.dropTable({ name, schema }),
       );
       if (!result.ok) {
         return c.json(
@@ -1222,8 +1285,9 @@ export function createJordApp(deps: JordAppDeps) {
           message: "name (string) is required",
         });
       }
+      const schema = await resolveSchemaQuery(c);
       const result = await enqueueWrite(() =>
-        ddlJord.renameTable({ name, newName: body.name as string }),
+        ddlJord.renameTable({ name, newName: body.name as string, schema }),
       );
       if (!result.ok) {
         return c.json(
@@ -1232,7 +1296,7 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
       await syncPoliciesRls();
-      const info = await deps.jord.describeTable(body.name as string);
+      const info = await deps.jord.describeTable(body.name as string, schema);
       return c.json({ ok: true as const, table: info });
     },
   );
@@ -1270,8 +1334,9 @@ export function createJordApp(deps: JordAppDeps) {
           message: "name and/or type is required",
         });
       }
+      const schema = await resolveSchemaQuery(c);
       const result = await enqueueWrite(() =>
-        ddlJord.alterColumn({ table, column, ...patch }),
+        ddlJord.alterColumn({ table, schema, column, ...patch }),
       );
       if (!result.ok) {
         return c.json(
@@ -1280,7 +1345,7 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
       await syncPoliciesRls();
-      const info = await deps.jord.describeTable(table);
+      const info = await deps.jord.describeTable(table, schema);
       return c.json({ ok: true as const, table: info });
     },
   );
@@ -1291,8 +1356,9 @@ export function createJordApp(deps: JordAppDeps) {
     async (c) => {
       const table = c.req.param("name");
       const column = c.req.param("column");
+      const schema = await resolveSchemaQuery(c);
       const result = await enqueueWrite(() =>
-        ddlJord.dropColumn({ table, column }),
+        ddlJord.dropColumn({ table, schema, column }),
       );
       if (!result.ok) {
         return c.json(
@@ -1301,7 +1367,7 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
       await syncPoliciesRls();
-      const info = await deps.jord.describeTable(table);
+      const info = await deps.jord.describeTable(table, schema);
       return c.json({ ok: true as const, table: info });
     },
   );
@@ -1328,12 +1394,18 @@ export function createJordApp(deps: JordAppDeps) {
   async function readUserTableRow(
     table: string,
     pk: string,
+    schema?: string,
   ): Promise<Record<string, unknown> | null> {
     if (!isValidSqlIdent(table)) return null;
-    const info = await deps.jord.describeTable(table);
+    const info = await deps.jord.describeTable(table, schema);
     const pkCol = info?.columns.find((col) => col.pk)?.name;
     if (!pkCol || !isValidSqlIdent(pkCol)) return null;
-    const sql = `SELECT * FROM ${quoteIdent(table)} WHERE ${quoteIdent(pkCol)} = ? LIMIT 1`;
+    // libSQL has one schema; keep its SQL unqualified. Postgres always qualifies.
+    const target =
+      deps.jord.dialect === "postgres"
+        ? quoteQualified(info?.schema ?? deps.jord.defaultSchema, table)
+        : quoteIdent(table);
+    const sql = `SELECT * FROM ${target} WHERE ${quoteIdent(pkCol)} = ? LIMIT 1`;
     const rows =
       deps.jord.dialect === "postgres"
         ? await deps.jord.query(sql.replace("?", "$1"), [pk])
@@ -1349,11 +1421,14 @@ export function createJordApp(deps: JordAppDeps) {
       bucket?: string | null;
       row?: Record<string, unknown> | null;
       nextRow?: Record<string, unknown> | null;
+      /** Schema of `tableName` for the `jord_table_rls` lookup. */
+      schema?: string;
     },
   ) {
     return evaluatePolicies({
       jord: deps.jord,
       tableName,
+      schema: extra?.schema,
       operation,
       role: principal.role,
       subject: principal.kind,
@@ -2417,7 +2492,7 @@ export function createJordApp(deps: JordAppDeps) {
       throw new HTTPException(400, { message: "name is required" });
     }
     const tableName = body.table_name ?? V1_TABLE;
-    await assertPolicyTable(deps.jord, tableName);
+    await assertPolicyTable(deps.jord, tableName, await resolveSchemaQuery(c));
     if (
       typeof body.operation !== "string" ||
       !POLICY_OPS.has(body.operation as JordPolicyOperation)
@@ -2477,7 +2552,11 @@ export function createJordApp(deps: JordAppDeps) {
       enabled?: boolean;
     }>();
     if (body.table_name !== undefined) {
-      await assertPolicyTable(deps.jord, body.table_name);
+      await assertPolicyTable(
+        deps.jord,
+        body.table_name,
+        await resolveSchemaQuery(c),
+      );
     }
     if (
       body.operation !== undefined &&

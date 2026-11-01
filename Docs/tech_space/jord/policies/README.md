@@ -2,7 +2,7 @@
 title: "Jord — policies, triggers, and Postgres RLS"
 description: "Built-in policy rules, row scope, AFTER triggers, and native RLS compiled from jord_policies onto records and user tables"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-11-01
 tags:
   - tech-space
   - jord
@@ -35,7 +35,7 @@ Rows outside the scope are not returned, and writes report `affected: 0`. A pred
 
 **libSQL enforces row scope only in the server.** `bindRlsSession` is a no-op there and there is no database RLS. Raw SQL on libSQL (`/sql/execute`, the migrate wizard) is operator-only and sees every row.
 
-Authoring accepts `records` or an existing user table. `PUT /schema/tables/:name/rls` stores `{ rls_enabled, owner_column }` in `jord_table_rls` (migration `0003_table_rls`). `JORD_POLICIES_DISABLED` skips middleware.
+Authoring accepts `records` or an existing user table. `PUT /schema/tables/:name/rls?schema=` stores `{ rls_enabled, owner_column }` in `jord_table_rls` keyed by `(schema_name, table_name)` (migrations `0003_table_rls` + `0011_schema_scope`). Native `CREATE POLICY` / FORCE RLS target the requested schema — [[../schema/README]]. `JORD_POLICIES_DISABLED` skips middleware. `jord_policies` rows stay table-name-only for now.
 
 **Triggers** (`jord_triggers`). AFTER the write succeeds. Actions: `log`, `echo`, `invoke_function`. `invoke_function` runs as the caller unless the action config sets `as: "service"`. Errors are logged and do not roll back the write unless `failHard: true`. Trigger authoring is still `records` only. `JORD_TRIGGERS_DISABLED` skips them. There is no native `CREATE TRIGGER`.
 

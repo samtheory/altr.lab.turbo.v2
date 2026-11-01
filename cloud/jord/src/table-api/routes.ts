@@ -50,11 +50,25 @@ export function createTableApiRoutes(deps: {
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
 
+  /** `?schema=` → validated schema, or a 400 Response. */
+  async function resolveSchema(
+    c: { req: { query: (name: string) => string | undefined } },
+  ): Promise<{ ok: true; schema: string } | { ok: false; response: Response }> {
+    const raw = c.req.query("schema");
+    const resolved = await deps.jord.resolveSchema(raw === "" ? undefined : raw);
+    if (!resolved.ok) {
+      return { ok: false, response: jsonError(400, "unknown_schema", resolved.message) };
+    }
+    return { ok: true, schema: resolved.schema };
+  }
+
   routes.get("/openapi.json", async (c) => {
-    const names = (await deps.jord.listTables()).filter((name) => !RESERVED.test(name));
+    const scoped = await resolveSchema(c);
+    if (!scoped.ok) return scoped.response;
+    const names = (await deps.jord.listTables(scoped.schema)).filter((name) => !RESERVED.test(name));
     const tables = [];
     for (const name of names) {
-      const info = await deps.jord.describeTable(name);
+      const info = await deps.jord.describeTable(name, scoped.schema);
       if (info) tables.push(info);
     }
     return c.json(buildOpenApi(tables));
@@ -73,7 +87,9 @@ export function createTableApiRoutes(deps: {
       if (table === "records" && !deps.generatedRecordsEnabled()) {
         return c.json({ error: "api_disabled", resource: "records" }, 503);
       }
-      const info = await deps.jord.describeTable(table);
+      const scoped = await resolveSchema(c);
+      if (!scoped.ok) return scoped.response;
+      const info = await deps.jord.describeTable(table, scoped.schema);
       if (!info) return jsonError(404, "not_found", "table not found");
 
       const url = new URL(c.req.url);
@@ -99,6 +115,7 @@ export function createTableApiRoutes(deps: {
       const decision = await evaluatePolicies({
         jord: deps.jord,
         tableName: table,
+        schema: scoped.schema,
         operation,
         role: principal.role,
         subject: principal.kind,
@@ -151,6 +168,7 @@ export function createTableApiRoutes(deps: {
           (rows): JordChangeDraft[] =>
             rows.map((row) => ({
               table,
+              schema: scoped.schema,
               op,
               id: keys.map((key) => String(row[key] ?? "")).join(","),
               oldRow: op === "insert" ? null : op === "delete" ? row : null,
@@ -199,6 +217,7 @@ export function createTableApiRoutes(deps: {
             const oldById = new Map(previous.map((row) => [rowId(keys, row), row]));
             return updated.map((row) => ({
               table,
+              schema: scoped.schema,
               op: "update" as const,
               id: rowId(keys, row),
               oldRow: oldById.get(rowId(keys, row)) ?? null,

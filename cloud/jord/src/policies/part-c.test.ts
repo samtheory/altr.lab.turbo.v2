@@ -167,6 +167,7 @@ const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "GET", path: "/records" },
   { method: "POST", path: "/records" },
   { method: "GET", path: "/records/abc" },
+  { method: "GET", path: "/schema/schemas" },
   { method: "GET", path: "/schema/tables" },
   { method: "GET", path: "/schema/tables/notes" },
   { method: "GET", path: "/schema/tables/notes/rows" },
@@ -325,6 +326,7 @@ describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {
     );
     expect(surfaceFor("PUT", "/schema/tables/records/rls")).toBe("schema DDL");
     expect(surfaceFor("GET", "/api/v1")).toBe("api/v1");
+    expect(surfaceFor("GET", "/schema/schemas")).toBe("schema tables");
     for (const route of MOUNTED) {
       expect(surfaceFor(route.method, route.path), `${route.method} ${route.path}`).not.toBeNull();
     }

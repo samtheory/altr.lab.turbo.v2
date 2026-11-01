@@ -24,12 +24,31 @@ export function quoteIdent(name: string): string {
   return `"${name}"`;
 }
 
+/**
+ * `"schema"."table"`. Both parts must be valid identifiers; no search_path
+ * tricks — every user-table statement spells out its schema.
+ */
+export function quoteQualified(schema: string, table: string): string {
+  if (!isValidSqlIdent(schema)) {
+    throw new Error(
+      `[@altr/jord] invalid SQL schema identifier: ${JSON.stringify(schema)}`,
+    );
+  }
+  return `${quoteIdent(schema)}.${quoteIdent(table)}`;
+}
+
+/** Table reference: qualified when `schema` is set, else the bare quoted name. */
+export function tableRef(table: string, schema?: string): string {
+  return schema ? quoteQualified(schema, table) : quoteIdent(table);
+}
+
 export function buildAddColumnSql(
   table: string,
   column: string,
   type: JordColumnType,
+  schema?: string,
 ): string {
-  return `ALTER TABLE ${quoteIdent(table)} ADD COLUMN ${quoteIdent(column)} ${type}`;
+  return `ALTER TABLE ${tableRef(table, schema)} ADD COLUMN ${quoteIdent(column)} ${type}`;
 }
 
 /** Names Studio CREATE TABLE must not overwrite (scratchpad + control plane + system). */
@@ -156,12 +175,13 @@ export function buildCreateTableSql(
   table: string,
   columns: readonly PlannedCreateColumn[],
   dialect: "libsql" | "postgres",
+  schema?: string,
 ): string {
   const defs = columns.map((col) => {
     const sqlType = dialect === "postgres" ? pgColumnType(col.type) : col.type;
     return `${quoteIdent(col.name)} ${sqlType}${col.pk ? " PRIMARY KEY" : ""}`;
   });
-  return `CREATE TABLE ${quoteIdent(table)} (${defs.join(", ")})`;
+  return `CREATE TABLE ${tableRef(table, schema)} (${defs.join(", ")})`;
 }
 
 export type TableCell = string | number | boolean | null;

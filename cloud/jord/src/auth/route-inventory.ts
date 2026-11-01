@@ -39,7 +39,9 @@ export function surfaceFor(method: string, path: string): string | null {
     const read = verb === "GET" || verb === "HEAD";
     if (
       read &&
-      (normalized === "/schema/tables" || SCHEMA_ONE_TABLE.test(normalized))
+      (normalized === "/schema/schemas" ||
+        normalized === "/schema/tables" ||
+        SCHEMA_ONE_TABLE.test(normalized))
     ) {
       return "schema tables";
     }

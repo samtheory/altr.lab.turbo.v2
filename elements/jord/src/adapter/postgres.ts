@@ -48,6 +48,8 @@ import type {
   JordPolicyOperation,
   JordRecord,
   JordTableInfo,
+  JordSchemaInfo,
+  ResolveSchemaResult,
   TableRlsFlag,
   JordTrigger,
   JordTriggerEvent,
@@ -86,8 +88,10 @@ import {
   isValidSqlIdent,
   planCreateTable,
   quoteIdent,
+  quoteQualified,
   toTableCell,
 } from "../schema/ddl.js";
+import { PG_DEFAULT_SCHEMA } from "../schema/schema-scope.js";
 import {
   buildRebuildCopySql,
   buildRebuildCreateSql,
@@ -95,6 +99,7 @@ import {
   planDropColumn,
   planDropTable,
   planRenameTable,
+  SCHEMA_SCOPED_METADATA,
   TABLE_NAME_METADATA,
   rebuildTempName,
   requireUserTableName,
@@ -319,8 +324,21 @@ function mapTableRls(row: Record<string, unknown>): TableRlsFlag {
   const owner = row.owner_column;
   return {
     tableName: String(row.table_name ?? ""),
+    schema: row.schema_name == null ? PG_DEFAULT_SCHEMA : String(row.schema_name),
     rlsEnabled: rlsEnabledFlag(row.rls_enabled),
     ownerColumn: owner == null ? null : String(owner),
+  };
+}
+
+function unknownSchemaFailure(schemaName: string): {
+  ok: false;
+  error: "unknown_schema";
+  message: string;
+} {
+  return {
+    ok: false,
+    error: "unknown_schema",
+    message: `unknown schema ${JSON.stringify(schemaName)}`,
   };
 }
 
@@ -393,6 +411,7 @@ async function probePgvector(
 
 export class PostgresAdapter implements JordDriverPort {
   readonly dialect = "postgres" as const;
+  readonly defaultSchema = PG_DEFAULT_SCHEMA;
   readonly urlScheme = "postgres" as const;
   readonly vectorBackend: VectorBackend;
   private readonly pool: Pool;
@@ -577,10 +596,14 @@ export class PostgresAdapter implements JordDriverPort {
     });
   }
 
-  async getTableRls(tableName: string): Promise<TableRlsFlag | null> {
+  async getTableRls(
+    tableName: string,
+    schemaName: string = PG_DEFAULT_SCHEMA,
+  ): Promise<TableRlsFlag | null> {
     const rows = await this.query(
-      `SELECT table_name, rls_enabled, owner_column FROM jord_table_rls WHERE table_name = $1 LIMIT 1`,
-      [tableName],
+      `SELECT schema_name, table_name, rls_enabled, owner_column FROM jord_table_rls
+       WHERE schema_name = $1 AND table_name = $2 LIMIT 1`,
+      [schemaName, tableName],
     );
     const row = rows[0];
     return row ? mapTableRls(row) : null;
@@ -588,57 +611,65 @@ export class PostgresAdapter implements JordDriverPort {
 
   async setTableRls(input: {
     tableName: string;
+    schema?: string;
     rlsEnabled: boolean;
     ownerColumn?: string | null;
   }): Promise<TableRlsFlag> {
+    const schemaName = input.schema ?? PG_DEFAULT_SCHEMA;
     const updatedAt = Date.now();
     const ownerColumn = input.ownerColumn ?? null;
     const enabled = input.rlsEnabled ? "TRUE" : "FALSE";
     const rows = await this.query(
-      `INSERT INTO jord_table_rls (table_name, rls_enabled, owner_column, updated_at)
-       VALUES ($1, ${enabled}, $2, $3)
-       ON CONFLICT (table_name) DO UPDATE SET
+      `INSERT INTO jord_table_rls (schema_name, table_name, rls_enabled, owner_column, updated_at)
+       VALUES ($1, $2, ${enabled}, $3, $4)
+       ON CONFLICT (schema_name, table_name) DO UPDATE SET
          rls_enabled = EXCLUDED.rls_enabled,
          owner_column = EXCLUDED.owner_column,
          updated_at = EXCLUDED.updated_at
-       RETURNING table_name, rls_enabled, owner_column`,
-      [input.tableName, ownerColumn, updatedAt],
+       RETURNING schema_name, table_name, rls_enabled, owner_column`,
+      [schemaName, input.tableName, ownerColumn, updatedAt],
     );
     const row = rows[0];
     return row
       ? mapTableRls(row)
       : {
           tableName: input.tableName,
+          schema: schemaName,
           rlsEnabled: input.rlsEnabled,
           ownerColumn,
         };
   }
 
-  compilePolicySql(policy: JordPolicy): string | null {
-    return compilePolicySqlText(policy);
+  compilePolicySql(policy: JordPolicy, schemaName?: string): string | null {
+    return compilePolicySqlText(policy, undefined, schemaName);
   }
 
   async syncRecordsPoliciesRls(): Promise<void> {
     const policies = await this.listPolicies();
     const statements = [...planSyncRecordsRls(policies).statements];
     const flags = await this.pool.query(
-      `SELECT r.table_name, r.rls_enabled,
+      `SELECT r.schema_name, r.table_name, r.rls_enabled,
               EXISTS (
                 SELECT 1 FROM information_schema.columns c
-                WHERE c.table_schema = 'public' AND c.table_name = r.table_name AND c.column_name = 'bucket'
+                WHERE c.table_schema = r.schema_name AND c.table_name = r.table_name AND c.column_name = 'bucket'
               ) AS has_bucket
        FROM jord_table_rls r
        JOIN information_schema.tables t
-         ON t.table_schema = 'public' AND t.table_name = r.table_name
+         ON t.table_schema = r.schema_name AND t.table_name = r.table_name
        WHERE r.table_name <> 'records'`,
     );
+    // Every schema holding a flagged table gets DML grants (public always).
+    const grantSchemas = new Set<string>([PG_DEFAULT_SCHEMA]);
     for (const row of flags.rows) {
       const tableName = String(row.table_name);
-      if (!isValidSqlIdent(tableName)) continue;
+      const schemaName = String(row.schema_name ?? PG_DEFAULT_SCHEMA);
+      if (!isValidSqlIdent(tableName) || !isValidSqlIdent(schemaName)) continue;
+      grantSchemas.add(schemaName);
       statements.push(
         ...planSyncTableRls(tableName, policies, {
           enable: rlsEnabledFlag(row.rls_enabled),
           shape: { hasBucket: bool(row.has_bucket) },
+          schema: schemaName,
         }).statements,
       );
     }
@@ -647,10 +678,30 @@ export class PostgresAdapter implements JordDriverPort {
       [JORD_APP_ROLE],
     );
     if (app.rows.length > 0) {
-      statements.push(
-        `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${JORD_APP_ROLE}`,
-        `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${JORD_APP_ROLE}`,
+      // An operator who granted `jord_app` USAGE on a schema opted it in: tables
+      // created there later must be reachable without a per-table RLS flag.
+      const usable = await this.pool.query(
+        `SELECT nspname AS name FROM pg_catalog.pg_namespace
+         WHERE nspname !~ '^pg_' AND nspname <> 'information_schema'
+           AND has_schema_privilege($1, nspname, 'USAGE')`,
+        [JORD_APP_ROLE],
       );
+      for (const row of usable.rows) {
+        const name = String(row.name);
+        if (isValidSqlIdent(name)) grantSchemas.add(name);
+      }
+      for (const schemaName of grantSchemas) {
+        const ident = quoteIdent(schemaName);
+        // `public` already grants USAGE to everyone; skip it so a non-owner
+        // migrate role does not fail on GRANT.
+        if (schemaName !== PG_DEFAULT_SCHEMA) {
+          statements.push(`GRANT USAGE ON SCHEMA ${ident} TO ${JORD_APP_ROLE}`);
+        }
+        statements.push(
+          `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${ident} TO ${JORD_APP_ROLE}`,
+          `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ${ident} TO ${JORD_APP_ROLE}`,
+        );
+      }
     }
     const client = await this.pool.connect();
     try {
@@ -1264,19 +1315,65 @@ export class PostgresAdapter implements JordDriverPort {
     return null;
   }
 
-  async listTables(): Promise<string[]> {
+  async listSchemas(): Promise<JordSchemaInfo[]> {
+    const result = await this.exec(
+      `SELECT nspname AS name
+       FROM pg_catalog.pg_namespace
+       WHERE nspname !~ '^pg_'
+         AND nspname <> 'information_schema'
+         AND has_schema_privilege(current_user, nspname, 'USAGE')
+       ORDER BY nspname`,
+    );
+    return result.rows
+      .map((row) => String(row.name))
+      .filter((name) => isValidSqlIdent(name))
+      .map((name) => ({ name, readOnly: false }));
+  }
+
+  async resolveSchema(input?: string | null): Promise<ResolveSchemaResult> {
+    const wanted = input == null || input === "" ? this.defaultSchema : input;
+    if (!isValidSqlIdent(wanted)) return unknownSchemaFailure(wanted);
+    const schemas = await this.listSchemas();
+    if (schemas.some((s) => s.name === wanted)) {
+      return { ok: true, schema: wanted };
+    }
+    return unknownSchemaFailure(wanted);
+  }
+
+  /**
+   * Schema for a table operation. The default schema skips the catalog
+   * lookup (it is what every pre-S0049 call used); anything else is validated.
+   */
+  private async scope(
+    schemaName?: string,
+  ): Promise<ResolveSchemaResult> {
+    if (schemaName == null || schemaName === "" || schemaName === this.defaultSchema) {
+      return { ok: true, schema: this.defaultSchema };
+    }
+    return this.resolveSchema(schemaName);
+  }
+
+  async listTables(schemaName?: string): Promise<string[]> {
+    const scoped = await this.scope(schemaName);
+    if (!scoped.ok) return [];
     const result = await this.exec(
       `SELECT tablename AS name
        FROM pg_catalog.pg_tables
-       WHERE schemaname = 'public'
+       WHERE schemaname = $1
        ORDER BY tablename`,
+      [scoped.schema],
     );
     return result.rows.map((r) => String(r.name));
   }
 
-  async describeTable(name: string): Promise<JordTableInfo | null> {
+  async describeTable(
+    name: string,
+    schemaName?: string,
+  ): Promise<JordTableInfo | null> {
     if (!isValidSqlIdent(name)) return null;
-    const tables = await this.listTables();
+    const scoped = await this.scope(schemaName);
+    if (!scoped.ok) return null;
+    const tables = await this.listTables(scoped.schema);
     if (!tables.includes(name)) return null;
 
     const result = await this.exec(
@@ -1293,12 +1390,12 @@ export class PostgresAdapter implements JordDriverPort {
        JOIN pg_class c ON a.attrelid = c.oid
        JOIN pg_namespace n ON c.relnamespace = n.oid
        LEFT JOIN pg_attrdef ad ON a.attrelid = ad.adrelid AND a.attnum = ad.adnum
-       WHERE n.nspname = 'public'
+       WHERE n.nspname = $2
          AND c.relname = $1
          AND a.attnum > 0
          AND NOT a.attisdropped
        ORDER BY a.attnum`,
-      [name],
+      [name, scoped.schema],
     );
 
     const columns: JordColumnInfo[] = result.rows.map((r) => ({
@@ -1308,10 +1405,12 @@ export class PostgresAdapter implements JordDriverPort {
       pk: bool(r.pk),
       dflt_value: r.dflt_value == null ? null : String(r.dflt_value),
     }));
-    return { name, columns };
+    return { name, schema: scoped.schema, columns };
   }
 
   async addColumn(input: AddColumnInput): Promise<AddColumnResult> {
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
     if (!isValidSqlIdent(input.table) || !isValidSqlIdent(input.name)) {
       return {
         ok: false,
@@ -1327,7 +1426,7 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
 
-    const described = await this.describeTable(input.table);
+    const described = await this.describeTable(input.table, scoped.schema);
     if (!described) {
       return {
         ok: false,
@@ -1352,7 +1451,7 @@ export class PostgresAdapter implements JordDriverPort {
             ? "DOUBLE PRECISION"
             : "BYTEA";
     await this.exec(
-      `ALTER TABLE ${quoteIdent(input.table)} ADD COLUMN ${quoteIdent(input.name)} ${pgType}`,
+      `ALTER TABLE ${quoteQualified(scoped.schema, input.table)} ADD COLUMN ${quoteIdent(input.name)} ${pgType}`,
     );
     return { ok: true };
   }
@@ -1360,7 +1459,9 @@ export class PostgresAdapter implements JordDriverPort {
   async createTable(input: CreateTableInput): Promise<CreateTableResult> {
     const plan = planCreateTable(input);
     if (!plan.ok) return plan;
-    const existing = await this.describeTable(plan.name);
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
+    const existing = await this.describeTable(plan.name, scoped.schema);
     if (existing) {
       return {
         ok: false,
@@ -1368,12 +1469,19 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${plan.name} already exists`,
       };
     }
-    const sql = buildCreateTableSql(plan.name, plan.columns, "postgres");
+    const sql = buildCreateTableSql(
+      plan.name,
+      plan.columns,
+      "postgres",
+      scoped.schema,
+    );
     await this.exec(sql);
     return { ok: true, sql };
   }
 
   async listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult> {
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
     if (!isValidSqlIdent(input.table)) {
       return {
         ok: false,
@@ -1381,7 +1489,7 @@ export class PostgresAdapter implements JordDriverPort {
         message: "table name must match [a-zA-Z_][a-zA-Z0-9_]*",
       };
     }
-    const described = await this.describeTable(input.table);
+    const described = await this.describeTable(input.table, scoped.schema);
     if (!described) {
       return {
         ok: false,
@@ -1397,7 +1505,7 @@ export class PostgresAdapter implements JordDriverPort {
       : "";
     args.push(window.limit, window.offset);
     const result = await this.exec(
-      `SELECT * FROM ${quoteIdent(input.table)}${where} LIMIT $${args.length - 1} OFFSET $${args.length}`,
+      `SELECT * FROM ${quoteQualified(scoped.schema, input.table)}${where} LIMIT $${args.length - 1} OFFSET $${args.length}`,
       args,
     );
     const rows = result.rows.map((row) => {
@@ -1411,12 +1519,13 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async insertTableRow(input: InsertTableRowInput): Promise<MutateTableRowResult> {
-    const described = await this.openUserTable(input.table);
+    const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
     const plan = planInsertRow(described.info, input.values);
     if (!plan.ok) return plan;
+    const target = quoteQualified(described.schema, plan.table);
     const existing = await this.exec(
-      `SELECT 1 AS hit FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1 LIMIT 1`,
+      `SELECT 1 AS hit FROM ${target} WHERE ${quoteIdent(plan.pkColumn)} = $1 LIMIT 1`,
       [plan.pkValue],
     );
     if (existing.rows.length > 0) {
@@ -1429,14 +1538,14 @@ export class PostgresAdapter implements JordDriverPort {
     const cols = plan.columns.map((name) => quoteIdent(name)).join(", ");
     const marks = plan.columns.map((_, i) => `$${i + 1}`).join(", ");
     await this.exec(
-      `INSERT INTO ${quoteIdent(plan.table)} (${cols}) VALUES (${marks})`,
+      `INSERT INTO ${target} (${cols}) VALUES (${marks})`,
       plan.args,
     );
     return { ok: true };
   }
 
   async updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult> {
-    const described = await this.openUserTable(input.table);
+    const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
     const plan = planUpdateRow(described.info, input.pk, input.values);
     if (!plan.ok) return plan;
@@ -1444,7 +1553,7 @@ export class PostgresAdapter implements JordDriverPort {
       .map((name, i) => `${quoteIdent(name)} = $${i + 1}`)
       .join(", ");
     const result = await this.exec(
-      `UPDATE ${quoteIdent(plan.table)} SET ${sets} WHERE ${quoteIdent(plan.pkColumn)} = $${plan.setColumns.length + 1}`,
+      `UPDATE ${quoteQualified(described.schema, plan.table)} SET ${sets} WHERE ${quoteIdent(plan.pkColumn)} = $${plan.setColumns.length + 1}`,
       [...plan.args, plan.pkValue],
     );
     if ((result.rowCount ?? 0) === 0) {
@@ -1454,12 +1563,12 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async deleteTableRow(input: DeleteTableRowInput): Promise<MutateTableRowResult> {
-    const described = await this.openUserTable(input.table);
+    const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
     const plan = planDeleteRow(described.info, input.pk);
     if (!plan.ok) return plan;
     const result = await this.exec(
-      `DELETE FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1`,
+      `DELETE FROM ${quoteQualified(described.schema, plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = $1`,
       [plan.pkValue],
     );
     if ((result.rowCount ?? 0) === 0) {
@@ -1471,7 +1580,9 @@ export class PostgresAdapter implements JordDriverPort {
   async dropTable(input: DropTableInput): Promise<SchemaDdlResult> {
     const plan = planDropTable(input.name);
     if (!plan.ok) return plan;
-    const existing = await this.describeTable(plan.name);
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
+    const existing = await this.describeTable(plan.name, scoped.schema);
     if (!existing) {
       return {
         ok: false,
@@ -1479,14 +1590,17 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${plan.name} not found`,
       };
     }
-    await this.exec(`DROP TABLE ${quoteIdent(plan.name)}`);
+    await this.exec(`DROP TABLE ${quoteQualified(scoped.schema, plan.name)}`);
     return { ok: true };
   }
 
   async renameTable(input: RenameTableInput): Promise<SchemaDdlResult> {
     const plan = planRenameTable(input.name, input.newName);
     if (!plan.ok) return plan;
-    const existing = await this.describeTable(plan.from);
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
+    const schemaName = scoped.schema;
+    const existing = await this.describeTable(plan.from, schemaName);
     if (!existing) {
       return {
         ok: false,
@@ -1494,7 +1608,7 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${plan.from} not found`,
       };
     }
-    const conflict = await this.describeTable(plan.to);
+    const conflict = await this.describeTable(plan.to, schemaName);
     if (conflict) {
       return {
         ok: false,
@@ -1504,23 +1618,32 @@ export class PostgresAdapter implements JordDriverPort {
     }
     await this.transaction(async () => {
       await this.exec(
-        `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
+        `ALTER TABLE ${quoteQualified(schemaName, plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
       );
       for (const meta of TABLE_NAME_METADATA) {
-        await this.exec(`UPDATE ${meta} SET table_name = $1 WHERE table_name = $2`, [
-          plan.to,
-          plan.from,
-        ]);
+        // jord_policies / jord_triggers are table_name-only (S0049); the
+        // schema-scoped tables must not move a same-named table elsewhere.
+        if (SCHEMA_SCOPED_METADATA.has(meta)) {
+          await this.exec(
+            `UPDATE ${meta} SET table_name = $1 WHERE table_name = $2 AND schema_name = $3`,
+            [plan.to, plan.from, schemaName],
+          );
+        } else {
+          await this.exec(`UPDATE ${meta} SET table_name = $1 WHERE table_name = $2`, [
+            plan.to,
+            plan.from,
+          ]);
+        }
       }
       // Compiled policies keep the old name; the caller's RLS sync recreates them.
       const stale = await this.exec(
         `SELECT policyname FROM pg_policies
-         WHERE schemaname = 'public' AND tablename = $1 AND policyname LIKE 'jord\\_rls\\_%'`,
-        [plan.to],
+         WHERE schemaname = $2 AND tablename = $1 AND policyname LIKE 'jord\\_rls\\_%'`,
+        [plan.to, schemaName],
       );
       for (const row of stale.rows as Array<{ policyname: string }>) {
         await this.exec(
-          `DROP POLICY IF EXISTS ${quoteIdent(row.policyname)} ON ${quoteIdent(plan.to)}`,
+          `DROP POLICY IF EXISTS ${quoteIdent(row.policyname)} ON ${quoteQualified(schemaName, plan.to)}`,
         );
       }
     });
@@ -1530,7 +1653,9 @@ export class PostgresAdapter implements JordDriverPort {
   async dropColumn(input: DropColumnInput): Promise<SchemaDdlResult> {
     const gate = requireUserTableName(input.table);
     if (!gate.ok) return gate;
-    const info = await this.describeTable(gate.name);
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
+    const info = await this.describeTable(gate.name, scoped.schema);
     if (!info) {
       return {
         ok: false,
@@ -1541,7 +1666,7 @@ export class PostgresAdapter implements JordDriverPort {
     const plan = planDropColumn(info, input.column);
     if (!plan.ok) return plan;
     await this.exec(
-      `ALTER TABLE ${quoteIdent(plan.table)} DROP COLUMN ${quoteIdent(plan.column)}`,
+      `ALTER TABLE ${quoteQualified(scoped.schema, plan.table)} DROP COLUMN ${quoteIdent(plan.column)}`,
     );
     return { ok: true };
   }
@@ -1549,7 +1674,10 @@ export class PostgresAdapter implements JordDriverPort {
   async alterColumn(input: AlterColumnInput): Promise<SchemaDdlResult> {
     const gate = requireUserTableName(input.table);
     if (!gate.ok) return gate;
-    const info = await this.describeTable(gate.name);
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) return scoped;
+    const schemaName = scoped.schema;
+    const info = await this.describeTable(gate.name, schemaName);
     if (!info) {
       return {
         ok: false,
@@ -1565,7 +1693,7 @@ export class PostgresAdapter implements JordDriverPort {
 
     if (plan.mode === "rename") {
       await this.exec(
-        `ALTER TABLE ${quoteIdent(plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
+        `ALTER TABLE ${quoteQualified(schemaName, plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
       );
       return { ok: true };
     }
@@ -1576,9 +1704,11 @@ export class PostgresAdapter implements JordDriverPort {
       await client.query("BEGIN");
       // A non-superuser owner is filtered by FORCE RLS and would copy no rows.
       await client.query(
-        `ALTER TABLE ${quoteIdent(plan.table)} NO FORCE ROW LEVEL SECURITY`,
+        `ALTER TABLE ${quoteQualified(schemaName, plan.table)} NO FORCE ROW LEVEL SECURITY`,
       );
-      await client.query(buildRebuildCreateSql(temp, plan.columns, "postgres"));
+      await client.query(
+        buildRebuildCreateSql(temp, plan.columns, "postgres", schemaName),
+      );
       await client.query(
         buildRebuildCopySql(
           plan.table,
@@ -1588,11 +1718,12 @@ export class PostgresAdapter implements JordDriverPort {
           plan.to,
           plan.nextType,
           "postgres",
+          schemaName,
         ),
       );
-      await client.query(`DROP TABLE ${quoteIdent(plan.table)}`);
+      await client.query(`DROP TABLE ${quoteQualified(schemaName, plan.table)}`);
       await client.query(
-        `ALTER TABLE ${quoteIdent(temp)} RENAME TO ${quoteIdent(plan.table)}`,
+        `ALTER TABLE ${quoteQualified(schemaName, temp)} RENAME TO ${quoteIdent(plan.table)}`,
       );
       await client.query("COMMIT");
       return { ok: true };
@@ -1603,7 +1734,9 @@ export class PostgresAdapter implements JordDriverPort {
         /* ignore */
       }
       try {
-        await this.exec(`DROP TABLE IF EXISTS ${quoteIdent(temp)}`);
+        await this.exec(
+          `DROP TABLE IF EXISTS ${quoteQualified(schemaName, temp)}`,
+        );
       } catch {
         /* ignore cleanup */
       }
@@ -1620,14 +1753,21 @@ export class PostgresAdapter implements JordDriverPort {
 
   private async openUserTable(
     table: string,
+    schemaName?: string,
   ): Promise<
-    | { ok: true; info: JordTableInfo }
+    | { ok: true; info: JordTableInfo; schema: string }
     | {
         ok: false;
-        error: "invalid_identifier" | "reserved" | "table_not_found";
+        error:
+          | "invalid_identifier"
+          | "reserved"
+          | "table_not_found"
+          | "unknown_schema";
         message: string;
       }
   > {
+    const scoped = await this.scope(schemaName);
+    if (!scoped.ok) return scoped;
     if (!isValidSqlIdent(table)) {
       return {
         ok: false,
@@ -1642,7 +1782,7 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${table} is reserved`,
       };
     }
-    const info = await this.describeTable(table);
+    const info = await this.describeTable(table, scoped.schema);
     if (!info) {
       return {
         ok: false,
@@ -1650,7 +1790,7 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${table} not found`,
       };
     }
-    return { ok: true, info };
+    return { ok: true, info, schema: scoped.schema };
   }
 
   async listBlobBuckets(): Promise<string[]> {

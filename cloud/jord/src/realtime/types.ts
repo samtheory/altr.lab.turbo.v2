@@ -34,6 +34,8 @@ export type JordChangeEvent = {
 export type JordChangeDraft = {
   /** Defaults to `records` when omitted (legacy records emit sites). */
   table?: string;
+  /** Schema of `table`; defaults to the adapter's default schema. */
+  schema?: string;
   op: JordChangeOp;
   id: string;
   version?: number;

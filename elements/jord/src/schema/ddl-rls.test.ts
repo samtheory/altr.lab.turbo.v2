@@ -213,4 +213,36 @@ describe("ddl-rls planner", () => {
       `"tenant_id" = (NULLIF(current_setting('jord.claims', true), '')::jsonb ->> 'tenant')`,
     );
   });
+
+  it("qualifies policy and table statements with the schema (S0049)", () => {
+    const notes = policy({
+      tableName: "notes",
+      operation: "select",
+      effect: "allow",
+      rules: JSON.stringify([{ kind: "always" }]),
+    });
+    const sql = compilePolicySql(notes, undefined, "app");
+    expect(sql).toContain('ON "app"."notes" FOR SELECT');
+
+    const plan = planSyncTableRls("notes", [notes], {
+      enable: true,
+      shape: { hasBucket: false },
+      schema: "app",
+    });
+    expect(plan.statements).toContain('ALTER TABLE "app"."notes" ENABLE ROW LEVEL SECURITY');
+    expect(plan.statements).toContain('ALTER TABLE "app"."notes" FORCE ROW LEVEL SECURITY');
+    expect(
+      plan.statements.filter((s) => s.startsWith("CREATE POLICY") && s.includes('ON "app"."notes"')),
+    ).toHaveLength(4);
+    expect(
+      plan.statements.filter((s) => s.startsWith("DROP POLICY") && s.endsWith('ON "app"."notes"')),
+    ).toHaveLength(4);
+
+    const off = planSyncTableRls("notes", [notes], { enable: false, schema: "app" });
+    expect(off.statements).toContain('ALTER TABLE "app"."notes" DISABLE ROW LEVEL SECURITY');
+
+    // No schema keeps the bare table name (records + legacy callers).
+    const bare = planSyncTableRls("notes", [notes], { enable: true, shape: { hasBucket: false } });
+    expect(bare.statements).toContain('ALTER TABLE "notes" ENABLE ROW LEVEL SECURITY');
+  });
 });

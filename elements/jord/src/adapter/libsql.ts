@@ -49,6 +49,8 @@ import type {
   JordPolicyOperation,
   JordRecord,
   JordTableInfo,
+  JordSchemaInfo,
+  ResolveSchemaResult,
   TableRlsFlag,
   JordTrigger,
   JordTriggerEvent,
@@ -84,6 +86,7 @@ import {
   toTableCell,
 } from "../schema/ddl.js";
 import { rowScopeSql } from "../schema/row-scope.js";
+import { LIBSQL_SCHEMA } from "../schema/schema-scope.js";
 import {
   buildRebuildCopySql,
   buildRebuildCreateSql,
@@ -91,6 +94,7 @@ import {
   planDropColumn,
   planDropTable,
   planRenameTable,
+  SCHEMA_SCOPED_METADATA,
   TABLE_NAME_METADATA,
   rebuildTempName,
   requireUserTableName,
@@ -393,8 +397,26 @@ function mapTableRls(row: Record<string, unknown>): TableRlsFlag {
   const owner = row.owner_column;
   return {
     tableName: String(row.table_name ?? ""),
+    schema: row.schema_name == null ? LIBSQL_SCHEMA : String(row.schema_name),
     rlsEnabled: rlsEnabledFlag(row.rls_enabled),
     ownerColumn: owner == null ? null : String(owner),
+  };
+}
+
+/** libSQL has one schema, `main`; anything else is not addressable. */
+function isMainSchema(schemaName: string | undefined): boolean {
+  return schemaName === undefined || schemaName === "" || schemaName === LIBSQL_SCHEMA;
+}
+
+function unknownSchemaFailure(schemaName: string | undefined): {
+  ok: false;
+  error: "unknown_schema";
+  message: string;
+} {
+  return {
+    ok: false,
+    error: "unknown_schema",
+    message: `unknown schema ${JSON.stringify(schemaName)} (libSQL exposes only "${LIBSQL_SCHEMA}")`,
   };
 }
 
@@ -424,6 +446,7 @@ async function probeLibsqlVectorBackend(client: Client): Promise<VectorBackend> 
 
 export class LibSqlAdapter implements JordDriverPort {
   readonly dialect = "libsql" as const;
+  readonly defaultSchema = LIBSQL_SCHEMA;
   readonly urlScheme: Extract<JordUrlScheme, "file" | "libsql">;
   readonly vectorBackend: VectorBackend;
   /** Tx-routed client: inside an interactive `transaction`, statements join it. */
@@ -1225,10 +1248,15 @@ export class LibSqlAdapter implements JordDriverPort {
     // libSQL keeps application middleware; no session GUCs.
   }
 
-  async getTableRls(tableName: string): Promise<TableRlsFlag | null> {
+  async getTableRls(
+    tableName: string,
+    schemaName: string = LIBSQL_SCHEMA,
+  ): Promise<TableRlsFlag | null> {
+    if (!isMainSchema(schemaName)) return null;
     const rows = await this.query(
-      `SELECT table_name, rls_enabled, owner_column FROM jord_table_rls WHERE table_name = ? LIMIT 1`,
-      [tableName],
+      `SELECT schema_name, table_name, rls_enabled, owner_column FROM jord_table_rls
+       WHERE schema_name = ? AND table_name = ? LIMIT 1`,
+      [LIBSQL_SCHEMA, tableName],
     );
     const row = rows[0];
     return row ? mapTableRls(row) : null;
@@ -1236,26 +1264,31 @@ export class LibSqlAdapter implements JordDriverPort {
 
   async setTableRls(input: {
     tableName: string;
+    schema?: string;
     rlsEnabled: boolean;
     ownerColumn?: string | null;
   }): Promise<TableRlsFlag> {
+    if (!isMainSchema(input.schema)) {
+      throw new Error(unknownSchemaFailure(input.schema).message);
+    }
     const updatedAt = Date.now();
     const ownerColumn = input.ownerColumn ?? null;
     const rows = await this.query(
-      `INSERT INTO jord_table_rls (table_name, rls_enabled, owner_column, updated_at)
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(table_name) DO UPDATE SET
+      `INSERT INTO jord_table_rls (schema_name, table_name, rls_enabled, owner_column, updated_at)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(schema_name, table_name) DO UPDATE SET
          rls_enabled = excluded.rls_enabled,
          owner_column = excluded.owner_column,
          updated_at = excluded.updated_at
-       RETURNING table_name, rls_enabled, owner_column`,
-      [input.tableName, input.rlsEnabled ? 1 : 0, ownerColumn, updatedAt],
+       RETURNING schema_name, table_name, rls_enabled, owner_column`,
+      [LIBSQL_SCHEMA, input.tableName, input.rlsEnabled ? 1 : 0, ownerColumn, updatedAt],
     );
     const row = rows[0];
     return row
       ? mapTableRls(row)
       : {
           tableName: input.tableName,
+          schema: LIBSQL_SCHEMA,
           rlsEnabled: input.rlsEnabled,
           ownerColumn,
         };
@@ -1269,14 +1302,30 @@ export class LibSqlAdapter implements JordDriverPort {
     // No native RLS on libSQL.
   }
 
-  async listTables(): Promise<string[]> {
+  async listSchemas(): Promise<JordSchemaInfo[]> {
+    // `readOnly` is informational only; DDL on main is never gated on it.
+    return [{ name: LIBSQL_SCHEMA, readOnly: true }];
+  }
+
+  async resolveSchema(input?: string | null): Promise<ResolveSchemaResult> {
+    const wanted = input == null || input === "" ? LIBSQL_SCHEMA : input;
+    if (wanted === LIBSQL_SCHEMA) return { ok: true, schema: LIBSQL_SCHEMA };
+    return unknownSchemaFailure(wanted);
+  }
+
+  async listTables(schemaName?: string): Promise<string[]> {
+    if (!isMainSchema(schemaName)) return [];
     const rs = await this.client.execute(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
     );
     return rs.rows.map((r) => String(r.name ?? r[0]));
   }
 
-  async describeTable(name: string): Promise<JordTableInfo | null> {
+  async describeTable(
+    name: string,
+    schemaName?: string,
+  ): Promise<JordTableInfo | null> {
+    if (!isMainSchema(schemaName)) return null;
     if (!isValidSqlIdent(name)) return null;
     const tables = await this.listTables();
     if (!tables.includes(name)) return null;
@@ -1296,10 +1345,11 @@ export class LibSqlAdapter implements JordDriverPort {
             : String(r[4])
           : String(r.dflt_value),
     }));
-    return { name, columns };
+    return { name, schema: LIBSQL_SCHEMA, columns };
   }
 
   async addColumn(input: AddColumnInput): Promise<AddColumnResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     if (!isValidSqlIdent(input.table) || !isValidSqlIdent(input.name)) {
       return {
         ok: false,
@@ -1338,6 +1388,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async createTable(input: CreateTableInput): Promise<CreateTableResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     const plan = planCreateTable(input);
     if (!plan.ok) return plan;
     const existing = await this.describeTable(plan.name);
@@ -1354,6 +1405,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     if (!isValidSqlIdent(input.table)) {
       return {
         ok: false,
@@ -1391,7 +1443,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async insertTableRow(input: InsertTableRowInput): Promise<MutateTableRowResult> {
-    const described = await this.openUserTable(input.table);
+    const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
     const plan = planInsertRow(described.info, input.values);
     if (!plan.ok) return plan;
@@ -1416,7 +1468,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult> {
-    const described = await this.openUserTable(input.table);
+    const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
     const plan = planUpdateRow(described.info, input.pk, input.values);
     if (!plan.ok) return plan;
@@ -1434,7 +1486,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async deleteTableRow(input: DeleteTableRowInput): Promise<MutateTableRowResult> {
-    const described = await this.openUserTable(input.table);
+    const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
     const plan = planDeleteRow(described.info, input.pk);
     if (!plan.ok) return plan;
@@ -1449,6 +1501,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async dropTable(input: DropTableInput): Promise<SchemaDdlResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     const plan = planDropTable(input.name);
     if (!plan.ok) return plan;
     const existing = await this.describeTable(plan.name);
@@ -1464,6 +1517,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async renameTable(input: RenameTableInput): Promise<SchemaDdlResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     const plan = planRenameTable(input.name, input.newName);
     if (!plan.ok) return plan;
     const existing = await this.describeTable(plan.from);
@@ -1487,16 +1541,24 @@ export class LibSqlAdapter implements JordDriverPort {
         `ALTER TABLE ${quoteIdent(plan.from)} RENAME TO ${quoteIdent(plan.to)}`,
       );
       for (const meta of TABLE_NAME_METADATA) {
-        await this.client.execute({
-          sql: `UPDATE ${meta} SET table_name = ? WHERE table_name = ?`,
-          args: [plan.to, plan.from],
-        });
+        await this.client.execute(
+          SCHEMA_SCOPED_METADATA.has(meta)
+            ? {
+                sql: `UPDATE ${meta} SET table_name = ? WHERE table_name = ? AND schema_name = ?`,
+                args: [plan.to, plan.from, LIBSQL_SCHEMA],
+              }
+            : {
+                sql: `UPDATE ${meta} SET table_name = ? WHERE table_name = ?`,
+                args: [plan.to, plan.from],
+              },
+        );
       }
     });
     return { ok: true };
   }
 
   async dropColumn(input: DropColumnInput): Promise<SchemaDdlResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     const gate = requireUserTableName(input.table);
     if (!gate.ok) return gate;
     const info = await this.describeTable(gate.name);
@@ -1516,6 +1578,7 @@ export class LibSqlAdapter implements JordDriverPort {
   }
 
   async alterColumn(input: AlterColumnInput): Promise<SchemaDdlResult> {
+    if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     const gate = requireUserTableName(input.table);
     if (!gate.ok) return gate;
     const info = await this.describeTable(gate.name);
@@ -1577,10 +1640,16 @@ export class LibSqlAdapter implements JordDriverPort {
 
   private async openUserTable(
     table: string,
+    schemaName?: string,
   ): Promise<
     | { ok: true; info: JordTableInfo }
-    | { ok: false; error: "invalid_identifier" | "reserved" | "table_not_found"; message: string }
+    | {
+        ok: false;
+        error: "invalid_identifier" | "reserved" | "table_not_found" | "unknown_schema";
+        message: string;
+      }
   > {
+    if (!isMainSchema(schemaName)) return unknownSchemaFailure(schemaName);
     if (!isValidSqlIdent(table)) {
       return {
         ok: false,

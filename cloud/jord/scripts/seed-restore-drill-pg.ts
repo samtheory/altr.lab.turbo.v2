@@ -22,7 +22,7 @@ await jord.query(
 
 await jord.query(
   `INSERT INTO jord_tracked_tables (table_name, tracked_at) VALUES ($1, $2)
-   ON CONFLICT (table_name) DO NOTHING`,
+   ON CONFLICT (schema_name, table_name) DO NOTHING`,
   ["records", now],
 );
 

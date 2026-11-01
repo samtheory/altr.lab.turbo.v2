@@ -61,6 +61,8 @@ const RESERVED_PARAMS = new Set([
   "offset",
   "all",
   "pk",
+  // Schema scope (S0049): a column named `schema` cannot be filtered by name.
+  "schema",
 ]);
 
 function columnMap(info: JordTableInfo): Map<string, JordColumnInfo> {

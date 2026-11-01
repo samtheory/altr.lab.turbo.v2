@@ -6,12 +6,14 @@ import {
   isValidSqlIdent,
   pgColumnType,
   quoteIdent,
+  tableRef,
 } from "./ddl.js";
 import { columnKind } from "./row-write.js";
 
 export type SchemaDdlError =
   | "invalid_identifier"
   | "reserved"
+  | "unknown_schema"
   | "table_not_found"
   | "table_exists"
   | "column_not_found"
@@ -60,6 +62,16 @@ export const TABLE_NAME_METADATA = [
   "jord_triggers",
   "jord_tracked_tables",
 ] as const;
+
+/**
+ * Subset of `TABLE_NAME_METADATA` that also carries `schema_name` (S0049).
+ * A rename must match on both. `jord_policies` / `jord_triggers` /
+ * `jord_changes` stay table_name-only for now.
+ */
+export const SCHEMA_SCOPED_METADATA: ReadonlySet<string> = new Set([
+  "jord_table_rls",
+  "jord_tracked_tables",
+]);
 
 export function planRenameTable(
   from: string,
@@ -238,12 +250,13 @@ export function buildRebuildCreateSql(
   tempName: string,
   columns: readonly PlannedColumn[],
   dialect: "libsql" | "postgres",
+  schema?: string,
 ): string {
   const defs = columns.map((col) => {
     const sqlType = dialect === "postgres" ? pgColumnType(col.type) : col.type;
     return `${quoteIdent(col.name)} ${sqlType}${col.pk ? " PRIMARY KEY" : ""}`;
   });
-  return `CREATE TABLE ${quoteIdent(tempName)} (${defs.join(", ")})`;
+  return `CREATE TABLE ${tableRef(tempName, schema)} (${defs.join(", ")})`;
 }
 
 export function buildRebuildCopySql(
@@ -254,6 +267,7 @@ export function buildRebuildCopySql(
   toColumn: string,
   nextType: JordColumnType,
   dialect: "libsql" | "postgres",
+  schema?: string,
 ): string {
   const select = buildTypeChangeSelect(
     info,
@@ -262,5 +276,5 @@ export function buildRebuildCopySql(
     nextType,
     dialect,
   );
-  return `INSERT INTO ${quoteIdent(tempName)} SELECT ${select} FROM ${quoteIdent(table)}`;
+  return `INSERT INTO ${tableRef(tempName, schema)} SELECT ${select} FROM ${tableRef(table, schema)}`;
 }

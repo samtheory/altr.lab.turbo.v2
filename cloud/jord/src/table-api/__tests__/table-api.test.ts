@@ -266,4 +266,144 @@ describe.each(TEST_BACKENDS)("S0022 table API (%s)", (backend) => {
       "delete",
     ]);
   });
+
+  it("rejects an unknown ?schema= with 400 on the table API and introspection", async () => {
+    const { app } = await boot(backend);
+    const admin = operator("admin");
+    expect(
+      (
+        await app.request("/schema/tables", {
+          method: "POST",
+          headers: { ...admin, "content-type": "application/json" },
+          body: JSON.stringify({ name: "notes", columns: [{ name: "title", type: "TEXT" }] }),
+        })
+      ).status,
+    ).toBe(201);
+
+    const table = await app.request("/api/v1/notes?schema=nope", { headers: service() });
+    expect(table.status).toBe(400);
+    expect(await table.json()).toMatchObject({ error: "unknown_schema" });
+    expect((await app.request("/api/v1/openapi.json?schema=nope", { headers: service() })).status).toBe(
+      400,
+    );
+    expect((await app.request("/schema/tables?schema=nope", { headers: admin })).status).toBe(400);
+    expect((await app.request("/schema/tables/notes?schema=nope", { headers: admin })).status).toBe(
+      400,
+    );
+    expect(
+      (
+        await app.request("/schema/tables/notes/rows?schema=nope", { headers: admin })
+      ).status,
+    ).toBe(400);
+    const create = await app.request("/schema/tables?schema=nope", {
+      method: "POST",
+      headers: { ...admin, "content-type": "application/json" },
+      body: JSON.stringify({ name: "other", columns: [{ name: "title", type: "TEXT" }] }),
+    });
+    expect(create.status).toBe(400);
+    const bodySchema = await app.request("/schema/tables", {
+      method: "POST",
+      headers: { ...admin, "content-type": "application/json" },
+      body: JSON.stringify({
+        name: "other",
+        schema: "nope",
+        columns: [{ name: "title", type: "TEXT" }],
+      }),
+    });
+    expect(bodySchema.status).toBe(400);
+
+    // The default schema (explicit or implied) still works; an injection string does not.
+    expect((await app.request("/api/v1/notes", { headers: service() })).status).toBe(200);
+    expect(
+      (await app.request('/api/v1/notes?schema=public"%3B--', { headers: service() })).status,
+    ).toBe(400);
+  });
+
+  it("lists schemas on GET /schema/schemas", async () => {
+    const { app, jord } = await boot(backend);
+    const res = await app.request("/schema/schemas", { headers: operator("admin") });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { schemas: Array<{ name: string; readOnly: boolean }> };
+    expect(body.schemas.map((s) => s.name)).toContain(jord.defaultSchema);
+    if (backend === "file") {
+      expect(body.schemas).toEqual([{ name: "main", readOnly: true }]);
+      const tables = await app.request("/schema/tables?schema=main", { headers: operator("admin") });
+      expect(tables.status).toBe(200);
+    }
+  });
+
+  it.runIf(backend === "postgres")(
+    "serves a non-public schema end to end (DDL, rows, RLS, table API, outbox)",
+    async () => {
+      const { app, db, jord } = await boot(backend);
+      await db.ownerSql("CREATE SCHEMA app");
+      // The runtime role only sees schemas it can USE; sync then grants DML there.
+      await db.ownerSql("GRANT USAGE ON SCHEMA app TO jord_app");
+      const admin = { ...operator("admin"), "content-type": "application/json" };
+
+      const created = await app.request("/schema/tables?schema=app", {
+        method: "POST",
+        headers: admin,
+        body: JSON.stringify({ name: "notes", columns: [{ name: "title", type: "TEXT" }] }),
+      });
+      expect(created.status).toBe(201);
+      expect(((await created.json()) as { table: { schema: string } }).table.schema).toBe("app");
+      expect(await jord.describeTable("notes")).toBeNull();
+
+      const rls = await app.request("/schema/tables/notes/rls?schema=app", {
+        method: "PUT",
+        headers: admin,
+        body: JSON.stringify({ rls_enabled: true }),
+      });
+      expect(rls.status).toBe(200);
+      expect(await rls.json()).toMatchObject({ schema: "app", rls_enabled: true });
+
+      const list = await app.request("/schema/tables?schema=app", { headers: admin });
+      expect(await list.json()).toEqual({ tables: ["notes"] });
+      const schemas = (
+        (await (await app.request("/schema/schemas", { headers: admin })).json()) as {
+          schemas: Array<{ name: string }>;
+        }
+      ).schemas.map((s) => s.name);
+      expect(schemas).toEqual(expect.arrayContaining(["public", "app"]));
+
+      const json = { ...service(), "content-type": "application/json" };
+      expect(
+        (
+          await app.request("/api/v1/notes?schema=app", {
+            method: "POST",
+            headers: json,
+            body: JSON.stringify({ id: "1", title: "in app" }),
+          })
+        ).status,
+      ).toBe(201);
+      const fetched = await app.request("/api/v1/notes?schema=app", { headers: service() });
+      expect(((await fetched.json()) as { data: unknown[] }).data).toEqual([
+        { id: "1", title: "in app" },
+      ]);
+      // Not in public.
+      expect((await app.request("/api/v1/notes", { headers: service() })).status).toBe(404);
+
+      const rows = await app.request("/schema/tables/notes/rows?schema=app", { headers: admin });
+      expect(((await rows.json()) as { rows: unknown[] }).rows).toEqual([
+        { id: "1", title: "in app" },
+      ]);
+
+      const changes = await db.jord.query(
+        "SELECT op, pk FROM jord_changes WHERE table_name = $1 ORDER BY seq",
+        ["notes"],
+      );
+      expect(changes.map((row) => [row.op, row.pk])).toEqual([["insert", "1"]]);
+      const tracked = await db.jord.query(
+        "SELECT schema_name FROM jord_tracked_tables WHERE table_name = $1",
+        ["notes"],
+      );
+      expect(tracked).toEqual([{ schema_name: "app" }]);
+
+      expect(
+        (await app.request("/schema/tables/notes?schema=app", { method: "DELETE", headers: admin }))
+          .status,
+      ).toBe(200);
+    },
+  );
 });

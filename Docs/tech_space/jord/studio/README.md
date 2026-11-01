@@ -168,4 +168,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Next shell cards: [[../../../plan/Jord/phase-03/S0049-schema-scoped-introspection|S0049]] schema introspection · [[../../../plan/Jord/phase-03/S0050-schema-picker-ui|S0050]] picker UI.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Schema server scope shipped [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · [[../schema/README]]. Next shell card: [[../../../plan/Jord/phase-03/S0050-schema-picker-ui|S0050]] picker UI.

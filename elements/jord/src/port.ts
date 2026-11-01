@@ -3,8 +3,15 @@ import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
 import type { JordColumnType } from "./schema/ddl.js";
 import type { schema } from "./schema/records.js";
+import type { JordSchemaInfo } from "./schema/schema-scope.js";
 
 export type { JordColumnType } from "./schema/ddl.js";
+export type { JordSchemaInfo } from "./schema/schema-scope.js";
+
+/** Outcome of validating a `?schema=` value against the live schema list. */
+export type ResolveSchemaResult =
+  | { ok: true; schema: string }
+  | { ok: false; error: "unknown_schema"; message: string };
 
 /** PRAGMA table_info–shaped column (Studio schema browser). */
 export type JordColumnInfo = {
@@ -17,6 +24,8 @@ export type JordColumnInfo = {
 
 export type JordTableInfo = {
   name: string;
+  /** Owning schema (`public` / `main` unless another was requested). */
+  schema?: string;
   columns: JordColumnInfo[];
 };
 
@@ -24,6 +33,8 @@ export type AddColumnInput = {
   table: string;
   name: string;
   type: JordColumnType;
+  /** Defaults to the adapter's default schema. */
+  schema?: string;
 };
 
 export type AddColumnResult =
@@ -34,7 +45,8 @@ export type AddColumnResult =
         | "invalid_identifier"
         | "invalid_type"
         | "table_not_found"
-        | "column_exists";
+        | "column_exists"
+        | "unknown_schema";
       message: string;
     };
 
@@ -45,6 +57,8 @@ export type CreateTableInput = {
     type: JordColumnType;
     pk?: boolean;
   }>;
+  /** Defaults to the adapter's default schema. */
+  schema?: string;
 };
 
 export type CreateTableResult =
@@ -58,7 +72,8 @@ export type CreateTableResult =
         | "duplicate_column"
         | "multiple_pk"
         | "reserved"
-        | "table_exists";
+        | "table_exists"
+        | "unknown_schema";
       message: string;
     };
 
@@ -75,6 +90,8 @@ export type RowScope = { anyOf: RowPredicate[] };
 
 export type ListTableRowsInput = {
   table: string;
+  /** Defaults to the adapter's default schema. */
+  schema?: string;
   limit: number;
   offset: number;
   /**
@@ -94,13 +111,14 @@ export type ListTableRowsResult =
     }
   | {
       ok: false;
-      error: "invalid_identifier" | "table_not_found";
+      error: "invalid_identifier" | "table_not_found" | "unknown_schema";
       message: string;
     };
 
 export type TableRowWriteError =
   | "invalid_identifier"
   | "reserved"
+  | "unknown_schema"
   | "table_not_found"
   | "no_pk"
   | "missing_pk"
@@ -118,23 +136,27 @@ export type MutateTableRowResult =
 
 export type InsertTableRowInput = {
   table: string;
+  schema?: string;
   values: TableRowValues;
 };
 
 export type UpdateTableRowInput = {
   table: string;
+  schema?: string;
   pk: string;
   values: TableRowValues;
 };
 
 export type DeleteTableRowInput = {
   table: string;
+  schema?: string;
   pk: string;
 };
 
 export type SchemaDdlError =
   | "invalid_identifier"
   | "reserved"
+  | "unknown_schema"
   | "table_not_found"
   | "table_exists"
   | "column_not_found"
@@ -149,14 +171,23 @@ export type SchemaDdlResult =
   | { ok: true }
   | { ok: false; error: SchemaDdlError; message: string };
 
-export type DropTableInput = { name: string };
+export type DropTableInput = { name: string; schema?: string };
 
-export type RenameTableInput = { name: string; newName: string };
+export type RenameTableInput = {
+  name: string;
+  newName: string;
+  schema?: string;
+};
 
-export type DropColumnInput = { table: string; column: string };
+export type DropColumnInput = {
+  table: string;
+  column: string;
+  schema?: string;
+};
 
 export type AlterColumnInput = {
   table: string;
+  schema?: string;
   column: string;
   name?: string;
   type?: JordColumnType;
@@ -476,6 +507,8 @@ export type JordDb = LibSQLDatabase<typeof schema>;
 
 export type TableRlsFlag = {
   tableName: string;
+  /** Schema of the flagged table (`jord_table_rls.schema_name`). */
+  schema?: string;
   rlsEnabled: boolean;
   ownerColumn: string | null;
 };
@@ -630,11 +663,15 @@ export interface JordDriverPort {
     claims?: Record<string, unknown> | null;
   }): void;
 
-  /** Per-table RLS flag from `jord_table_rls`, or null when the row is absent. */
-  getTableRls(tableName: string): Promise<TableRlsFlag | null>;
-  /** Upsert `jord_table_rls` on `table_name`. */
+  /**
+   * Per-table RLS flag from `jord_table_rls`, or null when the row is absent.
+   * `schema` defaults to `defaultSchema`.
+   */
+  getTableRls(tableName: string, schema?: string): Promise<TableRlsFlag | null>;
+  /** Upsert `jord_table_rls` on `(schema_name, table_name)`. */
   setTableRls(input: {
     tableName: string;
+    schema?: string;
     rlsEnabled: boolean;
     ownerColumn?: string | null;
   }): Promise<TableRlsFlag>;
@@ -643,7 +680,7 @@ export interface JordDriverPort {
    * Native CREATE POLICY for one Jord policy, or null when this dialect
    * does not compile it (libSQL) or the policy is not compilable.
    */
-  compilePolicySql?(policy: JordPolicy): string | null;
+  compilePolicySql?(policy: JordPolicy, schema?: string): string | null;
 
   /**
    * Rebuild Postgres RLS on `records` and every `rls_enabled` user table
@@ -652,10 +689,31 @@ export interface JordDriverPort {
    */
   syncRecordsPoliciesRls?(): Promise<void>;
 
-  /** User tables from sqlite_master (excludes sqlite_*). */
-  listTables(): Promise<string[]>;
-  /** Columns via PRAGMA table_info; null if table missing. */
-  describeTable(name: string): Promise<JordTableInfo | null>;
+  /**
+   * Schema searched when a method gets no `schema`: `public` (Postgres) or
+   * `main` (libSQL).
+   */
+  readonly defaultSchema: string;
+  /**
+   * Schemas a request may target. Postgres: non-system schemas the current
+   * role can USE. libSQL: always `main`.
+   */
+  listSchemas(): Promise<JordSchemaInfo[]>;
+  /**
+   * Validate `input` (null/empty → `defaultSchema`) against `listSchemas`.
+   * Unknown or malformed names fail with `unknown_schema`.
+   */
+  resolveSchema(input?: string | null): Promise<ResolveSchemaResult>;
+
+  /**
+   * User tables in `schema` (default `defaultSchema`). An unknown schema
+   * yields an empty list; resolve first when you need the error.
+   */
+  listTables(schema?: string): Promise<string[]>;
+  /**
+   * Columns; null if table or schema is missing. The result carries `schema`.
+   */
+  describeTable(name: string, schema?: string): Promise<JordTableInfo | null>;
   /** Additive DDL only — ADD COLUMN with type whitelist. */
   addColumn(input: AddColumnInput): Promise<AddColumnResult>;
   /** CREATE TABLE for user tables. Rejects reserved names and existing tables. */

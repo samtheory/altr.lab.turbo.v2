@@ -32,6 +32,11 @@ export type PolicyDecision =
 export type EvaluatePoliciesInput = {
   jord: JordDriverPort;
   tableName: string;
+  /**
+   * Schema of `tableName` for the RLS flag lookup (`jord_table_rls`).
+   * Policies themselves are table_name-only; default `jord.defaultSchema`.
+   */
+  schema?: string;
   operation: JordPolicyOperation;
   role: string;
   bucket?: string | null;
@@ -175,7 +180,7 @@ export async function evaluatePolicies(
   };
 
   if (input.subject === "user" || input.subject === "anon") {
-    const rls = await input.jord.getTableRls(input.tableName);
+    const rls = await input.jord.getTableRls(input.tableName, input.schema);
     if (rls == null || rls.rlsEnabled === false) {
       return { allowed: false, reason: "default_deny" };
     }

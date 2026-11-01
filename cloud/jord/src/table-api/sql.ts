@@ -1,4 +1,11 @@
-import { quoteIdent, rowScopeSql, type JordTableInfo, type RowScope } from "@altr/jord";
+import {
+  defaultSchemaFor,
+  quoteIdent,
+  quoteQualified,
+  rowScopeSql,
+  type JordTableInfo,
+  type RowScope,
+} from "@altr/jord";
 
 import {
   pkColumns,
@@ -12,6 +19,14 @@ export type CompiledSql = {
   sql: string;
   args: SqlValue[];
 };
+
+/**
+ * `"schema"."table"` from `describeTable` (schema-scoped introspection, S0049).
+ * `info.schema` is set by every adapter; the fallback covers hand-built infos.
+ */
+function tableSql(info: JordTableInfo, dialect: "libsql" | "postgres"): string {
+  return quoteQualified(info.schema ?? defaultSchemaFor(dialect), info.name);
+}
 
 function placeholders(sql: string, dialect: "libsql" | "postgres"): string {
   if (dialect !== "postgres") return sql;
@@ -114,7 +129,7 @@ export function compileSelect(
           .join(", ")}`;
   args.push(parsed.limit, parsed.offset);
   const sql = placeholders(
-    `SELECT ${selectList(info, parsed)} FROM ${quoteIdent(info.name)}${where}${order} LIMIT ? OFFSET ?`,
+    `SELECT ${selectList(info, parsed)} FROM ${tableSql(info, dialect)}${where}${order} LIMIT ? OFFSET ?`,
     dialect,
   );
   return { sql, args };
@@ -130,7 +145,7 @@ export function compileCount(
   const where = whereSql(filters, args, scope);
   return {
     sql: placeholders(
-      `SELECT COUNT(*) AS n FROM ${quoteIdent(info.name)}${where}`,
+      `SELECT COUNT(*) AS n FROM ${tableSql(info, dialect)}${where}`,
       dialect,
     ),
     args,
@@ -148,7 +163,7 @@ export function compileInsert(
   }
   const args = cols.map((name) => values[name] ?? null);
   const sql = placeholders(
-    `INSERT INTO ${quoteIdent(info.name)} (${cols.map((c) => quoteIdent(c)).join(", ")}) VALUES (${cols.map(() => "?").join(", ")}) RETURNING *`,
+    `INSERT INTO ${tableSql(info, dialect)} (${cols.map((c) => quoteIdent(c)).join(", ")}) VALUES (${cols.map(() => "?").join(", ")}) RETURNING *`,
     dialect,
   );
   return { sql, args };
@@ -184,7 +199,7 @@ export function compileUpdate(
   }
   return {
     sql: placeholders(
-      `UPDATE ${quoteIdent(info.name)} SET ${sets.join(", ")}${where} RETURNING *`,
+      `UPDATE ${tableSql(info, dialect)} SET ${sets.join(", ")}${where} RETURNING *`,
       dialect,
     ),
     args,
@@ -206,7 +221,7 @@ export function compilePriorSelect(
   }
   const lock = dialect === "postgres" ? " FOR UPDATE" : "";
   return {
-    sql: placeholders(`SELECT * FROM ${quoteIdent(info.name)}${where}${lock}`, dialect),
+    sql: placeholders(`SELECT * FROM ${tableSql(info, dialect)}${where}${lock}`, dialect),
     args,
   };
 }
@@ -250,7 +265,7 @@ export function compileDelete(
   }
   return {
     sql: placeholders(
-      `DELETE FROM ${quoteIdent(info.name)}${where} RETURNING *`,
+      `DELETE FROM ${tableSql(info, dialect)}${where} RETURNING *`,
       dialect,
     ),
     args,

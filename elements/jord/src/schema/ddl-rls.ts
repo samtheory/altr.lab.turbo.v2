@@ -1,5 +1,5 @@
 import type { JordPolicy, JordPolicyOperation } from "../port.js";
-import { isValidSqlIdent, quoteIdent } from "./ddl.js";
+import { isValidSqlIdent, quoteIdent, tableRef } from "./ddl.js";
 
 /** Native policies are one per operation so priority + default-allow survive. */
 export const RLS_OPERATIONS = [
@@ -200,12 +200,13 @@ export function buildOperationExpr(
 export function compilePolicySql(
   policy: JordPolicy,
   shape?: RlsTableShape,
+  schema?: string,
 ): string | null {
   const match = policyMatchExpr(policy, shape);
   if (!match) return null;
   const name = quoteIdent(rlsPolicyName(policy.operation, policy.tableName));
   const expr = buildOperationExpr([policy], shape);
-  return createPolicySql(policy.tableName, policy.operation, name, expr);
+  return createPolicySql(policy.tableName, policy.operation, name, expr, schema);
 }
 
 function createPolicySql(
@@ -213,8 +214,9 @@ function createPolicySql(
   operation: JordPolicyOperation,
   name: string,
   expr: string,
+  schema?: string,
 ): string {
-  const table = quoteIdent(tableName);
+  const table = tableRef(tableName, schema);
   switch (operation) {
     case "select":
       return `CREATE POLICY ${name} ON ${table} FOR SELECT USING (${expr})`;
@@ -242,10 +244,15 @@ export type RecordsRlsPlan = {
 export function planSyncTableRls(
   tableName: string,
   policies: readonly JordPolicy[],
-  options: { shape?: RlsTableShape; enable: boolean | "auto" },
+  options: {
+    shape?: RlsTableShape;
+    enable: boolean | "auto";
+    /** Qualify `ON "schema"."table"`; omitted keeps the bare name. */
+    schema?: string;
+  },
 ): RecordsRlsPlan {
   const shape = options.shape ?? defaultShape(tableName);
-  const table = quoteIdent(tableName);
+  const table = tableRef(tableName, options.schema);
   const drops = RLS_OPERATIONS.map(
     (op) =>
       `DROP POLICY IF EXISTS ${quoteIdent(rlsPolicyName(op, tableName))} ON ${table}`,
@@ -280,6 +287,7 @@ export function planSyncTableRls(
       operation,
       quoteIdent(rlsPolicyName(operation, tableName)),
       expr,
+      options.schema,
     );
   });
 
