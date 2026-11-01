@@ -190,6 +190,7 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "temp/output/prompt-plan-task-authoring.md",
     "brain/00-Docs-Brain.md",
     "brain/00-Docs-Hub.md",
     "brain/README.md",
@@ -234,7 +235,6 @@
     "tech_space/ui-kit/assets/apolyx-s0003",
     "tech_space/ui-kit/assets/apolyx-s0001",
     "tech_space/ui-kit/assets",
-    "plan/Jord/phase-03/S0096-dashboard-ui.md",
-    "plan/Jord/phase-03/S0095-project-stats-endpoint.md"
+    "plan/Jord/phase-03/S0096-dashboard-ui.md"
   ]
 }
