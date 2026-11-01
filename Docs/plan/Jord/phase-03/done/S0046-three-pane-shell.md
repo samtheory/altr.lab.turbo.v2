@@ -2,18 +2,19 @@
 title: "S0046 — three-pane Studio shell"
 description: "Primary nav + contextual sidebar + content + right inspector frame, driven by one nav config instead of per-page layouts"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0046
+  - done
 ---
 
 # S0046 — three-pane Studio shell
 
-> **Status:** todo · **Depends on** [[done/S0045-project-scoped-routes|S0045]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-01 · **Depends on** [[S0045-project-scoped-routes|S0045]] · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -37,9 +38,9 @@ Every Studio v2 screen assumes this frame. Today `studio-shell.tsx` + `studio-si
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (pane table) |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (pane table) |
 | Code today | `apps/jord-studio/src/components/studio-shell.tsx` · `studio-side-nav.tsx` · `lib/studio-nav.ts` |
-| Routes | `app/p/[project]/…` from [[done/S0045-project-scoped-routes|S0045]] |
+| Routes | `app/p/[project]/…` from [[S0045-project-scoped-routes|S0045]] |
 | UI kit | `@altr/apolyx` `NavList`, `Sheet`, `Field`, `Tabs` — add missing pieces to the kit, not the app |
 
 **Do not break:** Apolyx-first rule; no layout shift when the inspector opens; content keeps its scroll position across pane changes.
@@ -54,7 +55,7 @@ Every Studio v2 screen assumes this frame. Today `studio-shell.tsx` + `studio-si
 
 ## Out of scope
 
-The sidebar contents themselves ([[S0047-contextual-sidebar|S0047]]) · the inspector behaviour ([[S0048-right-inspector|S0048]]) · workspace tabs ([[S0051-workspace-tabs|S0051]]) · theming.
+The sidebar contents themselves ([[../S0047-contextual-sidebar|S0047]]) · the inspector behaviour ([[../S0048-right-inspector|S0048]]) · workspace tabs ([[../S0051-workspace-tabs|S0051]]) · theming.
 
 ## Diagram
 
@@ -82,22 +83,25 @@ flowchart LR
 
 ## Done when
 
-- [ ] All existing screens render inside the new shell with no visual regression
-- [ ] Nav collapse persists per project
-- [ ] No layout shift when panes toggle
-- [ ] Tablet fallback uses sheets
-- [ ] Typecheck + build pass; proof pasted
+- [x] All existing screens render inside the new shell with no visual regression
+- [x] Nav collapse persists per project
+- [x] No layout shift when panes toggle
+- [x] Tablet fallback uses sheets
+- [x] Typecheck + build pass; proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-studio typecheck` | |
-| | `pnpm --filter @altr/jord-studio build` | |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio build` | exit 0 — `/p/[project]/…` routes intact |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio exec node --import tsx --test src/lib/studio-nav.test.ts` | 5 pass (contextual resolve) |
+
+**Shipped:** CSS-var shell (`--jord-nav-w` / `--jord-sidebar-w`) · `StudioSidebar` / `StudioContent` / `StudioInspector` · nav `icon` + `contextual` · per-project collapse prefs · below-`lg` Sheets · skip links · placeholder contextual column with loading/empty/error frames.
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/studio/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

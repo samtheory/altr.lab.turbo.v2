@@ -43,7 +43,7 @@ export default async function RootLayout({
               <>
                 <LocalBanner role={session.role} bypass={session.bypass} />
                 <StudioShell role={session.role} bypass={session.bypass}>
-                  <main id="main">{children}</main>
+                  {children}
                 </StudioShell>
               </>
             ) : (

@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0045 projects registry, wizard, /p/[project] scoping + switcher"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0046 projects + three-pane shell"
 created: 2026-10-24
 updated: 2026-11-01
 tags:
@@ -32,7 +32,7 @@ Operators need tables, jobs, APIs, and files without a SQL shell and without the
 
 ## How — screens
 
-Nav config: `apps/jord-studio/src/lib/studio-nav.ts`. Shell: `StudioShell` (desktop `NavList`, mobile `Sheet`).
+Nav config: `apps/jord-studio/src/lib/studio-nav.ts` (`icon` + optional `contextual`). Shell: three-pane `StudioShell` (S0046) — primary `NavList`, contextual sidebar slot, `StudioContent`, overlay `StudioInspector`.
 
 | Screen | Route | Talks to |
 |--------|-------|----------|
@@ -124,6 +124,17 @@ Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry ro
 
 **Note:** Scope is enforced in Studio routing/BFF. Data still hits the primary server DB until a later card fans out connections per project target.
 
+### Three-pane shell (S0046)
+
+| Piece | Fact |
+|-------|------|
+| Grid | CSS vars `--jord-nav-w` / `--jord-sidebar-w`; primary nav icon-collapsible; contextual column only when active item has `contextual` |
+| Slots | `StudioSidebar` · `StudioContent` (`#main`) · `StudioInspector` (overlay + blur; no content reflow) in `studio-panes.tsx` |
+| Prefs | `localStorage` key `jord.studio.shell:v1:<projectSlug>` — nav + sidebar collapsed |
+| Responsive | Below `lg`: primary nav + contextual sidebar + inspector each use Apolyx `Sheet` |
+| Placeholder | Contextual kinds `tables` / `jobs` / `endpoints` / `queries` / `users` / `buckets` show a reserved frame (loading/empty/error ready); real lists → [[../../../plan/Jord/phase-03/S0047-contextual-sidebar\|S0047]] |
+| A11y | Skip links → nav / sidebar / content |
+
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Three-pane shell: [[../../../plan/Jord/phase-03/S0046-three-pane-shell|S0046]].
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Contextual sidebar lists: [[../../../plan/Jord/phase-03/S0047-contextual-sidebar|S0047]]. Right inspector behaviour: [[../../../plan/Jord/phase-03/S0048-right-inspector|S0048]].
