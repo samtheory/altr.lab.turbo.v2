@@ -80,6 +80,11 @@ type Props = {
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   /** Optional footer rendered beneath the list (e.g. a create action). */
   footer?: ReactNode;
+  /**
+   * Content above search/filter that stays visible (S0050 schema picker +
+   * add-table). Search/filter never hides this slot.
+   */
+  leading?: ReactNode;
 };
 
 type Status = "idle" | "loading" | "empty" | "error";
@@ -104,6 +109,7 @@ export const StudioSidebarList = forwardRef<HTMLDivElement, Props>(
       className,
       scrollRef,
       footer,
+      leading,
     },
     ref,
   ) => {
@@ -248,65 +254,68 @@ export const StudioSidebarList = forwardRef<HTMLDivElement, Props>(
         )}
         aria-label={listAriaLabel ?? header}
       >
-        {/* Sticky header: eyebrow + search + filter */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border/80 bg-background/95 px-3 py-2 backdrop-blur-sm">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {header}
-          </p>
-          <div className="flex items-center gap-2">
-            {searchable && (
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-                <Input
-                  ref={inputRef}
-                  value={effectiveSearch}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setInternalSearch(v);
-                    if (searchable && onSearchChange) {
-                      if (searchTimer.current) clearTimeout(searchTimer.current);
-                      searchTimer.current = setTimeout(() => onSearchChange(v), 150);
-                    }
-                  }}
-                  placeholder="Search…"
-                  className="w-full pl-7"
-                  aria-label={`Search ${header.toLowerCase()}`}
-                />
-                {effectiveSearch && (
-                  <button
-                    type="button"
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
-                    aria-label="Clear search"
-                    onClick={() => {
-                      setInternalSearch("");
-                      if (onSearchChange) onSearchChange("");
-                      focusList();
+        {/* Sticky chrome: leading (picker/add) then eyebrow + search + filter */}
+        <div className="sticky top-0 z-10 flex flex-col gap-2 border-b border-border/80 bg-background/95 px-3 py-2 backdrop-blur-sm">
+          {leading ? <div className="flex flex-col gap-2">{leading}</div> : null}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {header}
+            </p>
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+              {searchable && (
+                <div className="relative min-w-0 flex-1 max-w-[12rem]">
+                  <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                  <Input
+                    ref={inputRef}
+                    value={effectiveSearch}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setInternalSearch(v);
+                      if (searchable && onSearchChange) {
+                        if (searchTimer.current) clearTimeout(searchTimer.current);
+                        searchTimer.current = setTimeout(() => onSearchChange(v), 150);
+                      }
                     }}
-                  >
-                    <X className="size-3" aria-hidden />
-                  </button>
-                )}
-              </div>
-            )}
-            {filterOptions && filterOptions.length > 0 && (
-              <Select
-                value={filterValue}
-                onValueChange={(v) => onFilterChange?.(v)}
-                aria-label={`Filter ${header.toLowerCase()}`}
-              >
-                <SelectTrigger className="w-[min(100%,9rem)]">
-                  <Filter className="mr-1.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filterOptions.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+                    placeholder="Search…"
+                    className="w-full pl-7"
+                    aria-label={`Search ${header.toLowerCase()}`}
+                  />
+                  {effectiveSearch && (
+                    <button
+                      type="button"
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+                      aria-label="Clear search"
+                      onClick={() => {
+                        setInternalSearch("");
+                        if (onSearchChange) onSearchChange("");
+                        focusList();
+                      }}
+                    >
+                      <X className="size-3" aria-hidden />
+                    </button>
+                  )}
+                </div>
+              )}
+              {filterOptions && filterOptions.length > 0 && (
+                <Select
+                  value={filterValue}
+                  onValueChange={(v) => onFilterChange?.(v)}
+                  aria-label={`Filter ${header.toLowerCase()}`}
+                >
+                  <SelectTrigger className="w-[min(100%,9rem)]">
+                    <Filter className="mr-1.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filterOptions.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </div>
         </div>
 

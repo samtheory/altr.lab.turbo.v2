@@ -28,6 +28,8 @@ import {
 import { ProjectSwitcher } from "@/components/project-switcher";
 import { SessionBadge } from "@/components/session-badge";
 import { StudioContextualSidebar } from "@/components/studio-contextual-sidebar";
+import { StudioEndpointsSidebar } from "@/components/studio-endpoints-sidebar";
+import { StudioJobsSidebar } from "@/components/studio-jobs-sidebar";
 import {
   StudioContent,
   StudioInspector,
@@ -35,6 +37,7 @@ import {
   useStudioPanes,
 } from "@/components/studio-panes";
 import { StudioSideNav } from "@/components/studio-side-nav";
+import { StudioTablesSidebar } from "@/components/studio-tables-sidebar";
 import { useProjectSlug } from "@/hooks/use-project-path";
 import type { JordRole } from "@/lib/auth/roles";
 import {
@@ -68,6 +71,7 @@ export function StudioShell({ children, role, bypass }: Props) {
   return (
     <StudioPanesProvider contextual={contextual} key={projectSlug}>
       <InspectorProvider role={role}>
+        <ContextualSidebarMount contextual={contextual} />
         <StudioShellFrame
           role={role}
           bypass={bypass}
@@ -79,6 +83,18 @@ export function StudioShell({ children, role, bypass }: Props) {
       </InspectorProvider>
     </StudioPanesProvider>
   );
+}
+
+/** Registers the section sidebar body into the shell slot (S0047 / S0050). */
+function ContextualSidebarMount({
+  contextual,
+}: {
+  contextual: ReturnType<typeof resolveContextual>;
+}) {
+  if (contextual === "tables") return <StudioTablesSidebar />;
+  if (contextual === "jobs") return <StudioJobsSidebar />;
+  if (contextual === "endpoints") return <StudioEndpointsSidebar />;
+  return null;
 }
 
 function StudioShellFrame({

@@ -111,9 +111,9 @@ Command palette · theming changes · drag-to-dock panels · split-pane (side-by
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/done/S0046-three-pane-shell\|S0046]] — three-pane shell | 2.5–3 h | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/done/S0047-contextual-sidebar\|S0047]] — contextual sidebar | 2–3 h | **done** |
-| [[../../../plan/Jord/phase-03/S0048-right-inspector\|S0048]] — right inspector drawer | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0049-schema-scoped-introspection\|S0049]] — server schema scope | 2.5–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0050-schema-picker-ui\|S0050]] — schema picker + table list | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0048-right-inspector\|S0048]] — right inspector drawer | 2–3 h | **done** 2026-11-01 |
+| [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection\|S0049]] — server schema scope | 2.5–3 h | **done** 2026-11-01 |
+| [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui\|S0050]] — schema picker + table list | 2–3 h | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/S0051-workspace-tabs\|S0051]] — workspace tabs | 2.5–3 h | todo |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

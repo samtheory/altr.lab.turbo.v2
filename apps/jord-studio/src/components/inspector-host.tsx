@@ -12,6 +12,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CreateRecordForm } from "@/components/create-record-form";
+import { CreateTableForm } from "@/components/create-table-form";
 import {
   InspectorPanelChrome,
   INSPECTOR_TITLE_ID,
@@ -28,6 +29,7 @@ import {
   type InspectorProps,
   type InspectorState,
 } from "@/lib/studio-inspector";
+import { useProjectHref } from "@/hooks/use-project-path";
 
 export { INSPECTOR_TITLE_ID };
 
@@ -173,6 +175,14 @@ function InspectorPanelBody({
           }
         />
       );
+    case "create-table":
+      return (
+        <CreateTableInspectorBody
+          role={role}
+          schema={props.schema ?? "public"}
+          onClose={onClose}
+        />
+      );
     case "record-detail":
       return (
         <RecordDetailInspector
@@ -190,4 +200,34 @@ function InspectorPanelBody({
         />
       );
   }
+}
+
+function CreateTableInspectorBody({
+  role,
+  schema,
+  onClose,
+}: {
+  role: JordRole;
+  schema: string;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const hrefFor = useProjectHref();
+  return (
+    <CreateTableForm
+      role={role}
+      schema={schema}
+      onCancel={onClose}
+      onCreated={(table, tableSchema) => {
+        const qs =
+          tableSchema && tableSchema !== "public" && tableSchema !== "main"
+            ? `?schema=${encodeURIComponent(tableSchema)}`
+            : "";
+        onClose();
+        router.push(
+          `${hrefFor(`/tables/${encodeURIComponent(table)}`)}${qs}`,
+        );
+      }}
+    />
+  );
 }

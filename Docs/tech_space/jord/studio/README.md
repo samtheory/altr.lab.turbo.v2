@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0048 projects + shell + sidebars + right inspector"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0050 projects + shell + schema picker"
 created: 2026-10-24
-updated: 2026-11-01T16:30
+updated: 2026-11-01T18:00
 tags:
   - tech-space
   - jord
@@ -142,15 +142,30 @@ Real second-column lists for the wired sections; selection is URL-driven and the
 | Piece | Fact |
 |-------|------|
 | Primitive | `StudioSidebarList` + `SidebarBadge` in `src/components/studio-sidebar-list.tsx` — layout only, no Jord data fetch |
-| Tables | `StudioTablesSidebar` reads `GET /api/schema/tables`, search + `?q`, selection drives `/tables` or `/tables/[name]`; `records` is a badge + hint |
+| Tables | `StudioTablesSidebar` (S0050) — see schema picker below |
 | Jobs | `StudioJobsSidebar` reads `GET /api/jobs`, status filter + last-run badge, selection drives `?job=` |
 | APIs | `StudioEndpointsSidebar` reads `GET /api/apis/generated` + `/api/custom-apis` + `/api/functions`, grouped by Tables/Custom with method badges |
+| Mount | `ContextualSidebarMount` in `studio-shell.tsx` registers the active section body into the slot |
 | SQL | Reserved `queries` slot; real list is [[../../../plan/Jord/phase-03/S0064-query-tabs-history\|S0064]] |
 | Auth | Reserved `users` slot; real list is [[../../../plan/Jord/phase-03/S0070-auth-console-users\|S0070]] |
 | Storage | Reserved `buckets` slot; real list is [[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]] |
 | Resize + persist | Drag handle with 12rem–30rem clamp; `sidebarWidth` + `sidebarCollapsed` kept in the S0046 shell prefs |
 | Selection | `?table=`, `?job=`, `?endpoint=` rewritten on item click; restored on reload |
 | Search | Debounced ~150 ms; `/` focuses, Escape clears |
+
+### Schema picker + scoped table list (S0050)
+
+Data sidebar order is fixed: **schema dropdown → + Add new table → search/filter → table list**. Search/filter never hide the picker or add action.
+
+| Piece | Fact |
+|-------|------|
+| BFF | `GET /api/schema/schemas` · `GET/POST /api/schema/tables?schema=` (query forwarded upstream) |
+| Prefs | `localStorage` `jord.studio.schema:v1:<projectSlug>` + URL `?schema=` (omitted for dialect default) |
+| All schemas | Optional `schema=all` — lists `schema.table` labels; add-table disabled in that mode |
+| libSQL | Single read-only `main` option (no fake multi-schema list) |
+| Add table | Inspector `create-table` + `?schema=` prop · stub form until [[../../../plan/Jord/phase-03/S0052-type-registry\|S0052]] |
+| Hotkeys | `/` search · `n` add table |
+| Leading slot | `StudioSidebarList` `leading` prop keeps picker + add above search |
 
 ### Right inspector (S0048)
 
@@ -159,8 +174,8 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 | Piece | Fact |
 |-------|------|
 | API | `InspectorProvider` + `useInspector()` in `inspector-host.tsx` — `open(id, props)`, `close()` |
-| URL | `?inspector=<id>` plus optional `recordId` / `table`; helpers in `lib/studio-inspector.ts` |
-| Panels | `create-record` · `record-detail` · `migrate` (create-table / policies land in later cards) |
+| URL | `?inspector=<id>` plus optional `recordId` / `table` / `schema`; helpers in `lib/studio-inspector.ts` |
+| Panels | `create-record` · `create-table` · `record-detail` · `migrate` (policies land in later cards) |
 | Frame | `StudioInspector` — FocusScope trap + restore, dim+blur backdrop, ~420–520 px, &lt;200 ms motion, `useReducedMotion` |
 | Chrome | Sticky title + close; `InspectorFooter` for primary actions |
 | Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate` |
@@ -168,4 +183,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Schema server scope shipped [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · [[../schema/README]]. Next shell card: [[../../../plan/Jord/phase-03/S0050-schema-picker-ui|S0050]] picker UI.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Schema server scope [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · picker UI [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]]. Next shell card: [[../../../plan/Jord/phase-03/S0051-workspace-tabs|S0051]] workspace tabs.

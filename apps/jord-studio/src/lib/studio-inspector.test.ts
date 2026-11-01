@@ -35,6 +35,15 @@ describe("studio-inspector URL helpers", () => {
     );
   });
 
+  it("parses create-table with schema prop", () => {
+    assert.deepEqual(
+      parseInspectorSearch(
+        new URLSearchParams("inspector=create-table&schema=app"),
+      ),
+      { id: "create-table", props: { schema: "app" } },
+    );
+  });
+
   it("clears inspector keys while keeping other params", () => {
     const next = withInspectorSearch(
       new URLSearchParams("inspector=migrate&job=1&table=users"),

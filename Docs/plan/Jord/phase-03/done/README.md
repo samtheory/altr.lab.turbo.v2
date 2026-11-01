@@ -32,3 +32,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0047-contextual-sidebar\|S0047]] | Contextual sidebar per section | 2026-11-01 |
 | [[S0048-right-inspector\|S0048]] | Right inspector drawer + deep links | 2026-11-01 |
 | [[S0049-schema-scoped-introspection\|S0049]] | Schema-scoped introspection / DDL / table API | 2026-11-01 |
+| [[S0050-schema-picker-ui\|S0050]] | Schema picker + scoped table list (Data sidebar) | 2026-11-01 |

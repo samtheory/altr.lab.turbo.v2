@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Table,
   TableBody,
@@ -16,11 +18,14 @@ import {
 } from "@altr/apolyx";
 
 import { useProjectHref } from "@/hooks/use-project-path";
+import { SCHEMA_ALL } from "@/lib/studio-schema-prefs";
 
 type ApiError = { message?: string };
 
 export function TableIndex() {
   const hrefFor = useProjectHref();
+  const searchParams = useSearchParams();
+  const schemaParam = searchParams.get("schema");
   const [tables, setTables] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -28,7 +33,13 @@ export function TableIndex() {
   useEffect(() => {
     startTransition(async () => {
       try {
-        const res = await fetch("/api/schema/tables", { cache: "no-store" });
+        const qs =
+          schemaParam && schemaParam !== SCHEMA_ALL
+            ? `?schema=${encodeURIComponent(schemaParam)}`
+            : "";
+        const res = await fetch(`/api/schema/tables${qs}`, {
+          cache: "no-store",
+        });
         if (!res.ok) {
           const body = (await res.json().catch(() => ({}))) as ApiError;
           throw new Error(body.message ?? `Failed to list tables (${res.status}).`);
@@ -41,7 +52,7 @@ export function TableIndex() {
         setError(err instanceof Error ? err.message : "Load failed.");
       }
     });
-  }, []);
+  }, [schemaParam]);
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
@@ -49,16 +60,29 @@ export function TableIndex() {
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Data
         </p>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Tables</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
+          Tables
+          {schemaParam &&
+          schemaParam !== SCHEMA_ALL &&
+          schemaParam !== "public" &&
+          schemaParam !== "main" ? (
+            <Badge
+              variant="secondary"
+              className="ml-3 align-middle font-mono text-xs font-normal"
+            >
+              {schemaParam}
+            </Badge>
+          ) : null}
+        </h1>
         <p className="text-sm text-muted-foreground">
           Open a catalog table. <code className="font-mono">records</code> uses the scratchpad
-          editor. Create tables from Schema.
+          editor. Use + Add new table in the sidebar, or Schema.
         </p>
       </div>
 
       <div>
         <Button asChild variant="outline">
-          <Link href={hrefFor("/schema")}>Create table</Link>
+          <Link href={hrefFor("/schema")}>Schema visualizer</Link>
         </Button>
       </div>
 

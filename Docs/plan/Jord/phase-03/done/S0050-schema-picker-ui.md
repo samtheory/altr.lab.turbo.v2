@@ -2,18 +2,19 @@
 title: "S0050 — schema picker + scoped table list (Data sidebar)"
 description: "Tables sidebar order: schema dropdown, add new table, search/filter, then the table list — scoped and persistent per project"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0050
+  - done
 ---
 
 # S0050 — schema picker + scoped table list
 
-> **Status:** todo · **Depends on** [[done/S0049-schema-scoped-introspection|S0049]] + [[done/S0047-contextual-sidebar|S0047]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-01 · **Depends on** [[S0049-schema-scoped-introspection|S0049]] + [[S0047-contextual-sidebar|S0047]] · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -31,14 +32,14 @@ The Data sidebar reads top to bottom as: **schema dropdown → + Add new table �
 
 ## Why now
 
-The schema server contract landed in [[done/S0049-schema-scoped-introspection|S0049]]; this is the control that makes it usable. It is also the anchor for [[S0051-workspace-tabs|S0051]], because tabs are keyed `schema.table`.
+The schema server contract landed in [[S0049-schema-scoped-introspection|S0049]]; this is the control that makes it usable. It is also the anchor for [[../S0051-workspace-tabs|S0051]], because tabs are keyed `schema.table`.
 
 ## Context (read before coding)
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (schema picker section) |
-| Depends on | [[S0049-schema-scoped-introspection|S0049]] (`GET /schema/schemas`, `?schema=`) · [[done/S0047-contextual-sidebar|S0047]] (list primitive) |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (schema picker section) |
+| Depends on | [[S0049-schema-scoped-introspection|S0049]] (`GET /schema/schemas`, `?schema=`) · [[S0047-contextual-sidebar|S0047]] (list primitive) |
 | Code today | `apps/jord-studio/src/lib/{schema,database-api}.ts` · `components/schema-explorer.tsx` · `app/p/[project]/tables/page.tsx` |
 | UI kit | Apolyx `Select`/combobox, `Input`, `Button`, `Badge` |
 
@@ -48,14 +49,14 @@ The schema server contract landed in [[done/S0049-schema-scoped-introspection|S0
 
 - Schema dropdown: options from the server, default `public`, optional **All schemas** with `schema.table` labels; count badge per schema; read-only `main` on libSQL (no fake list).
 - Non-default schema shown as a chip on the picker and a qualifier on each table row.
-- **+ Add new table** opens the create inspector scoped to the selected schema (uses the column model later — stub with the existing create path until [[S0052-type-registry|S0052]]).
+- **+ Add new table** opens the create inspector scoped to the selected schema (uses the column model later — stub with the existing create path until [[../S0052-type-registry|S0052]]).
 - Search (name, debounced) + filter menu (has rows / empty / tracked / has policies) — server-side filter once available, client-side until then.
 - Persistence: project UI prefs + `?schema=` in the URL; restore on reload; switching does not lose the search string within a session.
 - Table row: name, row estimate, badges (tracked / RLS / empty), context action to open in a tab.
 
 ## Out of scope
 
-Tab bar ([[S0051-workspace-tabs|S0051]]) · rich column editing ([[S0053-column-settings|S0053]]) · schema create/drop.
+Tab bar ([[../S0051-workspace-tabs|S0051]]) · rich column editing ([[../S0053-column-settings|S0053]]) · schema create/drop.
 
 ## Diagram
 
@@ -80,22 +81,23 @@ flowchart TB
 
 ## Done when
 
-- [ ] Dropdown lists real schemas (and `main` on libSQL, read-only)
-- [ ] Selecting a schema rescopes list + add action
-- [ ] Selection survives reload and is in the URL
-- [ ] Search/filter never hides picker or add action
-- [ ] Typecheck + build pass; proof pasted
+- [x] Dropdown lists real schemas (and `main` on libSQL, read-only)
+- [x] Selecting a schema rescopes list + add action
+- [x] Selection survives reload and is in the URL
+- [x] Search/filter never hides picker or add action
+- [x] Typecheck + build pass; proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-studio typecheck` | |
-| | `pnpm --filter @altr/jord-studio build` | |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio build` | exit 0 — `/api/schema/schemas` present |
+| 2026-11-01 | `node --import tsx --test apps/jord-studio/src/lib/studio-schema-prefs.test.ts apps/jord-studio/src/lib/studio-inspector.test.ts` | 10 passed |
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/studio/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

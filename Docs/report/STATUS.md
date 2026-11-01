@@ -1,5 +1,5 @@
 ---title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0049; next S0050); Functions runtime still gated"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0050; next S0051); Functions runtime still gated"
 created: 2026-09-19
 updated: 2026-11-01
 tags:
@@ -33,10 +33,11 @@ Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Phase-03 S0047 / jord-F0023 (partial)** — contextual sidebars for Tables/Jobs/APIs + shared sidebar list primitive + resize/persist/URL selection · [[../tech_space/jord/studio/README#contextual-sidebars-s0047]] · card [[../plan/Jord/phase-03/done/S0047-contextual-sidebar|S0047]]
 - **Phase-03 S0048 / jord-F0023 (partial)** — right inspector host + `?inspector=` deep links; migrate/create/detail panels · [[../tech_space/jord/studio/README#right-inspector-s0048]] · card [[../plan/Jord/phase-03/done/S0048-right-inspector|S0048]]
 - **Phase-03 S0049 / jord-F0023 (partial)** — `GET /schema/schemas`, `?schema=` on introspection/DDL/rows/table-API; migration `0011` schema_name on tracked + RLS tables · [[../tech_space/jord/schema/README]] · card [[../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]]
+- **Phase-03 S0050 / jord-F0023 (partial)** — Data sidebar schema picker + scoped table list + create-table inspector stub · [[../tech_space/jord/studio/README#schema-picker--scoped-table-list-s0050]] · card [[../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]]
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B done** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]). **Wave C** ([[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]–[[../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]]). **Next:** [[../plan/Jord/phase-03/S0050-schema-picker-ui|S0050]] (Studio schema picker UI). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B done** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]). **Wave C** ([[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]–[[../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]]). **Next:** [[../plan/Jord/phase-03/S0051-workspace-tabs|S0051]] (workspace tabs). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet

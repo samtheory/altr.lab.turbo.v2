@@ -3,12 +3,13 @@
 export const INSPECTOR_PARAM = "inspector";
 
 /** Query keys kept as inspector props (deep-linkable). */
-export const INSPECTOR_PROP_KEYS = ["recordId", "table"] as const;
+export const INSPECTOR_PROP_KEYS = ["recordId", "table", "schema"] as const;
 
 export type InspectorPropKey = (typeof INSPECTOR_PROP_KEYS)[number];
 
 export const INSPECTOR_IDS = [
   "create-record",
+  "create-table",
   "record-detail",
   "migrate",
 ] as const;
@@ -74,6 +75,8 @@ export function inspectorTitle(id: InspectorId): string {
   switch (id) {
     case "create-record":
       return "Insert row";
+    case "create-table":
+      return "Create table";
     case "record-detail":
       return "Edit row";
     case "migrate":
