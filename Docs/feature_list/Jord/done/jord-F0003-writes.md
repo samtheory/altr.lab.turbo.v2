@@ -1,14 +1,15 @@
 ---
 title: "jord-F0003 — writes"
 feature_id: jord-F0003
-description: "Shipped: write queue, OCC records, user-table row writes"
+description: "Shipped: write queue (PG width via JORD_PG_WRITE_CONCURRENCY), OCC records, user-table row writes"
 created: 2026-10-18
-updated: 2026-10-27
+updated: 2026-11-01
 tags:
   - feature
   - jord
   - done
   - writes
+  - s0038
 ---
 
 # jord-F0003 — writes
@@ -17,7 +18,7 @@ tags:
 
 ## Write queue
 
-libSQL hot writes multiplex through one in-process queue in `@altr/jord-server`. Postgres uses the same queue at concurrency 1 today; `JORD_PG_WRITE_CONCURRENCY` is [[../INDEX|jord-F0013]]. SQL **reads** use a different connection.
+libSQL hot writes stay serial in `@altr/jord-server`. Postgres uses the same queue with width from `JORD_PG_WRITE_CONCURRENCY` (1…8, default 1) — [[../../../plan/Jord/phase-03/done/S0038-pg-write-concurrency|S0038]] / [[jord-F0013-production-ops|jord-F0013]]. SQL **reads** use a different connection.
 
 Do not open the raw DB file from many OS processes for hot writes.
 

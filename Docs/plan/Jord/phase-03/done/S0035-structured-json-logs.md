@@ -14,7 +14,7 @@ tags:
 # S0035 — structured JSON request logs
 
 > **Status:** done  
-> **Phase:** [[README]] · Parent feature: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/overview/README]] (and jobs/logs if ring behavior is mentioned)
+> **Phase:** [[../README]] · Parent feature: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]] (and jobs/logs if ring behavior is mentioned)
 
 ## Routing (who / how long / which model)
 
@@ -38,10 +38,10 @@ jord-F0013: without structured request logs you cannot debug multi-instance depl
 
 | Kind | Open |
 |------|------|
-| Intent | [[../../../feature_list/Jord/INDEX]] P1 |
-| As-built | [[../../../tech_space/jord/overview/README]] · [[../../../tech_space/jord/jobs/README]] (existing log ring) |
+| Intent | [[../../../../feature_list/Jord/INDEX]] P1 |
+| As-built | [[../../../../tech_space/jord/overview/README]] · [[../../../../tech_space/jord/jobs/README]] (existing log ring) |
 | Code | `cloud/jord/src/app.ts` (`createJordApp`) · `cloud/jord/src/logs/batch.ts` (`LogBatcher`) · `cloud/jord/src/logs/redact.ts` |
-| Hardening | [[../../../feature_list/Jord/done/jord-F0006-apis]] F10 — body limits / CORS already exist |
+| Hardening | [[../../../../feature_list/Jord/done/jord-F0006-apis]] F10 — body limits / CORS already exist |
 
 **Do not break:** LogBatcher flush path; SQL audit redaction; health probes spam — either sample or skip logging `/health*` at info (document the choice).
 
@@ -121,6 +121,6 @@ sequenceDiagram
 
 | Update | Path |
 |--------|------|
-| tech_space | [[../../../tech_space/jord/overview/README]] |
-| Phase queue | [[README]] status → done |
-| Next suggested split | [[S0036-shared-rate-limit-idempotency\|S0036]] · OTel later ([[S0039-otel-traces\|S0039]]) |
+| tech_space | [[../../../../tech_space/jord/overview/README]] |
+| Phase queue | [[../README]] status → done |
+| Next suggested split | [[S0036-shared-rate-limit-idempotency\|S0036]] · OTel later ([[../S0039-otel-traces\|S0039]]) |

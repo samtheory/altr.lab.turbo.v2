@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-03 — single-task queue"
 description: "Phase-03 queue: one file per AI task, 63 cards across production ops, Studio v2, storage, auth, table API and security"
 created: 2026-10-27
-updated: 2026-10-29
+updated: 2026-11-01
 tags:
   - plan
   - jord
@@ -12,16 +12,16 @@ tags:
 
 # plan / Jord / phase-03
 
-> **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]].
+> **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-10-29):** **S0034–S0037 done** (health probes · structured JSON request logs · shared PG rate limit + idempotency · LISTEN fan-out + shared watermark). As-shipped note: [[../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] (partial). Next open card: [[S0038-pg-write-concurrency|S0038]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-01):** **S0034–S0038 done** (health · JSON logs · shared PG rate/idempotency · LISTEN fan-out · `JORD_PG_WRITE_CONCURRENCY`). Archived under [[done/README|done/]]. As-shipped note: [[../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] (partial). Next open card: [[S0039-otel-traces|S0039]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
 1. Open the next **todo** card in wave order (A → P). Do not skip a card a later one depends on.
 2. Follow its **Routing** table (agent · skills · model · estimate).
 3. Do **only** that card's in-scope steps. Do not expand into the next feature id.
-4. Paste proof into the card. Mark status **done**.
+4. Paste proof into the card. Mark status **done**. Move the file to [[done/README|done/]].
 5. Call **docs_man** to update the matching `tech_space/jord/<category>/` (+ feature_list `done/` if the contract changed).
 
 ```mermaid
@@ -64,11 +64,11 @@ flowchart LR
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| A1 | [[S0034-health-probes\|S0034]] | `/health/live` + `/health/ready` | **done** 2026-10-29 |
-| A2 | [[S0035-structured-json-logs\|S0035]] | Structured JSON request logs | **done** 2026-10-29 |
-| A3 | [[S0036-shared-rate-limit-idempotency\|S0036]] | Shared rate limit + idempotency in Postgres | **done** 2026-10-29 |
-| A4 | [[S0037-listen-seq-fanout\|S0037]] | LISTEN/NOTIFY fan-out + shared watermark | **done** 2026-10-29 |
-| A5 | [[S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | 45–75 min |
+| A1 | [[done/S0034-health-probes\|S0034]] | `/health/live` + `/health/ready` | **done** 2026-10-29 |
+| A2 | [[done/S0035-structured-json-logs\|S0035]] | Structured JSON request logs | **done** 2026-10-29 |
+| A3 | [[done/S0036-shared-rate-limit-idempotency\|S0036]] | Shared rate limit + idempotency in Postgres | **done** 2026-10-29 |
+| A4 | [[done/S0037-listen-seq-fanout\|S0037]] | LISTEN/NOTIFY fan-out + shared watermark | **done** 2026-10-29 |
+| A5 | [[done/S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | **done** 2026-11-01 |
 | A6 | [[S0039-otel-traces\|S0039]] | OpenTelemetry traces + metrics | 2–3 h |
 | A7 | [[S0040-backup-restore-drill\|S0040]] | Backup + restore drill | 60–90 min |
 | A8 | [[S0041-dockerfile-deploy\|S0041]] | Dockerfile + deploy recipe | 1.5–2 h |

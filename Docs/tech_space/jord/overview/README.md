@@ -2,7 +2,7 @@
 title: "Jord — overview"
 description: "What Jord is, the three packages, the request path, and the invariants that still hold"
 created: 2026-10-24
-updated: 2026-10-29
+updated: 2026-11-01
 tags:
   - tech-space
   - jord
@@ -13,6 +13,7 @@ tags:
   - http-log
   - s0035
   - s0036
+  - s0038
   - rate-limit
   - idempotency
 ---
@@ -58,7 +59,7 @@ Public, unauthenticated. Module: `cloud/jord/src/http/health.ts`. Never returns 
 | Path | Meaning | Body |
 |------|---------|------|
 | `GET /health/live` | Process is serving (no DB) | `{ ok: true }` → **200** |
-| `GET /health/ready` | DB ping + baseline migration (`0001` in `jord_migrations`) + write queue present with finite `pending()` | `{ ok: true }` → **200**; else `{ ok: false, reasons: { db?, migrations?, queue? } }` → **503** |
+| `GET /health/ready` | DB ping + baseline migration (`0001` in `jord_migrations`) + write queue present with finite `pending()` / `inFlight()` | `{ ok: true }` → **200**; else `{ ok: false, reasons: { db?, migrations?, queue? } }` → **503** |
 | `GET /health` | **Back-compat alias** of live **plus** dialect labels | `{ ok, dialect, urlScheme, vectorBackend }` → **200** |
 
 Load balancers / k8s should use **live** for liveness and **ready** for readiness. Prefer those over `/health` for new wiring.
@@ -188,8 +189,16 @@ On **Postgres**, data-route rate counters and idempotency replay live in the pro
 - Sweeper job kind `shared_state_sweep` (seeded on Postgres only) deletes expired idempotency rows and old rate windows. Modules: `http/rate-limit-store.ts`, `idempotency/pg-store.ts`, `idempotency/sweep.ts`.
 - Failure policy: rate-limit DB errors **fail open** (log + allow); idempotency lookup failure → **500**; failed `remember` after a committed write is logged only.
 
-**Still process-local:** SQL console history, auth route rate limits (30/min). Realtime LISTEN fan-out + shared watermark are multi-instance on Postgres ([[../../../plan/Jord/phase-03/S0037-listen-seq-fanout|S0037]]).
+**Still process-local:** SQL console history, auth route rate limits (30/min). Realtime LISTEN fan-out + shared watermark are multi-instance on Postgres ([[../../../plan/Jord/phase-03/done/S0037-listen-seq-fanout|S0037]]).
+
+### Postgres write concurrency (S0038)
+
+| Env | Default | Notes |
+|-----|---------|-------|
+| `JORD_PG_WRITE_CONCURRENCY` | `1` | Postgres only. Integer **1…8**; invalid → boot fails. libSQL always serial (warns once if set > 1). |
+
+Documented in `cloud/jord/src/load-env.ts`. As-built: [[../writes/README]]. Card: [[../../../plan/Jord/phase-03/done/S0038-pg-write-concurrency|S0038]].
 
 ## Not in Jord yet
 
-Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024).
+Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024). OpenTelemetry / backup drill / Dockerfile remain open on [[../../../plan/Jord/phase-03/README|phase-03]].

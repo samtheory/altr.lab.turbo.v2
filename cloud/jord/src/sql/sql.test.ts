@@ -31,7 +31,11 @@ async function boot(backend: TestBackend) {
       writes += 1;
       return base(task);
     },
-    { drain: () => base.drain(), pending: () => base.pending() },
+    {
+      drain: () => base.drain(),
+      pending: () => base.pending(),
+      inFlight: () => base.inFlight(),
+    },
   );
   const app = createJordApp({ jord: db.jord, ddl: db.ddl, enqueueWrite, auth: AUTH });
   return { app, db, writes: () => writes };

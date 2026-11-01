@@ -138,6 +138,7 @@ describe("health probes (S0034)", () => {
         {
           drain: async () => undefined,
           pending: () => Number.NaN,
+          inFlight: () => 0,
         },
       ) as WriteQueue;
       const result = await checkReady({ jord, enqueueWrite: badQueue });

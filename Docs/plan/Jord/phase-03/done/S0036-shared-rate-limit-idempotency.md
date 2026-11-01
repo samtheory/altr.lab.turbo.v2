@@ -13,7 +13,7 @@ tags:
 
 # S0036 — shared rate limit + idempotency in Postgres
 
-> **Status:** **done** 2026-10-29 · **Phase:** [[README]] · Parents: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] + [[../../../feature_list/Jord/done/jord-F0006-apis|jord-F0006]] · After ship: [[../../../tech_space/jord/apis/README]]
+> **Status:** **done** 2026-10-29 · **Phase:** [[../README]] · Parents: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] + [[../../../../feature_list/Jord/done/jord-F0006-apis|jord-F0006]] · After ship: [[../../../../tech_space/jord/apis/README]]
 
 ## Routing (who / how long / which model)
 
@@ -37,8 +37,8 @@ Rate-limit counters and idempotency records live in the project database, so N s
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] |
-| As-built | [[../../../tech_space/jord/apis/README]] · [[../../../tech_space/jord/overview/README]] |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] |
+| As-built | [[../../../../tech_space/jord/apis/README]] · [[../../../../tech_space/jord/overview/README]] |
 | Code today | `cloud/jord/src/http/data-rate-limit.ts` (in-memory buckets) · `cloud/jord/src/idempotency/store.ts` + `middleware.ts` (in-memory map) |
 | Dialect seam | `elements/jord/src/adapter/{postgres,libsql}.ts` — new tables need both paths or a clear libSQL fallback |
 | Tests | `cloud/jord/src/idempotency/idempotency.test.ts` · `cloud/jord/src/http/s0028.test.ts` |
@@ -104,6 +104,6 @@ flowchart LR
 |--------|------|
 | tech_space | `Docs/tech_space/jord/apis/README.md` |
 | tech_space | `Docs/tech_space/jord/writes/README.md` |
-| feature_list | [[../../../feature_list/Jord/done/jord-F0006-apis|jord-F0006-apis]] · [[../../../feature_list/Jord/done/jord-F0003-writes|jord-F0003-writes]] |
-| feature_list | [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] task row |
-| Queue | [[README]] |
+| feature_list | [[../../../../feature_list/Jord/done/jord-F0006-apis|jord-F0006-apis]] · [[../../../../feature_list/Jord/done/jord-F0003-writes|jord-F0003-writes]] |
+| feature_list | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] task row |
+| Queue | [[../README]] |

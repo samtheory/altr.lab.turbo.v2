@@ -42,14 +42,25 @@ function queueReason(enqueueWrite: WriteQueue): string | undefined {
   if (typeof enqueueWrite.pending !== "function") {
     return "write queue pending() missing";
   }
+  if (typeof enqueueWrite.inFlight !== "function") {
+    return "write queue inFlight() missing";
+  }
   let pending: number;
+  let inFlight: number;
   try {
     pending = enqueueWrite.pending();
+    inFlight = enqueueWrite.inFlight();
   } catch (err) {
-    return `write queue pending() failed: ${errorMessage(err)}`;
+    return `write queue depth probe failed: ${errorMessage(err)}`;
   }
   if (!Number.isFinite(pending) || pending < 0) {
     return "write queue pending() is not a finite non-negative number";
+  }
+  if (!Number.isFinite(inFlight) || inFlight < 0) {
+    return "write queue inFlight() is not a finite non-negative number";
+  }
+  if (inFlight > pending) {
+    return "write queue inFlight() exceeds pending()";
   }
   return undefined;
 }

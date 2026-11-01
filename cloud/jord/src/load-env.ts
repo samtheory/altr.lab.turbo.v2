@@ -1,7 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-/** Best-effort `.env` load for local `pnpm dev:jord` (does not override existing env). */
+/**
+ * Best-effort `.env` load for local `pnpm dev:jord` (does not override existing env).
+ *
+ * Known Jord server knobs (non-exhaustive):
+ * - `JORD_PG_WRITE_CONCURRENCY` — Postgres write-queue width, integer `1…8`, default `1`.
+ *   Ignored on libSQL (always serial). Out-of-range values refuse boot.
+ * - See also: `JORD_CORS_ORIGINS`, `JORD_MAX_JSON_BYTES`, `JORD_HTTP_LOG`,
+ *   `JORD_IDEMPOTENCY_TTL_MS`, `JORD_WAL_CHECKPOINT_MS`, `JORD_MIGRATE_URL`.
+ */
 export function loadLocalEnv(cwd: string = process.cwd()): void {
   const path = resolve(cwd, ".env");
   if (!existsSync(path)) return;

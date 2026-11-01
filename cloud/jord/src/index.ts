@@ -9,7 +9,7 @@ import {
   startJobScheduler,
 } from "./jobs/index.js";
 import { loadLocalEnv } from "./load-env.js";
-import { createWriteQueue } from "./queue.js";
+import { createWriteQueue, resolveWriteConcurrency } from "./queue.js";
 import { RealtimeBus } from "./realtime/index.js";
 import {
   resolveWalCheckpointMs,
@@ -91,7 +91,13 @@ export {
   type JobScheduler,
   type LogEvent,
 } from "./jobs/index.js";
-export { createWriteQueue } from "./queue.js";
+export {
+  createWriteQueue,
+  resolveWriteConcurrency,
+  DEFAULT_PG_WRITE_CONCURRENCY,
+  PG_WRITE_CONCURRENCY_MAX,
+  PG_WRITE_CONCURRENCY_MIN,
+} from "./queue.js";
 export {
   isRealtimeSubscribeTable,
   MAX_REALTIME_SUBSCRIBERS,
@@ -142,7 +148,11 @@ export async function startJordServer(
   const ddl = postgres
     ? await createJordClient({ url: env.JORD_MIGRATE_URL, postgresDdl: true })
     : undefined;
-  const enqueueWrite = createWriteQueue();
+  const writeConcurrency = resolveWriteConcurrency(
+    env,
+    jord.dialect === "postgres" ? "postgres" : "libsql",
+  );
+  const enqueueWrite = createWriteQueue({ concurrency: writeConcurrency });
   const realtime = new RealtimeBus();
   const { LogBatcher } = await import("./logs/batch.js");
   const logs = new LogBatcher(jord);

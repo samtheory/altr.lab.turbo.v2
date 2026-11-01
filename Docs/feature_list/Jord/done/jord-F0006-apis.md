@@ -31,7 +31,7 @@ CORS allow-list; data rate 120/min; auth 30/min; JSON 1 MiB; shutdown drains wri
 
 **Rate limit + idempotency storage.** libSQL is in-process; Postgres is shared on `jord_rate_limits` / `jord_idempotency` (S0036). Auth signup/signin limits stay process-local (S0021-B).
 
-**Done**. Plan: [[../../../plan/Jord/phase-02/Jord-S0028/README|S0028]] · [[../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency|S0036]].
+**Done**. Plan: [[../../../plan/Jord/phase-02/Jord-S0028/README|S0028]] · [[../../plan/Jord/phase-03/done/S0036-shared-rate-limit-idempotency|S0036]].
 
 ## Client SDK (F11)
 
@@ -43,7 +43,7 @@ CORS allow-list; data rate 120/min; auth 30/min; JSON 1 MiB; shutdown drains wri
 
 Data-route limits and `Idempotency-Key` replay are **shared across instances on Postgres** via migration `0007_rate_limit_idempotency` (`jord_rate_limits`, `jord_idempotency` + TTL index + sweep). libSQL stays in-process. Auth signup/signin limits remain process-local. 429 body unchanged: `{ error: "too_many_requests" }`.
 
-**Done** 2026-10-29. Plan: [[../../plan/Jord/phase-03/S0036-shared-rate-limit-idempotency|S0036]]. As-built: [[../../../tech_space/jord/apis/README#shared-rate-limit--idempotency-s0036]] · [[../../../tech_space/jord/writes/README]].
+**Done** 2026-10-29. Plan: [[../../plan/Jord/phase-03/done/S0036-shared-rate-limit-idempotency|S0036]]. As-built: [[../../../tech_space/jord/apis/README#shared-rate-limit--idempotency-s0036]] · [[../../../tech_space/jord/writes/README]].
 
 ## Functions v2 (F8)
 

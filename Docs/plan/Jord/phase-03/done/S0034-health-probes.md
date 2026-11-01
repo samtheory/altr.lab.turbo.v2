@@ -14,7 +14,7 @@ tags:
 # S0034 — health live + ready probes
 
 > **Status:** done  
-> **Phase:** [[README]] · Parent feature: [[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../tech_space/jord/overview/README]]
+> **Phase:** [[../README]] · Parent feature: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,8 +38,8 @@ jord-F0013 needs deployability. Operators cannot put Jord behind a load balancer
 
 | Kind | Open |
 |------|------|
-| Intent | [[../../../feature_list/Jord/INDEX]] P1 · [[../../../feature_list/Jord/done/jord-F0006-apis]] |
-| As-built | [[../../../tech_space/jord/overview/README]] |
+| Intent | [[../../../../feature_list/Jord/INDEX]] P1 · [[../../../../feature_list/Jord/done/jord-F0006-apis]] |
+| As-built | [[../../../../tech_space/jord/overview/README]] |
 | Code today | `cloud/jord/src/http/health.ts` · wired from `cloud/jord/src/app.ts` |
 | Auth | `cloud/jord/src/auth/route-inventory.ts` treats `/health` and `/health/*` as public `health` |
 | Tests | `cloud/jord/src/http/health.test.ts` · `app.test.ts` · `http-hardening.test.ts` · `principals.test.ts` · `part-c.test.ts` inventory |
@@ -90,7 +90,7 @@ flowchart TB
 4. Update route inventory + any allow-lists that hardcode `/health`.
 5. Tests: live without jord; ready success; ready failure path.
 6. `pnpm --filter @altr/jord-server typecheck` + targeted vitest.
-7. **docs_man**: update [[../../../tech_space/jord/overview/README]] “not in yet” / HTTP section; tick this card; note on [[README]].
+7. **docs_man**: update [[../../../../tech_space/jord/overview/README]] “not in yet” / HTTP section; tick this card; note on [[../README]].
 
 ## Done when (acceptance)
 
@@ -114,6 +114,6 @@ flowchart TB
 
 | Update | Path |
 |--------|------|
-| tech_space | [[../../../tech_space/jord/overview/README]] · [[../../../tech_space/jord/auth/README]] |
-| feature_list | [[../../../feature_list/Jord/todo/jord-F0013-production-ops\|jord-F0013]] (S0034 row → done) |
-| Phase queue | [[README]] S0034 → done |
+| tech_space | [[../../../../tech_space/jord/overview/README]] · [[../../../../tech_space/jord/auth/README]] |
+| feature_list | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops\|jord-F0013]] (S0034 row → done) |
+| Phase queue | [[../README]] S0034 → done |
