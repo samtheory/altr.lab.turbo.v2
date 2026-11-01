@@ -31,14 +31,14 @@ The SQL workspace gets tabs (create, rename, reorder, close with unsaved guard),
 
 ## Why now
 
-`jord-F0028` and the sidebar section from [[S0047-contextual-sidebar|S0047]] both point at this; without it every query is lost on navigation.
+`jord-F0028` and the sidebar section from [[done/S0047-contextual-sidebar|S0047]] both point at this; without it every query is lost on navigation.
 
 ## Context (read before coding)
 
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]] (Tabs, History) |
-| Depends on | [[S0063-monaco-sql-editor|S0063]] · [[S0047-contextual-sidebar|S0047]] |
+| Depends on | [[S0063-monaco-sql-editor|S0063]] · [[done/S0047-contextual-sidebar|S0047]] |
 | Code today | `cloud/jord/src/sql/routes.ts` · `jord_sql_audit` via `elements/jord/src/schema/sql-console.ts` (check the existing audit shape before adding a table) |
 | Storage | saved queries in the project DB (they are user data), history from the existing audit table where possible |
 

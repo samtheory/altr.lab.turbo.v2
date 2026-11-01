@@ -2,18 +2,19 @@
 title: "S0047 — contextual sidebar per section"
 description: "Per-section second column: table list for Data, job list for Runtime, endpoint list for APIs, saved queries for SQL, users for Auth — resizable and remembered"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0047
+  - done
 ---
 
 # S0047 — contextual sidebar per section
 
-> **Status:** todo · **Depends on** [[S0046-three-pane-shell|S0046]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-01 · **Depends on** [[S0046-three-pane-shell|S0046]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -84,17 +85,21 @@ flowchart LR
 
 ## Done when
 
-- [ ] Three sections have working, searchable sidebars
-- [ ] Width + collapse persist per project
-- [ ] Selection survives reload via URL
-- [ ] Keyboard selection works
-- [ ] Typecheck + build pass; proof pasted
+- [x] Three sections have working, searchable sidebars
+- [x] Width + collapse persist per project
+- [x] Selection survives reload via URL
+- [x] Keyboard selection works
+- [x] Typecheck + build pass; proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-studio typecheck` | |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio build` | exit 0 |
+| 2026-11-01 | manual | Tables/Jobs/APIs sidebars wired; search + URL selection + resize + persist |
+
+**Shipped:** `StudioSidebarList` + `SidebarBadge` compositional primitive; `studio-tables-sidebar.tsx`, `studio-jobs-sidebar.tsx`, `studio-endpoints-sidebar.tsx` wired to BFF; per-project shell prefs include `sidebarWidth` + collapse; `StudioContextualSidebar` resizable drag handle with min/max; selection URL params (`table`, `job`, `endpoint`) restored on reload; `/` focuses search, Escape clears.
 
 ## After ship
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   Alert,
   AlertDescription,
@@ -31,6 +31,7 @@ import {
   type PublicJob,
   type PublicJobRun,
 } from "@/lib/jobs";
+import { useSearchParams } from "next/navigation";
 
 type ApiError = { error?: string; message?: string };
 
@@ -40,8 +41,11 @@ type Props = {
 
 export function JobsPanel({ role }: Props) {
   const canManage = canManageJobs(role);
+  const searchParams = useSearchParams();
   const [jobs, setJobs] = useState<PublicJob[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedRef = useRef(selectedId);
+  selectedRef.current = selectedId;
   const [runs, setRuns] = useState<PublicJobRun[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("Echo lab");
@@ -61,16 +65,16 @@ export function JobsPanel({ role }: Props) {
             ? "jord-server is down — start `pnpm dev:jord`."
             : `Failed to load jobs (${res.status}).`),
       );
-    }
-    const data = (await res.json()) as { jobs: PublicJob[] };
-    setJobs(data.jobs);
-    if (data.jobs.length > 0) {
-      setSelectedId((prev) =>
-        prev && data.jobs.some((j) => j.id === prev)
-          ? prev
-          : data.jobs[0]!.id,
-      );
-    }
+    }      const data = (await res.json()) as { jobs: PublicJob[] };
+      setJobs(data.jobs);
+      if (data.jobs.length > 0) {
+        const urlJob = searchParams.get("job");
+        const preferred =
+          urlJob && data.jobs.some((j) => j.id === urlJob)
+            ? urlJob
+            : data.jobs[0]!.id;
+        setSelectedId((prev) => (prev ? prev : preferred));
+      }
     return data.jobs;
   }, []);
 
@@ -82,6 +86,15 @@ export function JobsPanel({ role }: Props) {
     const data = (await res.json()) as { runs: PublicJobRun[] };
     setRuns(data.runs);
   }, []);
+
+  // Restore selection from the URL on mount / param change (S0047).
+  useEffect(() => {
+    const job = searchParams.get("job");
+    if (!job) return;
+    if (jobs && jobs.some((j) => j.id === job)) {
+      setSelectedId(job);
+    }
+  }, [searchParams, jobs]);
 
   useEffect(() => {
     let cancelled = false;

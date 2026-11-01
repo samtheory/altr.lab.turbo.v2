@@ -13,7 +13,7 @@ tags:
 
 # S0050 — schema picker + scoped table list
 
-> **Status:** todo · **Depends on** [[S0049-schema-scoped-introspection|S0049]] + [[S0047-contextual-sidebar|S0047]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[S0049-schema-scoped-introspection|S0049]] + [[done/S0047-contextual-sidebar|S0047]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ The schema server contract landed in [[S0049-schema-scoped-introspection|S0049]]
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (schema picker section) |
-| Depends on | [[S0049-schema-scoped-introspection|S0049]] (`GET /schema/schemas`, `?schema=`) · [[S0047-contextual-sidebar|S0047]] (list primitive) |
+| Depends on | [[S0049-schema-scoped-introspection|S0049]] (`GET /schema/schemas`, `?schema=`) · [[done/S0047-contextual-sidebar|S0047]] (list primitive) |
 | Code today | `apps/jord-studio/src/lib/{schema,database-api}.ts` · `components/schema-explorer.tsx` · `app/p/[project]/tables/page.tsx` |
 | UI kit | Apolyx `Select`/combobox, `Input`, `Button`, `Badge` |
 

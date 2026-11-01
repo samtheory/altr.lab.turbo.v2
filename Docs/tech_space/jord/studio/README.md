@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0046 projects + three-pane shell"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0047 projects + three-pane shell + contextual sidebars"
 created: 2026-10-24
-updated: 2026-11-01
+updated: 2026-11-01T14:56
 tags:
   - tech-space
   - jord
@@ -132,9 +132,26 @@ Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry ro
 | Slots | `StudioSidebar` · `StudioContent` (`#main`) · `StudioInspector` (overlay + blur; no content reflow) in `studio-panes.tsx` |
 | Prefs | `localStorage` key `jord.studio.shell:v1:<projectSlug>` — nav + sidebar collapsed |
 | Responsive | Below `lg`: primary nav + contextual sidebar + inspector each use Apolyx `Sheet` |
-| Placeholder | Contextual kinds `tables` / `jobs` / `endpoints` / `queries` / `users` / `buckets` show a reserved frame (loading/empty/error ready); real lists → [[../../../plan/Jord/phase-03/S0047-contextual-sidebar\|S0047]] |
+| Placeholder | Contextual kinds `tables` / `jobs` / `endpoints` / `queries` / `users` / `buckets` show a reserved frame (loading/empty/error ready) |
 | A11y | Skip links → nav / sidebar / content |
+
+### Contextual sidebars (S0047)
+
+Real second-column lists for the wired sections; selection is URL-driven and the width/collapse persist per project.
+
+| Piece | Fact |
+|-------|------|
+| Primitive | `StudioSidebarList` + `SidebarBadge` in `src/components/studio-sidebar-list.tsx` — layout only, no Jord data fetch |
+| Tables | `StudioTablesSidebar` reads `GET /api/schema/tables`, search + `?q`, selection drives `/tables` or `/tables/[name]`; `records` is a badge + hint |
+| Jobs | `StudioJobsSidebar` reads `GET /api/jobs`, status filter + last-run badge, selection drives `?job=` |
+| APIs | `StudioEndpointsSidebar` reads `GET /api/apis/generated` + `/api/custom-apis` + `/api/functions`, grouped by Tables/Custom with method badges |
+| SQL | Reserved `queries` slot; real list is [[../../../plan/Jord/phase-03/S0064-query-tabs-history\|S0064]] |
+| Auth | Reserved `users` slot; real list is [[../../../plan/Jord/phase-03/S0070-auth-console-users\|S0070]] |
+| Storage | Reserved `buckets` slot; real list is [[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]] |
+| Resize + persist | Drag handle with 12rem–30rem clamp; `sidebarWidth` + `sidebarCollapsed` kept in the S0046 shell prefs |
+| Selection | `?table=`, `?job=`, `?endpoint=` rewritten on item click; restored on reload |
+| Search | Debounced ~150 ms; `/` focuses, Escape clears |
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Contextual sidebar lists: [[../../../plan/Jord/phase-03/S0047-contextual-sidebar|S0047]]. Right inspector behaviour: [[../../../plan/Jord/phase-03/S0048-right-inspector|S0048]].
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Right inspector behaviour: [[../../../plan/Jord/phase-03/S0048-right-inspector|S0048]].

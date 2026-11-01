@@ -38,7 +38,7 @@ Today only `/auth/users` exists with a basic panel; the requested console needs 
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] (Users) |
-| Depends on | [[S0069-auth-settings-store|S0069]] · [[S0047-contextual-sidebar|S0047]] (user list lives there) |
+| Depends on | [[S0069-auth-settings-store|S0069]] · [[done/S0047-contextual-sidebar|S0047]] (user list lives there) |
 | Code today | `components/users-admin-panel.tsx` · `app/p/[project]/auth/` · `cloud/jord/src/auth/{admin,routes,identity}.ts` |
 | Gate | Sections the server cannot back yet render **disabled with a reason** and a link to the owning card — never a fake toggle |
 

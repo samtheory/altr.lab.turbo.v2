@@ -46,7 +46,6 @@ type Props = {
 
 const NAV_W = "14rem";
 const NAV_W_COLLAPSED = "3.5rem";
-const SIDEBAR_W = "16rem";
 
 export function StudioShell({ children, role, bypass }: Props) {
   const pathname = usePathname() ?? "";
@@ -90,19 +89,25 @@ function StudioShellFrame({
   const [mobileInspectorOpen, setMobileInspectorOpen] = useState(false);
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState<number | null>(null);
   const [prefsReady, setPrefsReady] = useState(false);
 
   useEffect(() => {
     const prefs = loadShellPrefs(projectSlug);
     setNavCollapsed(prefs.navCollapsed);
     setSidebarCollapsed(prefs.sidebarCollapsed);
+    setSidebarWidth(prefs.sidebarWidth);
     setPrefsReady(true);
   }, [projectSlug]);
 
   useEffect(() => {
     if (!prefsReady) return;
-    saveShellPrefs(projectSlug, { navCollapsed, sidebarCollapsed });
-  }, [projectSlug, navCollapsed, sidebarCollapsed, prefsReady]);
+    saveShellPrefs(projectSlug, {
+      navCollapsed,
+      sidebarCollapsed,
+      sidebarWidth,
+    });
+  }, [projectSlug, navCollapsed, sidebarCollapsed, sidebarWidth, prefsReady]);
 
   useEffect(() => {
     setMobileSidebarOpen(false);
@@ -117,7 +122,9 @@ function StudioShellFrame({
 
   const gridStyle = {
     ["--jord-nav-w" as string]: navCollapsed ? NAV_W_COLLAPSED : NAV_W,
-    ["--jord-sidebar-w" as string]: desktopSidebarOpen ? SIDEBAR_W : "0px",
+    ["--jord-sidebar-w" as string]: desktopSidebarOpen
+      ? sidebarWidthCss(sidebarWidth)
+      : "0px",
   } as React.CSSProperties;
 
   return (
@@ -186,7 +193,7 @@ function StudioShellFrame({
               <SheetHeader className="border-b border-border px-4 py-3 text-left">
                 <SheetTitle className="font-display">Section</SheetTitle>
               </SheetHeader>
-              <div className="h-[calc(100vh-4rem)]">
+              <div className="h-[calc(100vh-4rem)] w-full">
                 <StudioContextualSidebar contextual={contextual} />
               </div>
             </SheetContent>
@@ -283,8 +290,14 @@ function StudioShellFrame({
           aria-hidden={!desktopSidebarOpen}
         >
           {showSidebar && desktopSidebarOpen ? (
-            <div className="h-[calc(100vh-3.5rem)] w-[16rem]">
-              <StudioContextualSidebar contextual={contextual} />
+            <div className="h-[calc(100vh-3.5rem)] w-full">
+              <StudioContextualSidebar
+                contextual={contextual}
+                width={sidebarWidth}
+                collapsed={sidebarCollapsed}
+                onWidthChange={setSidebarWidth}
+                onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+              />
             </div>
           ) : null}
         </aside>

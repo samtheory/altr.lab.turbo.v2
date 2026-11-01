@@ -1,6 +1,4 @@
----
-title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0046; next S0047); Functions runtime still gated"
+---title: "Status — complete vs remaining"description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0047; next S0048); Functions runtime still gated"
 created: 2026-09-19
 updated: 2026-11-01
 tags:
@@ -14,7 +12,7 @@ tags:
 
 # Status
 
-Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0046 three-pane Studio shell** · Prior: **S0045** `/p/[project]` scoping · **S0044** Projects wizard · **S0043** project registry API · **S0042** control-plane store · **S0041** Dockerfile · **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0047 contextual Studio sidebars** (after S0046 three-pane shell) · Prior: **S0046** · **S0045** `/p/[project]` scoping · **S0044** Projects wizard · **S0043** project registry API · **S0042** control-plane store · **S0041** Dockerfile · **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -30,11 +28,11 @@ Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Phase-03 S0043 / jord-F0021 (partial)** — `/admin/projects` registry + keys + connect test · [[../tech_space/jord/studio/README#control-plane-store-s0042--registry-api-s0043--studio-wizard-s0044]] · card [[../plan/Jord/phase-03/done/S0043-project-registry-api|S0043]]
 - **Phase-03 S0044 / jord-F0021 (partial)** — Studio `/projects` list + New project wizard + one-time key reveal · [[../tech_space/jord/studio/README#studio-create-flow-s0044]] · card [[../plan/Jord/phase-03/done/S0044-new-project-wizard|S0044]]
 - **Phase-03 S0045 / jord-F0021 (partial)** — `/p/[project]/…` screens, `jord_project` cookie, header switcher, BFF fail-closed · [[../tech_space/jord/studio/README#project-scoped-routes-s0045]] · card [[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]
-- **Phase-03 S0046 / jord-F0023 (partial)** — three-pane shell + nav `contextual` + inspector overlay frame · [[../tech_space/jord/studio/README#three-pane-shell-s0046]] · card [[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]
+- **Phase-03 S0046 / jord-F0023 (partial)** — three-pane shell + nav `contextual` + inspector overlay frame · [[../tech_space/jord/studio/README#three-pane-shell-s0046]] · card [[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]- **Phase-03 S0047 / jord-F0023 (partial)** — contextual sidebars for Tables/Jobs/APIs + shared sidebar list primitive + resize/persist/URL selection · [[../tech_space/jord/studio/README#contextual-sidebars-s0047]] · card [[../plan/Jord/phase-03/done/S0047-contextual-sidebar|S0047]]
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B done** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]). **Wave C started** ([[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]). **Next:** [[../plan/Jord/phase-03/S0047-contextual-sidebar|S0047]] (contextual sidebar lists). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B done** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]). **Wave C started** ([[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]] · [[../plan/Jord/phase-03/done/S0047-contextual-sidebar|S0047]]). **Next:** [[../plan/Jord/phase-03/S0048-right-inspector|S0048]] (right inspector drawer + deep links). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet

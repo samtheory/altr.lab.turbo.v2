@@ -55,7 +55,7 @@ Every Studio v2 screen assumes this frame. Today `studio-shell.tsx` + `studio-si
 
 ## Out of scope
 
-The sidebar contents themselves ([[../S0047-contextual-sidebar|S0047]]) · the inspector behaviour ([[../S0048-right-inspector|S0048]]) · workspace tabs ([[../S0051-workspace-tabs|S0051]]) · theming.
+The sidebar contents themselves ([[done/S0047-contextual-sidebar|S0047]]) · the inspector behaviour ([[../S0048-right-inspector|S0048]]) · workspace tabs ([[../S0051-workspace-tabs|S0051]]) · theming.
 
 ## Diagram
 

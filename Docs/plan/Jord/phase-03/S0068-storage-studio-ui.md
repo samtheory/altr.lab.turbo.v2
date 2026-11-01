@@ -38,7 +38,7 @@ The **Storage** section becomes bucket-centric: sidebar list with provider badge
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] (Studio surfaces) |
-| Depends on | [[S0067-bucket-config-api|S0067]] · [[S0047-contextual-sidebar|S0047]] · [[S0048-right-inspector|S0048]] |
+| Depends on | [[S0067-bucket-config-api|S0067]] · [[done/S0047-contextual-sidebar|S0047]] · [[S0048-right-inspector|S0048]] |
 | Code today | `components/storage-panel.tsx` · `app/p/[project]/storage/` · `lib/blobs.ts` · BFF `app/api/blobs/` |
 | UI kit | Apolyx `Field`, `Select`, `Tabs`, `Progress`, `Sheet`, `Table` |
 
