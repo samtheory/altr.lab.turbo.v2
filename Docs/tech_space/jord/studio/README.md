@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, SQL console, migrate wizard, users admin"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, SQL console, migrate wizard, users admin; S0042 control-plane tables + secret port"
 created: 2026-10-24
-updated: 2026-10-25
+updated: 2026-11-01
 tags:
   - tech-space
   - jord
@@ -11,7 +11,7 @@ tags:
 
 # Jord Studio
 
-> Who: anyone changing `apps/jord-studio`. Product intent: [[../../../feature_list/Jord/done/jord-F0012-studio]]. Server behavior lives in the other categories — this note is only the control plane.
+> Who: anyone changing `apps/jord-studio`. Product intent: [[../../../feature_list/Jord/done/jord-F0012-studio]] · multi-project [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]]. Server behavior lives in the other categories — this note is only the control plane.
 
 ## Why
 
@@ -68,6 +68,19 @@ pnpm dev:jord-studio
 
 Sign in as admin, open **SQL console**, run `SELECT 1`, then flip read-only off only when you intend a queued write.
 
+## Control-plane store (S0042)
+
+ADR: [[ADR-control-plane-store]]. **Decision:** project metadata lives in `jord_projects` / `jord_project_keys` on the **server primary** `DATABASE_URL` (never inside a registered project target). Secrets at rest use **AES-256-GCM** + `JORD_MASTER_KEY` (`putSecret` / `getSecret` / `rotate` on `@altr/jord`). Create flow is **register + test** only (no hosted provisioning).
+
+| Piece | Fact |
+|-------|------|
+| Migration | `0009_control_plane_projects.sql` (libSQL + Postgres) |
+| Types | `elements/jord/src/schema/projects.ts` |
+| Secret port | `elements/jord/src/control-plane/secret-port.ts` · wired on `createJordApp` as `secrets` (null when master key unset) |
+| HTTP | **None yet** — registry API is [[../../../plan/Jord/phase-03/S0043-project-registry-api\|S0043]] |
+
+Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY`.
+
 ## Not in Jord yet
 
-A writable connection-string editor (cut — needs a new ADR), Monaco, multi-tenant hosting, Artemis screens inside Studio.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Writable connection-string editor waits on the project registry (S0043–S0045).

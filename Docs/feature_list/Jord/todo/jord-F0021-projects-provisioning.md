@@ -3,7 +3,7 @@ title: "jord-F0021 — projects & provisioning"
 feature_id: jord-F0021
 description: "Studio Projects surface: define a project, pick libSQL/libSQL-Turso/Postgres, set credentials and keys at create time"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - feature
   - jord
@@ -60,11 +60,13 @@ Create flow: validate → **test connect** → write control-plane record → ge
 | [[../done/jord-F0002-dialects\|jord-F0002]] | Reuses the existing dialect/connection logic; don't fork a second connector |
 | [[../done/jord-F0005-auth\|jord-F0005]] | Studio session/roles gate every project route |
 
-## Open questions (decide in the ADR before coding)
+## Open questions — settled in S0042
 
-- **Control-plane store** — where project metadata + encrypted secrets live (separate libSQL file vs Postgres vs env-sealed file). Needs a saga ADR; do not store secrets in the project database.
-- Create-vs-register: does "new project" also create the libSQL/Turso/Postgres database, or only register an existing target? Intent here is **register + test**; hosted provisioning stays out.
-- Secret-at-rest mechanism (OS keyring / KMS / encrypted file + master key env).
+ADR: [[../../../tech_space/jord/studio/ADR-control-plane-store]].
+
+- **Control-plane store** — `jord_projects` / `jord_project_keys` on the **server primary** `DATABASE_URL` (not inside project targets; not a separate control-plane file in v1).
+- **Create-vs-register** — **register + test** only; hosted provisioning stays out.
+- **Secret-at-rest** — AES-256-GCM + `JORD_MASTER_KEY`; missing key fails when the secret port is used.
 
 ## Out of scope
 
@@ -74,7 +76,7 @@ Billing · per-project team RBAC · hosted provider APIs (Turso/Neon) · databas
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0042-control-plane-store-adr\|S0042]] — control-plane store + ADR | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0042-control-plane-store-adr\|S0042]] — control-plane store + ADR | 2–3 h | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/S0043-project-registry-api\|S0043]] — project registry API + keys | 2.5–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0044-new-project-wizard\|S0044]] — New project wizard | 2.5–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0045-project-scoped-routes\|S0045]] — /p/[project] scoping + switcher | 2.5–3 h | todo |

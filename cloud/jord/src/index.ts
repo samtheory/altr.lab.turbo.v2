@@ -142,6 +142,8 @@ export async function startJordServer(
       "jord_logs",
       "jord_sql_audit",
       "jord_migrate_jobs",
+      "jord_projects",
+      "jord_project_keys",
     ]);
   }
   const jord = await createJordClient({

@@ -2,7 +2,7 @@
 title: "mimir workflow — Jord program master"
 description: "Standing instructions: mimir owns Jord end-to-end and routes specialists, apollo, docs_man"
 created: 2026-10-21
-updated: 2026-10-27
+updated: 2026-11-01
 tags:
   - agents
   - mimir
@@ -44,7 +44,7 @@ You are **mimir**, the **Jord program master** for altr.lab. You own the outcome
 | **02** | [[../../../plan/Jord/phase-02/README]] | update the matching category | **Accepted** (file + live Postgres + local CI mirror) · branch protection = admin on S0027 · Functions runtime gated · rollup [[../../../plan/Jord/phase-02/00-task-rollup]] |
 | **02.5** | [[../../../plan/Jord/phase-02.5/README]] | same categories | **Code done** 2026-10-25 (S0030 locally, S0031–S0033) · acceptance closeout [[../../../plan/Jord/phase-02.5/README]] |
 | **02.75** | [[../../../plan/Jord/phase-02.75/README]] | same categories | **Closed** 2026-10-26 (B/C + MinIO live; hosted libSQL live secret-gated) |
-| **03** | [[../../../plan/Jord/phase-03/README]] | update matching category per task | **Active queue** — one file per AI task; finished cards under [[../../../plan/Jord/phase-03/done/README\|done/]] (S0034–S0041); next open [[../../../plan/Jord/phase-03/S0042-control-plane-store-adr\|S0042]] |
+| **03** | [[../../../plan/Jord/phase-03/README]] | update matching category per task | **Active queue** — one file per AI task; finished cards under [[../../../plan/Jord/phase-03/done/README\|done/]] (S0034–S0042); next open [[../../../plan/Jord/phase-03/S0043-project-registry-api\|S0043]] |
 
 Do **not** put new sprint cards under phase-01 / closed 02.x. Phase-03+ uses [[../../templates/plan-task|single-task cards]].
 

@@ -2,18 +2,19 @@
 title: "S0042 — control-plane store + ADR (project metadata, encrypted secrets)"
 description: "Decide and implement where project records and encrypted credentials live, then ship the schema and secret-at-rest port"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0042
+  - done
 ---
 
 # S0042 — control-plane store + ADR
 
-> **Status:** todo · **Blocked on a decision** (see Goal) · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../../tech_space/jord/studio/README]] · ADR: [[../../../../tech_space/jord/studio/ADR-control-plane-store]]
 
 ## Routing (who / how long / which model)
 
@@ -31,14 +32,14 @@ Write `ADR-control-plane-store` **and** land its minimum shape: a `jord_projects
 
 ## Why now
 
-[[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] is the foundation of every Studio v2 card, and it has an open question (control plane vs project DB, secret-at-rest mechanism). Coding before that is decided creates two competing homes for project metadata.
+[[../../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] is the foundation of every Studio v2 card, and it has an open question (control plane vs project DB, secret-at-rest mechanism). Coding before that is decided creates two competing homes for project metadata.
 
 ## Context (read before coding)
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · overlap [[../../../feature_list/Jord/done/jord-F0012-studio|jord-F0012]] |
-| As-built | [[../../../tech_space/jord/studio/README]] |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · overlap [[../../../../feature_list/Jord/done/jord-F0012-studio|jord-F0012]] |
+| As-built | [[../../../../tech_space/jord/studio/README]] |
 | Code today | single database from env (`cloud/jord/src/load-env.ts`, `elements/jord/src/url.ts`) · Studio BFF `apps/jord-studio/src/lib/jord-proxy.ts` |
 | Existing ADR style | `Docs/tech_space/jord/apis/ADR-functions-v2.md`, `Docs/plan/Jord/phase-02/Jord-S0021/ADR-threat-model.md` |
 
@@ -61,7 +62,7 @@ Write `ADR-control-plane-store` **and** land its minimum shape: a `jord_projects
 
 ## Out of scope
 
-The registry HTTP API ([[S0043-project-registry-api|S0043]]) · wizard UI ([[S0044-new-project-wizard|S0044]]) · route scoping ([[S0045-project-scoped-routes|S0045]]).
+The registry HTTP API ([[../S0043-project-registry-api|S0043]]) · wizard UI ([[../S0044-new-project-wizard|S0044]]) · route scoping ([[../S0045-project-scoped-routes|S0045]]).
 
 ## Diagram
 
@@ -84,22 +85,25 @@ flowchart LR
 
 ## Done when
 
-- [ ] ADR merged with a stated decision and rejected options
-- [ ] `jord_projects` / `jord_project_keys` exist on both dialects
-- [ ] Secret encrypt/decrypt/rotate test passes; missing master key fails loudly
-- [ ] No existing test changed
-- [ ] Proof pasted
+- [x] ADR merged with a stated decision and rejected options
+- [x] `jord_projects` / `jord_project_keys` exist on both dialects
+- [x] Secret encrypt/decrypt/rotate test passes; missing master key fails loudly
+- [x] No existing test changed
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord test` | |
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-11-01 | `pnpm --filter @altr/jord typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord test` | **94 passed** \| 9 skipped (103) · includes `secret-port` (9) + `projects` migration (1) |
+| 2026-11-01 | `pnpm --filter @altr/jord-server test` | **154 passed** \| 17 skipped (171) |
+
+**Decision (ADR):** control-plane tables on the **server primary** `DATABASE_URL` (not project targets); secrets via **AES-256-GCM + `JORD_MASTER_KEY`**; **register + test** only.
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/studio/README.md` + ADR |
-| Queue | [[README]] |
+| Queue | [[../README]] |

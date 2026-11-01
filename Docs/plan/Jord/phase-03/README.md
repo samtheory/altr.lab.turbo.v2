@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-01):** **S0034–S0041 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed. Archived under [[done/README|done/]]. Next open card: [[S0042-control-plane-store-adr|S0042]] (wave B). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-01):** **S0034–S0042 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B started ([[done/S0042-control-plane-store-adr|S0042]] ADR + schema + secret port). Archived under [[done/README|done/]]. Next open card: [[S0043-project-registry-api|S0043]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -77,7 +77,7 @@ flowchart LR
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| B1 | [[S0042-control-plane-store-adr\|S0042]] | Control-plane store + ADR (**decision first**) | 2–3 h |
+| B1 | [[done/S0042-control-plane-store-adr\|S0042]] | Control-plane store + ADR (**decision first**) | **done** 2026-11-01 |
 | B2 | [[S0043-project-registry-api\|S0043]] | Project registry API + keys + connect test | 2.5–3 h |
 | B3 | [[S0044-new-project-wizard\|S0044]] | Projects list + New project wizard | 2.5–3 h |
 | B4 | [[S0045-project-scoped-routes\|S0045]] | `/p/[project]` scoping + switcher | 2.5–3 h |

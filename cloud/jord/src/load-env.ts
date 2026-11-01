@@ -14,6 +14,9 @@ import { resolve } from "node:path";
  * - Backup / restore-drill (S0040): `DATABASE_URL` is the live URL the scripts
  *   refuse to overwrite; optional `JORD_DATABASE_URL` alias; optional
  *   `JORD_BACKUP_PG_CONTAINER` when host `pg_dump`/`psql` are missing.
+ * - Control-plane secrets (S0042): `JORD_MASTER_KEY` — 32-byte AES key as
+ *   64-char hex or base64. Optional for zero-project boots; required when the
+ *   secret port encrypts project DB passwords (S0043+).
  */
 export function loadLocalEnv(cwd: string = process.cwd()): void {
   const path = resolve(cwd, ".env");

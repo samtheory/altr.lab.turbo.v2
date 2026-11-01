@@ -105,6 +105,29 @@ export {
   type NewJordBlobRow,
 } from "./schema/blobs.js";
 export {
+  jordProjectKeys,
+  jordProjects,
+  type JordProjectEngine,
+  type JordProjectKeyKind,
+  type JordProjectKeyRow,
+  type JordProjectRow,
+  type JordProjectStatus,
+  type NewJordProjectKeyRow,
+  type NewJordProjectRow,
+} from "./schema/projects.js";
+export {
+  createAesGcmSecretPort,
+  createSecretPortFromEnv,
+  hasUsableMasterKey,
+  JordMasterKeyError,
+  JordSecretError,
+  parseMasterKey,
+  SECRET_ENVELOPE_VERSION,
+  type AesGcmSecretPort,
+  type AesGcmSecretPortOptions,
+  type SecretPort,
+} from "./control-plane/secret-port.js";
+export {
   jordEmbeddings,
   type JordEmbeddingRow,
   type NewJordEmbeddingRow,

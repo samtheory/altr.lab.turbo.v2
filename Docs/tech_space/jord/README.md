@@ -30,7 +30,7 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[realtime/README]] | Outbox CDC, SSE / WebSocket, `since` resume |
 | [[blobs/README]] | Local HMAC + S3/R2/MinIO, sign-time policy, pending/finalize/GC |
 | [[vectors/README]] | Embeddings, cosine, libSQL engine, pgvector |
-| [[studio/README]] | Control plane, BFF, nav, Apolyx-only |
+| [[studio/README]] | Control plane, BFF, nav, Apolyx-only · [[studio/ADR-control-plane-store\|control-plane ADR (S0042)]] |
 
 ## How a category note is shaped
 

@@ -12,9 +12,12 @@ import type {
   JordRecord,
   JordTrigger,
   JordTriggerEvent,
+  SecretPort,
 } from "@altr/jord";
 import {
   buildAddColumnSql,
+  createSecretPortFromEnv,
+  hasUsableMasterKey,
   isJordColumnType,
   isValidSqlIdent,
   quoteIdent,
@@ -219,6 +222,12 @@ export type JordAppDeps = {
    * Inject in tests; set `JORD_HTTP_LOG=0` to disable.
    */
   httpLog?: HttpRequestLogWriter;
+  /**
+   * Control-plane secret port (S0042). When omitted and `JORD_MASTER_KEY` is
+   * set, built from env. When the key is absent, stays `null` so zero-project
+   * boots keep working. No HTTP routes yet (S0043).
+   */
+  secrets?: SecretPort | null;
 };
 
 function publicRecord(row: JordRecord) {
@@ -489,6 +498,13 @@ export function createJordApp(deps: JordAppDeps) {
         publicBaseUrl: resolvePublicBaseUrl(env),
       }),
   );
+  // S0042: inject secret port when a master key is configured; no routes yet.
+  const secrets: SecretPort | null =
+    deps.secrets === undefined
+      ? hasUsableMasterKey(env)
+        ? createSecretPortFromEnv(env)
+        : null
+      : deps.secrets;
   const enqueueWrite = instrumentWriteQueue(deps.enqueueWrite);
   // Prefer `enqueueWrite` below so jobs get `jord.write` spans (S0039).
 
@@ -2770,7 +2786,7 @@ export function createJordApp(deps: JordAppDeps) {
     listenBridge = null;
   }
 
-  return Object.assign(app, { injectWebSocket, stopRealtimeListen });
+  return Object.assign(app, { injectWebSocket, stopRealtimeListen, secrets });
 }
 
 export type JordApp = ReturnType<typeof createJordApp>;

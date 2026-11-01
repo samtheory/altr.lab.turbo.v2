@@ -13,7 +13,7 @@ tags:
 
 # S0067 — bucket config API, encrypted credentials, test connection
 
-> **Status:** todo · **Depends on** [[S0066-bucket-registry|S0066]] + [[S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] · After ship: [[../../../tech_space/jord/blobs/README]]
+> **Status:** todo · **Depends on** [[S0066-bucket-registry|S0066]] + [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] · After ship: [[../../../tech_space/jord/blobs/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ tags:
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] (Studio surfaces, acceptance 2–3) |
-| Depends on | [[S0066-bucket-registry|S0066]] · [[S0042-control-plane-store-adr|S0042]] secret port |
+| Depends on | [[S0066-bucket-registry|S0066]] · [[done/S0042-control-plane-store-adr|S0042]] secret port |
 | Code today | `cloud/jord/src/blobs/routes.ts` (`GET/POST /blobs/buckets` today) · `storage/s3.ts` (client factory) · `auth/admin.ts` |
 | Tests | `cloud/jord/src/blobs/delete-failure.test.ts` patterns for stub storage |
 

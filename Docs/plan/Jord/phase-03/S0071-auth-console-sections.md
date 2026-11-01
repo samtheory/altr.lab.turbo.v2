@@ -38,7 +38,7 @@ These are the sections operators expect from a Supabase-style auth menu; the set
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] (Providers, URL, JWT, Rate limits) |
-| Depends on | [[S0069-auth-settings-store|S0069]] · [[S0042-control-plane-store-adr|S0042]] secret port |
+| Depends on | [[S0069-auth-settings-store|S0069]] · [[done/S0042-control-plane-store-adr|S0042]] secret port |
 | Code today | `cloud/jord/src/auth/{jwt,config,admin,route-inventory}.ts` · settings from S0069 |
 | Gate | OAuth/magic-link provider forms enable only after [[S0074-magic-link|S0074]] / [[S0075-oauth-provider|S0075]]; until then disabled with the dependency named |
 

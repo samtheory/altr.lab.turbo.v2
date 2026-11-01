@@ -13,7 +13,7 @@ tags:
 
 # S0043 — project registry API + keys + connect test
 
-> **Status:** todo · **Depends on** [[S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ tags:
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] |
-| Depends on | [[S0042-control-plane-store-adr|S0042]] tables + secret port |
+| Depends on | [[done/S0042-control-plane-store-adr|S0042]] tables + secret port |
 | Code today | `cloud/jord/src/auth/admin.ts` (existing admin guard) · `cloud/jord/src/auth/route-inventory.ts` (must list new routes) · `elements/jord/src/adapter/{postgres,libsql}.ts` for the connect test |
 | Tests | `cloud/jord/src/auth/principals.test.ts` · `app.test.ts` |
 
