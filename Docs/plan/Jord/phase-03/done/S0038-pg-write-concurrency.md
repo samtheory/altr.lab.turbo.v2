@@ -14,7 +14,7 @@ tags:
 
 # S0038 — JORD_PG_WRITE_CONCURRENCY
 
-> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/writes/README]]
+> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/writes/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ Leftover **B6** from phase-02.75: throughput work is blocked on a hardcoded seri
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] |
+| Intent | [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] |
 | As-built | [[../../../../tech_space/jord/writes/README]] |
 | Code today | `cloud/jord/src/queue.ts` · `resolveWriteConcurrency` · ready probe in `http/health.ts` |
 | Tests | `cloud/jord/src/queue.drain.test.ts` |

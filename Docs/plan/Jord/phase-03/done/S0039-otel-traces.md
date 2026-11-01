@@ -14,7 +14,7 @@ tags:
 
 # S0039 — OpenTelemetry traces + metrics
 
-> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
+> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ Operators have JSON logs ([[S0035-structured-json-logs|S0035]]) and probes; noth
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] |
+| Intent | [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] |
 | As-built | [[../../../../tech_space/jord/overview/README]] |
 | Code today | `cloud/jord/src/telemetry/` · `cloud/jord/src/app.ts` · `cloud/jord/src/queue.ts` · `cloud/jord/src/sql/routes.ts` · `cloud/jord/src/storage/` |
 | Tests | `cloud/jord/src/telemetry/otel.test.ts` |

@@ -2,7 +2,7 @@
 title: "feature_list/Jord/done — shipped intent"
 description: "Shipped Jord features jord-F0001…F0013. Cite IDs from INDEX."
 created: 2026-10-27
-updated: 2026-10-29
+updated: 2026-11-01
 tags:
   - feature
   - jord
@@ -28,8 +28,8 @@ tags:
 | [[jord-F0010-blobs\|jord-F0010]] | blobs | [[../../../tech_space/jord/blobs/README\|blobs]] |
 | [[jord-F0011-vectors\|jord-F0011]] | vectors | [[../../../tech_space/jord/vectors/README\|vectors]] |
 | [[jord-F0012-studio\|jord-F0012]] | studio | [[../../../tech_space/jord/studio/README\|studio]] |
-| [[jord-F0013-production-ops\|jord-F0013]] | production ops (partial) | [[jord-F0013-production-ops\|jord-F0013]] |
+| [[jord-F0013-production-ops\|jord-F0013]] | production ops | [[../../../tech_space/jord/overview/README\|overview]] |
 
-Partial: [[jord-F0013-production-ops|jord-F0013]] — S0034–S0040 shipped (health · JSON logs · shared PG rate/idempotency · LISTEN fan-out · `JORD_PG_WRITE_CONCURRENCY` · OTel · backup/restore drill); remaining (Dockerfile): [[../todo/jord-F0013-production-ops|jord-F0013]] · [[../../plan/Jord/phase-03/README]] · archived cards [[../../plan/Jord/phase-03/done/README]].
+**jord-F0013** done 2026-11-01 — S0034–S0041 (health · JSON logs · shared PG rate/idempotency · LISTEN fan-out · `JORD_PG_WRITE_CONCURRENCY` · OTel · backup/restore · Dockerfile/compose). Cards: [[../../../plan/Jord/phase-03/done/README]].
 
 Hub: [[../README]] · Open: [[../todo/README]].

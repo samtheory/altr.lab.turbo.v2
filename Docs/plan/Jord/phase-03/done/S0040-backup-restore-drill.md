@@ -14,7 +14,7 @@ tags:
 
 # S0040 — backup + restore drill
 
-> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
+> **Status:** **done** 2026-11-01 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ No restore path is stated anywhere; a production feature set without a proven re
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] |
+| Intent | [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] |
 | As-built | [[../../../../tech_space/jord/overview/README]] |
 | Code today | `cloud/jord/scripts/backup.sh` · `restore-drill.sh` · `restore-drill-compare.mjs` · `cloud/jord/src/load-env.ts` |
 | Blobs | bytes live outside SQL — the drill states blob handling explicitly (`data/blobs/` or the S3 bucket) |

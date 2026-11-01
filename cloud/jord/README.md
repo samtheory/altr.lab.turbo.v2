@@ -26,6 +26,19 @@ Default: [http://127.0.0.1:8787](http://127.0.0.1:8787). `startJordServer` loads
 | `PORT` | no (default `8787`) | Listen port |
 | `JORD_WAL_CHECKPOINT_MS` | no | WAL truncate interval |
 
+## Docker deploy (S0041)
+
+Build context is the **monorepo root** (workspace `@altr/jord`). Image runs as non-root `node` with `HEALTHCHECK` on `/health/ready`.
+
+```bash
+# from repo root
+docker build -f cloud/jord/Dockerfile -t altr/jord-server:local .
+docker compose -f cloud/jord/docker-compose.yml up --build -d
+curl -sf http://127.0.0.1:8787/health/ready
+```
+
+Compose starts Postgres + server. Runtime `DATABASE_URL` is `jord_app`; `JORD_MIGRATE_URL` is the owner (migrations on boot). Volume `jord-data` mounts `/app/cloud/jord/data` for local blobs. Replace compose-smoke secrets before any shared host. Recipe: `Docs/tech_space/jord/overview/README.md` (Dockerfile + compose deploy).
+
 ## Backup / restore drill (S0040)
 
 ```bash

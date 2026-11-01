@@ -14,7 +14,7 @@ tags:
 # S0034 — health live + ready probes
 
 > **Status:** done  
-> **Phase:** [[../README]] · Parent feature: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
+> **Phase:** [[../README]] · Parent feature: [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]]
 
 ## Routing (who / how long / which model)
 
@@ -115,5 +115,5 @@ flowchart TB
 | Update | Path |
 |--------|------|
 | tech_space | [[../../../../tech_space/jord/overview/README]] · [[../../../../tech_space/jord/auth/README]] |
-| feature_list | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops\|jord-F0013]] (S0034 row → done) |
+| feature_list | [[../../../../feature_list/Jord/done/jord-F0013-production-ops\|jord-F0013]] (S0034 row → done) |
 | Phase queue | [[../README]] S0034 → done |

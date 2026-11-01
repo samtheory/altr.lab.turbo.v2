@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0040 done; next S0041); Functions runtime still gated"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0041 / jord-F0013 done; next S0042); Functions runtime still gated"
 created: 2026-09-19
 updated: 2026-11-01
 tags:
@@ -14,7 +14,7 @@ tags:
 
 # Status
 
-Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0040 backup + restore drill (jord-F0013 partial)** · Prior: **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0041 Dockerfile + compose deploy (jord-F0013 done)** · Prior: **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -25,11 +25,11 @@ Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Jord-S0021-A/B/ADR/C** through **Jord-S0026** — see [[../plan/Jord/phase-02/00-task-rollup]]
 - **Phase-02.5 (S0030–S0033)** — live Postgres gate, transactional outbox, row scope · [[../plan/Jord/phase-02.5/README]]
 - **Phase-02.75** — B1–B5, B8, C1 done; B6/B7 → phase-03; C2 secret-gated / manual-only · [[../plan/Jord/phase-02.75/README]]
-- **Phase-03 S0034–S0040** — archived [[../plan/Jord/phase-03/done/README]] · writes concurrency [[../tech_space/jord/writes/README]] · OTel [[../tech_space/jord/overview/README#opentelemetry-s0039]] · backup drill [[../tech_space/jord/overview/README#backup--restore-drill-s0040]]
+- **Phase-03 S0034–S0041 / jord-F0013** — archived [[../plan/Jord/phase-03/done/README]] · as-shipped [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · writes concurrency [[../tech_space/jord/writes/README]] · OTel [[../tech_space/jord/overview/README#opentelemetry-s0039]] · backup drill [[../tech_space/jord/overview/README#backup--restore-drill-s0040]] · Docker deploy [[../tech_space/jord/overview/README#dockerfile--compose-deploy-s0041]]
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P covering [[../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. **S0034–S0040 done** (health · JSON HTTP logs · shared PG rate/idempotency · LISTEN fan-out · PG write concurrency · OTel · backup/restore drill). **Next:** [[../plan/Jord/phase-03/S0041-dockerfile-deploy|S0041]]. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Next:** [[../plan/Jord/phase-03/S0042-control-plane-store-adr|S0042]] (control-plane store ADR). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet

@@ -14,7 +14,7 @@ tags:
 # S0035 — structured JSON request logs
 
 > **Status:** done  
-> **Phase:** [[../README]] · Parent feature: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]] (and jobs/logs if ring behavior is mentioned)
+> **Phase:** [[../README]] · Parent feature: [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/overview/README]] (and jobs/logs if ring behavior is mentioned)
 
 ## Routing (who / how long / which model)
 

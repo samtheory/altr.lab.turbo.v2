@@ -1,0 +1,65 @@
+# One-box deploy recipe for @altr/jord-server (S0041).
+# From repo root:
+#   docker compose -f cloud/jord/docker-compose.yml up --build -d
+# Ready probe:
+#   curl -sf http://127.0.0.1:8787/health/ready
+#
+# Secrets below are compose-smoke defaults only — replace for any shared host.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: jord-pg
+    environment:
+      POSTGRES_USER: jord_owner
+      POSTGRES_PASSWORD: jord_owner_dev
+      POSTGRES_DB: jord
+    # No host port — jord reaches Postgres on the compose network only.
+    # For host tools (backup drill), map e.g. "54329:5432" when free.
+    volumes:
+      - jord-pg-data:/var/lib/postgresql/data
+      - ./docker/init-postgres.sql:/docker-entrypoint-initdb.d/01-jord-app.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jord_owner -d jord"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  jord:
+    build:
+      context: ../..
+      dockerfile: cloud/jord/Dockerfile
+    image: altr/jord-server:local
+    container_name: jord-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Runtime role (FORCE RLS). Must differ from JORD_MIGRATE_URL user.
+      DATABASE_URL: postgres://jord_app:jord_app_dev@postgres:5432/jord
+      # Table owner — runs migrations + creates grants on boot.
+      JORD_MIGRATE_URL: postgres://jord_owner:jord_owner_dev@postgres:5432/jord
+      JORD_SERVER_TOKEN: compose-dev-token-change-me
+      PORT: "8787"
+      # Optional: local blobs under the mounted volume
+      JORD_BLOBS_ROOT: /app/cloud/jord/data/blobs
+    ports:
+      - "8787:8787"
+    volumes:
+      - jord-data:/app/cloud/jord/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8787/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+volumes:
+  jord-pg-data:
+  jord-data:

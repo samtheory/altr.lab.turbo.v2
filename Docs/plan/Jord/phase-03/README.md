@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-01):** **S0034–S0040 done** (health · JSON logs · shared PG rate/idempotency · LISTEN fan-out · `JORD_PG_WRITE_CONCURRENCY` · OTel · backup/restore drill). Archived under [[done/README|done/]]. As-shipped note: [[../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] (partial). Next open card: [[S0041-dockerfile-deploy|S0041]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-01):** **S0034–S0041 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed. Archived under [[done/README|done/]]. Next open card: [[S0042-control-plane-store-adr|S0042]] (wave B). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -60,7 +60,7 @@ flowchart LR
   B --> P[P dashboard<br/>S0095–S0096]
 ```
 
-### Wave A — production ops ([[../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]])
+### Wave A — production ops ([[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · **closed**)
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
@@ -71,7 +71,7 @@ flowchart LR
 | A5 | [[done/S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | **done** 2026-11-01 |
 | A6 | [[done/S0039-otel-traces\|S0039]] | OpenTelemetry traces + metrics | **done** 2026-11-01 |
 | A7 | [[done/S0040-backup-restore-drill\|S0040]] | Backup + restore drill | **done** 2026-11-01 |
-| A8 | [[S0041-dockerfile-deploy\|S0041]] | Dockerfile + deploy recipe | 1.5–2 h |
+| A8 | [[done/S0041-dockerfile-deploy\|S0041]] | Dockerfile + deploy recipe | **done** 2026-11-01 |
 
 ### Wave B — control plane ([[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]])
 

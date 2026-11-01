@@ -13,7 +13,7 @@ tags:
 
 # S0037 — LISTEN/NOTIFY seq fan-out + shared watermark
 
-> **Status:** **done** 2026-10-29 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/realtime/README]]
+> **Status:** **done** 2026-10-29 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · After ship: [[../../../../tech_space/jord/realtime/README]]
 
 ## Routing (who / how long / which model)
 
@@ -37,7 +37,7 @@ Every instance receives new outbox sequence numbers through one dedicated `LISTE
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../../feature_list/Jord/todo/jord-F0013-production-ops|jord-F0013]] · [[../../../../feature_list/Jord/todo/jord-F0026-live-data-client|jord-F0026]] consumes this |
+| Intent | [[../../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · [[../../../../feature_list/Jord/todo/jord-F0026-live-data-client|jord-F0026]] consumes this |
 | As-built | [[../../../../tech_space/jord/realtime/README]] |
 | Code today | `cloud/jord/src/realtime/bus.ts` · `outbox.ts` · `watermark.ts` · `deliver.ts` · `pg_notify` trigger in `elements/jord/migrations` |
 | Tests | `cloud/jord/src/realtime/bus.test.ts` · `outbox.test.ts` · `ws-policy.test.ts` |

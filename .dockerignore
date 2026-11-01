@@ -1,0 +1,59 @@
+# Monorepo context for cloud/jord/Dockerfile (S0041).
+# Do not ship secrets, live DBs, Docs, or unused app/kit sources.
+
+# deps / caches
+**/node_modules
+**/.pnpm-store
+**/.turbo
+**/.next
+**/dist
+**/build
+**/coverage
+**/storybook-static
+**/*.tsbuildinfo
+.git
+.graft
+graft
+
+# secrets + local data (never bake)
+**/.env
+**/.env.*
+!**/.env.example
+data
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/*.dump
+cloud/jord/backups
+cloud/jord/data
+
+# vault / agent noise (not needed to run the server)
+Docs
+.agents
+.cursor
+agent-transcripts
+**/*.md
+!**/package.json
+
+# unused package sources (package.json stubs stay via earlier COPY)
+apps/apolyx/**
+!apps/apolyx/package.json
+apps/jord-studio/**
+!apps/jord-studio/package.json
+cloud/pocketbase/**
+!cloud/pocketbase/package.json
+elements/apolyx-cli/**
+!elements/apolyx-cli/package.json
+elements/base/**
+!elements/base/package.json
+elements/jord-client/**
+!elements/jord-client/package.json
+elements/ui-kit/**
+!elements/ui-kit/package.json
+
+# server / engine tests and fixtures not needed at runtime
+cloud/jord/src/**/*.test.ts
+cloud/jord/fixtures
+elements/jord/src/**/*.test.ts
+**/vitest.config.*
+**/.storybook

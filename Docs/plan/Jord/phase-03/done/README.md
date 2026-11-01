@@ -23,3 +23,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | 2026-11-01 |
 | [[S0039-otel-traces\|S0039]] | OpenTelemetry traces + metrics | 2026-11-01 |
 | [[S0040-backup-restore-drill\|S0040]] | Backup + restore drill | 2026-11-01 |
+| [[S0041-dockerfile-deploy\|S0041]] | Dockerfile + deploy recipe | 2026-11-01 |

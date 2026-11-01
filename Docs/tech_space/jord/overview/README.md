@@ -16,9 +16,12 @@ tags:
   - s0038
   - s0039
   - s0040
+  - s0041
   - otel
   - backup
   - restore-drill
+  - dockerfile
+  - deploy
   - rate-limit
   - idempotency
 ---
@@ -262,6 +265,33 @@ export JORD_BACKUP_PG_CONTAINER=jord-pg   # when pg_dump is not on PATH
 
 Package aliases: `pnpm --filter @altr/jord-server backup` / `restore-drill`. Card: [[../../../plan/Jord/phase-03/done/S0040-backup-restore-drill|S0040]].
 
+### Dockerfile + compose deploy (S0041)
+
+Multi-stage image for `@altr/jord-server`. **Dockerfile** lives at `cloud/jord/Dockerfile`; **build context is the monorepo root** so workspace `@altr/jord` can install. Root `.dockerignore` keeps out `.env`, `data/`, `*.db`, Docs, and unused app/kit sources. Runtime user is **`node` (uid 1000)**. Packages still export TypeScript — `CMD` runs `tsx src/index.ts` (`tsx` is a runtime dependency of the server). Boot still runs owner migration when `DATABASE_URL` is Postgres (`JORD_MIGRATE_URL`).
+
+| Piece | Path |
+|-------|------|
+| Image | `cloud/jord/Dockerfile` → tag `altr/jord-server:local` |
+| Compose recipe | `cloud/jord/docker-compose.yml` (Postgres + server) |
+| Role init | `cloud/jord/docker/init-postgres.sql` creates `jord_app` with a password |
+
+```bash
+# from repo root
+docker build -f cloud/jord/Dockerfile -t altr/jord-server:local .
+docker compose -f cloud/jord/docker-compose.yml up --build -d
+curl -sf http://127.0.0.1:8787/health/ready   # → {"ok":true}
+```
+
+| Env | Required | Role |
+|-----|----------|------|
+| `JORD_SERVER_TOKEN` | **yes** | Shared HMAC / raw bearer secret |
+| `DATABASE_URL` | for Postgres recipe | Runtime URL as **`jord_app`** (must differ from migrate user) |
+| `JORD_MIGRATE_URL` | when `DATABASE_URL` is postgres | Table **owner** — migrations + grants on boot |
+| `PORT` | no (default `8787`) | Listen port |
+| `JORD_BLOBS_ROOT` | no | Local blob directory (compose mounts `jord-data` → `/app/cloud/jord/data`) |
+
+Compose smoke defaults (`jord_owner_dev` / `jord_app_dev` / `compose-dev-token-change-me`) are **not** for shared hosts. Volume `jord-data` holds local blobs (and a `file:` DB if you switch the URL). Postgres is on the compose network only (no host port by default). Card: [[../../../plan/Jord/phase-03/done/S0041-dockerfile-deploy|S0041]].
+
 ## Not in Jord yet
 
-Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024). Dockerfile / deploy recipe remains open on [[../../../plan/Jord/phase-03/S0041-dockerfile-deploy|S0041]].
+Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] (Studio v2 / later waves). **jord-F0013** production-ops cards (S0034–S0041) are closed.
