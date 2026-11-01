@@ -42,4 +42,5 @@ export {
   type HttpRequestLogLevel,
   type HttpRequestLogOptions,
   type HttpRequestLogWriter,
+  type JordRequestLogVariables,
 } from "./request-log.js";

@@ -7,7 +7,9 @@ export const PG_WRITE_CONCURRENCY_MIN = 1;
 export const PG_WRITE_CONCURRENCY_MAX = 8;
 export const DEFAULT_PG_WRITE_CONCURRENCY = 1;
 
-export type WriteQueue = (<T>(fn: () => Promise<T>) => Promise<T>) & {
+export type WriteQueue = {
+  /** Optional `kind` is used by OTel `jord.write` spans (S0039). */
+  <T>(fn: () => Promise<T>, kind?: string): Promise<T>;
   drain: () => Promise<void>;
   /** Waiting + in-flight jobs. */
   pending: () => number;
@@ -119,7 +121,7 @@ export function createWriteQueue(
     }
   }
 
-  function enqueue<T>(fn: () => Promise<T>): Promise<T> {
+  function enqueue<T>(fn: () => Promise<T>, _kind?: string): Promise<T> {
     pendingCount++;
     return new Promise<T>((resolve, reject) => {
       waiting.push({

@@ -8,6 +8,7 @@ import type { JordAuthVariables } from "../auth/middleware.js";
 import type { Principal } from "../auth/principal.js";
 import type { WriteQueue } from "../queue.js";
 import type { LogSink } from "../logs/sink.js";
+import { withSqlSpan } from "../telemetry/spans.js";
 
 const HISTORY_CAP = 50;
 
@@ -73,12 +74,14 @@ export function createSqlRoutes(deps: {
     const readOnly = body.readOnly !== false;
 
     const run = async () =>
-      deps.jord.executeSql({
-        sql,
-        readOnly,
-        timeoutMs: body.timeoutMs,
-        rowCap: body.rowCap,
-      });
+      withSqlSpan({ kind: readOnly ? "select" : "execute" }, () =>
+        deps.jord.executeSql({
+          sql,
+          readOnly,
+          timeoutMs: body.timeoutMs,
+          rowCap: body.rowCap,
+        }),
+      );
 
     let result;
     let errorText: string | null = null;
@@ -99,7 +102,7 @@ export function createSqlRoutes(deps: {
               if (engineCommitted(err)) await deps.resyncTracked?.(principal);
               throw err;
             }
-          });
+          }, "sql.execute");
     } catch (err) {
       errorText = err instanceof Error ? err.message : String(err);
       errorCode = engineErrorCode(err);

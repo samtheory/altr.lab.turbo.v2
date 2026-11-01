@@ -21,3 +21,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0036-shared-rate-limit-idempotency\|S0036]] | Shared PG rate limit + idempotency | 2026-10-29 |
 | [[S0037-listen-seq-fanout\|S0037]] | LISTEN/NOTIFY fan-out + shared watermark | 2026-10-29 |
 | [[S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | 2026-11-01 |
+| [[S0039-otel-traces\|S0039]] | OpenTelemetry traces + metrics | 2026-11-01 |

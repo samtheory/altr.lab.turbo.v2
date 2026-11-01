@@ -7,6 +7,8 @@ import { resolve } from "node:path";
  * Known Jord server knobs (non-exhaustive):
  * - `JORD_PG_WRITE_CONCURRENCY` — Postgres write-queue width, integer `1…8`, default `1`.
  *   Ignored on libSQL (always serial). Out-of-range values refuse boot.
+ * - `JORD_OTEL_ENABLED` — opt-in OpenTelemetry (default off). With no endpoint, exporters are no-op.
+ * - `JORD_OTEL_ENDPOINT` / `OTEL_EXPORTER_OTLP_ENDPOINT` — OTLP/HTTP base URL when enabled.
  * - See also: `JORD_CORS_ORIGINS`, `JORD_MAX_JSON_BYTES`, `JORD_HTTP_LOG`,
  *   `JORD_IDEMPOTENCY_TTL_MS`, `JORD_WAL_CHECKPOINT_MS`, `JORD_MIGRATE_URL`.
  */
