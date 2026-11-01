@@ -25,7 +25,7 @@ export default function HomePage() {
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link href="/tables">Open tables</Link>
+            <Link href="/p/default/tables">Open tables</Link>
           </Button>
         </div>
       </section>

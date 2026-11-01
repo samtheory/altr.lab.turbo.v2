@@ -84,6 +84,7 @@ import {
 } from "./auth/admin.js";
 import {
   createProjectRoutes,
+  createStudioProjectRoutes,
   type ProjectConnectTester,
   type ProjectConnectInput,
 } from "./projects/index.js";
@@ -2796,6 +2797,8 @@ export function createJordApp(deps: JordAppDeps) {
 
   // S0043 — project registry (admin-only; secrets required for mutate/list).
   protectedRoutes.route("/admin", createProjectRoutes(projectRegistry));
+  // S0045 — Studio project catalog / resolve (any authenticated principal).
+  protectedRoutes.route("/studio", createStudioProjectRoutes(projectRegistry));
 
   app.route("/", protectedRoutes);
 

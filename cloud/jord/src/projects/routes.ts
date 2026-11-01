@@ -6,6 +6,8 @@ import {
   archiveProject,
   createProject,
   getProject,
+  getProjectBySlug,
+  listActiveProjectSummaries,
   listProjects,
   parseEngine,
   parseTlsMode,
@@ -115,6 +117,23 @@ export function createProjectRoutes(
     );
   });
 
+  // Must register before /projects/:id so "by-slug" is not treated as an id.
+  routes.get("/projects/by-slug/:slug", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const result = await getProjectBySlug(deps, c.req.param("slug"));
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json({ project: result.project });
+  });
+
   routes.get("/projects/:id", async (c) => {
     requireAdmin(c);
     requireSecrets(deps);
@@ -185,6 +204,51 @@ export function createProjectRoutes(
       secret_key: result.secret_key,
       publishable_key: result.publishable_key,
       barrier_key: result.barrier_key,
+    });
+  });
+
+  return routes;
+}
+
+/**
+ * Authenticated Studio catalog (S0045) — any principal may list/resolve active
+ * projects for routing + switcher. No secrets or keys in the payload.
+ */
+export function createStudioProjectRoutes(
+  deps: ProjectRegistryDeps,
+): Hono<{ Variables: JordAuthVariables }> {
+  const routes = new Hono<{ Variables: JordAuthVariables }>();
+
+  routes.get("/projects", async (c) => {
+    if (!deps.secrets) {
+      return c.json({ projects: [] as const });
+    }
+    const projects = await listActiveProjectSummaries(deps);
+    return c.json({ projects });
+  });
+
+  routes.get("/projects/:slug", async (c) => {
+    const slug = c.req.param("slug");
+    if (!deps.secrets) {
+      return c.json({ error: "project_not_found" }, 404);
+    }
+    const result = await getProjectBySlug(deps, slug);
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json({
+      project: {
+        slug: result.project.slug,
+        engine: result.project.engine,
+        status: result.project.status,
+        target: result.project.target,
+      },
     });
   });
 

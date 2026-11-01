@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@altr/apolyx";
 
+import { useProjectHref } from "@/hooks/use-project-path";
 import {
   formatMs,
   previewBody,
@@ -38,6 +39,7 @@ type Props = {
 
 export function RecordsBrowser({ initialBucket = "lab" }: Props) {
   const router = useRouter();
+  const hrefFor = useProjectHref();
   const [bucket, setBucket] = useState(initialBucket);
   const [rows, setRows] = useState<PublicRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -159,7 +161,7 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
             </Badge>
           </div>
           <Button asChild>
-            <Link href="/records/new">Insert row</Link>
+            <Link href={hrefFor("/records/new")}>Insert row</Link>
           </Button>
         </div>
       </div>
@@ -169,7 +171,9 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
           value={bucket}
           onValueChange={(value) => {
             setBucket(value);
-            router.replace(`/records?bucket=${encodeURIComponent(value)}`);
+            router.replace(
+              `${hrefFor("/records")}?bucket=${encodeURIComponent(value)}`,
+            );
           }}
         >
           <SelectTrigger>
@@ -222,7 +226,7 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
               <TableRow
                 key={row.id}
                 className="cursor-pointer"
-                onClick={() => router.push(`/records/${row.id}`)}
+                onClick={() => router.push(hrefFor(`/records/${row.id}`))}
               >
                 <TableCell className="font-mono text-xs">{row.id.slice(0, 8)}…</TableCell>
                 <TableCell className="font-mono text-xs">{row.bucket}</TableCell>

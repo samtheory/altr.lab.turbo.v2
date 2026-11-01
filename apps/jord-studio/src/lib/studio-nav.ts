@@ -1,5 +1,6 @@
 import type { JordRole } from "@/lib/auth/roles";
 import { canWriteRecords } from "@/lib/auth/roles";
+import { projectHref } from "@/lib/project-scope";
 
 export type StudioNavStatus = "live" | "soon";
 
@@ -12,6 +13,8 @@ export type StudioNavItem = {
   soonLabel?: string;
   /** If set, item is hidden when the role cannot write records. */
   requiresWrite?: boolean;
+  /** Control-plane links stay outside `/p/[project]`. */
+  global?: boolean;
 };
 
 export type StudioNavGroup = {
@@ -23,6 +26,7 @@ export type StudioNavGroup = {
 /**
  * Single source for Studio side menu.
  * Live = wired. soon = visible but not implemented.
+ * Data/runtime paths are project-relative when `projectSlug` is set.
  */
 export const STUDIO_NAV: StudioNavGroup[] = [
   {
@@ -34,12 +38,14 @@ export const STUDIO_NAV: StudioNavGroup[] = [
         label: "All projects",
         href: "/projects",
         status: "live",
+        global: true,
       },
       {
         id: "projects-new",
         label: "New project",
         href: "/projects/new",
         status: "live",
+        global: true,
       },
     ],
   },
@@ -160,11 +166,19 @@ export const STUDIO_NAV: StudioNavGroup[] = [
   },
 ];
 
-export function navForRole(role: JordRole): StudioNavGroup[] {
+export function navForRole(
+  role: JordRole,
+  projectSlug?: string | null,
+): StudioNavGroup[] {
   const write = canWriteRecords(role);
   return STUDIO_NAV.map((group) => ({
     ...group,
-    items: group.items.filter((item) => !item.requiresWrite || write),
+    items: group.items
+      .filter((item) => !item.requiresWrite || write)
+      .map((item) => {
+        if (!item.href || item.global || !projectSlug) return item;
+        return { ...item, href: projectHref(projectSlug, item.href) };
+      }),
   }));
 }
 

@@ -193,8 +193,8 @@ const jord = createJordClient({
         </Button>
         {confirmed ? (
           <Button type="button" variant="outline" asChild>
-            <Link href={`/p/${encodeURIComponent(project.slug)}`}>
-              Open /p/{project.slug}
+            <Link href={`/p/${encodeURIComponent(project.slug)}/tables`}>
+              Open /p/{project.slug}/tables
             </Link>
           </Button>
         ) : null}

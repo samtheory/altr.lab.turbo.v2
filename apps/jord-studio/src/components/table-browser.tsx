@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@altr/apolyx";
 
+import { useProjectHref } from "@/hooks/use-project-path";
 import { canWriteTableRows, type JordRole } from "@/lib/auth/roles";
 
 type ApiError = { message?: string };
@@ -70,6 +71,7 @@ function parseCell(type: string, raw: string): Cell {
 }
 
 export function TableBrowser({ table, role }: Props) {
+  const hrefFor = useProjectHref();
   const canWrite = canWriteTableRows(role);
   const [page, setPage] = useState<RowPage | null>(null);
   const [columns, setColumns] = useState<ColumnInfo[]>([]);
@@ -255,7 +257,7 @@ export function TableBrowser({ table, role }: Props) {
             </Badge>
           </div>
           <Button asChild variant="outline">
-            <Link href="/tables">All tables</Link>
+            <Link href={hrefFor("/tables")}>All tables</Link>
           </Button>
         </div>
       </div>

@@ -7,6 +7,7 @@ export async function POST(_request: Request, ctx: Ctx) {
   const upstream = await proxyToJord(
     `/admin/projects/${encodeURIComponent(id)}/rotate-keys`,
     { method: "POST" },
+    { skipProjectScope: true },
   );
   return forwardUpstream(upstream);
 }

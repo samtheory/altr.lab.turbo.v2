@@ -13,6 +13,7 @@ import {
   RecordRowFields,
   validateBodyJson,
 } from "@/components/record-row-fields";
+import { useProjectHref } from "@/hooks/use-project-path";
 import { canWriteRecords, type JordRole } from "@/lib/auth/roles";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
@@ -22,6 +23,7 @@ type Props = {
 
 export function CreateRecordForm({ role }: Props) {
   const router = useRouter();
+  const hrefFor = useProjectHref();
   const canWrite = canWriteRecords(role);
   const [bucket, setBucket] = useState("lab");
   const [body, setBody] = useState('{\n  "hello": "jord"\n}');
@@ -59,7 +61,7 @@ export function CreateRecordForm({ role }: Props) {
           return;
         }
         const row = (await res.json()) as PublicRecord;
-        router.push(`/records/${row.id}`);
+        router.push(hrefFor(`/records/${row.id}`));
         router.refresh();
       } catch {
         setError("Network error talking to Studio BFF.");
@@ -116,7 +118,11 @@ export function CreateRecordForm({ role }: Props) {
         <Button type="submit" disabled={isPending || !canWrite}>
           {isPending ? "Inserting…" : "Insert row"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.push("/records")}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.push(hrefFor("/records"))}
+        >
           Cancel
         </Button>
       </div>

@@ -272,6 +272,25 @@ export async function listProjects(
   return out;
 }
 
+async function projectFromRow(
+  deps: ProjectRegistryDeps,
+  row: Record<string, unknown>,
+): Promise<
+  | { ok: true; project: ProjectPublic }
+  | { ok: false; status: 404 | 410; error: string; reason?: string }
+> {
+  if (String(row.status) === "archived") {
+    return {
+      ok: false,
+      status: 410,
+      error: "project_archived",
+      reason: "project is archived; keys are revoked",
+    };
+  }
+  const keys = await loadKeys(deps.jord, String(row.id));
+  return { ok: true, project: publicProjectJson(mapProject(row, keys)) };
+}
+
 export async function getProject(
   deps: ProjectRegistryDeps,
   id: string,
@@ -287,16 +306,54 @@ export async function getProject(
   );
   const row = rows[0];
   if (!row) return { ok: false, status: 404, error: "project_not_found" };
-  if (String(row.status) === "archived") {
-    return {
-      ok: false,
-      status: 410,
-      error: "project_archived",
-      reason: "project is archived; keys are revoked",
-    };
-  }
-  const keys = await loadKeys(deps.jord, String(row.id));
-  return { ok: true, project: publicProjectJson(mapProject(row, keys)) };
+  return projectFromRow(deps, row);
+}
+
+/** Resolve by immutable slug (S0045 Studio scoping). */
+export async function getProjectBySlug(
+  deps: ProjectRegistryDeps,
+  slug: string,
+): Promise<
+  | { ok: true; project: ProjectPublic }
+  | { ok: false; status: 404 | 410; error: string; reason?: string }
+> {
+  const trimmed = slug.trim();
+  if (!trimmed) return { ok: false, status: 404, error: "project_not_found" };
+  const rows = await deps.jord.query(
+    `SELECT id, slug, engine, target, tls_mode, db_user, notes, status,
+            created_at, archived_at
+     FROM jord_projects WHERE slug = ${ph(deps.jord, 1)} LIMIT 1`,
+    [trimmed],
+  );
+  const row = rows[0];
+  if (!row) return { ok: false, status: 404, error: "project_not_found" };
+  return projectFromRow(deps, row);
+}
+
+/** Active projects only — slug/engine/status for Studio switcher (any auth). */
+export async function listActiveProjectSummaries(
+  deps: Pick<ProjectRegistryDeps, "jord">,
+): Promise<
+  Array<{
+    slug: string;
+    engine: JordProjectEngine;
+    status: Extract<JordProjectStatus, "active">;
+    target: string;
+  }>
+> {
+  const rows = await deps.jord.query(
+    `SELECT slug, engine, status, target
+     FROM jord_projects
+     WHERE status = ${ph(deps.jord, 1)}
+     ORDER BY created_at DESC`,
+    ["active"],
+  );
+  return rows.map((row) => ({
+    slug: String(row.slug),
+    engine: String(row.engine) as JordProjectEngine,
+    status: "active" as const,
+    target: String(row.target),
+  }));
 }
 
 export async function createProject(

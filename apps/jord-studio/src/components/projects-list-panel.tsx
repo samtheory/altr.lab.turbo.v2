@@ -194,7 +194,7 @@ export function ProjectsListPanel({ role }: Props) {
                 </TableCell>
                 <TableCell className="space-x-2 text-right">
                   <Button asChild size="sm" variant="secondary">
-                    <Link href={`/p/${encodeURIComponent(project.slug)}`}>
+                    <Link href={`/p/${encodeURIComponent(project.slug)}/tables`}>
                       Open
                     </Link>
                   </Button>

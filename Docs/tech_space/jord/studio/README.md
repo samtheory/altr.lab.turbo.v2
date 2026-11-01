@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, SQL console, migrate wizard, users admin; S0042–S0044 projects registry + Studio wizard"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0045 projects registry, wizard, /p/[project] scoping + switcher"
 created: 2026-10-24
 updated: 2026-11-01
 tags:
@@ -36,20 +36,22 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts`. Shell: `StudioShell` (desk
 
 | Screen | Route | Talks to |
 |--------|-------|----------|
-| Records editor | `/records` | [[../writes/README]] + Live [[../realtime/README]] |
-| Tables | `/tables`, `/tables/[name]` | [[../schema/README]] [[../writes/README]] |
-| Schema | `/schema` | [[../schema/README]] |
-| Connection | `/database/connection` | [[../dialects/README]] — labels only; **no URL editor** |
-| SQL console | `/database/sql` | `POST /sql/execute` — admin; read-only via engine pragma |
-| Migrate | `/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
-| Users | `/auth/users` | `GET /admin/users` — disable / revoke |
-| Projects | `/projects`, `/projects/new`, `/projects/[id]/edit` | BFF → `GET/POST /admin/projects` · test · rotate · archive · one-time key reveal |
-| Project soft home | `/p/[project]` | Landing until [[../../../plan/Jord/phase-03/S0045-project-scoped-routes\|S0045]] scopes the shell |
-| Policies / Triggers | Database nav | [[../policies/README]] |
-| Generated / Function / Custom / Table APIs | `/apis/…` | [[../apis/README]] |
-| Jobs / Logs | `/jobs`, `/logs` | [[../jobs/README]] — logs batch into `jord_logs` |
-| Storage | `/storage` | [[../blobs/README]] |
-| Vectors | `/vectors` | [[../vectors/README]] |
+| Records editor | `/p/[project]/records` | [[../writes/README]] + Live [[../realtime/README]] |
+| Tables | `/p/[project]/tables`, `…/tables/[name]` | [[../schema/README]] [[../writes/README]] |
+| Schema | `/p/[project]/schema` | [[../schema/README]] |
+| Connection | `/p/[project]/database/connection` | [[../dialects/README]] — labels only; **no URL editor** |
+| SQL console | `/p/[project]/database/sql` | `POST /sql/execute` — admin; read-only via engine pragma |
+| Migrate | `/p/[project]/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
+| Users | `/p/[project]/auth/users` | `GET /admin/users` — disable / revoke |
+| Projects | `/projects`, `/projects/new`, `/projects/[id]/edit` | BFF → `GET/POST /admin/projects` · test · rotate · archive · one-time key reveal (control plane, not project-prefixed) |
+| Project home | `/p/[project]` | Scoped landing + switcher target |
+| Policies / Triggers | `/p/[project]/database/…` | [[../policies/README]] |
+| Generated / Function / Custom / Table APIs | `/p/[project]/apis/…` | [[../apis/README]] |
+| Jobs / Logs | `/p/[project]/jobs`, `…/logs` | [[../jobs/README]] — logs batch into `jord_logs` |
+| Storage | `/p/[project]/storage` | [[../blobs/README]] |
+| Vectors | `/p/[project]/vectors` | [[../vectors/README]] |
+
+Legacy unscoped paths (`/tables`, `/records`, …) **redirect** via middleware to `/p/<cookie|default>/…`.
 
 BFF routes live under `apps/jord-studio/src/app/api/` and mirror the server paths.
 
@@ -70,7 +72,7 @@ pnpm dev:jord-studio
 
 Sign in as admin, open **SQL console**, run `SELECT 1`, then flip read-only off only when you intend a queued write.
 
-## Control-plane store (S0042) + registry API (S0043) + Studio wizard (S0044)
+## Control-plane store (S0042) + registry API (S0043) + Studio wizard (S0044) + scoping (S0045)
 
 ADR: [[ADR-control-plane-store]]. **Decision:** project metadata lives in `jord_projects` / `jord_project_keys` on the **server primary** `DATABASE_URL` (never inside a registered project target). Secrets at rest use **AES-256-GCM** + `JORD_MASTER_KEY` (`putSecret` / `getSecret` / `rotate` on `@altr/jord`). Create flow is **register + test** only (no hosted provisioning).
 
@@ -83,7 +85,8 @@ ADR: [[ADR-control-plane-store]]. **Decision:** project metadata lives in `jord_
 | Keys | `jord_pub_…` / `jord_sec_…` / `jord_bar_…` — SHA-256 hashed in `jord_project_keys`; secret returned **once** on create/rotate |
 | Connect test | `POST /admin/projects/test` — ephemeral ping; failed create writes **no** row |
 | Archive | `DELETE /admin/projects/:id` → `status=archived`, keys deleted, subsequent GET → **410** |
-| Studio UI (S0044) | `apps/jord-studio` — `/projects` list, `/projects/new` wizard, `/projects/[id]/edit`, BFF under `src/app/api/admin/projects/`, soft `/p/[project]` |
+| Studio UI (S0044) | `apps/jord-studio` — `/projects` list, `/projects/new` wizard, `/projects/[id]/edit`, BFF under `src/app/api/admin/projects/` |
+| Studio scoping (S0045) | Screens under `app/p/[project]/…`; cookie `jord_project`; header switcher; BFF fail-closed; slug `default` = env DB |
 
 ### Admin project routes
 
@@ -105,8 +108,22 @@ Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry ro
 2. Name auto-fills slug (editable until submit); engine / target / TLS+user (Postgres) / write-only password / notes.
 3. **Test connection** must succeed (client latency shown) before **Create** enables.
 4. Create proxies to jord-server; reveal panel shows publishable / secret / barrier keys once with copy + “I stored it” confirm.
-5. Continue lands on `/p/[slug]` (shell scoping = [[../../../plan/Jord/phase-03/S0045-project-scoped-routes|S0045]]). Secrets never go in the URL or `localStorage`.
+5. Continue lands on `/p/[slug]/tables`. Secrets never go in the URL or `localStorage`.
+
+### Project-scoped routes (S0045)
+
+| Piece | Fact |
+|-------|------|
+| Routes | All former Studio screens live under `apps/jord-studio/src/app/p/[project]/…` |
+| Resolve | Layout calls `resolveStudioProject` — slug `default` is synthetic (env `JORD_SERVER_URL`); others via `GET /studio/projects/:slug` (404 unknown, 410 archived) |
+| Cookie | `jord_project` set by middleware on `/p/…` and by switcher `POST /api/studio/project-cookie` |
+| Switcher | Header `ProjectSwitcher` (Apolyx `Select`) — keeps sub-path when changing slug |
+| BFF | `proxyToJord` reads cookie + `x-jord-project`; mismatch → **403** `project_mismatch`; forwards `X-Jord-Project` upstream |
+| Catalog | `GET /studio/projects` (any auth) lists active summaries for the switcher |
+| Nav | `navForRole(role, projectSlug)` prefixes data/runtime/API/database/help hrefs |
+
+**Note:** Scope is enforced in Studio routing/BFF. Data still hits the primary server DB until a later card fans out connections per project target.
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Full `/p/[project]` scoping + switcher: [[../../../plan/Jord/phase-03/S0045-project-scoped-routes|S0045]].
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Three-pane shell: [[../../../plan/Jord/phase-03/S0046-three-pane-shell|S0046]].

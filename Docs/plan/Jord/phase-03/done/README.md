@@ -27,3 +27,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0042-control-plane-store-adr\|S0042]] | Control-plane store + ADR + secret port | 2026-11-01 |
 | [[S0043-project-registry-api\|S0043]] | Project registry API + keys + connect test | 2026-11-01 |
 | [[S0044-new-project-wizard\|S0044]] | Projects list + New project wizard | 2026-11-01 |
+| [[S0045-project-scoped-routes\|S0045]] | `/p/[project]` scoping + switcher | 2026-11-01 |

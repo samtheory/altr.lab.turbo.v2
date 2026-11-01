@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@altr/apolyx";
 
+import { ProjectSwitcher } from "@/components/project-switcher";
 import { SessionBadge } from "@/components/session-badge";
 import { StudioSideNav } from "@/components/studio-side-nav";
 import type { JordRole } from "@/lib/auth/roles";
@@ -58,7 +59,8 @@ export function StudioShell({ children, role, bypass }: Props) {
         >
           Jord Studio
         </Link>
-        <span className="hidden text-xs text-muted-foreground sm:inline">
+        <ProjectSwitcher />
+        <span className="hidden text-xs text-muted-foreground xl:inline">
           libSQL · table <code className="font-mono">records</code>
         </span>
         <SessionBadge role={role} bypass={bypass} />

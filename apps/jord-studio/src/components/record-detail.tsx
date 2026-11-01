@@ -14,6 +14,7 @@ import {
   RecordRowFields,
   validateBodyJson,
 } from "@/components/record-row-fields";
+import { useProjectHref } from "@/hooks/use-project-path";
 import { canWriteRecords, type JordRole } from "@/lib/auth/roles";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
@@ -24,6 +25,7 @@ type Props = {
 
 export function RecordDetail({ initial, role }: Props) {
   const router = useRouter();
+  const hrefFor = useProjectHref();
   const canWrite = canWriteRecords(role);
   const [record, setRecord] = useState(initial);
   const [body, setBody] = useState(initial.body);
@@ -108,7 +110,10 @@ export function RecordDetail({ initial, role }: Props) {
     <form onSubmit={onSave} className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="space-y-1">
         <p className="text-sm text-muted-foreground">
-          <Link href="/records" className="underline-offset-4 hover:underline">
+          <Link
+            href={hrefFor("/records")}
+            className="underline-offset-4 hover:underline"
+          >
             ← Table · records
           </Link>
         </p>

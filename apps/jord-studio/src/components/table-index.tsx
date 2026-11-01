@@ -15,9 +15,12 @@ import {
   TableRow,
 } from "@altr/apolyx";
 
+import { useProjectHref } from "@/hooks/use-project-path";
+
 type ApiError = { message?: string };
 
 export function TableIndex() {
+  const hrefFor = useProjectHref();
   const [tables, setTables] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -55,7 +58,7 @@ export function TableIndex() {
 
       <div>
         <Button asChild variant="outline">
-          <Link href="/schema">Create table</Link>
+          <Link href={hrefFor("/schema")}>Create table</Link>
         </Button>
       </div>
 
@@ -90,7 +93,9 @@ export function TableIndex() {
           <TableBody>
             {tables.map((name) => {
               const href =
-                name === "records" ? "/records" : `/tables/${encodeURIComponent(name)}`;
+                name === "records"
+                  ? hrefFor("/records")
+                  : hrefFor(`/tables/${encodeURIComponent(name)}`);
               return (
                 <TableRow key={name}>
                   <TableCell className="font-mono text-xs">{name}</TableCell>

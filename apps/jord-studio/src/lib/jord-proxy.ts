@@ -3,7 +3,14 @@
  * Never imports @libsql/client or touches data/jord.db.
  */
 
+import { cookies, headers } from "next/headers";
+
 import { getSession } from "@/lib/auth/session";
+import {
+  PROJECT_COOKIE,
+  PROJECT_HEADER,
+  assertProjectScopeMatch,
+} from "@/lib/project-scope";
 
 const DEFAULT_JORD_SERVER_URL = "http://127.0.0.1:8787";
 
@@ -15,9 +22,15 @@ export function getJordServerUrl(): string {
   );
 }
 
+export type ProxyToJordOptions = {
+  /** Skip cookie/header project scope checks (control-plane / resolve). */
+  skipProjectScope?: boolean;
+};
+
 export async function proxyToJord(
   pathWithQuery: string,
   init?: RequestInit,
+  options?: ProxyToJordOptions,
 ): Promise<Response> {
   const session = await getSession();
   if (!session) {
@@ -30,18 +43,41 @@ export async function proxyToJord(
     );
   }
 
+  let projectSlug: string | null = null;
+  if (!options?.skipProjectScope) {
+    const cookieStore = await cookies();
+    const hdrs = await headers();
+    const cookieSlug = cookieStore.get(PROJECT_COOKIE)?.value ?? null;
+    const headerSlug = hdrs.get(PROJECT_HEADER);
+    const scope = assertProjectScopeMatch(cookieSlug, headerSlug);
+    if (!scope.ok) {
+      return Response.json(
+        {
+          error: scope.error,
+          message:
+            "Active project cookie does not match the requested project scope.",
+        },
+        { status: scope.status },
+      );
+    }
+    projectSlug = scope.slug;
+  }
+
   const url = `${getJordServerUrl()}${pathWithQuery.startsWith("/") ? pathWithQuery : `/${pathWithQuery}`}`;
 
   try {
-    const headers = new Headers(init?.headers);
-    if (init?.body && !headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
+    const requestHeaders = new Headers(init?.headers);
+    if (init?.body && !requestHeaders.has("Content-Type")) {
+      requestHeaders.set("Content-Type", "application/json");
     }
-    headers.set("Authorization", `Bearer ${session.bearer}`);
+    requestHeaders.set("Authorization", `Bearer ${session.bearer}`);
+    if (projectSlug) {
+      requestHeaders.set("X-Jord-Project", projectSlug);
+    }
 
     return await fetch(url, {
       ...init,
-      headers,
+      headers: requestHeaders,
       cache: "no-store",
     });
   } catch {
@@ -59,8 +95,8 @@ export async function proxyToJord(
 /** Pass upstream status + body through to the Studio origin (keeps 409 intact). */
 export async function forwardUpstream(upstream: Response): Promise<Response> {
   const body = await upstream.arrayBuffer();
-  const headers = new Headers();
+  const headersOut = new Headers();
   const contentType = upstream.headers.get("Content-Type");
-  if (contentType) headers.set("Content-Type", contentType);
-  return new Response(body, { status: upstream.status, headers });
+  if (contentType) headersOut.set("Content-Type", contentType);
+  return new Response(body, { status: upstream.status, headers: headersOut });
 }

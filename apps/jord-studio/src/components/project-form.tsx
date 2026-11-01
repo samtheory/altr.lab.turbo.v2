@@ -118,7 +118,9 @@ export function ProjectForm({ mode, role, project }: Props) {
             : "Project created — store these keys"
         }
         onDismiss={() => {
-          router.push(`/p/${encodeURIComponent(revealed.project.slug)}`);
+          router.push(
+            `/p/${encodeURIComponent(revealed.project.slug)}/tables`,
+          );
         }}
       />
     );

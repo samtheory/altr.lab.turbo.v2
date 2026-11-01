@@ -194,7 +194,9 @@ describe("S0043 project registry API", () => {
       body: JSON.stringify(createBody("libsql-file", "to-archive")),
     });
     expect(created.status).toBe(201);
-    const { project } = (await created.json()) as { project: { id: string } };
+    const { project } = (await created.json()) as {
+      project: { id: string; slug: string };
+    };
 
     const archived = await ctx.app.request(`/admin/projects/${project.id}`, {
       method: "DELETE",
@@ -216,6 +218,52 @@ describe("S0043 project registry API", () => {
       error: "project_archived",
       reason: "project is archived; keys are revoked",
     });
+
+    const bySlug = await ctx.app.request(
+      `/admin/projects/by-slug/${project.slug}`,
+      { headers: adminHeaders() },
+    );
+    expect(bySlug.status).toBe(410);
+
+    const studioGone = await ctx.app.request(`/studio/projects/${project.slug}`, {
+      headers: adminHeaders(),
+    });
+    expect(studioGone.status).toBe(410);
+  });
+
+  it("S0045 studio catalog lists active; unknown slug 404; by-slug works", async () => {
+    const ctx = await boot();
+    const created = await ctx.app.request("/admin/projects", {
+      method: "POST",
+      headers: adminHeaders(),
+      body: JSON.stringify(createBody("libsql-file", "scoped-one")),
+    });
+    expect(created.status).toBe(201);
+
+    const catalog = await ctx.app.request("/studio/projects", {
+      headers: adminHeaders(),
+    });
+    expect(catalog.status).toBe(200);
+    const catalogBody = (await catalog.json()) as {
+      projects: Array<{ slug: string }>;
+    };
+    expect(catalogBody.projects.some((p) => p.slug === "scoped-one")).toBe(true);
+
+    const found = await ctx.app.request("/studio/projects/scoped-one", {
+      headers: adminHeaders(),
+    });
+    expect(found.status).toBe(200);
+
+    const missing = await ctx.app.request("/studio/projects/does-not-exist", {
+      headers: adminHeaders(),
+    });
+    expect(missing.status).toBe(404);
+
+    const adminBySlug = await ctx.app.request(
+      "/admin/projects/by-slug/scoped-one",
+      { headers: adminHeaders() },
+    );
+    expect(adminBySlug.status).toBe(200);
   });
 
   it("POST /admin/projects/test is ephemeral and does not write rows", async () => {

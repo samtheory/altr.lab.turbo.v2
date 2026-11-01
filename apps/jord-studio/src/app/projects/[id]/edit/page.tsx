@@ -25,7 +25,11 @@ export default async function EditProjectPage({ params }: Props) {
     );
   }
 
-  const upstream = await proxyToJord(`/admin/projects/${encodeURIComponent(id)}`);
+  const upstream = await proxyToJord(
+    `/admin/projects/${encodeURIComponent(id)}`,
+    undefined,
+    { skipProjectScope: true },
+  );
   const body = (await upstream.json().catch(() => ({}))) as {
     project?: ProjectPublic;
     error?: string;

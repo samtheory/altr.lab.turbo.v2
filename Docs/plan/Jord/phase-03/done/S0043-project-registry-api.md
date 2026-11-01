@@ -32,7 +32,7 @@ tags:
 
 ## Why now
 
-[[../S0044-new-project-wizard|S0044]] and [[../S0045-project-scoped-routes|S0045]] both need a real endpoint contract; building the form first would fake it.
+[[S0044-new-project-wizard|S0044]] and [[S0045-project-scoped-routes|S0045]] both need a real endpoint contract; building the form first would fake it.
 
 ## Context (read before coding)
 

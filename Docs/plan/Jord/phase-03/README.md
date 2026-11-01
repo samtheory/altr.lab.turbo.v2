@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-01):** **S0034–S0044 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B in progress ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0044-new-project-wizard|S0044]] Projects UI). Archived under [[done/README|done/]]. Next open card: [[S0045-project-scoped-routes|S0045]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-01):** **S0034–S0045 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]] control plane + `/p/[project]`) closed. Archived under [[done/README|done/]]. Next open card: [[S0046-three-pane-shell|S0046]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -80,7 +80,7 @@ flowchart LR
 | B1 | [[done/S0042-control-plane-store-adr\|S0042]] | Control-plane store + ADR (**decision first**) | **done** 2026-11-01 |
 | B2 | [[done/S0043-project-registry-api\|S0043]] | Project registry API + keys + connect test | **done** 2026-11-01 |
 | B3 | [[done/S0044-new-project-wizard\|S0044]] | Projects list + New project wizard | **done** 2026-11-01 |
-| B4 | [[S0045-project-scoped-routes\|S0045]] | `/p/[project]` scoping + switcher | 2.5–3 h |
+| B4 | [[done/S0045-project-scoped-routes\|S0045]] | `/p/[project]` scoping + switcher | **done** 2026-11-01 |
 
 ### Wave C — Studio shell ([[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]])
 
@@ -211,7 +211,7 @@ Gate: parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord
 |------|------------|
 | [[done/S0043-project-registry-api\|S0043]] | S0042 (store decision) — **done** |
 | [[done/S0044-new-project-wizard\|S0044]] | S0043 (registry API) — **done** |
-| [[S0045-project-scoped-routes\|S0045]] | S0044 (projects UI) |
+| [[done/S0045-project-scoped-routes\|S0045]] | S0044 (projects UI) — **done** |
 | [[S0049-schema-scoped-introspection\|S0049]] | — (server only) |
 | [[S0050-schema-picker-ui\|S0050]] | S0047, S0049 |
 | [[S0056-grid-column-ops\|S0056]] | apolyx-F0008 DataGrid |

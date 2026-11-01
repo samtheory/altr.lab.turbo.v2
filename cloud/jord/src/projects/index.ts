@@ -14,6 +14,8 @@ export {
   archiveProject,
   createProject,
   getProject,
+  getProjectBySlug,
+  listActiveProjectSummaries,
   listProjects,
   parseEngine,
   parseTlsMode,
@@ -28,4 +30,7 @@ export {
   type ProjectPublic,
   type ProjectRegistryDeps,
 } from "./registry.js";
-export { createProjectRoutes } from "./routes.js";
+export {
+  createProjectRoutes,
+  createStudioProjectRoutes,
+} from "./routes.js";

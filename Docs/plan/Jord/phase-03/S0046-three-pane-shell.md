@@ -13,7 +13,7 @@ tags:
 
 # S0046 — three-pane Studio shell
 
-> **Status:** todo · **Depends on** [[S0045-project-scoped-routes|S0045]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0045-project-scoped-routes|S0045]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -39,7 +39,7 @@ Every Studio v2 screen assumes this frame. Today `studio-shell.tsx` + `studio-si
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (pane table) |
 | Code today | `apps/jord-studio/src/components/studio-shell.tsx` · `studio-side-nav.tsx` · `lib/studio-nav.ts` |
-| Routes | `app/p/[project]/…` from [[S0045-project-scoped-routes|S0045]] |
+| Routes | `app/p/[project]/…` from [[done/S0045-project-scoped-routes|S0045]] |
 | UI kit | `@altr/apolyx` `NavList`, `Sheet`, `Field`, `Tabs` — add missing pieces to the kit, not the app |
 
 **Do not break:** Apolyx-first rule; no layout shift when the inspector opens; content keeps its scroll position across pane changes.

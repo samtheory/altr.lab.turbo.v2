@@ -11,7 +11,13 @@ import {
   cn,
 } from "@altr/apolyx";
 
+import { useProjectSlug } from "@/hooks/use-project-path";
 import type { JordRole } from "@/lib/auth/roles";
+import {
+  DEFAULT_PROJECT_SLUG,
+  extractProjectRestPath,
+  extractProjectSlug,
+} from "@/lib/project-scope";
 import { navForRole } from "@/lib/studio-nav";
 
 type Props = {
@@ -21,18 +27,27 @@ type Props = {
 };
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/records") {
+  const pathProject = extractProjectSlug(pathname);
+  const hrefProject = extractProjectSlug(href);
+  const pathRest = pathProject
+    ? extractProjectRestPath(pathname) || "/"
+    : pathname;
+  const hrefRest = hrefProject ? extractProjectRestPath(href) || "/" : href;
+
+  if (hrefRest === "/records") {
     return (
-      pathname === "/records" ||
-      (pathname.startsWith("/records/") && !pathname.startsWith("/records/new"))
+      pathRest === "/records" ||
+      (pathRest.startsWith("/records/") && !pathRest.startsWith("/records/new"))
     );
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathRest === hrefRest || pathRest.startsWith(`${hrefRest}/`);
 }
 
 export function StudioSideNav({ role, onNavigate, className }: Props) {
-  const pathname = usePathname();
-  const groups = navForRole(role);
+  const pathname = usePathname() ?? "";
+  const projectSlug = useProjectSlug();
+  const slugForNav = extractProjectSlug(pathname) ? projectSlug : DEFAULT_PROJECT_SLUG;
+  const groups = navForRole(role, slugForNav);
 
   return (
     <ScrollArea className={cn("h-full", className)}>

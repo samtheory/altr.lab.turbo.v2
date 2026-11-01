@@ -7,11 +7,12 @@ import { proxyToJord } from "@/lib/jord-proxy";
 import type { ApiErrorBody, PublicRecord } from "@/lib/records";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ project: string; id: string }>;
 };
 
 export default async function RecordPage({ params }: Props) {
-  const { id } = await params;
+  const { project, id } = await params;
+  const backHref = `/p/${encodeURIComponent(project)}/records`;
   const session = await getSession();
   const role = session?.role ?? "readonly";
 
@@ -41,7 +42,7 @@ export default async function RecordPage({ params }: Props) {
           <AlertDescription>{loadError ?? "Unknown error."}</AlertDescription>
         </Alert>
         <Button asChild variant="outline">
-          <Link href="/records">Back to list</Link>
+          <Link href={backHref}>Back to list</Link>
         </Button>
       </div>
     );
