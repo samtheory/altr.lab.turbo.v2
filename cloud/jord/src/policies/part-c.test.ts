@@ -197,6 +197,13 @@ const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "GET", path: "/admin/users" },
   { method: "POST", path: "/admin/users/abc/disable" },
   { method: "POST", path: "/admin/users/abc/revoke" },
+  { method: "GET", path: "/admin/projects" },
+  { method: "POST", path: "/admin/projects" },
+  { method: "POST", path: "/admin/projects/test" },
+  { method: "GET", path: "/admin/projects/abc" },
+  { method: "PATCH", path: "/admin/projects/abc" },
+  { method: "DELETE", path: "/admin/projects/abc" },
+  { method: "POST", path: "/admin/projects/abc/rotate-keys" },
 ];
 
 describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {

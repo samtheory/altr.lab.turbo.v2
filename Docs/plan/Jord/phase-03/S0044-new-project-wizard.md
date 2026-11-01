@@ -13,7 +13,7 @@ tags:
 
 # S0044 — Projects list + New project wizard
 
-> **Status:** todo · **Depends on** [[S0043-project-registry-api|S0043]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0043-project-registry-api|S0043]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 

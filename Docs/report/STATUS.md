@@ -1,6 +1,6 @@
 ---
 title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0042; next S0043); Functions runtime still gated"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0043; next S0044); Functions runtime still gated"
 created: 2026-09-19
 updated: 2026-11-01
 tags:
@@ -14,7 +14,7 @@ tags:
 
 # Status
 
-Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0042 control-plane store ADR + `jord_projects` / AES-GCM secret port** · Prior: **S0041** Dockerfile · **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0043 project registry API** (`/admin/projects` + keys + connect test) · Prior: **S0042** control-plane store · **S0041** Dockerfile · **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -27,10 +27,11 @@ Last updated: 2026-11-01 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Phase-02.75** — B1–B5, B8, C1 done; B6/B7 → phase-03; C2 secret-gated / manual-only · [[../plan/Jord/phase-02.75/README]]
 - **Phase-03 S0034–S0041 / jord-F0013** — archived [[../plan/Jord/phase-03/done/README]] · as-shipped [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] · writes concurrency [[../tech_space/jord/writes/README]] · OTel [[../tech_space/jord/overview/README#opentelemetry-s0039]] · backup drill [[../tech_space/jord/overview/README#backup--restore-drill-s0040]] · Docker deploy [[../tech_space/jord/overview/README#dockerfile--compose-deploy-s0041]]
 - **Phase-03 S0042 / jord-F0021 (partial)** — control-plane ADR + migrations + AES-GCM secret port · [[../tech_space/jord/studio/ADR-control-plane-store]] · card [[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]
+- **Phase-03 S0043 / jord-F0021 (partial)** — `/admin/projects` registry + keys + connect test · [[../tech_space/jord/studio/README#control-plane-store-s0042--project-registry-api-s0043]] · card [[../plan/Jord/phase-03/done/S0043-project-registry-api|S0043]]
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B started** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]). **Next:** [[../plan/Jord/phase-03/S0043-project-registry-api|S0043]] (project registry API). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0043-project-registry-api|S0043]] done). **Next:** [[../plan/Jord/phase-03/S0044-new-project-wizard|S0044]] (New project wizard). Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet

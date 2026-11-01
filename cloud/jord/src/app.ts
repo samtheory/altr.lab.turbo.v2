@@ -83,6 +83,11 @@ import {
   setUserDisabled,
 } from "./auth/admin.js";
 import {
+  createProjectRoutes,
+  type ProjectConnectTester,
+  type ProjectConnectInput,
+} from "./projects/index.js";
+import {
   evaluatePolicies,
   isBuiltinPolicyRuleKind,
   ownerUnchanged,
@@ -223,11 +228,15 @@ export type JordAppDeps = {
    */
   httpLog?: HttpRequestLogWriter;
   /**
-   * Control-plane secret port (S0042). When omitted and `JORD_MASTER_KEY` is
-   * set, built from env. When the key is absent, stays `null` so zero-project
-   * boots keep working. No HTTP routes yet (S0043).
+   * Control-plane secret port (S0042/S0043). When omitted and `JORD_MASTER_KEY`
+   * is set, built from env. When the key is absent, stays `null` so
+   * zero-project boots keep working; `/admin/projects` returns 503.
    */
   secrets?: SecretPort | null;
+  /** Override project connect test (S0043 tests). */
+  projectConnectTest?: ProjectConnectTester;
+  /** Override project target baseline / migrate open (S0043 tests). */
+  projectBaseline?: (input: ProjectConnectInput) => Promise<void>;
 };
 
 function publicRecord(row: JordRecord) {
@@ -498,7 +507,7 @@ export function createJordApp(deps: JordAppDeps) {
         publicBaseUrl: resolvePublicBaseUrl(env),
       }),
   );
-  // S0042: inject secret port when a master key is configured; no routes yet.
+  // S0042/S0043: inject secret port when a master key is configured.
   const secrets: SecretPort | null =
     deps.secrets === undefined
       ? hasUsableMasterKey(env)
@@ -507,6 +516,13 @@ export function createJordApp(deps: JordAppDeps) {
       : deps.secrets;
   const enqueueWrite = instrumentWriteQueue(deps.enqueueWrite);
   // Prefer `enqueueWrite` below so jobs get `jord.write` spans (S0039).
+  const projectRegistry = {
+    jord: deps.jord,
+    secrets,
+    testConnect: deps.projectConnectTest,
+    baseline: deps.projectBaseline,
+    enqueueWrite,
+  };
 
   app.use("*", createCorsMiddleware(parseCorsOrigins(env)));
   app.use(
@@ -2777,6 +2793,9 @@ export function createJordApp(deps: JordAppDeps) {
     });
     return c.json(result);
   });
+
+  // S0043 — project registry (admin-only; secrets required for mutate/list).
+  protectedRoutes.route("/admin", createProjectRoutes(projectRegistry));
 
   app.route("/", protectedRoutes);
 

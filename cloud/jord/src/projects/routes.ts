@@ -1,0 +1,192 @@
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+
+import type { JordAuthVariables } from "../auth/middleware.js";
+import {
+  archiveProject,
+  createProject,
+  getProject,
+  listProjects,
+  parseEngine,
+  parseTlsMode,
+  patchProject,
+  rotateProjectKeys,
+  testProjectConnect,
+  type ProjectRegistryDeps,
+} from "./registry.js";
+import type { ProjectTlsMode } from "./connect-test.js";
+
+async function readJson(request: Request): Promise<Record<string, unknown>> {
+  try {
+    const body = (await request.json()) as unknown;
+    if (!body || typeof body !== "object" || Array.isArray(body)) return {};
+    return body as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+function requireAdmin(c: { get: (key: "principal") => JordAuthVariables["principal"] }) {
+  const principal = c.get("principal");
+  if (principal.kind !== "operator" || principal.role !== "admin") {
+    throw new HTTPException(403, { message: "admin operator only" });
+  }
+}
+
+function requireSecrets(deps: ProjectRegistryDeps): void {
+  if (!deps.secrets) {
+    throw new HTTPException(503, {
+      message: "JORD_MASTER_KEY is required for the project registry",
+    });
+  }
+}
+
+export function createProjectRoutes(
+  deps: ProjectRegistryDeps,
+): Hono<{ Variables: JordAuthVariables }> {
+  const routes = new Hono<{ Variables: JordAuthVariables }>();
+
+  routes.get("/projects", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    return c.json({ projects: await listProjects(deps) });
+  });
+
+  routes.post("/projects/test", async (c) => {
+    requireAdmin(c);
+    const body = await readJson(c.req.raw);
+    const engine = parseEngine(body.engine);
+    if (!engine) return c.json({ error: "invalid_engine" }, 400);
+    const target = typeof body.target === "string" ? body.target : "";
+    if (!target.trim()) return c.json({ error: "target is required" }, 400);
+    const tls = parseTlsMode(body.tls_mode);
+    if (body.tls_mode !== undefined && tls === undefined) {
+      return c.json({ error: "invalid_tls_mode" }, 400);
+    }
+    const result = await testProjectConnect(deps, {
+      engine,
+      target,
+      dbUser: typeof body.db_user === "string" ? body.db_user : null,
+      password: typeof body.password === "string" ? body.password : null,
+      tlsMode: (tls ?? null) as ProjectTlsMode | null,
+    });
+    if (!result.ok) {
+      return c.json({ ok: false as const, error: result.error }, 400);
+    }
+    return c.json({ ok: true as const });
+  });
+
+  routes.post("/projects", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const body = await readJson(c.req.raw);
+    const engine = parseEngine(body.engine);
+    if (!engine) return c.json({ error: "invalid_engine" }, 400);
+    const tls = parseTlsMode(body.tls_mode);
+    if (body.tls_mode !== undefined && tls === undefined) {
+      return c.json({ error: "invalid_tls_mode" }, 400);
+    }
+    const result = await createProject(deps, {
+      slug: typeof body.slug === "string" ? body.slug : "",
+      engine,
+      target: typeof body.target === "string" ? body.target : "",
+      tls_mode: tls === undefined ? null : tls,
+      db_user: typeof body.db_user === "string" ? body.db_user : null,
+      password: typeof body.password === "string" ? body.password : null,
+      notes: typeof body.notes === "string" ? body.notes : "",
+    });
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.detail ? { detail: result.detail } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json(
+      {
+        project: result.project,
+        secret_key: result.secret_key,
+        publishable_key: result.publishable_key,
+        barrier_key: result.barrier_key,
+      },
+      201,
+    );
+  });
+
+  routes.get("/projects/:id", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const result = await getProject(deps, c.req.param("id"));
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json({ project: result.project });
+  });
+
+  routes.patch("/projects/:id", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const body = await readJson(c.req.raw);
+    const result = await patchProject(deps, c.req.param("id"), {
+      notes: typeof body.notes === "string" ? body.notes : undefined,
+      status: body.status === "active" ? "active" : undefined,
+    });
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json({ project: result.project });
+  });
+
+  routes.delete("/projects/:id", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const result = await archiveProject(deps, c.req.param("id"));
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json({ ok: true as const, status: "archived" as const });
+  });
+
+  routes.post("/projects/:id/rotate-keys", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const result = await rotateProjectKeys(deps, c.req.param("id"));
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    return c.json({
+      project: result.project,
+      secret_key: result.secret_key,
+      publishable_key: result.publishable_key,
+      barrier_key: result.barrier_key,
+    });
+  });
+
+  return routes;
+}

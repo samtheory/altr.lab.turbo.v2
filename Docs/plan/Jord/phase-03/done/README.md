@@ -25,3 +25,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0040-backup-restore-drill\|S0040]] | Backup + restore drill | 2026-11-01 |
 | [[S0041-dockerfile-deploy\|S0041]] | Dockerfile + deploy recipe | 2026-11-01 |
 | [[S0042-control-plane-store-adr\|S0042]] | Control-plane store + ADR + secret port | 2026-11-01 |
+| [[S0043-project-registry-api\|S0043]] | Project registry API + keys + connect test | 2026-11-01 |

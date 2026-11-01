@@ -11,6 +11,7 @@ tags:
   - jord-F0021
   - studio
   - projects
+  - S0043
 ---
 
 # jord-F0021 — projects & provisioning
@@ -77,7 +78,7 @@ Billing · per-project team RBAC · hosted provider APIs (Turso/Neon) · databas
 | Task | Est. | Status |
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/done/S0042-control-plane-store-adr\|S0042]] — control-plane store + ADR | 2–3 h | **done** 2026-11-01 |
-| [[../../../plan/Jord/phase-03/S0043-project-registry-api\|S0043]] — project registry API + keys | 2.5–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0043-project-registry-api\|S0043]] — project registry API + keys | 2.5–3 h | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/S0044-new-project-wizard\|S0044]] — New project wizard | 2.5–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0045-project-scoped-routes\|S0045]] — /p/[project] scoping + switcher | 2.5–3 h | todo |
 

@@ -2,18 +2,19 @@
 title: "S0043 — project registry API + keys + connect test"
 description: "CRUD for projects with encrypted DB credentials, generated publishable/secret/barrier keys, and a non-persisting connect test"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0043
+  - done
 ---
 
 # S0043 — project registry API + keys + connect test
 
-> **Status:** todo · **Depends on** [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-01 · **Depends on** [[S0042-control-plane-store-adr|S0042]] · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -31,16 +32,16 @@ tags:
 
 ## Why now
 
-[[S0044-new-project-wizard|S0044]] and [[S0045-project-scoped-routes|S0045]] both need a real endpoint contract; building the form first would fake it.
+[[../S0044-new-project-wizard|S0044]] and [[../S0045-project-scoped-routes|S0045]] both need a real endpoint contract; building the form first would fake it.
 
 ## Context (read before coding)
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] |
-| Depends on | [[done/S0042-control-plane-store-adr|S0042]] tables + secret port |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] |
+| Depends on | [[S0042-control-plane-store-adr|S0042]] tables + secret port |
 | Code today | `cloud/jord/src/auth/admin.ts` (existing admin guard) · `cloud/jord/src/auth/route-inventory.ts` (must list new routes) · `elements/jord/src/adapter/{postgres,libsql}.ts` for the connect test |
-| Tests | `cloud/jord/src/auth/principals.test.ts` · `app.test.ts` |
+| Tests | `cloud/jord/src/projects/projects.test.ts` · `auth/principals` / `policies/part-c` inventory |
 
 **Do not break:** admin-only guard on every route; archiving revokes keys but never drops a database.
 
@@ -74,32 +75,37 @@ sequenceDiagram
 
 ## Steps (do in order)
 
-1. Graft `admin.ts` + route registration; add the route group in `cloud/jord/src/auth/routes.ts`.
+1. Graft `admin.ts` + route registration; add the route group in `cloud/jord/src/projects/`.
 2. Implement the ephemeral connect test (per engine, short timeout).
 3. Implement create (validate slug, test, encrypt, generate keys, baseline) + list/get/patch/archive/rotate.
-4. Update `route-inventory.ts`; extend `principals.test.ts` for admin-only access.
+4. Update `route-inventory.ts` / `part-c` MOUNTED; extend projects tests for admin-only access.
 5. Tests: create per engine (mock target), secret returned once, absent from list JSON, archive → 410, failed test → no row.
 6. Typecheck + test; paste proof.
 7. **docs_man**: studio tech_space route table; tick card.
 
 ## Done when
 
-- [ ] Three engines create successfully in tests
-- [ ] Secret key appears only in the create response
-- [ ] List/detail JSON contains no credential fields (asserted)
-- [ ] Failed connect test leaves no project row
-- [ ] Archive → 410, keys revoked
-- [ ] Proof pasted
+- [x] Three engines create successfully in tests
+- [x] Secret key appears only in the create response
+- [x] List/detail JSON contains no credential fields (asserted)
+- [x] Failed connect test leaves no project row
+- [x] Archive → 410, keys revoked
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-11-01 | `pnpm --filter @altr/jord typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord-server typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord test` | **94 passed** \| 9 skipped (103) |
+| 2026-11-01 | `pnpm --filter @altr/jord-server test` | **160 passed** \| 17 skipped (177) · includes `projects` (6) |
+
+**Shipped:** `/admin/projects` CRUD + test + rotate-keys; `0010_project_db_password_sealed`; keys `jord_pub_` / `jord_sec_` / `jord_bar_` (SHA-256 at rest); AES-GCM sealed DB password column.
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/studio/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

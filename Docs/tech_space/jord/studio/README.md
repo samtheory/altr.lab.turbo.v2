@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, SQL console, migrate wizard, users admin; S0042 control-plane tables + secret port"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI, SQL console, migrate wizard, users admin; S0042 store + S0043 project registry API"
 created: 2026-10-24
 updated: 2026-11-01
 tags:
@@ -43,6 +43,7 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts`. Shell: `StudioShell` (desk
 | SQL console | `/database/sql` | `POST /sql/execute` — admin; read-only via engine pragma |
 | Migrate | `/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
 | Users | `/auth/users` | `GET /admin/users` — disable / revoke |
+| Projects (API only) | — (wizard = S0044) | `GET/POST /admin/projects` · test · rotate · archive |
 | Policies / Triggers | Database nav | [[../policies/README]] |
 | Generated / Function / Custom / Table APIs | `/apis/…` | [[../apis/README]] |
 | Jobs / Logs | `/jobs`, `/logs` | [[../jobs/README]] — logs batch into `jord_logs` |
@@ -68,19 +69,34 @@ pnpm dev:jord-studio
 
 Sign in as admin, open **SQL console**, run `SELECT 1`, then flip read-only off only when you intend a queued write.
 
-## Control-plane store (S0042)
+## Control-plane store (S0042) + project registry API (S0043)
 
 ADR: [[ADR-control-plane-store]]. **Decision:** project metadata lives in `jord_projects` / `jord_project_keys` on the **server primary** `DATABASE_URL` (never inside a registered project target). Secrets at rest use **AES-256-GCM** + `JORD_MASTER_KEY` (`putSecret` / `getSecret` / `rotate` on `@altr/jord`). Create flow is **register + test** only (no hosted provisioning).
 
 | Piece | Fact |
 |-------|------|
-| Migration | `0009_control_plane_projects.sql` (libSQL + Postgres) |
+| Migration | `0009_control_plane_projects.sql` + `0010_project_db_password_sealed.sql` (libSQL + Postgres) |
 | Types | `elements/jord/src/schema/projects.ts` |
 | Secret port | `elements/jord/src/control-plane/secret-port.ts` · wired on `createJordApp` as `secrets` (null when master key unset) |
-| HTTP | **None yet** — registry API is [[../../../plan/Jord/phase-03/S0043-project-registry-api\|S0043]] |
+| Registry | `cloud/jord/src/projects/` · mounted at `/admin/projects*` (admin operator only) |
+| Keys | `jord_pub_…` / `jord_sec_…` / `jord_bar_…` — SHA-256 hashed in `jord_project_keys`; secret returned **once** on create/rotate |
+| Connect test | `POST /admin/projects/test` — ephemeral ping; failed create writes **no** row |
+| Archive | `DELETE /admin/projects/:id` → `status=archived`, keys deleted, subsequent GET → **410** |
 
-Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY`.
+### Admin project routes
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/admin/projects` | List (no passwords / secret keys) |
+| POST | `/admin/projects/test` | Connect check only |
+| POST | `/admin/projects` | Register + baseline; returns `secret_key` once |
+| GET | `/admin/projects/:id` | Detail; **410** if archived |
+| PATCH | `/admin/projects/:id` | Notes (active only) |
+| DELETE | `/admin/projects/:id` | Archive + revoke keys (never drops target DB) |
+| POST | `/admin/projects/:id/rotate-keys` | New key set; secret returned once |
+
+Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry routes return **503** until the key is set).
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Writable connection-string editor waits on the project registry (S0043–S0045).
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Studio Projects UI + `/p/[project]` scoping: [[../../../plan/Jord/phase-03/S0044-new-project-wizard|S0044]]–[[../../../plan/Jord/phase-03/S0045-project-scoped-routes|S0045]].

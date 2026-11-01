@@ -16,6 +16,8 @@ export const jordProjects = sqliteTable(
     target: text("target").notNull(),
     tlsMode: text("tls_mode"),
     dbUser: text("db_user"),
+    /** AES-GCM sealed envelope from SecretPort; never returned in JSON. */
+    dbPasswordSealed: text("db_password_sealed"),
     notes: text("notes").notNull().default(""),
     status: text("status").notNull().default("active"),
     createdAt: integer("created_at", { mode: "number" }).notNull(),
