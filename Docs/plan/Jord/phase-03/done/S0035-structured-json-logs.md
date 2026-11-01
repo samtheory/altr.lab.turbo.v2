@@ -123,4 +123,4 @@ sequenceDiagram
 |--------|------|
 | tech_space | [[../../../../tech_space/jord/overview/README]] |
 | Phase queue | [[../README]] status → done |
-| Next suggested split | [[S0036-shared-rate-limit-idempotency\|S0036]] · OTel later ([[../S0039-otel-traces\|S0039]]) |
+| Next suggested split | [[S0036-shared-rate-limit-idempotency\|S0036]] · OTel ([[S0039-otel-traces\|S0039]] **done**) |

@@ -14,6 +14,8 @@ tags:
   - s0035
   - s0036
   - s0038
+  - s0039
+  - otel
   - rate-limit
   - idempotency
 ---
@@ -76,6 +78,7 @@ Ops access log on **stdout** (`info`) / **stderr** (`error` for 5xx). Separate f
 | `method` / `path` | request method and path (no query) |
 | `status` / `ms` | response status and elapsed ms |
 | `principal` | kind only: `anon` \| `user` \| `service` \| `operator` \| `none` |
+| `traceId` | present when OTel is on (S0039) — same id as the `jord.http` span |
 
 **Never** logged: Authorization, cookies, bodies, header dumps.
 
@@ -199,6 +202,32 @@ On **Postgres**, data-route rate counters and idempotency replay live in the pro
 
 Documented in `cloud/jord/src/load-env.ts`. As-built: [[../writes/README]]. Card: [[../../../plan/Jord/phase-03/done/S0038-pg-write-concurrency|S0038]].
 
+### OpenTelemetry (S0039)
+
+Opt-in. Module: `cloud/jord/src/telemetry/`. Boot calls `initTelemetry` before `serve` so Node HTTP auto-instrumentation can wrap the listener; Hono also gets a manual `jord.http` span (covers `app.request` in tests).
+
+| Env | Default | Notes |
+|-----|---------|-------|
+| `JORD_OTEL_ENABLED` | off | `1` / `true` / `on` / `yes` enables the SDK |
+| `JORD_OTEL_ENDPOINT` or `OTEL_EXPORTER_OTLP_ENDPOINT` | unset | OTLP/HTTP base; when enabled with no endpoint → **no-op** span exporter (no collector required) |
+| `OTEL_SERVICE_NAME` | `jord-server` | resource `service.name` |
+
+| Span | Attributes (never SQL text, params, tokens, or signed URLs) |
+|------|--------------------------------------------------------------|
+| `jord.http` | method, route, status, `jord.request_id` |
+| `jord.write` | `jord.write.kind`, `jord.write.wait_ms` |
+| `jord.sql` | `jord.sql.kind` (`select` \| `execute`) |
+| `jord.storage` | `jord.storage.op`, `jord.storage.bucket`, optional `jord.storage.bytes` |
+
+| Metric | Meaning |
+|--------|---------|
+| `jord_requests_total{route,status}` | HTTP completions (health skipped) |
+| `jord_sql_errors_total` | SQL span failures |
+| `jord_write_queue_depth` | Observable gauge → `queue.pending()` |
+| `jord_blob_bytes_written` | Bytes through `putObject` |
+
+JSON request logs include `traceId` when OTel is on. Card: [[../../../plan/Jord/phase-03/done/S0039-otel-traces|S0039]].
+
 ## Not in Jord yet
 
-Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024). OpenTelemetry / backup drill / Dockerfile remain open on [[../../../plan/Jord/phase-03/README|phase-03]].
+Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024). Backup drill / Dockerfile remain open on [[../../../plan/Jord/phase-03/README|phase-03]].

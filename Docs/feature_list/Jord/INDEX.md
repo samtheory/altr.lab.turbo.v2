@@ -17,7 +17,7 @@ Ids are **stable**. Do not reuse a retired number; mark status `done` / `todo` /
 
 ## Done (shipped)
 
-A feature is **done** only when its contract landed. **jord-F0013** is **partial** — S0034–S0038 shipped; remaining ops cards are S0039–S0041.
+A feature is **done** only when its contract landed. **jord-F0013** is **partial** — S0034–S0039 shipped; remaining ops cards are S0040–S0041.
 
 Split location: [[done/jord-F0013-production-ops|jord-F0013]] (shipped) + [[todo/jord-F0013-production-ops|jord-F0013]] (open).
 
@@ -35,7 +35,7 @@ Split location: [[done/jord-F0013-production-ops|jord-F0013]] (shipped) + [[todo
 | **jord-F0010** | blobs | [[done/jord-F0010-blobs]] | done |
 | **jord-F0011** | vectors | [[done/jord-F0011-vectors]] | done |
 | **jord-F0012** | studio | [[done/jord-F0012-studio]] | done |
-| **jord-F0013** | P1 | [[done/jord-F0013-production-ops]] | **partial** — S0034–S0038 shipped; rest open |
+| **jord-F0013** | P1 | [[done/jord-F0013-production-ops]] | **partial** — S0034–S0039 shipped; rest open |
 
 
 ## Open backlog (partial F0013 kept here)
@@ -51,7 +51,7 @@ Split location: [[done/jord-F0013-production-ops|jord-F0013]] (shipped) + [[todo
 | Id | Was / theme | Note | Plan tasks |
 |----|-----|------|------------|
 
-| **jord-F0013** | P1 | [[todo/jord-F0013-production-ops]] (partial — S0034–S0038 shipped; rest open) | [[../../plan/Jord/phase-03/done/S0034-health-probes\|S0034]] · [[../../plan/Jord/phase-03/done/S0035-structured-json-logs\|S0035]] · [[../../plan/Jord/phase-03/done/S0036-shared-rate-limit-idempotency\|S0036]] · [[../../plan/Jord/phase-03/done/S0037-listen-seq-fanout\|S0037]] · [[../../plan/Jord/phase-03/done/S0038-pg-write-concurrency\|S0038]] · [[../../plan/Jord/phase-03/S0039-otel-traces\|S0039]] · [[../../plan/Jord/phase-03/S0040-backup-restore-drill\|S0040]] · [[../../plan/Jord/phase-03/S0041-dockerfile-deploy\|S0041]] |
+| **jord-F0013** | P1 | [[todo/jord-F0013-production-ops]] (partial — S0034–S0039 shipped; rest open) | [[../../plan/Jord/phase-03/done/S0034-health-probes\|S0034]] · [[../../plan/Jord/phase-03/done/S0035-structured-json-logs\|S0035]] · [[../../plan/Jord/phase-03/done/S0036-shared-rate-limit-idempotency\|S0036]] · [[../../plan/Jord/phase-03/done/S0037-listen-seq-fanout\|S0037]] · [[../../plan/Jord/phase-03/done/S0038-pg-write-concurrency\|S0038]] · [[../../plan/Jord/phase-03/done/S0039-otel-traces\|S0039]] · [[../../plan/Jord/phase-03/S0040-backup-restore-drill\|S0040]] · [[../../plan/Jord/phase-03/S0041-dockerfile-deploy\|S0041]] |
 | **jord-F0014** | P2 | [[todo/jord-F0014-typed-dx]] | [[../../plan/Jord/phase-03/S0087-gen-types-cli\|S0087]] · [[../../plan/Jord/phase-03/S0088-typed-client-builder\|S0088]] · [[../../plan/Jord/phase-03/S0089-react-bindings\|S0089]] |
 | **jord-F0015** | P3 | [[todo/jord-F0015-functions-runtime]] | [[../../plan/Jord/phase-03/S0090-functions-worker-pool\|S0090]] · [[../../plan/Jord/phase-03/S0091-functions-client-logs\|S0091]] — **gated** |
 | **jord-F0016** | P4 | [[todo/jord-F0016-auth-v2]] | [[../../plan/Jord/phase-03/S0073-mailer-port\|S0073]] · [[../../plan/Jord/phase-03/S0074-magic-link\|S0074]] · [[../../plan/Jord/phase-03/S0075-oauth-provider\|S0075]] · [[../../plan/Jord/phase-03/S0076-sessions-claims\|S0076]] · [[../../plan/Jord/phase-03/S0077-policy-tester\|S0077]] |

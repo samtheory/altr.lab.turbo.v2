@@ -7,6 +7,12 @@ import type { PrincipalKind } from "../auth/principal.js";
 /** Kind-only principal for ops logs — never uid/tokens. */
 export type HttpLogPrincipal = PrincipalKind | "none";
 
+/** Request correlation vars set by the HTTP log / OTel middlewares. */
+export type JordRequestLogVariables = JordAuthVariables & {
+  requestId?: string;
+  traceId?: string;
+};
+
 export type HttpRequestLogLevel = "info" | "error";
 
 export type HttpRequestLog = {
@@ -18,6 +24,8 @@ export type HttpRequestLog = {
   status: number;
   ms: number;
   principal: HttpLogPrincipal;
+  /** Present when OTel is on (S0039) — joins logs to traces. */
+  traceId?: string;
 };
 
 export type HttpRequestLogWriter = (line: HttpRequestLog) => void;
@@ -92,11 +100,11 @@ export type HttpRequestLogOptions = {
 
 export function createHttpRequestLogMiddleware(
   options: HttpRequestLogOptions = {},
-): MiddlewareHandler<{ Variables: JordAuthVariables }> {
+): MiddlewareHandler<{ Variables: JordRequestLogVariables }> {
   const enabled = options.enabled ?? true;
   const write = options.write ?? defaultHttpLogWriter;
 
-  return createMiddleware<{ Variables: JordAuthVariables }>(
+  return createMiddleware<{ Variables: JordRequestLogVariables }>(
     async (c, next) => {
       if (!enabled) {
         await next();
@@ -107,6 +115,8 @@ export function createHttpRequestLogMiddleware(
       const skip = isHttpLogSkippedPath(path);
       const start = Date.now();
       const requestId = resolveRequestId(c.req.header("x-request-id"));
+      // Set before next() so OTel middleware (inner) can attach it to the span.
+      c.set("requestId", requestId);
 
       try {
         await next();
@@ -115,6 +125,11 @@ export function createHttpRequestLogMiddleware(
 
         const status = c.res.status;
         const level: HttpRequestLogLevel = status >= 500 ? "error" : "info";
+        const fromCtx = c.get("traceId");
+        const traceId =
+          typeof fromCtx === "string" && fromCtx.length > 0
+            ? fromCtx
+            : undefined;
         const line: HttpRequestLog = {
           level,
           msg: "http",
@@ -124,6 +139,7 @@ export function createHttpRequestLogMiddleware(
           status,
           ms: Math.max(0, Date.now() - start),
           principal: principalKindFromContext(() => c.get("principal")),
+          ...(traceId ? { traceId } : {}),
         };
         write(line);
       }

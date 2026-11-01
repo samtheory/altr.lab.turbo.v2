@@ -11,6 +11,7 @@ import {
 import { loadLocalEnv } from "./load-env.js";
 import { createWriteQueue, resolveWriteConcurrency } from "./queue.js";
 import { RealtimeBus } from "./realtime/index.js";
+import { initTelemetry } from "./telemetry/index.js";
 import {
   resolveWalCheckpointMs,
   startWalHygiene,
@@ -121,6 +122,8 @@ export async function startJordServer(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<{ close: () => Promise<void> }> {
   loadLocalEnv();
+  // OTel before the app so HTTP auto-instrumentation wraps Node serve.
+  const telemetry = initTelemetry({ env, httpAutoInstrument: true });
   assertPostgresMigrateUrl(env);
   const auth = resolveAuthConfig(env);
   const databaseUrl = env.DATABASE_URL?.trim() ?? "";
@@ -204,6 +207,7 @@ export async function startJordServer(
     await jord.close();
     await ddl?.close();
     server.close();
+    await telemetry.shutdown();
     process.exit(0);
   };
 
@@ -225,6 +229,7 @@ export async function startJordServer(
       await jord.close();
       await ddl?.close();
       server.close();
+      await telemetry.shutdown();
     },
   };
 }

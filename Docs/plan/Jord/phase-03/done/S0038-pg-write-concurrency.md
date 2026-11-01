@@ -54,7 +54,7 @@ Leftover **B6** from phase-02.75: throughput work is blocked on a hardcoded seri
 
 ## Out of scope
 
-Per-table concurrency · retry policy changes · metrics export ([[../S0039-otel-traces|S0039]]).
+Per-table concurrency · retry policy changes · metrics export ([[S0039-otel-traces|S0039]]).
 
 ## Diagram
 

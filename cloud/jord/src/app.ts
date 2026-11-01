@@ -116,6 +116,11 @@ import {
   type RateLimitStore,
 } from "./http/index.js";
 import {
+  createOtelHttpMiddleware,
+  instrumentStorage,
+  instrumentWriteQueue,
+} from "./telemetry/index.js";
+import {
   createIdempotencyStore,
   resolveIdempotencyTtlMs,
   type IdempotencyStore,
@@ -475,14 +480,17 @@ export function createJordApp(deps: JordAppDeps) {
   const maxBlobBytes = resolveMaxBlobBytes(env, deps.maxBlobBytes);
   const hmacSecret =
     deps.blobSigningSecret ?? resolveHmacSecret(env, deps.auth.secret);
-  const storage =
+  const storage = instrumentStorage(
     deps.storage ??
-    createStorageFromEnv({
-      env,
-      blobsRoot,
-      hmacSecret,
-      publicBaseUrl: resolvePublicBaseUrl(env),
-    });
+      createStorageFromEnv({
+        env,
+        blobsRoot,
+        hmacSecret,
+        publicBaseUrl: resolvePublicBaseUrl(env),
+      }),
+  );
+  const enqueueWrite = instrumentWriteQueue(deps.enqueueWrite);
+  // Prefer `enqueueWrite` below so jobs get `jord.write` spans (S0039).
 
   app.use("*", createCorsMiddleware(parseCorsOrigins(env)));
   app.use(
@@ -492,6 +500,8 @@ export function createJordApp(deps: JordAppDeps) {
       write: deps.httpLog,
     }),
   );
+  // After request-id (set by the log middleware) so every span carries it.
+  app.use("*", createOtelHttpMiddleware());
   app.use("*", createJsonBodyLimitMiddleware(resolveMaxJsonBytes(env)));
 
   registerSignedBlobRoutes(app, {
@@ -563,7 +573,7 @@ export function createJordApp(deps: JordAppDeps) {
       const appended: OutboxRow[] = [];
       let result: Awaited<ReturnType<typeof work>>;
       try {
-        result = await deps.enqueueWrite(() =>
+        result = await enqueueWrite(() =>
           deps.jord.transaction(async () => {
             const value = await work();
             const raw = changes(value);
@@ -678,13 +688,13 @@ export function createJordApp(deps: JordAppDeps) {
       jord: deps.jord,
       auth: deps.auth,
       mailer,
-      enqueueWrite: deps.enqueueWrite,
+      enqueueWrite: enqueueWrite,
     }),
   );
 
   registerHealthRoutes(app, {
     jord: deps.jord,
-    enqueueWrite: deps.enqueueWrite,
+    enqueueWrite: enqueueWrite,
   });
 
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
@@ -844,7 +854,7 @@ export function createJordApp(deps: JordAppDeps) {
       });
     }
 
-    const result = await deps.enqueueWrite(() =>
+    const result = await enqueueWrite(() =>
       ddlJord.createTable({ name: body.name as string, columns }),
     );
     if (!result.ok) {
@@ -1126,7 +1136,7 @@ export function createJordApp(deps: JordAppDeps) {
           ? buildAddColumnSql(table, body.name, type)
           : null;
 
-      const result = await deps.enqueueWrite(() =>
+      const result = await enqueueWrite(() =>
         ddlJord.addColumn({ table, name: body.name!, type }),
       );
 
@@ -1153,7 +1163,7 @@ export function createJordApp(deps: JordAppDeps) {
     requireAlterSchema(),
     async (c) => {
       const name = c.req.param("name");
-      const result = await deps.enqueueWrite(() =>
+      const result = await enqueueWrite(() =>
         ddlJord.dropTable({ name }),
       );
       if (!result.ok) {
@@ -1179,7 +1189,7 @@ export function createJordApp(deps: JordAppDeps) {
           message: "name (string) is required",
         });
       }
-      const result = await deps.enqueueWrite(() =>
+      const result = await enqueueWrite(() =>
         ddlJord.renameTable({ name, newName: body.name as string }),
       );
       if (!result.ok) {
@@ -1227,7 +1237,7 @@ export function createJordApp(deps: JordAppDeps) {
           message: "name and/or type is required",
         });
       }
-      const result = await deps.enqueueWrite(() =>
+      const result = await enqueueWrite(() =>
         ddlJord.alterColumn({ table, column, ...patch }),
       );
       if (!result.ok) {
@@ -1248,7 +1258,7 @@ export function createJordApp(deps: JordAppDeps) {
     async (c) => {
       const table = c.req.param("name");
       const column = c.req.param("column");
-      const result = await deps.enqueueWrite(() =>
+      const result = await enqueueWrite(() =>
         ddlJord.dropColumn({ table, column }),
       );
       if (!result.ok) {
@@ -1378,7 +1388,7 @@ export function createJordApp(deps: JordAppDeps) {
       role,
       subject: principal.kind,
       uid: principal.uid,
-      enqueueWrite: deps.enqueueWrite,
+      enqueueWrite: enqueueWrite,
       disabled: triggersOff,
       writeChange: write,
     });
@@ -1503,7 +1513,7 @@ export function createJordApp(deps: JordAppDeps) {
       role,
       subject: principal.kind,
       uid: principal.uid,
-      enqueueWrite: deps.enqueueWrite,
+      enqueueWrite: enqueueWrite,
       disabled: triggersOff,
       writeChange: write,
     });
@@ -1553,7 +1563,7 @@ export function createJordApp(deps: JordAppDeps) {
       role,
       subject: principal.kind,
       uid: principal.uid,
-      enqueueWrite: deps.enqueueWrite,
+      enqueueWrite: enqueueWrite,
       disabled: triggersOff,
       writeChange: write,
     });
@@ -1812,7 +1822,7 @@ export function createJordApp(deps: JordAppDeps) {
       throw new HTTPException(400, { message: "config must be valid JSON" });
     }
 
-    const job = await deps.enqueueWrite(() =>
+    const job = await enqueueWrite(() =>
       deps.jord.insertJob({
         name: body.name!.trim(),
         kind: body.kind!,
@@ -1872,7 +1882,7 @@ export function createJordApp(deps: JordAppDeps) {
       nextRunAt = null;
     }
 
-    const job = await deps.enqueueWrite(() =>
+    const job = await enqueueWrite(() =>
       deps.jord.updateJob({
         id,
         name: body.name,
@@ -1888,7 +1898,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   protectedRoutes.delete("/jobs/:id", requireManageJobs(), async (c) => {
     const id = c.req.param("id");
-    const deleted = await deps.enqueueWrite(() => deps.jord.deleteJob(id));
+    const deleted = await enqueueWrite(() => deps.jord.deleteJob(id));
     if (!deleted) throw new HTTPException(404, { message: "job not found" });
     return c.json({ ok: true as const, id });
   });
@@ -1981,7 +1991,7 @@ export function createJordApp(deps: JordAppDeps) {
       throw new HTTPException(409, { message: "slug already exists" });
     }
 
-    const row = await deps.enqueueWrite(() =>
+    const row = await enqueueWrite(() =>
       deps.jord.insertFunction({
         name: body.name!.trim(),
         slug: body.slug!,
@@ -2034,7 +2044,7 @@ export function createJordApp(deps: JordAppDeps) {
       }
     }
 
-    const row = await deps.enqueueWrite(() =>
+    const row = await enqueueWrite(() =>
       deps.jord.updateFunction({
         id,
         name: body.name,
@@ -2049,7 +2059,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   protectedRoutes.delete("/functions/:id", requireManageApis(), async (c) => {
     const id = c.req.param("id");
-    const result = await deps.enqueueWrite(() => deps.jord.deleteFunction(id));
+    const result = await enqueueWrite(() => deps.jord.deleteFunction(id));
     if (!result.ok) {
       if (result.error === "not_found") {
         throw new HTTPException(404, { message: "function not found" });
@@ -2097,7 +2107,7 @@ export function createJordApp(deps: JordAppDeps) {
         policyBypass: c.get("principal").kind === "service",
         subject: c.get("principal").kind,
         uid: c.get("principal").uid,
-        enqueueWrite: deps.enqueueWrite,
+        enqueueWrite: enqueueWrite,
         logs,
         writeChange: writeChangeAs(c.get("principal")),
         request: {
@@ -2167,7 +2177,7 @@ export function createJordApp(deps: JordAppDeps) {
       });
     }
 
-    const row = await deps.enqueueWrite(() =>
+    const row = await enqueueWrite(() =>
       deps.jord.insertCustomApi({
         name: body.name!.trim(),
         method: body.method as JordHttpMethod,
@@ -2231,7 +2241,7 @@ export function createJordApp(deps: JordAppDeps) {
       }
     }
 
-    const row = await deps.enqueueWrite(() =>
+    const row = await enqueueWrite(() =>
       deps.jord.updateCustomApi({
         id,
         name: body.name,
@@ -2246,7 +2256,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   protectedRoutes.delete("/custom-apis/:id", requireManageApis(), async (c) => {
     const id = c.req.param("id");
-    const deleted = await deps.enqueueWrite(() =>
+    const deleted = await enqueueWrite(() =>
       deps.jord.deleteCustomApi(id),
     );
     if (!deleted) {
@@ -2322,7 +2332,7 @@ export function createJordApp(deps: JordAppDeps) {
       policyBypass: c.get("principal").kind === "service",
       subject: c.get("principal").kind,
       uid: c.get("principal").uid,
-      enqueueWrite: deps.enqueueWrite,
+      enqueueWrite: enqueueWrite,
       logs,
       writeChange: writeChangeAs(c.get("principal")),
       request: {
@@ -2400,7 +2410,7 @@ export function createJordApp(deps: JordAppDeps) {
         ? Math.floor(body.priority)
         : 0;
 
-    const row = await deps.enqueueWrite(async () => {
+    const row = await enqueueWrite(async () => {
       const created = await deps.jord.insertPolicy({
         name: body.name!.trim(),
         tableName,
@@ -2457,7 +2467,7 @@ export function createJordApp(deps: JordAppDeps) {
       if (rulesErr) throw new HTTPException(400, { message: rulesErr });
     }
 
-    const row = await deps.enqueueWrite(async () => {
+    const row = await enqueueWrite(async () => {
       const updated = await deps.jord.updatePolicy({
         id,
         name: body.name,
@@ -2477,7 +2487,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   protectedRoutes.delete("/policies/:id", requireAlterSchema(), async (c) => {
     const id = c.req.param("id");
-    const deleted = await deps.enqueueWrite(async () => {
+    const deleted = await enqueueWrite(async () => {
       const removed = await deps.jord.deletePolicy(id);
       if (removed) await syncPoliciesRls();
       return removed;
@@ -2539,7 +2549,7 @@ export function createJordApp(deps: JordAppDeps) {
       }
     }
 
-    const row = await deps.enqueueWrite(() =>
+    const row = await enqueueWrite(() =>
       deps.jord.insertTrigger({
         name: body.name!.trim(),
         tableName,
@@ -2600,7 +2610,7 @@ export function createJordApp(deps: JordAppDeps) {
       }
     }
 
-    const row = await deps.enqueueWrite(() =>
+    const row = await enqueueWrite(() =>
       deps.jord.updateTrigger({
         id,
         name: body.name,
@@ -2616,7 +2626,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   protectedRoutes.delete("/triggers/:id", requireAlterSchema(), async (c) => {
     const id = c.req.param("id");
-    const deleted = await deps.enqueueWrite(() => deps.jord.deleteTrigger(id));
+    const deleted = await enqueueWrite(() => deps.jord.deleteTrigger(id));
     if (!deleted) {
       throw new HTTPException(404, { message: "trigger not found" });
     }
@@ -2625,7 +2635,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   registerBlobRoutes(protectedRoutes, {
     jord: deps.jord,
-    enqueueWrite: deps.enqueueWrite,
+    enqueueWrite: enqueueWrite,
     storage,
     hmacSecret,
     maxBytes: maxBlobBytes,
@@ -2635,7 +2645,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   registerVectorRoutes(protectedRoutes, {
     jord: deps.jord,
-    enqueueWrite: deps.enqueueWrite,
+    enqueueWrite: enqueueWrite,
   });
 
   protectedRoutes.route(
@@ -2656,7 +2666,7 @@ export function createJordApp(deps: JordAppDeps) {
     "/sql",
     createSqlRoutes({
       jord: deps.jord,
-      enqueueWrite: deps.enqueueWrite,
+      enqueueWrite: enqueueWrite,
       logs: sqlLogs,
       resyncTracked: resyncTrackedAs,
     }),
