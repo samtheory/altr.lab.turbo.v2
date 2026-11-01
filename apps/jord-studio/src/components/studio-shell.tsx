@@ -20,6 +20,11 @@ import {
   cn,
 } from "@altr/apolyx";
 
+import { INSPECTOR_TITLE_ID } from "@/components/inspector-chrome";
+import {
+  InspectorProvider,
+  useInspectorOptional,
+} from "@/components/inspector-host";
 import { ProjectSwitcher } from "@/components/project-switcher";
 import { SessionBadge } from "@/components/session-badge";
 import { StudioContextualSidebar } from "@/components/studio-contextual-sidebar";
@@ -35,6 +40,7 @@ import type { JordRole } from "@/lib/auth/roles";
 import {
   loadShellPrefs,
   saveShellPrefs,
+  sidebarWidthCss,
 } from "@/lib/studio-shell-prefs";
 import { navForRole, resolveContextual } from "@/lib/studio-nav";
 
@@ -61,14 +67,16 @@ export function StudioShell({ children, role, bypass }: Props) {
 
   return (
     <StudioPanesProvider contextual={contextual} key={projectSlug}>
-      <StudioShellFrame
-        role={role}
-        bypass={bypass}
-        contextual={contextual}
-        projectSlug={projectSlug}
-      >
-        {children}
-      </StudioShellFrame>
+      <InspectorProvider role={role}>
+        <StudioShellFrame
+          role={role}
+          bypass={bypass}
+          contextual={contextual}
+          projectSlug={projectSlug}
+        >
+          {children}
+        </StudioShellFrame>
+      </InspectorProvider>
     </StudioPanesProvider>
   );
 }
@@ -84,6 +92,7 @@ function StudioShellFrame({
   projectSlug: string;
 }) {
   const { inspectorOpen, setInspectorOpen, inspectorSlot } = useStudioPanes();
+  const inspector = useInspectorOptional();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileInspectorOpen, setMobileInspectorOpen] = useState(false);
@@ -114,8 +123,21 @@ function StudioShellFrame({
   }, [contextual]);
 
   useEffect(() => {
-    if (!inspectorOpen) setMobileInspectorOpen(false);
+    if (!inspectorOpen) {
+      setMobileInspectorOpen(false);
+      return;
+    }
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setMobileInspectorOpen(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, [inspectorOpen]);
+
+  const dismissInspector = () => {
+    if (inspector) inspector.close();
+    else setInspectorOpen(false);
+  };
 
   const showSidebar = contextual !== null;
   const desktopSidebarOpen = showSidebar && !sidebarCollapsed;
@@ -194,7 +216,13 @@ function StudioShellFrame({
                 <SheetTitle className="font-display">Section</SheetTitle>
               </SheetHeader>
               <div className="h-[calc(100vh-4rem)] w-full">
-                <StudioContextualSidebar contextual={contextual} />
+                <StudioContextualSidebar
+                  contextual={contextual}
+                  width={sidebarWidth}
+                  collapsed={false}
+                  onWidthChange={setSidebarWidth}
+                  onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+                />
               </div>
             </SheetContent>
           </Sheet>
@@ -308,38 +336,31 @@ function StudioShellFrame({
 
           {/* Desktop inspector overlays content only — no layout shift */}
           <div className="absolute inset-0 hidden lg:block">
-            <StudioInspector>
-              {inspectorSlot ?? (
-                <p className="text-sm text-muted-foreground">
-                  Inspector slot — wired in S0048.
-                </p>
-              )}
+            <StudioInspector
+              onDismiss={dismissInspector}
+              labelledBy={INSPECTOR_TITLE_ID}
+            >
+              {inspectorSlot}
             </StudioInspector>
           </div>
         </div>
       </div>
 
-      {/* Tablet / mobile inspector sheet */}
+      {/* Tablet / mobile: full-height sheet */}
       <Sheet
         open={mobileInspectorOpen && inspectorOpen}
         onOpenChange={(open) => {
           setMobileInspectorOpen(open);
-          if (!open) setInspectorOpen(false);
+          if (!open) dismissInspector();
         }}
       >
         <SheetContent
           side="right"
-          className="flex h-full w-full flex-col p-0 sm:max-w-md lg:hidden"
+          showClose={false}
+          className="flex h-full w-full flex-col p-0 sm:max-w-[30rem] lg:hidden"
         >
-          <SheetHeader className="border-b border-border px-4 py-3 text-left">
-            <SheetTitle className="font-display">Inspector</SheetTitle>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            {inspectorSlot ?? (
-              <p className="text-sm text-muted-foreground">
-                Inspector slot — wired in S0048.
-              </p>
-            )}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {inspectorSlot}
           </div>
         </SheetContent>
       </Sheet>

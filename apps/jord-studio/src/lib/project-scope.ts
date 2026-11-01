@@ -41,8 +41,17 @@ export const DEFAULT_PROJECT_SUMMARY: StudioProjectSummary = {
 export function projectHref(slug: string, path = ""): string {
   const base = `/p/${encodeURIComponent(slug)}`;
   if (!path || path === "/") return base;
-  const suffix = path.startsWith("/") ? path : `/${path}`;
-  return `${base}${suffix}`;
+  const q = path.indexOf("?");
+  const pathOnly = q >= 0 ? path.slice(0, q) : path;
+  const search = q >= 0 ? path.slice(q) : "";
+  const suffix = pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
+  return `${base}${suffix}${search}`;
+}
+
+/** Drop `?…` / `#…` before matching Studio paths. */
+export function pathWithoutSearch(path: string): string {
+  const q = path.search(/[?#]/);
+  return q >= 0 ? path.slice(0, q) : path;
 }
 
 export function extractProjectSlug(pathname: string): string | null {

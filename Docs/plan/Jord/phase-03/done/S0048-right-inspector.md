@@ -2,18 +2,19 @@
 title: "S0048 — right inspector drawer"
 description: "Dimmed/blurred backdrop drawer with focus trap, ESC/click-away close, deep-linkable inspector state, no layout shift"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-01
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0048
+  - done
 ---
 
 # S0048 — right inspector drawer
 
-> **Status:** todo · **Depends on** [[S0046-three-pane-shell|S0046]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-01 · **Depends on** [[S0046-three-pane-shell|S0046]] · **Phase:** [[../README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -55,7 +56,7 @@ Create table, insert row, policy editor and API details are all specified as ins
 
 ## Out of scope
 
-Inspector contents (create table is [[S0050-schema-picker-ui|S0050]], policies/APIs are [[S0059-policies-apis-drawers|S0059]]) · split-pane resizing · drag-to-dock.
+Inspector contents (create table is [[../S0050-schema-picker-ui|S0050]], policies/APIs are [[../S0059-policies-apis-drawers|S0059]]) · split-pane resizing · drag-to-dock.
 
 ## Diagram
 
@@ -79,23 +80,26 @@ flowchart LR
 
 ## Done when
 
-- [ ] Panels open/close with no layout shift and no lost scroll
-- [ ] Deep link reopens the same panel with props
-- [ ] Focus is trapped and restored; ESC and back close it
-- [ ] Reduced-motion respected
-- [ ] Three legacy panels migrated
-- [ ] Proof pasted
+- [x] Panels open/close with no layout shift and no lost scroll
+- [x] Deep link reopens the same panel with props
+- [x] Focus is trapped and restored; ESC and back close it
+- [x] Reduced-motion respected
+- [x] Three legacy panels migrated
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-studio typecheck` | |
-| | `pnpm --filter @altr/jord-studio build` | |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio exec node --import tsx --test src/lib/studio-inspector.test.ts src/lib/studio-nav.test.ts` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio typecheck` | exit 0 |
+| 2026-11-01 | `pnpm --filter @altr/jord-studio build` | exit 0 |
+
+**Shipped:** `InspectorProvider` + `useInspector` URL sync (`?inspector=` + props); content-only `StudioInspector` with FocusScope, dim+blur backdrop, &lt;200ms motion + `useReducedMotion`; sticky chrome/footer; panels `create-record` · `record-detail` · `migrate`; legacy `/records/new` + `/records/[id]` redirect to deep links; records browser opens via hook; mobile full-height Sheet.
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/studio/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

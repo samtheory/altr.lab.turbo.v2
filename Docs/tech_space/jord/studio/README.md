@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0047 projects + three-pane shell + contextual sidebars"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0048 projects + shell + sidebars + right inspector"
 created: 2026-10-24
-updated: 2026-11-01T14:56
+updated: 2026-11-01T16:30
 tags:
   - tech-space
   - jord
@@ -152,6 +152,20 @@ Real second-column lists for the wired sections; selection is URL-driven and the
 | Selection | `?table=`, `?job=`, `?endpoint=` rewritten on item click; restored on reload |
 | Search | Debounced ~150 ms; `/` focuses, Escape clears |
 
+### Right inspector (S0048)
+
+One host overlays the **content pane only** (primary nav stays clear). State is URL-addressable; ESC / backdrop / browser Back close it.
+
+| Piece | Fact |
+|-------|------|
+| API | `InspectorProvider` + `useInspector()` in `inspector-host.tsx` — `open(id, props)`, `close()` |
+| URL | `?inspector=<id>` plus optional `recordId` / `table`; helpers in `lib/studio-inspector.ts` |
+| Panels | `create-record` · `record-detail` · `migrate` (create-table / policies land in later cards) |
+| Frame | `StudioInspector` — FocusScope trap + restore, dim+blur backdrop, ~420–520 px, &lt;200 ms motion, `useReducedMotion` |
+| Chrome | Sticky title + close; `InspectorFooter` for primary actions |
+| Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate` |
+| Responsive | Below `lg`: Apolyx `Sheet` full-height (same slot content) |
+
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Right inspector behaviour: [[../../../plan/Jord/phase-03/S0048-right-inspector|S0048]].
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Next shell cards: [[../../../plan/Jord/phase-03/S0049-schema-scoped-introspection|S0049]] schema introspection · [[../../../plan/Jord/phase-03/S0050-schema-picker-ui|S0050]] picker UI.

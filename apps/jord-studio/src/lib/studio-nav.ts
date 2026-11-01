@@ -3,6 +3,7 @@ import { canWriteRecords } from "@/lib/auth/roles";
 import {
   extractProjectRestPath,
   extractProjectSlug,
+  pathWithoutSearch,
   projectHref,
 } from "@/lib/project-scope";
 
@@ -309,10 +310,11 @@ export function resolveActiveNavItem(
   pathname: string,
   groups: StudioNavGroup[],
 ): StudioNavItem | null {
-  const pathProject = extractProjectSlug(pathname);
+  const cleanPath = pathWithoutSearch(pathname);
+  const pathProject = extractProjectSlug(cleanPath);
   const pathRest = pathProject
-    ? extractProjectRestPath(pathname) || "/"
-    : pathname;
+    ? extractProjectRestPath(cleanPath) || "/"
+    : cleanPath;
 
   let best: StudioNavItem | null = null;
   let bestLen = -1;
@@ -320,10 +322,11 @@ export function resolveActiveNavItem(
   for (const group of groups) {
     for (const item of group.items) {
       if (item.status !== "live" || !item.href) continue;
-      const hrefProject = extractProjectSlug(item.href);
+      const cleanHref = pathWithoutSearch(item.href);
+      const hrefProject = extractProjectSlug(cleanHref);
       const hrefRest = hrefProject
-        ? extractProjectRestPath(item.href) || "/"
-        : item.href;
+        ? extractProjectRestPath(cleanHref) || "/"
+        : cleanHref;
       if (!pathMatchesItem(pathRest, hrefRest)) continue;
       if (hrefRest.length > bestLen) {
         best = item;

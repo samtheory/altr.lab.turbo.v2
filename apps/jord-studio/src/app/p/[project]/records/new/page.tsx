@@ -1,8 +1,13 @@
-import { CreateRecordForm } from "@/components/create-record-form";
-import { getSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
-export default async function NewRecordPage() {
-  const session = await getSession();
-  const role = session?.role ?? "readonly";
-  return <CreateRecordForm role={role} />;
+type Props = {
+  params: Promise<{ project: string }>;
+};
+
+/** Legacy route → inspector deep link (S0048). */
+export default async function NewRecordPage({ params }: Props) {
+  const { project } = await params;
+  redirect(
+    `/p/${encodeURIComponent(project)}/records?inspector=create-record`,
+  );
 }

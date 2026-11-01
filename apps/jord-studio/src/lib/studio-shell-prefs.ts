@@ -11,8 +11,8 @@ const DEFAULTS: StudioShellPrefs = {
   sidebarCollapsed: false,
   sidebarWidth: null,
 };
-const MIN_SIDEBAR_W = 12rem;
-const MAX_SIDEBAR_W = 30rem;
+const MIN_SIDEBAR_W = "12rem";
+const MAX_SIDEBAR_W = "30rem";
 
 function storageKey(projectSlug: string): string {
   return `jord.studio.shell:${VERSION}:${projectSlug}`;

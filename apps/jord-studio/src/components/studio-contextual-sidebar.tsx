@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { Button, Skeleton, cn } from "@altr/apolyx";
 import {
   GripHorizontal,
@@ -14,9 +13,6 @@ import {
   CONTEXTUAL_LABELS,
   type StudioContextual,
 } from "@/lib/studio-nav";
-import {
-  sidebarWidthCss,
-} from "@/lib/studio-shell-prefs";
 
 type Props = {
   contextual: StudioContextual;
@@ -50,11 +46,11 @@ export function StudioContextualSidebar({
       if (current == null) return;
       const container = document.getElementById("jord-sidebar");
       const layout = container?.getBoundingClientRect();
-      // Use layout width if it is the real sidebar; otherwise fall back to the persisted value.
+      const fallbackPx = width ?? parseFloat("20rem") * 16;
       const widthPx =
         layout && layout.width > 0 && layout.width < current
           ? layout.width
-          : sidebarWidthCss(width);
+          : fallbackPx;
       startRef.current = { x: clientX, width: widthPx };
       setDragging(true);
       document.body.style.userSelect = "none";

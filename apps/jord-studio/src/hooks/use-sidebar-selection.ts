@@ -1,4 +1,4 @@
-import { useCallback, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 /**
@@ -30,8 +30,8 @@ export function useSidebarSelection(opts: SelectionOpts) {
       const next = new URLSearchParams(searchParams.toString());
       if (id) next.set(key, id);
       else next.delete(key);
-      // Preserve any other query params the page itself uses.
-      router.replace(pathname + "?" + next.toString(), { scroll: false });
+      const q = next.toString();
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
     },
     [key, pathname, router, searchParams, onSelect],
   );
@@ -64,7 +64,8 @@ export function useSidebarSearch(
       const next = new URLSearchParams(searchParams.toString());
       if (value) next.set("q", value);
       else next.delete("q");
-      router.replace(pathname + "?" + next.toString(), { scroll: false });
+      const q = next.toString();
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
     },
     [router, pathname, searchParams, onSearchChange],
   );

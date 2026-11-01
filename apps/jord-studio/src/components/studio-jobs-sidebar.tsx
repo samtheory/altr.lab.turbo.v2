@@ -1,10 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { useRegisterStudioSidebar } from "@/components/studio-panes";
-import { StudioSidebarList, SidebarBadge } from "@/components/studio-sidebar-list";
-import type { SidebarItem } from "@/components/studio-sidebar-list";
+import {
+  StudioSidebarList,
+  SidebarBadge,
+  type SidebarItem,
+} from "@/components/studio-sidebar-list";
 import { formatMs, type PublicJob } from "@/lib/jobs";
 
 type ApiError = { error?: string; message?: string };
@@ -25,15 +29,16 @@ export function StudioJobsSidebar() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [searchValue, setSearchValue] = useState(() => searchParams.get("q") ?? "");
+  const [searchValue, setSearchValue] = useState(
+    () => searchParams.get("q") ?? "",
+  );
 
-  // Keep search in sync with the URL so reload restores it.
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
     if (q !== searchValue) setSearchValue(q);
   }, [searchParams, searchValue]);
 
-  const selectedId = useActiveJobId(pathname, searchParams, jobs);
+  const selectedId = useActiveJobId(searchParams, jobs);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -60,38 +65,8 @@ export function StudioJobsSidebar() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    load();
-    return () => {
-      cancelled = true;
-    };
+    void load();
   }, [load]);
-
-  const filtered = statusFilteredJobs(jobs, statusFilter);
-  const items = buildJobItems(
-    filterByName(filtered.map((j) => j.id), searchValue).map((id) =>
-      filtered.find((j) => j.id === id)!,
-    ),
-    selectedId,
-  );
-
-  useRegisterStudioSidebar(
-    <StudioSidebarList
-      header="Jobs"
-      searchable
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      filterOptions={STATUS_FILTER_OPTIONS}
-      filterValue={statusFilter}
-      onFilterChange={setStatusFilter}
-      items={items}
-      selectedId={selectedId}
-      onSelect={onSelect}
-      error={error}
-      loading={loading}
-      listAriaLabel="Jobs list"
-    />,
-  );
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -99,20 +74,50 @@ export function StudioJobsSidebar() {
       const next = new URLSearchParams(searchParams.toString());
       if (value) next.set("q", value);
       else next.delete("q");
-      router.replace(pathname + "?" + next.toString(), { scroll: false });
+      const q = next.toString();
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
     },
     [router, pathname, searchParams],
   );
 
   const onSelect = useCallback(
-    (item: SidebarItem, _index: number) => {
+    (item: SidebarItem) => {
       const next = new URLSearchParams(searchParams.toString());
       if (item.id) next.set("job", item.id);
       else next.delete("job");
-      router.replace(pathname + "?" + next.toString(), { scroll: false });
+      const q = next.toString();
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
     },
     [router, pathname, searchParams],
   );
+
+  const filtered = statusFilteredJobs(jobs, statusFilter);
+  const items = buildJobItems(
+    filterByName(
+      filtered.map((j) => j.id),
+      searchValue,
+    ).map((id) => filtered.find((j) => j.id === id)!),
+  );
+
+  useRegisterStudioSidebar(
+    <StudioSidebarList
+      header="Jobs"
+      searchable
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
+      filterOptions={STATUS_FILTER_OPTIONS}
+      filterValue={statusFilter}
+      onFilterChange={setStatusFilter}
+      items={items}
+      selectedId={selectedId || undefined}
+      onSelect={onSelect}
+      error={error ?? undefined}
+      loading={loading}
+      listAriaLabel="Jobs list"
+    />,
+  );
+
+  return null;
 }
 
 function filterByName(ids: string[], q: string): string[] {
@@ -122,7 +127,6 @@ function filterByName(ids: string[], q: string): string[] {
 }
 
 function useActiveJobId(
-  pathname: string,
   searchParams: URLSearchParams,
   jobs: PublicJob[],
 ): string {
@@ -130,7 +134,6 @@ function useActiveJobId(
   if (param && param !== "") {
     return jobs.some((j) => j.id === param) ? param : "";
   }
-  // Fall back to the first job for highlight when nothing is selected.
   return jobs[0]?.id ?? "";
 }
 
@@ -140,7 +143,7 @@ function statusFilteredJobs(jobs: PublicJob[], filter: string): PublicJob[] {
   return jobs.filter((j) => j.last_status === filter);
 }
 
-function buildJobItems(jobs: PublicJob[], selectedId: string): SidebarItem[] {
+function buildJobItems(jobs: PublicJob[]): SidebarItem[] {
   return jobs.map((job) => ({
     id: job.id,
     label: job.name,

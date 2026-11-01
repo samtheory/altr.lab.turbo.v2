@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import {
@@ -24,6 +23,7 @@ import {
   TableRow,
 } from "@altr/apolyx";
 
+import { useInspector } from "@/components/inspector-host";
 import { useProjectHref } from "@/hooks/use-project-path";
 import {
   formatMs,
@@ -40,6 +40,7 @@ type Props = {
 export function RecordsBrowser({ initialBucket = "lab" }: Props) {
   const router = useRouter();
   const hrefFor = useProjectHref();
+  const { open: openInspector } = useInspector();
   const [bucket, setBucket] = useState(initialBucket);
   const [rows, setRows] = useState<PublicRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -160,8 +161,11 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
               {liveState}
             </Badge>
           </div>
-          <Button asChild>
-            <Link href={hrefFor("/records/new")}>Insert row</Link>
+          <Button
+            type="button"
+            onClick={() => openInspector("create-record")}
+          >
+            Insert row
           </Button>
         </div>
       </div>
@@ -226,7 +230,9 @@ export function RecordsBrowser({ initialBucket = "lab" }: Props) {
               <TableRow
                 key={row.id}
                 className="cursor-pointer"
-                onClick={() => router.push(hrefFor(`/records/${row.id}`))}
+                onClick={() =>
+                  openInspector("record-detail", { recordId: row.id })
+                }
               >
                 <TableCell className="font-mono text-xs">{row.id.slice(0, 8)}…</TableCell>
                 <TableCell className="font-mono text-xs">{row.bucket}</TableCell>

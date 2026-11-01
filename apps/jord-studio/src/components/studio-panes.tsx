@@ -5,11 +5,18 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import { cn } from "@altr/apolyx";
+import {
+  FocusScope,
+  Presence,
+  cn,
+  motion,
+  useReducedMotion,
+} from "@altr/apolyx";
 
 import type { StudioContextual } from "@/lib/studio-nav";
 
@@ -123,52 +130,99 @@ export function StudioContent({ children, className }: PaneProps) {
   );
 }
 
-/** Right inspector frame — overlays content; no width reflow when opened. */
-export function StudioInspector({ children, className }: PaneProps) {
-  const { inspectorOpen, setInspectorOpen } = useStudioPanes();
+type InspectorFrameProps = PaneProps & {
+  /** Called for ESC / backdrop — prefer URL close via InspectorProvider. */
+  onDismiss?: () => void;
+  /** Links dialog to the panel title (InspectorPanelChrome). */
+  labelledBy?: string;
+};
 
-  const onBackdrop = useCallback(() => {
-    setInspectorOpen(false);
-  }, [setInspectorOpen]);
+/**
+ * Right inspector frame — overlays content only (never the primary nav).
+ * No layout shift / scroll lock on the page behind. S0048.
+ */
+export function StudioInspector({
+  children,
+  className,
+  onDismiss,
+  labelledBy,
+}: InspectorFrameProps) {
+  const { inspectorOpen, setInspectorOpen } = useStudioPanes();
+  const reduced = useReducedMotion();
+  const fallbackLabelId = useId();
+
+  const dismiss = useCallback(() => {
+    if (onDismiss) onDismiss();
+    else setInspectorOpen(false);
+  }, [onDismiss, setInspectorOpen]);
 
   useEffect(() => {
     if (!inspectorOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setInspectorOpen(false);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        dismiss();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [inspectorOpen, setInspectorOpen]);
-
-  if (!inspectorOpen) return null;
+  }, [inspectorOpen, dismiss]);
 
   return (
-    <div
-      data-slot="studio-inspector-layer"
-      className="pointer-events-none absolute inset-0 z-20 flex justify-end"
-    >
-      <button
-        type="button"
-        aria-label="Close inspector"
-        className="pointer-events-auto absolute inset-0 bg-background/40 backdrop-blur-sm"
-        onClick={onBackdrop}
-      />
-      <aside
-        id="jord-inspector"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Inspector"
-        tabIndex={-1}
-        className={cn(
-          "pointer-events-auto relative flex h-full w-[min(100%,24rem)] shrink-0 flex-col border-l border-border bg-background shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          className,
-        )}
-      >
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
-          {children}
+    <Presence present={inspectorOpen}>
+      {({ present }) => (
+        <div
+          data-slot="studio-inspector-layer"
+          className="pointer-events-none absolute inset-0 z-20 flex justify-end"
+          hidden={!present && !inspectorOpen}
+        >
+          <motion.button
+            type="button"
+            aria-label="Close inspector"
+            className="pointer-events-auto absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: present && inspectorOpen ? 1 : 0 }}
+            transition={{ duration: reduced ? 0.12 : 0.18 }}
+            onClick={dismiss}
+          />
+          <FocusScope>
+            <motion.aside
+              id="jord-inspector"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={labelledBy ?? fallbackLabelId}
+              tabIndex={-1}
+              data-state={inspectorOpen && present ? "open" : "closed"}
+              className={cn(
+                /* 420–520px band */
+                "pointer-events-auto relative flex h-full w-[min(100%,30rem)] min-w-[min(100%,26.25rem)] shrink-0 flex-col border-l border-border bg-background shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                className,
+              )}
+              initial={reduced ? { opacity: 0 } : { opacity: 1, x: "100%" }}
+              animate={
+                inspectorOpen && present
+                  ? { opacity: 1, x: "0%" }
+                  : reduced
+                    ? { opacity: 0 }
+                    : { opacity: 1, x: "100%" }
+              }
+              transition={
+                reduced
+                  ? { duration: 0.12 }
+                  : { duration: 0.18, ease: [0.45, 0, 0.55, 1] }
+              }
+            >
+              <span id={fallbackLabelId} className="sr-only">
+                Inspector
+              </span>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                {children}
+              </div>
+            </motion.aside>
+          </FocusScope>
         </div>
-      </aside>
-    </div>
+      )}
+    </Presence>
   );
 }
 

@@ -18,6 +18,7 @@ import {
   DEFAULT_PROJECT_SLUG,
   extractProjectRestPath,
   extractProjectSlug,
+  pathWithoutSearch,
 } from "@/lib/project-scope";
 import { navForRole, resolveActiveNavItem } from "@/lib/studio-nav";
 
@@ -30,12 +31,16 @@ type Props = {
 };
 
 function isActive(pathname: string, href: string): boolean {
-  const pathProject = extractProjectSlug(pathname);
-  const hrefProject = extractProjectSlug(href);
+  const cleanPath = pathWithoutSearch(pathname);
+  const cleanHref = pathWithoutSearch(href);
+  const pathProject = extractProjectSlug(cleanPath);
+  const hrefProject = extractProjectSlug(cleanHref);
   const pathRest = pathProject
-    ? extractProjectRestPath(pathname) || "/"
-    : pathname;
-  const hrefRest = hrefProject ? extractProjectRestPath(href) || "/" : href;
+    ? extractProjectRestPath(cleanPath) || "/"
+    : cleanPath;
+  const hrefRest = hrefProject
+    ? extractProjectRestPath(cleanHref) || "/"
+    : cleanHref;
 
   if (hrefRest === "/records") {
     return (

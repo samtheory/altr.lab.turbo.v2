@@ -1,7 +1,12 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Badge,
   Input,
@@ -12,6 +17,7 @@ import {
   SelectValue,
   Skeleton,
   cn,
+  motion,
 } from "@altr/apolyx";
 import { Search, Filter, X } from "lucide-react";
 
@@ -111,20 +117,10 @@ export const StudioSidebarList = forwardRef<HTMLDivElement, Props>(
     const effectiveSearch = searchable ? searchValue : internalSearch;
 
     useEffect(() => {
-      if (!searchable) return;
-      setInternalSearch("");
-    }, [searchable]);
-
-    useEffect(() => {
-      if (searchTimer.current) clearTimeout(searchTimer.current);
-      if (!searchable || onSearchChange == null) return;
-      searchTimer.current = setTimeout(() => {
-        onSearchChange(effectiveSearch);
-      }, 150);
       return () => {
         if (searchTimer.current) clearTimeout(searchTimer.current);
       };
-    }, [searchable, effectiveSearch, onSearchChange]);
+    }, []);
 
     useEffect(() => {
       if (error != null) setStatus("error");
@@ -156,7 +152,7 @@ export const StudioSidebarList = forwardRef<HTMLDivElement, Props>(
           inputRef.current?.focus();
         }
         if (e.key === "Escape" && document.activeElement === inputRef.current) {
-          inputRef.current.blur();
+          inputRef.current?.blur();
           setInternalSearch("");
           if (onSearchChange) onSearchChange("");
           focusList();
@@ -211,8 +207,9 @@ export const StudioSidebarList = forwardRef<HTMLDivElement, Props>(
     const renderGrouped = () => {
       const groups: Record<string, SidebarItem[]> = {};
       for (const item of groupedItems) {
-        if (!groups[item.group]) groups[item.group] = [];
-        groups[item.group].push(item);
+        const groupKey = item.group ?? "Other";
+        if (!groups[groupKey]) groups[groupKey] = [];
+        groups[groupKey].push(item);
       }
       return Object.entries(groups).map(([group, groupItems]) => (
         <div key={group} className="flex flex-col gap-1 px-1 pt-2">
@@ -263,7 +260,14 @@ export const StudioSidebarList = forwardRef<HTMLDivElement, Props>(
                 <Input
                   ref={inputRef}
                   value={effectiveSearch}
-                  onValueChange={setInternalSearch}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setInternalSearch(v);
+                    if (searchable && onSearchChange) {
+                      if (searchTimer.current) clearTimeout(searchTimer.current);
+                      searchTimer.current = setTimeout(() => onSearchChange(v), 150);
+                    }
+                  }}
                   placeholder="Search…"
                   className="w-full pl-7"
                   aria-label={`Search ${header.toLowerCase()}`}
