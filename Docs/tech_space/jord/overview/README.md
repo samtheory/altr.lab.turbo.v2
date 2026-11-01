@@ -15,7 +15,10 @@ tags:
   - s0036
   - s0038
   - s0039
+  - s0040
   - otel
+  - backup
+  - restore-drill
   - rate-limit
   - idempotency
 ---
@@ -228,6 +231,37 @@ Opt-in. Module: `cloud/jord/src/telemetry/`. Boot calls `initTelemetry` before `
 
 JSON request logs include `traceId` when OTel is on. Card: [[../../../plan/Jord/phase-03/done/S0039-otel-traces|S0039]].
 
+### Backup + restore drill (S0040)
+
+SQL/metadata only. **Blob bytes are never in the dump** — copy `data/blobs/` (local) or the S3/R2 bucket separately. Hosted `libsql://` dumps stay with the provider; these scripts cover `postgres://` / `postgresql://` and `file:` libSQL.
+
+| Script | Role |
+|--------|------|
+| `cloud/jord/scripts/backup.sh` | Postgres: `pg_dump --format=custom`. File: copy / sqlite `.backup` into `cloud/jord/backups/` |
+| `cloud/jord/scripts/restore-drill.sh` | Restores into a scratch target (`<db>_drill` or `data/jord_drill.db`), compares core table counts + `MAX(jord_changes.seq)` |
+| `cloud/jord/scripts/restore-drill-compare.mjs` | File compare helper when the `sqlite3` CLI is missing (Windows) |
+
+| Guard | Behavior |
+|-------|----------|
+| Live URL | Refuses when `--target-url` equals `DATABASE_URL` or `JORD_DATABASE_URL` (or the `--source-url`) |
+| `--yes` | Required for the destructive scratch restore |
+| Postgres name | Scratch database must end with `_drill` |
+| Client tools | Prefer host `pg_dump` / `pg_restore` / `psql`; else set `JORD_BACKUP_PG_CONTAINER` (e.g. `jord-pg`) and stream via `docker exec` |
+
+```bash
+# from cloud/jord (Git Bash on Windows is fine)
+./scripts/backup.sh --url "file:./data/jord.db"
+./scripts/restore-drill.sh --dump backups/jord-<stamp>.db --source-url "file:./data/jord.db" --yes
+
+export JORD_BACKUP_PG_CONTAINER=jord-pg   # when pg_dump is not on PATH
+./scripts/backup.sh --url "postgres://postgres:postgres@127.0.0.1:54329/jord_s0040"
+./scripts/restore-drill.sh --dump backups/jord-<stamp>.dump \
+  --source-url "postgres://postgres:postgres@127.0.0.1:54329/jord_s0040" --yes
+# → restores into …/jord_s0040_drill and prints PASS when counts + max seq match
+```
+
+Package aliases: `pnpm --filter @altr/jord-server backup` / `restore-drill`. Card: [[../../../plan/Jord/phase-03/done/S0040-backup-restore-drill|S0040]].
+
 ## Not in Jord yet
 
-Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024). Backup drill / Dockerfile remain open on [[../../../plan/Jord/phase-03/README|phase-03]].
+Redis, a second bot process, remote S3, hosted embed APIs, and a Studio migration-history UI. Those stay candidates in [[../../../feature_list/Jord/INDEX]] or later phase-02 cards (Studio tools are S0024). Dockerfile / deploy recipe remains open on [[../../../plan/Jord/phase-03/S0041-dockerfile-deploy|S0041]].

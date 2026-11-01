@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-01):** **S0034–S0039 done** (health · JSON logs · shared PG rate/idempotency · LISTEN fan-out · `JORD_PG_WRITE_CONCURRENCY` · OTel). Archived under [[done/README|done/]]. As-shipped note: [[../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] (partial). Next open card: [[S0040-backup-restore-drill|S0040]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-01):** **S0034–S0040 done** (health · JSON logs · shared PG rate/idempotency · LISTEN fan-out · `JORD_PG_WRITE_CONCURRENCY` · OTel · backup/restore drill). Archived under [[done/README|done/]]. As-shipped note: [[../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]] (partial). Next open card: [[S0041-dockerfile-deploy|S0041]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0013-production-ops|F0013]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -70,7 +70,7 @@ flowchart LR
 | A4 | [[done/S0037-listen-seq-fanout\|S0037]] | LISTEN/NOTIFY fan-out + shared watermark | **done** 2026-10-29 |
 | A5 | [[done/S0038-pg-write-concurrency\|S0038]] | `JORD_PG_WRITE_CONCURRENCY` | **done** 2026-11-01 |
 | A6 | [[done/S0039-otel-traces\|S0039]] | OpenTelemetry traces + metrics | **done** 2026-11-01 |
-| A7 | [[S0040-backup-restore-drill\|S0040]] | Backup + restore drill | 60–90 min |
+| A7 | [[done/S0040-backup-restore-drill\|S0040]] | Backup + restore drill | **done** 2026-11-01 |
 | A8 | [[S0041-dockerfile-deploy\|S0041]] | Dockerfile + deploy recipe | 1.5–2 h |
 
 ### Wave B — control plane ([[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]])

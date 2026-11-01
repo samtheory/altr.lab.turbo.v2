@@ -56,4 +56,8 @@ data/**/*.db-wal
 data/**/*.db-shm
 # Jord-S0013 local blob store (bytes; metadata lives in jord.db)
 data/blobs/
+# S0040 backup dumps + restore-drill scratch DBs
+cloud/jord/backups/
+cloud/jord/data/jord_drill.db*
+*.dump
 

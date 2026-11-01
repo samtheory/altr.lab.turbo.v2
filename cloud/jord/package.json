@@ -13,6 +13,8 @@
     "test": "vitest run",
     "dump:phase-01-baseline": "tsx scripts/dump-phase-01-baseline.ts",
     "storage:copy-plan": "tsx scripts/storage-copy-plan.ts",
+    "backup": "bash scripts/backup.sh",
+    "restore-drill": "bash scripts/restore-drill.sh",
     "lint": "echo \"No lint configured for @altr/jord-server yet\"",
     "clean": "rimraf dist .turbo"
   },

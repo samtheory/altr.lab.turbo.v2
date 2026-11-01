@@ -1,7 +1,7 @@
 ---
 title: "jord-F0013 — production ops (multi-instance ready)"
 feature_id: jord-F0013
-description: "Postgres-backed rate-limit/idempotency + LISTEN fan-out + PG write concurrency + OTel shipped; remaining: backup drill, Dockerfile"
+description: "Ops through backup/restore drill shipped (S0034–S0040); remaining: Dockerfile + deploy recipe"
 created: 2026-10-25
 updated: 2026-11-01
 tags:
@@ -11,17 +11,16 @@ tags:
   - partial
   - jord-F0013
   - phase-03
-  - s0040
   - s0041
 ---
 
 # jord-F0013 — production ops (multi-instance ready)
 
-> **Status:** partial · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · As-shipped: [[../done/jord-F0013-production-ops|jord-F0013]] · Remaining: S0040–S0041 on [[../../../plan/Jord/phase-03/README]]
+> **Status:** partial · **Id:** `jord-F0013` (was P1) · Index: [[../INDEX]] · As-shipped: [[../done/jord-F0013-production-ops|jord-F0013]] · Remaining: S0041 on [[../../../plan/Jord/phase-03/README]]
 
 ## Why
 
-Rate limits, idempotency, LISTEN fan-out, PG write concurrency, and OTel are shared/ready on Postgres (S0034–S0039). SQL history is still process-local; backup / Dockerfile remain.
+Rate limits, idempotency, LISTEN fan-out, PG write concurrency, OTel, and a proven backup/restore drill are in (S0034–S0040). SQL history is still process-local; Dockerfile remains.
 
 ## What
 
@@ -51,7 +50,7 @@ Two server instances behind one URL: shared rate limit, cross-instance idempoten
 | [[../../../plan/Jord/phase-03/done/S0037-listen-seq-fanout\|S0037]] — LISTEN fan-out + shared watermark | 2–3 h | **done** 2026-10-29 |
 | [[../../../plan/Jord/phase-03/done/S0038-pg-write-concurrency\|S0038]] — JORD_PG_WRITE_CONCURRENCY | 45–75 min | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/done/S0039-otel-traces\|S0039]] — OpenTelemetry traces + metrics | 2–3 h | **done** 2026-11-01 |
-| [[../../../plan/Jord/phase-03/S0040-backup-restore-drill\|S0040]] — backup + restore drill | 60–90 min | todo |
+| [[../../../plan/Jord/phase-03/done/S0040-backup-restore-drill\|S0040]] — backup + restore drill | 60–90 min | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/S0041-dockerfile-deploy\|S0041]] — Dockerfile + deploy recipe | 1.5–2 h | todo |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

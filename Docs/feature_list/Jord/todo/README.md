@@ -2,7 +2,7 @@
 title: "feature_list/Jord/todo — remaining intent"
 description: "Open Jord features (jord-F0013+). Cite IDs from INDEX."
 created: 2026-10-27
-updated: 2026-10-29
+updated: 2026-11-01
 tags:
   - feature
   - jord
@@ -16,7 +16,7 @@ tags:
 
 | Id | Note |
 |----|------|
-| [[jord-F0013-production-ops\|jord-F0013]] | Production ops (partial — S0034–S0036 shipped) |
+| [[jord-F0013-production-ops\|jord-F0013]] | Production ops (partial — S0034–S0040 shipped; S0041 open) |
 | [[jord-F0014-typed-dx\|jord-F0014]] | Typed DX |
 | [[jord-F0015-functions-runtime\|jord-F0015]] | Functions runtime |
 | [[jord-F0016-auth-v2\|jord-F0016]] | Auth v2 |

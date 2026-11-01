@@ -11,6 +11,9 @@ import { resolve } from "node:path";
  * - `JORD_OTEL_ENDPOINT` / `OTEL_EXPORTER_OTLP_ENDPOINT` — OTLP/HTTP base URL when enabled.
  * - See also: `JORD_CORS_ORIGINS`, `JORD_MAX_JSON_BYTES`, `JORD_HTTP_LOG`,
  *   `JORD_IDEMPOTENCY_TTL_MS`, `JORD_WAL_CHECKPOINT_MS`, `JORD_MIGRATE_URL`.
+ * - Backup / restore-drill (S0040): `DATABASE_URL` is the live URL the scripts
+ *   refuse to overwrite; optional `JORD_DATABASE_URL` alias; optional
+ *   `JORD_BACKUP_PG_CONTAINER` when host `pg_dump`/`psql` are missing.
  */
 export function loadLocalEnv(cwd: string = process.cwd()): void {
   const path = resolve(cwd, ".env");

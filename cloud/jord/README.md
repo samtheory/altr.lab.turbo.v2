@@ -21,8 +21,19 @@ Default: [http://127.0.0.1:8787](http://127.0.0.1:8787). `startJordServer` loads
 | `JORD_JWT_SECRET` | for `/auth/*` tokens | HS256 signing secret (kid `current`). Separate from the HMAC secret |
 | `JORD_JWT_SECRET_PREVIOUS` | no | Previous HS256 secret (kid `previous`, verify only) |
 | `DATABASE_URL` | no | `file:` (default) or `postgres://` / `postgresql://` |
+| `JORD_DATABASE_URL` | no | Optional live-URL alias for backup/restore-drill guards |
+| `JORD_BACKUP_PG_CONTAINER` | no | Docker container with `pg_dump`/`psql` when host tools are missing |
 | `PORT` | no (default `8787`) | Listen port |
 | `JORD_WAL_CHECKPOINT_MS` | no | WAL truncate interval |
+
+## Backup / restore drill (S0040)
+
+```bash
+pnpm backup -- --url "file:./data/jord.db"
+pnpm restore-drill -- --dump backups/jord-<stamp>.db --source-url "file:./data/jord.db" --yes
+```
+
+SQL/metadata only — blob bytes in `data/blobs/` or S3 are **not** included. Scripts refuse to restore over the live `DATABASE_URL`.
 
 ## Auth (Studio S3)
 
