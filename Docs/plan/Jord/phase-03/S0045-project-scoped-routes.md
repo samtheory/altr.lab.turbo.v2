@@ -13,7 +13,7 @@ tags:
 
 # S0045 — `/p/[project]` scoping + switcher
 
-> **Status:** todo · **Depends on** [[S0044-new-project-wizard|S0044]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0044-new-project-wizard|S0044]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0021-projects-provisioning|jord-F0021]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 

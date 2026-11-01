@@ -26,6 +26,24 @@ export type StudioNavGroup = {
  */
 export const STUDIO_NAV: StudioNavGroup[] = [
   {
+    id: "projects",
+    label: "Projects",
+    items: [
+      {
+        id: "projects-list",
+        label: "All projects",
+        href: "/projects",
+        status: "live",
+      },
+      {
+        id: "projects-new",
+        label: "New project",
+        href: "/projects/new",
+        status: "live",
+      },
+    ],
+  },
+  {
     id: "data",
     label: "Data",
     items: [

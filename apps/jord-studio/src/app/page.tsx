@@ -20,12 +20,12 @@ export default function HomePage() {
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/tables">
-              Open tables <ArrowRight className="size-4" aria-hidden />
+            <Link href="/projects">
+              Projects <ArrowRight className="size-4" aria-hidden />
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link href="/records/new">Insert row</Link>
+            <Link href="/tables">Open tables</Link>
           </Button>
         </div>
       </section>
