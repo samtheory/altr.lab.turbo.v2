@@ -883,6 +883,7 @@ export function createJordApp(deps: JordAppDeps) {
       name?: unknown;
       columns?: unknown;
       schema?: unknown;
+      foreignKeys?: unknown;
     }>();
     if (body.schema !== undefined && typeof body.schema !== "string") {
       throw new HTTPException(400, { message: "schema must be a string" });
@@ -897,6 +898,7 @@ export function createJordApp(deps: JordAppDeps) {
       name: string;
       type: JordColumnType;
       pk?: boolean;
+      settings?: unknown;
     }> = [];
     for (const raw of body.columns) {
       if (!raw || typeof raw !== "object") {
@@ -904,7 +906,12 @@ export function createJordApp(deps: JordAppDeps) {
           message: "each column needs name and type",
         });
       }
-      const col = raw as { name?: unknown; type?: unknown; pk?: unknown };
+      const col = raw as {
+        name?: unknown;
+        type?: unknown;
+        pk?: unknown;
+        settings?: unknown;
+      };
       if (typeof col.name !== "string" || typeof col.type !== "string") {
         throw new HTTPException(400, {
           message: "each column needs name and type",
@@ -919,11 +926,22 @@ export function createJordApp(deps: JordAppDeps) {
         name: col.name,
         type: col.type,
         pk: col.pk === true,
+        settings:
+          col.settings !== undefined && typeof col.settings === "object"
+            ? col.settings
+            : undefined,
       });
     }
 
     const result = await enqueueWrite(() =>
-      ddlJord.createTable({ name: body.name as string, columns, schema }),
+      ddlJord.createTable({
+        name: body.name as string,
+        columns: columns as never,
+        schema,
+        foreignKeys: Array.isArray(body.foreignKeys)
+          ? (body.foreignKeys as never)
+          : undefined,
+      }),
     );
     if (!result.ok) {
       const status = result.error === "table_exists" ? 409 : 400;

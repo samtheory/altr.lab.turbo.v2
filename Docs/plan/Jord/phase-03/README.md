@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-02):** **S0034–S0054 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0054-id-strategies|S0054]]). Archived under [[done/README|done/]]. Next open card: [[S0055-fk-relationship-editor|S0055]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-02):** **S0034–S0055 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) **closed**. Archived under [[done/README|done/]]. Next open card: [[S0056-grid-column-ops|S0056]] (wave E — needs [[../../../feature_list/ui-kit/apolyx-F0008-datagrid|apolyx-F0008]]). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -100,7 +100,7 @@ flowchart LR
 | D1 | [[done/S0052-type-registry\|S0052]] | Dialect type registry + introspection model | **done** 2026-11-02 |
 | D2 | [[done/S0053-column-settings\|S0053]] | Column settings + server-side validation | **done** 2026-11-02 |
 | D3 | [[done/S0054-id-strategies\|S0054]] | Generated id strategies | **done** 2026-11-02 |
-| D4 | [[S0055-fk-relationship-editor\|S0055]] | FK / relationship editor (cross-schema) | 2.5–3 h |
+| D4 | [[done/S0055-fk-relationship-editor\|S0055]] | FK / relationship editor (cross-schema) | **done** 2026-11-02 |
 
 ### Wave E — tables workspace ([[../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]])
 

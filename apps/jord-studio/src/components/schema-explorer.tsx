@@ -8,6 +8,11 @@ import {
   AlertTitle,
   Badge,
   Button,
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxTrigger,
   Field,
   FieldInput,
   Select,
@@ -28,6 +33,7 @@ import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
 import {
   COLUMN_TYPES,
   EMPTY_COLUMN_SETTINGS,
+  FK_ACTIONS,
   isAlterableUserTable,
   previewAddColumnSql,
   settingsFormToPayload,
@@ -83,6 +89,10 @@ export function SchemaExplorer({ role }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isCreating, startCreate] = useTransition();
   const [isDdl, startDdl] = useTransition();
+  const [schemaNames, setSchemaNames] = useState<string[]>([]);
+  const [fkTableNames, setFkTableNames] = useState<string[]>([]);
+  const [fkColumnNames, setFkColumnNames] = useState<string[]>([]);
+  const [defaultSchema, setDefaultSchema] = useState("public");
 
   const canDdlTable = canAlter && isAlterableUserTable(selected);
 
@@ -147,6 +157,81 @@ export function SchemaExplorer({ role }: Props) {
     // initial load only
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/schema/schemas", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          schemas?: Array<{ name: string }>;
+          defaultSchema?: string;
+        };
+        if (cancelled) return;
+        const names = (data.schemas ?? []).map((s) => s.name);
+        setSchemaNames(names);
+        const def =
+          data.defaultSchema ??
+          (names.includes("public") ? "public" : names[0] ?? "main");
+        setDefaultSchema(def);
+        setColSettings((s) =>
+          s.fkSchema ? s : { ...s, fkSchema: def },
+        );
+      } catch {
+        /* picker stays empty until schemas load */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!colSettings.fkEnabled || !colSettings.fkSchema) {
+      setFkTableNames([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const q = new URLSearchParams({ schema: colSettings.fkSchema });
+      const res = await fetch(`/api/schema/tables?${q}`, { cache: "no-store" });
+      if (!res.ok || cancelled) return;
+      const data = (await res.json()) as { tables: string[] };
+      if (cancelled) return;
+      setFkTableNames(data.tables.filter((t) => isAlterableUserTable(t) || t === selected));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [colSettings.fkEnabled, colSettings.fkSchema, selected]);
+
+  useEffect(() => {
+    if (!colSettings.fkEnabled || !colSettings.fkTable) {
+      setFkColumnNames([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const q = new URLSearchParams({ schema: colSettings.fkSchema || defaultSchema });
+      const res = await fetch(
+        `/api/schema/tables/${encodeURIComponent(colSettings.fkTable)}?${q}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok || cancelled) return;
+      const data = (await res.json()) as SchemaTable;
+      if (cancelled) return;
+      setFkColumnNames(data.columns.map((c) => c.name));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    colSettings.fkEnabled,
+    colSettings.fkSchema,
+    colSettings.fkTable,
+    defaultSchema,
+  ]);
 
   useEffect(() => {
     if (!tables?.includes(selected)) return;
@@ -844,6 +929,27 @@ export function SchemaExplorer({ role }: Props) {
             </Table>
           ) : null}
 
+          {tableInfo?.foreignKeys && tableInfo.foreignKeys.length > 0 ? (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Relationships</h3>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {tableInfo.foreignKeys.map((fk) => (
+                  <li
+                    key={`${fk.columns.join(",")}->${fk.references.schema}.${fk.references.table}`}
+                    className="font-mono text-xs"
+                  >
+                    <Badge variant="outline" className="mr-2 font-mono">
+                      {fk.cardinality ?? "1:N"}
+                    </Badge>
+                    ({fk.columns.join(", ")}) → {fk.references.schema}.
+                    {fk.references.table}({fk.references.columns.join(", ")})
+                    {fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           <form
             onSubmit={onAddColumn}
             className="flex flex-col gap-4 rounded-lg border border-border bg-muted/20 p-4"
@@ -1086,6 +1192,167 @@ export function SchemaExplorer({ role }: Props) {
                   className="font-mono text-sm"
                 />
               </Field>
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-medium">Foreign key</h3>
+                <Select
+                  value={colSettings.fkEnabled ? "yes" : "no"}
+                  onValueChange={(v) =>
+                    setColSettings((s) => ({
+                      ...s,
+                      fkEnabled: v === "yes",
+                      fkSchema: s.fkSchema || defaultSchema,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">none</SelectItem>
+                    <SelectItem value="yes">declare FK</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {colSettings.fkEnabled ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="target schema">
+                    <Select
+                      value={colSettings.fkSchema || defaultSchema}
+                      onValueChange={(v) =>
+                        setColSettings((s) => ({
+                          ...s,
+                          fkSchema: v,
+                          fkTable: "",
+                          fkColumn: "",
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="schema" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(schemaNames.length > 0
+                          ? schemaNames
+                          : [defaultSchema]
+                        ).map((name) => (
+                          <SelectItem key={name} value={name}>
+                            {name}
+                            {name === defaultSchema ? " (active)" : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field label="target table">
+                    <Combobox
+                      value={colSettings.fkTable}
+                      onValueChange={(v) =>
+                        setColSettings((s) => ({
+                          ...s,
+                          fkTable: v,
+                          fkColumn: "",
+                        }))
+                      }
+                    >
+                      <ComboboxTrigger
+                        aria-label="FK target table"
+                        placeholder="Search table…"
+                      />
+                      <ComboboxContent>
+                        {fkTableNames.map((name) => (
+                          <ComboboxItem key={name} value={name}>
+                            {name}
+                          </ComboboxItem>
+                        ))}
+                        <ComboboxEmpty>No tables</ComboboxEmpty>
+                      </ComboboxContent>
+                    </Combobox>
+                  </Field>
+                  <Field label="target column">
+                    <Combobox
+                      value={colSettings.fkColumn}
+                      onValueChange={(v) =>
+                        setColSettings((s) => ({ ...s, fkColumn: v }))
+                      }
+                    >
+                      <ComboboxTrigger
+                        aria-label="FK target column"
+                        placeholder="Search column…"
+                      />
+                      <ComboboxContent>
+                        {fkColumnNames.map((name) => (
+                          <ComboboxItem key={name} value={name}>
+                            {name}
+                          </ComboboxItem>
+                        ))}
+                        <ComboboxEmpty>No columns</ComboboxEmpty>
+                      </ComboboxContent>
+                    </Combobox>
+                  </Field>
+                  <Field label="ON DELETE">
+                    <Select
+                      value={colSettings.fkOnDelete}
+                      onValueChange={(v) =>
+                        setColSettings((s) => ({
+                          ...s,
+                          fkOnDelete: v as ColumnSettingsForm["fkOnDelete"],
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FK_ACTIONS.map((action) => (
+                          <SelectItem key={action} value={action}>
+                            {action}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field label="ON UPDATE">
+                    <Select
+                      value={colSettings.fkOnUpdate}
+                      onValueChange={(v) =>
+                        setColSettings((s) => ({
+                          ...s,
+                          fkOnUpdate: v as ColumnSettingsForm["fkOnUpdate"],
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FK_ACTIONS.map((action) => (
+                          <SelectItem key={action} value={action}>
+                            {action}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  {colSettings.fkSchema &&
+                  colSettings.fkTable &&
+                  colSettings.fkColumn ? (
+                    <p className="sm:col-span-2 text-xs text-muted-foreground">
+                      Cardinality preview:{" "}
+                      <span className="font-mono">
+                        {colSettings.unique ? "1:1" : "1:N"}
+                      </span>{" "}
+                      →{" "}
+                      <span className="font-mono">
+                        {colSettings.fkSchema}.{colSettings.fkTable}.
+                        {colSettings.fkColumn}
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
 
             <pre className="overflow-x-auto rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-muted-foreground">

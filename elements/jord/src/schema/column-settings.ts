@@ -6,6 +6,11 @@
  */
 
 import {
+  type ColumnForeignKey,
+  columnReferencesSql,
+  parseColumnForeignKey,
+} from "./fk.js";
+import {
   type IdStrategy,
   parseIdStrategy,
 } from "./id-strategy.js";
@@ -50,6 +55,8 @@ export type ColumnSettings = {
   validation?: ColumnValidationRules;
   /** Generated id strategy (S0054). */
   idStrategy?: IdStrategy;
+  /** Single-column foreign key (S0055). */
+  foreignKey?: ColumnForeignKey;
 };
 
 export type ColumnSettingsParseError = {
@@ -159,6 +166,14 @@ export function parseColumnSettings(
     const strategy = parseIdStrategy(src.idStrategy);
     if (!strategy.ok) return strategy;
     settings.idStrategy = strategy.strategy;
+  }
+
+  if (src.foreignKey !== undefined) {
+    const fk = parseColumnForeignKey(src.foreignKey);
+    if (!fk.ok) {
+      return failSettings(fk.message);
+    }
+    settings.foreignKey = fk.value;
   }
 
   return { ok: true, settings };
@@ -333,6 +348,9 @@ export function columnConstraintSql(
   if (settings.check) {
     parts.push(`CHECK (${settings.check})`);
   }
+
+  const refs = columnReferencesSql(settings.foreignKey, dialect);
+  if (refs) parts.push(refs.trimStart());
 
   return parts.length > 0 ? ` ${parts.join(" ")}` : "";
 }

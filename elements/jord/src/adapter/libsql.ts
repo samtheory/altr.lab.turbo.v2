@@ -15,6 +15,8 @@ import { drizzle } from "drizzle-orm/libsql";
 import type {
   AddColumnInput,
   AddColumnResult,
+  AddForeignKeyInput,
+  AddForeignKeyResult,
   AlterColumnInput,
   CreateTableInput,
   CreateTableResult,
@@ -98,6 +100,15 @@ import {
   quoteIdent,
   toTableCell,
 } from "../schema/ddl.js";
+import {
+  assertFkDialectSupport,
+  attachCardinality,
+  columnFkToSpec,
+  groupSqliteForeignKeys,
+  parseForeignKeySpec,
+  refuseLibsqlAlterFk,
+  validateFkTarget,
+} from "../schema/fk.js";
 import { rowScopeSql } from "../schema/row-scope.js";
 import { LIBSQL_SCHEMA } from "../schema/schema-scope.js";
 import {
@@ -276,6 +287,8 @@ const WAL_PRAGMAS = [
   "PRAGMA journal_mode = WAL",
   "PRAGMA busy_timeout = 5000",
   "PRAGMA synchronous = NORMAL",
+  // Required for ON DELETE / ON UPDATE to enforce (S0055).
+  "PRAGMA foreign_keys = ON",
 ] as const;
 
 function mapRow(row: typeof records.$inferSelect): JordRecord {
@@ -1376,7 +1389,7 @@ export class LibSqlAdapter implements JordDriverPort {
             : String(r[4])
           : String(r.dflt_value),
     }));
-    const columns = normalizeColumns("libsql", rawColumns);
+    const columns: JordColumnInfo[] = normalizeColumns("libsql", rawColumns);
     const settingsMap = await loadColumnSettingsMap(
       this.columnMetaClient(),
       "libsql",
@@ -1387,7 +1400,45 @@ export class LibSqlAdapter implements JordDriverPort {
       const settings = settingsMap.get(col.name);
       if (settings) col.settings = settings;
     }
-    return { name, schema: LIBSQL_SCHEMA, columns };
+
+    const fkRs = await this.client.execute(
+      `PRAGMA foreign_key_list(${quoteIdent(name)})`,
+    );
+    const fkRows = fkRs.rows.map((r) => ({
+      id: Number(r.id ?? r[0] ?? 0),
+      seq: Number(r.seq ?? r[1] ?? 0),
+      table: String(r.table ?? r[2] ?? ""),
+      from: String(r.from ?? r[3] ?? ""),
+      to: String(r.to ?? r[4] ?? ""),
+      on_update: String(r.on_update ?? r[5] ?? "NO ACTION"),
+      on_delete: String(r.on_delete ?? r[6] ?? "NO ACTION"),
+    }));
+    const fkSpecs = groupSqliteForeignKeys(fkRows, LIBSQL_SCHEMA);
+    const foreignKeys = attachCardinality(
+      fkSpecs,
+      columns.map((c) => ({
+        name: c.name,
+        pk: c.pk,
+        unique: c.settings?.unique === true,
+      })),
+    );
+    // Mirror single-column FKs onto column.settings for the Studio editor.
+    for (const fk of foreignKeys) {
+      if (fk.columns.length !== 1) continue;
+      const col = columns.find((c) => c.name === fk.columns[0]);
+      if (!col) continue;
+      col.settings = {
+        ...(col.settings ?? {}),
+        foreignKey: {
+          schema: fk.references.schema,
+          table: fk.references.table,
+          column: fk.references.columns[0]!,
+          onDelete: fk.onDelete,
+          onUpdate: fk.onUpdate,
+        },
+      };
+    }
+    return { name, schema: LIBSQL_SCHEMA, columns, foreignKeys };
   }
 
   async addColumn(input: AddColumnInput): Promise<AddColumnResult> {
@@ -1425,6 +1476,18 @@ export class LibSqlAdapter implements JordDriverPort {
           message: requiresConfirm("not_null_without_default"),
         };
       }
+      if (settings.foreignKey) {
+        const spec = columnFkToSpec(input.name, settings.foreignKey);
+        const gate = assertFkDialectSupport("libsql", spec, LIBSQL_SCHEMA);
+        if (!gate.ok) {
+          return { ok: false, error: "fk_unsupported", message: gate.message };
+        }
+        const target = await this.describeTable(spec.references.table);
+        const check = validateFkTarget(spec, target);
+        if (!check.ok) {
+          return { ok: false, error: "invalid_fk", message: check.message };
+        }
+      }
     }
 
     const described = await this.describeTable(input.table);
@@ -1461,7 +1524,11 @@ export class LibSqlAdapter implements JordDriverPort {
 
   async createTable(input: CreateTableInput): Promise<CreateTableResult> {
     if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
-    const plan = planCreateTable(input);
+    const plan = planCreateTable({
+      ...input,
+      dialect: "libsql",
+      defaultSchema: LIBSQL_SCHEMA,
+    });
     if (!plan.ok) return plan;
     const existing = await this.describeTable(plan.name);
     if (existing) {
@@ -1471,7 +1538,29 @@ export class LibSqlAdapter implements JordDriverPort {
         message: `table ${plan.name} already exists`,
       };
     }
-    const sql = buildCreateTableSql(plan.name, plan.columns, "libsql");
+    for (const fk of plan.foreignKeys) {
+      const target = await this.describeTable(fk.references.table);
+      const check = validateFkTarget(fk, target);
+      if (!check.ok) {
+        return { ok: false, error: "invalid_fk", message: check.message };
+      }
+    }
+    for (const col of plan.columns) {
+      if (!col.settings?.foreignKey) continue;
+      const spec = columnFkToSpec(col.name, col.settings.foreignKey);
+      const target = await this.describeTable(spec.references.table);
+      const check = validateFkTarget(spec, target);
+      if (!check.ok) {
+        return { ok: false, error: "invalid_fk", message: check.message };
+      }
+    }
+    const sql = buildCreateTableSql(
+      plan.name,
+      plan.columns,
+      "libsql",
+      undefined,
+      plan.foreignKeys,
+    );
     await this.client.execute(sql);
     for (const col of plan.columns) {
       if (col.settings && Object.keys(col.settings).length > 0) {
@@ -1486,6 +1575,21 @@ export class LibSqlAdapter implements JordDriverPort {
       }
     }
     return { ok: true, sql };
+  }
+
+  async addForeignKey(input: AddForeignKeyInput): Promise<AddForeignKeyResult> {
+    if (!isMainSchema(input.schema)) {
+      return {
+        ok: false,
+        error: "unknown_schema",
+        message: `unknown schema ${JSON.stringify(input.schema ?? "")}`,
+      };
+    }
+    const parsed = parseForeignKeySpec(input.foreignKey);
+    if (!parsed.ok) {
+      return { ok: false, error: "invalid_fk", message: parsed.message };
+    }
+    return refuseLibsqlAlterFk();
   }
 
   async listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult> {

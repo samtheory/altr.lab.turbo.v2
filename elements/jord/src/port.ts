@@ -3,12 +3,24 @@ import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
 import type { ColumnSettings } from "./schema/column-settings.js";
 import type { JordColumnType } from "./schema/ddl.js";
+import type {
+  ForeignKeyInfo,
+  ForeignKeySpec,
+} from "./schema/fk.js";
 import type { schema } from "./schema/records.js";
 import type { JordSchemaInfo } from "./schema/schema-scope.js";
 import type { LogicalColumnType } from "./schema/types/types.js";
 
 export type { ColumnSettings } from "./schema/column-settings.js";
 export type { JordColumnType } from "./schema/ddl.js";
+export type {
+  ColumnForeignKey,
+  FkAction,
+  FkCardinality,
+  ForeignKeyInfo,
+  ForeignKeySpec,
+  ForeignKeyTarget,
+} from "./schema/fk.js";
 export type { JordSchemaInfo } from "./schema/schema-scope.js";
 export type { LogicalColumnType } from "./schema/types/types.js";
 
@@ -36,6 +48,8 @@ export type JordTableInfo = {
   /** Owning schema (`public` / `main` unless another was requested). */
   schema?: string;
   columns: JordColumnInfo[];
+  /** Declared foreign keys (S0055), including composite. */
+  foreignKeys?: ForeignKeyInfo[];
 };
 
 export type AddColumnInput = {
@@ -57,6 +71,8 @@ export type AddColumnResult =
         | "invalid_identifier"
         | "invalid_type"
         | "invalid_settings"
+        | "invalid_fk"
+        | "fk_unsupported"
         | "confirm_required"
         | "table_not_found"
         | "column_exists"
@@ -72,6 +88,8 @@ export type CreateTableInput = {
     pk?: boolean;
     settings?: ColumnSettings;
   }>;
+  /** Table-level / composite foreign keys (S0055). */
+  foreignKeys?: ForeignKeySpec[];
   /** Defaults to the adapter's default schema. */
   schema?: string;
 };
@@ -84,11 +102,34 @@ export type CreateTableResult =
         | "invalid_identifier"
         | "invalid_type"
         | "invalid_settings"
+        | "invalid_fk"
+        | "fk_unsupported"
         | "no_columns"
         | "duplicate_column"
         | "multiple_pk"
         | "reserved"
         | "table_exists"
+        | "unknown_schema";
+      message: string;
+    };
+
+/** Add a table-level FK after create (Postgres). libSQL refuses with fk_unsupported. */
+export type AddForeignKeyInput = {
+  table: string;
+  schema?: string;
+  foreignKey: ForeignKeySpec;
+};
+
+export type AddForeignKeyResult =
+  | { ok: true; sql: string }
+  | {
+      ok: false;
+      error:
+        | "invalid_identifier"
+        | "invalid_fk"
+        | "fk_unsupported"
+        | "table_not_found"
+        | "column_not_found"
         | "unknown_schema";
       message: string;
     };
@@ -754,6 +795,11 @@ export interface JordDriverPort {
   addColumn(input: AddColumnInput): Promise<AddColumnResult>;
   /** CREATE TABLE for user tables. Rejects reserved names and existing tables. */
   createTable(input: CreateTableInput): Promise<CreateTableResult>;
+  /**
+   * Add a table-level FOREIGN KEY after create (Postgres `ALTER TABLE ADD`).
+   * libSQL returns `fk_unsupported` — declare on CREATE / ADD COLUMN instead.
+   */
+  addForeignKey(input: AddForeignKeyInput): Promise<AddForeignKeyResult>;
   /** Read-only page of rows. Limit is clamped to 1–100. */
   listTableRows(input: ListTableRowsInput): Promise<ListTableRowsResult>;
   /** Insert one row into a user table. Rejects reserved names and duplicate PKs. */

@@ -13,6 +13,8 @@ import { JordUnsupportedError } from "../errors.js";
 import type {
   AddColumnInput,
   AddColumnResult,
+  AddForeignKeyInput,
+  AddForeignKeyResult,
   AlterColumnInput,
   CreateTableInput,
   CreateTableResult,
@@ -106,6 +108,16 @@ import {
   quoteQualified,
   toTableCell,
 } from "../schema/ddl.js";
+import {
+  assertFkDialectSupport,
+  attachCardinality,
+  columnFkToSpec,
+  parseForeignKeySpec,
+  previewForeignKeySql,
+  type FkAction,
+  type ForeignKeySpec,
+  validateFkTarget,
+} from "../schema/fk.js";
 import { PG_DEFAULT_SCHEMA } from "../schema/schema-scope.js";
 import {
   buildRebuildCopySql,
@@ -161,6 +173,24 @@ function num(value: unknown): number {
 function numOrNull(value: unknown): number | null {
   if (value === null || value === undefined) return null;
   return num(value);
+}
+
+/** pg_constraint confdeltype / confupdtype single-char codes. */
+function pgCharAction(code: string): FkAction | undefined {
+  switch (code) {
+    case "a":
+      return "no action";
+    case "r":
+      return "restrict";
+    case "c":
+      return "cascade";
+    case "n":
+      return "set null";
+    case "d":
+      return "set default";
+    default:
+      return undefined;
+  }
 }
 
 function bool(value: unknown): boolean {
@@ -1432,7 +1462,7 @@ export class PostgresAdapter implements JordDriverPort {
       pk: bool(r.pk),
       dflt_value: r.dflt_value == null ? null : String(r.dflt_value),
     }));
-    const columns = normalizeColumns("postgres", rawColumns);
+    const columns: JordColumnInfo[] = normalizeColumns("postgres", rawColumns);
     const settingsMap = await loadColumnSettingsMap(
       this.columnMetaClient(),
       "postgres",
@@ -1443,7 +1473,81 @@ export class PostgresAdapter implements JordDriverPort {
       const settings = settingsMap.get(col.name);
       if (settings) col.settings = settings;
     }
-    return { name, schema: scoped.schema, columns };
+
+    const fkResult = await this.exec(
+      `SELECT
+         c.conname AS name,
+         c.confdeltype AS on_delete,
+         c.confupdtype AS on_update,
+         local_cols.attname AS local_col,
+         local_ord.ord AS local_ord,
+         ref_ns.nspname AS ref_schema,
+         ref_cls.relname AS ref_table,
+         ref_cols.attname AS ref_col
+       FROM pg_constraint c
+       JOIN pg_class cls ON cls.oid = c.conrelid
+       JOIN pg_namespace ns ON ns.oid = cls.relnamespace
+       JOIN LATERAL unnest(c.conkey) WITH ORDINALITY AS local_ord(attnum, ord) ON true
+       JOIN pg_attribute local_cols
+         ON local_cols.attrelid = c.conrelid AND local_cols.attnum = local_ord.attnum
+       JOIN pg_class ref_cls ON ref_cls.oid = c.confrelid
+       JOIN pg_namespace ref_ns ON ref_ns.oid = ref_cls.relnamespace
+       JOIN LATERAL unnest(c.confkey) WITH ORDINALITY AS ref_ord(attnum, ord)
+         ON ref_ord.ord = local_ord.ord
+       JOIN pg_attribute ref_cols
+         ON ref_cols.attrelid = c.confrelid AND ref_cols.attnum = ref_ord.attnum
+       WHERE c.contype = 'f'
+         AND ns.nspname = $2
+         AND cls.relname = $1
+       ORDER BY c.conname, local_ord.ord`,
+      [name, scoped.schema],
+    );
+
+    const byName = new Map<string, ForeignKeySpec>();
+    for (const row of fkResult.rows) {
+      const key = String(row.name);
+      let spec = byName.get(key);
+      if (!spec) {
+        spec = {
+          name: key,
+          columns: [],
+          references: {
+            schema: String(row.ref_schema),
+            table: String(row.ref_table),
+            columns: [],
+          },
+          onDelete: pgCharAction(String(row.on_delete)),
+          onUpdate: pgCharAction(String(row.on_update)),
+        };
+        byName.set(key, spec);
+      }
+      spec.columns.push(String(row.local_col));
+      spec.references.columns.push(String(row.ref_col));
+    }
+    const foreignKeys = attachCardinality(
+      [...byName.values()],
+      columns.map((c) => ({
+        name: c.name,
+        pk: c.pk,
+        unique: c.settings?.unique === true,
+      })),
+    );
+    for (const fk of foreignKeys) {
+      if (fk.columns.length !== 1) continue;
+      const col = columns.find((c) => c.name === fk.columns[0]);
+      if (!col) continue;
+      col.settings = {
+        ...(col.settings ?? {}),
+        foreignKey: {
+          schema: fk.references.schema,
+          table: fk.references.table,
+          column: fk.references.columns[0]!,
+          onDelete: fk.onDelete,
+          onUpdate: fk.onUpdate,
+        },
+      };
+    }
+    return { name, schema: scoped.schema, columns, foreignKeys };
   }
 
   async addColumn(input: AddColumnInput): Promise<AddColumnResult> {
@@ -1481,6 +1585,21 @@ export class PostgresAdapter implements JordDriverPort {
           error: "confirm_required",
           message: requiresConfirm("not_null_without_default"),
         };
+      }
+      if (settings.foreignKey) {
+        const spec = columnFkToSpec(input.name, settings.foreignKey);
+        const gate = assertFkDialectSupport("postgres", spec, PG_DEFAULT_SCHEMA);
+        if (!gate.ok) {
+          return { ok: false, error: "fk_unsupported", message: gate.message };
+        }
+        const target = await this.describeTable(
+          spec.references.table,
+          spec.references.schema,
+        );
+        const check = validateFkTarget(spec, target);
+        if (!check.ok) {
+          return { ok: false, error: "invalid_fk", message: check.message };
+        }
       }
     }
 
@@ -1532,10 +1651,14 @@ export class PostgresAdapter implements JordDriverPort {
   }
 
   async createTable(input: CreateTableInput): Promise<CreateTableResult> {
-    const plan = planCreateTable(input);
-    if (!plan.ok) return plan;
     const scoped = await this.scope(input.schema);
     if (!scoped.ok) return scoped;
+    const plan = planCreateTable({
+      ...input,
+      dialect: "postgres",
+      defaultSchema: scoped.schema,
+    });
+    if (!plan.ok) return plan;
     const existing = await this.describeTable(plan.name, scoped.schema);
     if (existing) {
       return {
@@ -1544,11 +1667,34 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${plan.name} already exists`,
       };
     }
+    for (const fk of plan.foreignKeys) {
+      const target = await this.describeTable(
+        fk.references.table,
+        fk.references.schema,
+      );
+      const check = validateFkTarget(fk, target);
+      if (!check.ok) {
+        return { ok: false, error: "invalid_fk", message: check.message };
+      }
+    }
+    for (const col of plan.columns) {
+      if (!col.settings?.foreignKey) continue;
+      const spec = columnFkToSpec(col.name, col.settings.foreignKey);
+      const target = await this.describeTable(
+        spec.references.table,
+        spec.references.schema,
+      );
+      const check = validateFkTarget(spec, target);
+      if (!check.ok) {
+        return { ok: false, error: "invalid_fk", message: check.message };
+      }
+    }
     const sql = buildCreateTableSql(
       plan.name,
       plan.columns,
       "postgres",
       scoped.schema,
+      plan.foreignKeys,
     );
     await this.exec(sql);
     for (const col of plan.columns) {
@@ -1571,6 +1717,65 @@ export class PostgresAdapter implements JordDriverPort {
         );
       }
     }
+    return { ok: true, sql };
+  }
+
+  async addForeignKey(input: AddForeignKeyInput): Promise<AddForeignKeyResult> {
+    const scoped = await this.scope(input.schema);
+    if (!scoped.ok) {
+      return {
+        ok: false,
+        error: "unknown_schema",
+        message: scoped.message,
+      };
+    }
+    const parsed = parseForeignKeySpec(input.foreignKey);
+    if (!parsed.ok) {
+      return { ok: false, error: "invalid_fk", message: parsed.message };
+    }
+    const gate = assertFkDialectSupport("postgres", parsed.value, scoped.schema);
+    if (!gate.ok) {
+      return { ok: false, error: "fk_unsupported", message: gate.message };
+    }
+    if (!isValidSqlIdent(input.table)) {
+      return {
+        ok: false,
+        error: "invalid_identifier",
+        message: "table name must match [a-zA-Z_][a-zA-Z0-9_]*",
+      };
+    }
+    const described = await this.describeTable(input.table, scoped.schema);
+    if (!described) {
+      return {
+        ok: false,
+        error: "table_not_found",
+        message: `table ${input.table} not found`,
+      };
+    }
+    for (const col of parsed.value.columns) {
+      if (!described.columns.some((c) => c.name === col)) {
+        return {
+          ok: false,
+          error: "column_not_found",
+          message: `column ${col} not found on ${input.table}`,
+        };
+      }
+    }
+    const target = await this.describeTable(
+      parsed.value.references.table,
+      parsed.value.references.schema,
+    );
+    const check = validateFkTarget(parsed.value, target);
+    if (!check.ok) {
+      return { ok: false, error: "invalid_fk", message: check.message };
+    }
+    const sql = previewForeignKeySql(
+      input.table,
+      scoped.schema,
+      parsed.value,
+      "postgres",
+    ).replace(/;$/, "");
+    await this.exec(sql);
     return { ok: true, sql };
   }
 

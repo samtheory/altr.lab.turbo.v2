@@ -8,6 +8,13 @@ export type IdStrategyKind =
   | "identity"
   | "serial";
 
+export type FkActionForm =
+  | "cascade"
+  | "set null"
+  | "restrict"
+  | "no action"
+  | "set default";
+
 export type ColumnSettingsForm = {
   nullable: boolean;
   unique: boolean;
@@ -23,6 +30,13 @@ export type ColumnSettingsForm = {
   enumValues: string;
   min: string;
   max: string;
+  /** S0055 — foreign key section */
+  fkEnabled: boolean;
+  fkSchema: string;
+  fkTable: string;
+  fkColumn: string;
+  fkOnDelete: FkActionForm;
+  fkOnUpdate: FkActionForm;
 };
 
 export type SchemaColumn = {
@@ -34,9 +48,19 @@ export type SchemaColumn = {
   settings?: Record<string, unknown>;
 };
 
+export type SchemaForeignKey = {
+  columns: string[];
+  references: { schema: string; table: string; columns: string[] };
+  onDelete?: string;
+  onUpdate?: string;
+  cardinality?: string;
+};
+
 export type SchemaTable = {
   name: string;
+  schema?: string;
   columns: SchemaColumn[];
+  foreignKeys?: SchemaForeignKey[];
 };
 
 export const COLUMN_TYPES = ["TEXT", "INTEGER", "REAL", "BLOB"] as const;
@@ -57,7 +81,21 @@ export const EMPTY_COLUMN_SETTINGS: ColumnSettingsForm = {
   enumValues: "",
   min: "",
   max: "",
+  fkEnabled: false,
+  fkSchema: "",
+  fkTable: "",
+  fkColumn: "",
+  fkOnDelete: "no action",
+  fkOnUpdate: "no action",
 };
+
+export const FK_ACTIONS: FkActionForm[] = [
+  "cascade",
+  "set null",
+  "restrict",
+  "no action",
+  "set default",
+];
 
 export function settingsFormToPayload(
   form: ColumnSettingsForm,
@@ -93,6 +131,21 @@ export function settingsFormToPayload(
   if (form.min !== "") validation.min = Number(form.min);
   if (form.max !== "") validation.max = Number(form.max);
   if (Object.keys(validation).length > 0) settings.validation = validation;
+
+  if (
+    form.fkEnabled &&
+    form.fkSchema.trim() &&
+    form.fkTable.trim() &&
+    form.fkColumn.trim()
+  ) {
+    settings.foreignKey = {
+      schema: form.fkSchema.trim(),
+      table: form.fkTable.trim(),
+      column: form.fkColumn.trim(),
+      onDelete: form.fkOnDelete,
+      onUpdate: form.fkOnUpdate,
+    };
+  }
   return settings;
 }
 
@@ -111,6 +164,16 @@ export function previewAddColumnSql(
     if (!settings.nullable) parts.push("NOT NULL");
     if (settings.unique) parts.push("UNIQUE");
     if (settings.check.trim()) parts.push(`CHECK (${settings.check.trim()})`);
+    if (
+      settings.fkEnabled &&
+      settings.fkSchema &&
+      settings.fkTable &&
+      settings.fkColumn
+    ) {
+      parts.push(
+        `REFERENCES "${settings.fkSchema}"."${settings.fkTable}"("${settings.fkColumn}") ON DELETE ${settings.fkOnDelete.toUpperCase()} ON UPDATE ${settings.fkOnUpdate.toUpperCase()}`,
+      );
+    }
   }
   return `${parts.join(" ")};`;
 }

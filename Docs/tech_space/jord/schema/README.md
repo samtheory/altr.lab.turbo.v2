@@ -1,6 +1,6 @@
 ---
 title: "Jord — schema"
-description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), column settings + write validation (S0053)"
+description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), column settings + write validation (S0053), FK relationships (S0055)"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -11,11 +11,12 @@ tags:
   - S0049
   - S0052
   - S0053
+  - S0055
 ---
 
 # Jord — schema
 
-> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]] · settings [[../../../plan/Jord/phase-03/done/S0053-column-settings|S0053]].
+> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]] · settings [[../../../plan/Jord/phase-03/done/S0053-column-settings|S0053]] · FKs [[../../../plan/Jord/phase-03/done/S0055-fk-relationship-editor|S0055]].
 
 ## Why
 
@@ -71,6 +72,22 @@ Studio schema explorer exposes the settings on ADD COLUMN and sends `confirm` fo
 
 Tables without `idStrategy` behave as before (caller must supply the PK). Concurrency: 50 parallel inserts → 50 unique ids for the app-side strategies (`id-strategy.test.ts`). Studio ADD COLUMN includes an id-strategy picker.
 
+### Foreign keys / relationships (S0055)
+
+Module: `elements/jord/src/schema/fk.ts`. A foreign key targets **schema + table + column(s)** with optional `ON DELETE` / `ON UPDATE` (`cascade` · `set null` · `restrict` · `no action` · `set default`).
+
+| Path | Fact |
+|------|------|
+| Column settings | `settings.foreignKey: { schema, table, column, onDelete?, onUpdate? }` → inline `REFERENCES` on CREATE / ADD COLUMN |
+| Table-level / composite | `createTable({ foreignKeys: [{ columns, references, onDelete?, onUpdate? }] })` |
+| Introspection | `describeTable` returns `foreignKeys[]` with `{ schema, table, column }` targets + `cardinality` (`1:1` / `1:N` / `M:N`) |
+| Postgres alter | `addForeignKey` → `ALTER TABLE … ADD FOREIGN KEY` (cross-schema OK) |
+| libSQL alter | `addForeignKey` → **`fk_unsupported`** (clear error — declare on CREATE / ADD COLUMN or rebuild) |
+| libSQL cross-schema | rejected (`fk_unsupported`); only `main` |
+| Enforcement | libSQL boots with `PRAGMA foreign_keys = ON` so ON DELETE/UPDATE is observable |
+
+Cardinality: unique/PK local columns → **1:1**; otherwise **1:N**; join table with two FKs whose columns cover a composite PK → **M:N**. Invalid targets (missing table/column, non-key ref) → **`invalid_fk`** before DDL. Studio ADD COLUMN has a schema → searchable table → column picker (Apolyx Combobox), behavior selects, and SQL preview; the column browser lists introspected relationships.
+
 ### Schema scope (S0049)
 
 | Dialect | Default | List | Unknown `?schema=` |
@@ -88,7 +105,7 @@ Every `/schema/tables*` route and `/api/v1/:table` accepts `?schema=` (default =
 | `GET` | `/schema/tables?schema=` | authenticated | `{ tables }` in that schema |
 | `GET` | `/schema/tables/:name?schema=` | authenticated | columns (+ `schema`), or 404 |
 | `GET` | `/schema/tables/:name/rows?schema=` | authenticated | 1–100 rows, read-only |
-| `POST` | `/schema/tables` | admin | `{ name, columns, schema? }` (+ `?schema=`) |
+| `POST` | `/schema/tables` | admin | `{ name, columns, schema?, foreignKeys? }` (+ `?schema=`) |
 | `POST` | `/schema/tables/:name/columns` | admin | `{ name, type, settings?, confirm? }` ADD COLUMN |
 | `PATCH` | `/schema/tables/:name` | admin | rename `{ name }` |
 | `DELETE` | `/schema/tables/:name` | admin | drop table (`{ confirm: true }`) |
@@ -105,19 +122,20 @@ All DDL runs on the write queue. On Postgres, RLS sync and DML grants for `jord_
 |-------|------|
 | Type registry | `elements/jord/src/schema/types/` (`toSql` / `fromSql` / migrate) |
 | Column settings | `elements/jord/src/schema/column-settings.ts` · `column-meta.ts` |
+| Foreign keys | `elements/jord/src/schema/fk.ts` |
 | Schema helpers | `elements/jord/src/schema/schema-scope.ts` |
 | Introspect + ADD + CREATE | `elements/jord/src/schema/ddl.ts` |
 | DROP / RENAME / type | `elements/jord/src/schema/ddl-alter.ts` |
 | Row write + validation | `elements/jord/src/schema/row-write.ts` |
 | RLS planner (qualified) | `elements/jord/src/schema/ddl-rls.ts` |
 | Migration | `elements/jord/migrations/*/0011_schema_scope.sql` · `0012_column_settings.sql` |
-| Adapters | `elements/jord/src/adapter/{postgres,libsql}.ts` (`listSchemas`, `resolveSchema`, …) |
+| Adapters | `elements/jord/src/adapter/{postgres,libsql}.ts` (`listSchemas`, `resolveSchema`, FK introspect, …) |
 | Routes | `cloud/jord/src/app.ts` (`resolveSchemaQuery`) |
 | Table API | `cloud/jord/src/table-api/{routes,sql,query}.ts` (`schema` reserved param) |
 | Outbox tracking | `cloud/jord/src/realtime/outbox.ts` (`{ schema, table }`) |
-| Studio | Schema explorer at `/schema`; catalog `/tables` — picker UI is [[../../../plan/Jord/phase-03/S0050-schema-picker-ui\|S0050]] |
+| Studio | Schema explorer FK picker + relationships list · schema picker [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui\|S0050]] |
 
-`listTables(schema)` uses `sqlite_master` (libSQL / `main`) or `pg_tables` filtered by schema. `describeTable(name, schema)` uses `PRAGMA table_info` on libSQL.
+`listTables(schema)` uses `sqlite_master` (libSQL / `main`) or `pg_tables` filtered by schema. `describeTable(name, schema)` uses `PRAGMA table_info` + `PRAGMA foreign_key_list` on libSQL (Postgres: `pg_attribute` + `pg_constraint`).
 
 ## Example
 
@@ -132,4 +150,4 @@ Default omit/`public`/`main` keeps prior behavior for existing clients.
 
 ## Not in Jord yet
 
-Schema create/drop UI · Studio schema picker ([[../../../plan/Jord/phase-03/S0050-schema-picker-ui|S0050]]) · cross-schema FK embeds ([[../../../plan/Jord/phase-03/S0078-fk-embeds|S0078]]) · schema on `jord_policies` / `jord_triggers` / `jord_changes` · arbitrary SQL · column-level policies. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].
+Schema create/drop UI · cross-schema FK embeds ([[../../../plan/Jord/phase-03/S0078-fk-embeds|S0078]]) · ERD canvas ([[../../../plan/Jord/phase-03/S0061-erd-canvas|S0061]]) · schema on `jord_policies` / `jord_triggers` / `jord_changes` · arbitrary SQL · column-level policies. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].

@@ -4,6 +4,13 @@ import {
   parseColumnSettings,
 } from "./column-settings.js";
 import {
+  type ForeignKeySpec,
+  assertFkDialectSupport,
+  columnFkToSpec,
+  parseForeignKeySpec,
+  tableForeignKeySql,
+} from "./fk.js";
+import {
   idStrategyDdl,
   postgresSerialType,
 } from "./id-strategy.js";
@@ -106,6 +113,8 @@ export type CreateTablePlanError =
   | "invalid_identifier"
   | "invalid_type"
   | "invalid_settings"
+  | "invalid_fk"
+  | "fk_unsupported"
   | "no_columns"
   | "duplicate_column"
   | "multiple_pk"
@@ -118,8 +127,16 @@ export type CreateTablePlanError =
 export function planCreateTable(input: {
   name: string;
   columns: readonly CreateTableColumnInput[];
+  foreignKeys?: readonly unknown[];
+  dialect?: "libsql" | "postgres";
+  defaultSchema?: string;
 }):
-  | { ok: true; name: string; columns: PlannedCreateColumn[] }
+  | {
+      ok: true;
+      name: string;
+      columns: PlannedCreateColumn[];
+      foreignKeys: ForeignKeySpec[];
+    }
   | { ok: false; error: CreateTablePlanError; message: string } {
   if (!isValidSqlIdent(input.name)) {
     return {
@@ -202,7 +219,46 @@ export function planCreateTable(input: {
     }
   }
 
-  return { ok: true, name: input.name, columns: planned };
+  const dialect = input.dialect ?? "libsql";
+  const defaultSchema = input.defaultSchema ?? (dialect === "postgres" ? "public" : "main");
+  const foreignKeys: ForeignKeySpec[] = [];
+
+  // Single-column FKs on column settings become table-level only when composite
+  // list is empty — inline REFERENCES stays on the column via columnConstraintSql.
+  // Explicit `foreignKeys` are always table-level (needed for composites).
+  if (input.foreignKeys) {
+    for (const raw of input.foreignKeys) {
+      const parsed = parseForeignKeySpec(raw);
+      if (!parsed.ok) {
+        return { ok: false, error: "invalid_fk", message: parsed.message };
+      }
+      for (const col of parsed.value.columns) {
+        if (!planned.some((c) => c.name === col)) {
+          return {
+            ok: false,
+            error: "invalid_fk",
+            message: `foreign key column ${col} is not on the table`,
+          };
+        }
+      }
+      const gate = assertFkDialectSupport(dialect, parsed.value, defaultSchema);
+      if (!gate.ok) {
+        return { ok: false, error: "fk_unsupported", message: gate.message };
+      }
+      foreignKeys.push(parsed.value);
+    }
+  }
+
+  for (const col of planned) {
+    if (!col.settings?.foreignKey) continue;
+    const spec = columnFkToSpec(col.name, col.settings.foreignKey);
+    const gate = assertFkDialectSupport(dialect, spec, defaultSchema);
+    if (!gate.ok) {
+      return { ok: false, error: "fk_unsupported", message: gate.message };
+    }
+  }
+
+  return { ok: true, name: input.name, columns: planned, foreignKeys };
 }
 
 export function pgColumnType(type: JordColumnType): string {
@@ -219,6 +275,7 @@ export function buildCreateTableSql(
   columns: readonly PlannedCreateColumn[],
   dialect: "libsql" | "postgres",
   schema?: string,
+  foreignKeys: readonly ForeignKeySpec[] = [],
 ): string {
   const defs = columns.map((col) => {
     const strategy = col.settings?.idStrategy;
@@ -230,8 +287,17 @@ export function buildCreateTableSql(
         : col.type;
     const idDdl = idStrategyDdl(strategy, dialect, col.type);
     // PK is owned by `col.pk` (planCreateTable); strip settings.primaryKey to avoid duplicates.
+    // When a table-level FK already covers this column, strip inline REFERENCES to avoid dupes.
+    const coveredByTableFk = foreignKeys.some((fk) =>
+      fk.columns.length === 1 && fk.columns[0] === col.name,
+    );
     const settings = col.settings
-      ? { ...col.settings, primaryKey: undefined, idStrategy: undefined }
+      ? {
+          ...col.settings,
+          primaryKey: undefined,
+          idStrategy: undefined,
+          foreignKey: coveredByTableFk ? undefined : col.settings.foreignKey,
+        }
       : undefined;
     const constraints = columnConstraintSql(settings, dialect);
     const identityOwnsPk =
@@ -241,7 +307,9 @@ export function buildCreateTableSql(
       : "";
     return `${quoteIdent(col.name)} ${sqlType}${idDdl.fragment}${constraints}${pk}`;
   });
-  return `CREATE TABLE ${tableRef(table, schema)} (${defs.join(", ")})`;
+  const fkDefs = foreignKeys.map((fk) => tableForeignKeySql(fk, dialect));
+  const body = [...defs, ...fkDefs].join(", ");
+  return `CREATE TABLE ${tableRef(table, schema)} (${body})`;
 }
 
 export type TableCell = string | number | boolean | null;
