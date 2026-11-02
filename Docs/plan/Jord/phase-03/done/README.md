@@ -43,3 +43,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0058-inline-edit-live-sync\|S0058]] | Inline double-click edit + optimistic write + live merge | 2026-11-02 |
 | [[S0059-policies-apis-drawers\|S0059]] | Per-table Policies + APIs inspector drawers | 2026-11-02 |
 | [[S0060-table-relationships-view\|S0060]] | Per-table relationships view (incoming / outgoing) | 2026-11-02 |
+| [[S0061-erd-canvas\|S0061]] | ERD canvas (pan, zoom, drag, relations) | 2026-11-02 |

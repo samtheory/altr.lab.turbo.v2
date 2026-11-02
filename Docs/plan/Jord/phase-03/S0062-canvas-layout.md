@@ -13,7 +13,7 @@ tags:
 
 # S0062 — canvas layout persistence, auto-layout and FK drag
 
-> **Status:** todo · **Depends on** [[S0061-erd-canvas|S0061]] + [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]] · After ship: [[../../../tech_space/jord/schema/README]]
+> **Status:** todo · **Depends on** [[done/S0061-erd-canvas|S0061]] + [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]] · After ship: [[../../../tech_space/jord/schema/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ A canvas that forgets its positions is a demo. This card makes it a tool, and it
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]] (Layout, Sync, Edits, Share) |
-| Depends on | [[S0061-erd-canvas|S0061]] · [[S0055-fk-relationship-editor|S0055]] (FK write path) · [[done/S0042-control-plane-store-adr|S0042]] (where layout lives) |
+| Depends on | [[done/S0061-erd-canvas|S0061]] · [[done/S0055-fk-relationship-editor|S0055]] (FK write path) · [[done/S0042-control-plane-store-adr|S0042]] (where layout lives) |
 | Code today | canvas from S0061 · project record from S0043 |
 | Rule | layout is presentation only — never written into the project database |
 

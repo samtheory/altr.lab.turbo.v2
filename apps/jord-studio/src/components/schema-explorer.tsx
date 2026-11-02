@@ -30,6 +30,7 @@ import {
   cn,
 } from "@altr/apolyx";
 
+import { ErdCanvas } from "@/components/erd-canvas";
 import { TableRelationshipsView } from "@/components/table-relationships-view";
 import { useProjectHref } from "@/hooks/use-project-path";
 import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
@@ -678,7 +679,7 @@ export function SchemaExplorer({ role }: Props) {
             variant={view === "visualizer" ? "default" : "outline"}
             onClick={() => setSchemaView("visualizer")}
           >
-            Visualizer
+            ERD
           </Button>
           <Button
             type="button"
@@ -1496,43 +1497,13 @@ export function SchemaExplorer({ role }: Props) {
       ) : null}
 
       {!error && view === "visualizer" ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {(allTables.length > 0 ? allTables : tableInfo ? [tableInfo] : []).map((t) => (
-            <article
-              key={t.name}
-              className={cn(
-                "rounded-xl border border-border bg-card p-4 shadow-sm",
-                t.name === selected && "ring-2 ring-ring/40",
-              )}
-            >
-              <header className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="font-display text-base font-semibold">{t.name}</h2>
-                <Badge variant="outline">{t.columns.length} cols</Badge>
-              </header>
-              <ul className="space-y-1 font-mono text-xs">
-                {t.columns.map((c) => (
-                  <li
-                    key={c.name}
-                    className="flex items-center justify-between gap-2 border-t border-border/60 py-1.5 text-muted-foreground first:border-t-0"
-                  >
-                    <span className="text-foreground">
-                      {c.pk ? (
-                        <Badge variant="secondary" className="mr-1 text-[10px]">
-                          pk
-                        </Badge>
-                      ) : null}
-                      {c.name}
-                    </span>
-                    <span>{c.type || "?"}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-          {allTables.length === 0 && !tableInfo ? (
-            <p className="text-sm text-muted-foreground">No table metadata loaded yet.</p>
-          ) : null}
-        </div>
+        <ErdCanvas
+          tables={allTables.length > 0 ? allTables : tableInfo ? [tableInfo] : []}
+          selectedTable={selected}
+          onSelectTable={(table) => {
+            setSelected(table);
+          }}
+        />
       ) : null}
     </div>
   );

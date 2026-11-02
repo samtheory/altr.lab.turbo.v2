@@ -66,7 +66,7 @@ Diagram editing of table definitions beyond FK creation · real-time multi-user 
 | Task | Est. | Status |
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] — per-table relationships | 1.5–2 h | **done** 2026-11-02 |
-| [[../../../plan/Jord/phase-03/S0061-erd-canvas\|S0061]] — ERD canvas | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]] — ERD canvas | 3 h | **done** 2026-11-02 |
 | [[../../../plan/Jord/phase-03/S0062-canvas-layout\|S0062]] — layout + FK drag + export | 2.5–3 h | todo |
 
 Queue: [[../../../plan/Jord/phase-03/README]].
