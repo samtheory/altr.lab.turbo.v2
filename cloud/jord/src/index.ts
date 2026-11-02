@@ -151,6 +151,7 @@ export async function startJordServer(
       "jord_tracked_tables",
       "jord_logs",
       "jord_sql_audit",
+      "jord_saved_queries",
       "jord_migrate_jobs",
       "jord_projects",
       "jord_project_keys",

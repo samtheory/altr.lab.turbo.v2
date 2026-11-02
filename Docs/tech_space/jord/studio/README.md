@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0063 projects + shell + DataGrid tables + policies/APIs + relations + ERD canvas/layout + Monaco SQL editor"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0064 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL tabs/history"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -55,11 +55,11 @@ Legacy unscoped paths (`/tables`, `/records`, …) **redirect** via middleware t
 
 BFF routes live under `apps/jord-studio/src/app/api/` and mirror the server paths.
 
-## SQL editor (S0024 + S0063)
+## SQL editor (S0024 + S0063 + S0064)
 
 Admin operator only. Read-only default uses a **dedicated** libSQL connection with `PRAGMA query_only=ON` (Postgres: `BEGIN READ ONLY` + `statement_timeout`). Those reads never enter the write queue. Writes require the toggle off and go through `enqueueWrite`. Every statement is audited in `jord_sql_audit`. Raw SQL bypasses the migration runner and, on libSQL, the outbox.
 
-S0063 replaced the textarea with the Apolyx `SqlEditor` (Monaco). **Execution is unchanged** — the card is editor-only.
+S0063 replaced the textarea with the Apolyx `SqlEditor` (Monaco). S0064 adds query tabs, project saved queries, and audit-backed history in the Queries sidebar.
 
 | Piece | Fact |
 |-------|------|
@@ -69,9 +69,14 @@ S0063 replaced the textarea with the Apolyx `SqlEditor` (Monaco). **Execution is
 | Completion | Built from the **active project's** introspection only: `GET /api/schema/schemas` → `GET /api/schema/tables?schema=` → `GET /api/schema/tables/:name?schema=`, table details capped at 6 concurrent. Keywords/functions per dialect, tables, columns with type + pk, and `a.col = b.col` FK conditions inside `ON …` |
 | Scope guard | One `SqlCompletionModel` per project slug in `lib/studio-sql-editor.ts` (`createSqlModelCache`); the editor reads only the active slug |
 | Refresh | **Refresh schema** button; refetch on window focus when the model is older than 60 s |
-| Editing | Find/replace, multi-cursor, bracket matching/pair guides; `Shift+Alt+F` formats via a document-formatting provider (`formatSql` — uppercases keywords, breaks clauses, indents AND/OR, leaves strings/comments alone); `Ctrl/Cmd+Enter` runs |
-| Draft | `sessionStorage` `jord.studio.sql:v1:<projectSlug>` — query text survives navigation/tab switches for the session |
-| Out of scope | Query tabs / saved queries / history → [[../../../plan/Jord/phase-03/S0064-query-tabs-history|S0064]] · results grid, explain, cancel → [[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]] |
+| Editing | Find/replace, multi-cursor, bracket matching/pair guides; `Shift+Alt+F` formats via a document-formatting provider (`formatSql`); `Ctrl/Cmd+Enter` runs |
+| Tabs (S0064) | `SqlWorkspaceProvider` — create / rename / drag reorder / close with unsaved guard; `dirty = sql !== baseline` (baseline set on save or successful execute); persist `localStorage` `jord.studio.sql.tabs:v1:<projectSlug>` |
+| Saved queries | Table `jord_saved_queries` (migration `0014`); `GET/POST /sql/saved-queries`, `GET/PATCH/DELETE /sql/saved-queries/:id` (admin); Studio BFF under `/api/sql/saved-queries` |
+| History | `GET /sql/history?q=&failed=&limit=` reads **`jord_sql_audit` only** (no duplicate table); sidebar Failed-only filter |
+| Open policy | Opening a saved query or history row always creates a **new** tab |
+| Sidebar | `StudioSqlSidebar` when `contextual === "queries"` — Saved / History sections with search |
+| Shortcuts | `Ctrl/Cmd+Enter` run · `Ctrl/Cmd+T` new tab · `Ctrl/Cmd+W` close · `Ctrl/Cmd+S` save |
+| Out of scope | Results grid, explain, cancel → [[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]] |
 
 ## Migrate wizard (S0024)
 
@@ -283,4 +288,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Query tabs / saved queries / history ([[../../../plan/Jord/phase-03/S0064-query-tabs-history|S0064]]), results grid + explain + cancel ([[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]]), multi-tenant hosting, Artemis screens inside Studio. Waves C–F closed, wave G started. Next: [[../../../plan/Jord/phase-03/S0064-query-tabs-history|S0064]].
+Results grid + explain + cancel ([[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]]), multi-tenant hosting, Artemis screens inside Studio. Waves C–F closed; wave G through S0064. Next: [[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]].

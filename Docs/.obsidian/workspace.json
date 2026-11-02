@@ -190,6 +190,7 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "plan/Jord/phase-03/done/S0064-query-tabs-history.md",
     "plan/Jord/phase-03/done/S0063-monaco-sql-editor.md",
     "plan/Jord/phase-03/done/S0062-canvas-layout.md",
     "plan/Jord/phase-03/done/S0061-erd-canvas.md",
@@ -215,7 +216,6 @@
     "plan/Jord/phase-03/done/S0037-listen-seq-fanout.md",
     "plan/Jord/phase-03/done/S0036-shared-rate-limit-idempotency.md",
     "plan/Jord/phase-03/done/S0035-structured-json-logs.md",
-    "plan/Jord/phase-03/done/S0034-health-probes.md",
     "plan/Jord/phase-03/done",
     "feature_list/Jord/done",
     "temp/output",

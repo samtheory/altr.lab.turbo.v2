@@ -37,7 +37,9 @@ import {
   useStudioPanes,
 } from "@/components/studio-panes";
 import { StudioSideNav } from "@/components/studio-side-nav";
+import { StudioSqlSidebar } from "@/components/studio-sql-sidebar";
 import { StudioTablesSidebar } from "@/components/studio-tables-sidebar";
+import { SqlWorkspaceProvider } from "@/components/sql-workspace";
 import {
   WorkspaceTabsProvider,
   WorkspaceTabsStrip,
@@ -76,22 +78,24 @@ export function StudioShell({ children, role, bypass }: Props) {
     <StudioPanesProvider contextual={contextual} key={projectSlug}>
       <InspectorProvider role={role}>
         <WorkspaceTabsProvider enabled={contextual === "tables"}>
-          <ContextualSidebarMount contextual={contextual} />
-          <StudioShellFrame
-            role={role}
-            bypass={bypass}
-            contextual={contextual}
-            projectSlug={projectSlug}
-          >
-            {children}
-          </StudioShellFrame>
+          <SqlWorkspaceProvider enabled={contextual === "queries"}>
+            <ContextualSidebarMount contextual={contextual} />
+            <StudioShellFrame
+              role={role}
+              bypass={bypass}
+              contextual={contextual}
+              projectSlug={projectSlug}
+            >
+              {children}
+            </StudioShellFrame>
+          </SqlWorkspaceProvider>
         </WorkspaceTabsProvider>
       </InspectorProvider>
     </StudioPanesProvider>
   );
 }
 
-/** Registers the section sidebar body into the shell slot (S0047 / S0050). */
+/** Registers the section sidebar body into the shell slot (S0047 / S0050 / S0064). */
 function ContextualSidebarMount({
   contextual,
 }: {
@@ -100,6 +104,7 @@ function ContextualSidebarMount({
   if (contextual === "tables") return <StudioTablesSidebar />;
   if (contextual === "jobs") return <StudioJobsSidebar />;
   if (contextual === "endpoints") return <StudioEndpointsSidebar />;
+  if (contextual === "queries") return <StudioSqlSidebar />;
   return null;
 }
 

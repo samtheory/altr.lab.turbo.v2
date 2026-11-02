@@ -18,19 +18,20 @@ import {
 } from "@altr/apolyx";
 import type { SqlCompletionModel, SqlDialect } from "@altr/apolyx";
 
+import {
+  SqlQueryTabsStrip,
+  useSqlWorkspaceOptional,
+} from "@/components/sql-workspace";
 import { useProjectSlug } from "@/hooks/use-project-path";
 import type { SchemaTable } from "@/lib/schema";
 import {
-  DEFAULT_SQL,
   buildStudioSqlModel,
   inferSqlDialect,
   mapWithConcurrency,
-  readSqlDraft,
   sqlDialectForEngine,
   sqlDialectLabel,
   studioSqlModelCache,
   tableDetailPath,
-  writeSqlDraft,
 } from "@/lib/studio-sql-editor";
 
 type Props = {
@@ -46,8 +47,9 @@ const SCHEMA_STALE_MS = 60_000;
 
 export function SqlConsolePanel({ role, engine }: Props) {
   const projectSlug = useProjectSlug();
+  const workspace = useSqlWorkspaceOptional();
 
-  const [sql, setSql] = useState(DEFAULT_SQL);
+  const sql = workspace?.activeTab?.sql ?? "SELECT 1 AS n;";
   const [readOnly, setReadOnly] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -67,11 +69,6 @@ export function SqlConsolePanel({ role, engine }: Props) {
   );
   const [schemaError, setSchemaError] = useState<string | null>(null);
   const loadedAtRef = useRef(0);
-
-  // S0063: the draft is per project and lives for the browser session.
-  useEffect(() => {
-    setSql(readSqlDraft(window.sessionStorage, projectSlug, DEFAULT_SQL));
-  }, [projectSlug]);
 
   const loadSchema = useCallback(
     async (silent = false) => {
@@ -146,7 +143,6 @@ export function SqlConsolePanel({ role, engine }: Props) {
     void loadSchema();
   }, [loadSchema]);
 
-  // Completion stays current after DDL elsewhere without polling.
   useEffect(() => {
     const onFocus = () => {
       if (Date.now() - loadedAtRef.current < SCHEMA_STALE_MS) return;
@@ -156,12 +152,20 @@ export function SqlConsolePanel({ role, engine }: Props) {
     return () => window.removeEventListener("focus", onFocus);
   }, [loadSchema]);
 
+  // Clear result pane when switching tabs so stale rows do not mislead.
+  useEffect(() => {
+    setError(null);
+    setNote(null);
+    setColumns([]);
+    setRows([]);
+    setElapsedMs(null);
+  }, [workspace?.active]);
+
   const onSqlChange = useCallback(
     (next: string) => {
-      setSql(next);
-      writeSqlDraft(window.sessionStorage, projectSlug, next);
+      workspace?.updateSql(next);
     },
-    [projectSlug],
+    [workspace],
   );
 
   const run = useCallback(() => {
@@ -188,6 +192,7 @@ export function SqlConsolePanel({ role, engine }: Props) {
         setRows([]);
         setColumns([]);
         setElapsedMs(null);
+        workspace?.bumpRevision();
         return;
       }
       setColumns(body.columns ?? []);
@@ -198,8 +203,11 @@ export function SqlConsolePanel({ role, engine }: Props) {
           ? `${body.note ?? ""} (result truncated by the row cap)`.trim()
           : (body.note ?? null),
       );
+      // Executed snapshot clears dirty; history list refreshes from audit.
+      workspace?.markExecuted();
+      workspace?.bumpRevision();
     });
-  }, [sql, readOnly]);
+  }, [sql, readOnly, workspace]);
 
   if (role !== "admin") {
     return (
@@ -237,12 +245,13 @@ export function SqlConsolePanel({ role, engine }: Props) {
         </div>
         <p className="text-sm text-muted-foreground">
           Reads use a dedicated connection with engine-enforced query_only /
-          READ ONLY. Writes go through the write queue. Raw SQL bypasses
-          migrations and row-level change capture: after a successful write,
-          every tracked table gets one <code className="font-mono">resync</code>{" "}
-          change so live views refetch.
+          READ ONLY. Writes go through the write queue. Tabs, saved queries, and
+          history live in the Queries sidebar — opening a saved/history item
+          creates a new tab.
         </p>
       </div>
+
+      <SqlQueryTabsStrip />
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
@@ -252,6 +261,15 @@ export function SqlConsolePanel({ role, engine }: Props) {
           </label>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => workspace?.requestSave()}
+            aria-keyshortcuts="Control+S Meta+S"
+          >
+            Save
+          </Button>
           <Button
             type="button"
             variant="ghost"
@@ -284,8 +302,10 @@ export function SqlConsolePanel({ role, engine }: Props) {
 
       <p className="text-xs text-muted-foreground">
         <kbd className="font-mono">Ctrl/⌘+Enter</kbd> runs ·{" "}
-        <kbd className="font-mono">Shift+Alt+F</kbd> formats ·{" "}
-        <kbd className="font-mono">Ctrl/⌘+F</kbd> finds and replaces.
+        <kbd className="font-mono">Ctrl/⌘+T</kbd> new tab ·{" "}
+        <kbd className="font-mono">Ctrl/⌘+W</kbd> close ·{" "}
+        <kbd className="font-mono">Ctrl/⌘+S</kbd> save ·{" "}
+        <kbd className="font-mono">Shift+Alt+F</kbd> formats.
       </p>
 
       {error ? (

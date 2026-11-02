@@ -9,8 +9,16 @@ import type { Principal } from "../auth/principal.js";
 import type { WriteQueue } from "../queue.js";
 import type { LogSink } from "../logs/sink.js";
 import { withSqlSpan } from "../telemetry/spans.js";
-
-const HISTORY_CAP = 50;
+import { listSqlHistory } from "./history.js";
+import {
+  createSavedQuery,
+  deleteSavedQuery,
+  getSavedQuery,
+  listSavedQueries,
+  normalizeSavedQueryName,
+  normalizeSavedQuerySql,
+  updateSavedQuery,
+} from "./saved-queries.js";
 
 /** B11 engine guard codes (`JordSqlConsoleError.code`), duck-typed. */
 const ENGINE_SQL_CODES = new Set([
@@ -30,6 +38,12 @@ function engineCommitted(err: unknown): boolean {
   );
 }
 
+function requireAdmin(principal: Principal): void {
+  if (principal.kind !== "operator" || principal.role !== "admin") {
+    throw new HTTPException(403, { message: "admin operator only" });
+  }
+}
+
 export function createSqlRoutes(deps: {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
@@ -41,28 +55,103 @@ export function createSqlRoutes(deps: {
   resyncTracked?: (principal: Principal) => Promise<void>;
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
-  const history: Array<{
-    id: string;
-    at: number;
-    sql: string;
-    readOnly: boolean;
-    ok: boolean;
-    elapsedMs: number;
-  }> = [];
 
-  routes.get("/history", (c) => {
-    const principal = c.get("principal");
-    if (principal.kind !== "operator" || principal.role !== "admin") {
-      throw new HTTPException(403, { message: "admin operator only" });
-    }
+  routes.get("/history", async (c) => {
+    requireAdmin(c.get("principal"));
+    const q = c.req.query("q") ?? undefined;
+    const failedOnly = c.req.query("failed") === "1" || c.req.query("failed") === "true";
+    const limitRaw = Number(c.req.query("limit") ?? "50");
+    const limit = Number.isFinite(limitRaw) ? limitRaw : 50;
+    const history = await listSqlHistory(deps.jord, { q, failedOnly, limit });
     return c.json({ history });
+  });
+
+  routes.get("/saved-queries", async (c) => {
+    requireAdmin(c.get("principal"));
+    const q = c.req.query("q") ?? undefined;
+    const queries = await listSavedQueries(deps.jord, { q });
+    return c.json({ queries });
+  });
+
+  routes.post("/saved-queries", async (c) => {
+    const principal = c.get("principal");
+    requireAdmin(principal);
+    const body = (await c.req.json().catch(() => ({}))) as {
+      name?: unknown;
+      sql?: unknown;
+    };
+    const name = normalizeSavedQueryName(body.name);
+    const sql = normalizeSavedQuerySql(body.sql);
+    if (!name) throw new HTTPException(400, { message: "name required (1–120 chars)" });
+    if (!sql) throw new HTTPException(400, { message: "sql required (1–8000 chars)" });
+
+    const saved = await deps.enqueueWrite(
+      () =>
+        createSavedQuery(deps.jord, {
+          name,
+          sql,
+          ownerUid: principal.uid ?? null,
+        }),
+      "sql.saved.create",
+    );
+    return c.json({ query: saved }, 201);
+  });
+
+  routes.patch("/saved-queries/:id", async (c) => {
+    requireAdmin(c.get("principal"));
+    const id = c.req.param("id");
+    if (!id) throw new HTTPException(400, { message: "id required" });
+    const body = (await c.req.json().catch(() => ({}))) as {
+      name?: unknown;
+      sql?: unknown;
+    };
+    const patch: { name?: string; sql?: string } = {};
+    if (body.name !== undefined) {
+      const name = normalizeSavedQueryName(body.name);
+      if (!name) throw new HTTPException(400, { message: "name required (1–120 chars)" });
+      patch.name = name;
+    }
+    if (body.sql !== undefined) {
+      const sql = normalizeSavedQuerySql(body.sql);
+      if (!sql) throw new HTTPException(400, { message: "sql required (1–8000 chars)" });
+      patch.sql = sql;
+    }
+    if (!patch.name && !patch.sql) {
+      throw new HTTPException(400, { message: "name or sql required" });
+    }
+
+    const saved = await deps.enqueueWrite(
+      () => updateSavedQuery(deps.jord, id, patch),
+      "sql.saved.update",
+    );
+    if (!saved) throw new HTTPException(404, { message: "saved query not found" });
+    return c.json({ query: saved });
+  });
+
+  routes.delete("/saved-queries/:id", async (c) => {
+    requireAdmin(c.get("principal"));
+    const id = c.req.param("id");
+    if (!id) throw new HTTPException(400, { message: "id required" });
+    const ok = await deps.enqueueWrite(
+      () => deleteSavedQuery(deps.jord, id),
+      "sql.saved.delete",
+    );
+    if (!ok) throw new HTTPException(404, { message: "saved query not found" });
+    return c.json({ ok: true });
+  });
+
+  routes.get("/saved-queries/:id", async (c) => {
+    requireAdmin(c.get("principal"));
+    const id = c.req.param("id");
+    if (!id) throw new HTTPException(400, { message: "id required" });
+    const saved = await getSavedQuery(deps.jord, id);
+    if (!saved) throw new HTTPException(404, { message: "saved query not found" });
+    return c.json({ query: saved });
   });
 
   routes.post("/execute", async (c) => {
     const principal = c.get("principal");
-    if (principal.kind !== "operator" || principal.role !== "admin") {
-      throw new HTTPException(403, { message: "admin operator only" });
-    }
+    requireAdmin(principal);
     const body = (await c.req.json().catch(() => ({}))) as {
       sql?: string;
       readOnly?: boolean;
@@ -114,15 +203,6 @@ export function createSqlRoutes(deps: {
     const elapsedMs = result?.elapsedMs ?? 0;
     const auditId = randomUUID();
     const at = Date.now();
-    history.unshift({
-      id: auditId,
-      at,
-      sql: sql.slice(0, 2_000),
-      readOnly,
-      ok,
-      elapsedMs,
-    });
-    while (history.length > HISTORY_CAP) history.pop();
 
     // Audit + log outside the hot write queue (direct query).
     const readOnlyFlag = readOnly ? 1 : 0;
@@ -175,6 +255,7 @@ export function createSqlRoutes(deps: {
       truncated: result.truncated,
       elapsedMs: result.elapsedMs,
       readOnly,
+      auditId,
       note: readOnly
         ? "Raw SQL bypasses the migration runner."
         : "Raw SQL bypasses the migration runner. Row-level CDC is not captured; every tracked table gets one op:\"resync\" change so live subscribers refetch.",
