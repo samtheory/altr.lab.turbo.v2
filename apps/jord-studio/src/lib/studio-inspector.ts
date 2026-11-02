@@ -18,6 +18,8 @@ export const INSPECTOR_IDS = [
   "record-detail",
   "migrate",
   "insert-table-row",
+  "policies",
+  "apis",
 ] as const;
 
 export type InspectorId = (typeof INSPECTOR_IDS)[number];
@@ -48,6 +50,7 @@ export function parseInspectorSearch(
   }
   if (raw === "record-detail" && !props.recordId) return null;
   if (raw === "insert-table-row" && !props.table) return null;
+  if ((raw === "policies" || raw === "apis") && !props.table) return null;
   return { id: raw, props };
 }
 
@@ -90,5 +93,9 @@ export function inspectorTitle(id: InspectorId): string {
       return "Migrate wizard";
     case "insert-table-row":
       return "Insert table row";
+    case "policies":
+      return "Policies";
+    case "apis":
+      return "APIs";
   }
 }

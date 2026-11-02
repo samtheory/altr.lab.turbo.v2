@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0058 projects + shell + DataGrid tables + row ops + inline edit"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0059 projects + shell + DataGrid tables + policies/APIs drawers"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -223,6 +223,17 @@ Tables `[name]` renders through `@altr/apolyx` **DataGrid** (not a local grid). 
 | Helpers | `lib/studio-inline-edit.ts` |
 | Toast | Root layout mounts Apolyx `Toaster` |
 
+### Tables Policies + APIs drawers (S0059)
+
+| Piece | Fact |
+|-------|------|
+| Entry | Table header **Policies** / **APIs**; table-index row actions deep-link the same inspectors |
+| URL | `?inspector=policies\|apis&table=&schema=` (table required) |
+| Policies | `TablePoliciesDrawer` — list/create/edit/delete for `table_name`; rule builder (`role_in` / `bucket_*` / `owner_eq` / `claim_eq` / `always`); affected-rows preview via `GET /api/v1/:table?count=exact` (+ optional draft column filter); link to Database → Policies |
+| APIs | `TableApisDrawer` — tabs Generated / Table API / Custom; copyable curl + fetch (publishable-key placeholder, no secret/JWT); try-it through Studio cookie; realtime channel `jord.change:<table>` |
+| Cross-link | Save/toggle policy dispatches `jord:policies-changed`; APIs drawer reloads the policy summary |
+| Helpers | `lib/studio-table-policies.ts` · `lib/studio-table-apis.ts` |
+
 ### Right inspector (S0048)
 
 One host overlays the **content pane only** (primary nav stays clear). State is URL-addressable; ESC / backdrop / browser Back close it.
@@ -231,12 +242,12 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 |-------|------|
 | API | `InspectorProvider` + `useInspector()` in `inspector-host.tsx` — `open(id, props)`, `close()` |
 | URL | `?inspector=<id>` plus optional `recordId` / `table` / `schema`; helpers in `lib/studio-inspector.ts` |
-| Panels | `create-record` · `create-table` · `record-detail` · `migrate` · `insert-table-row` (policies land in later cards) |
+| Panels | `create-record` · `create-table` · `record-detail` · `migrate` · `insert-table-row` · `policies` · `apis` |
 | Frame | `StudioInspector` — FocusScope trap + restore, dim+blur backdrop, ~420–520 px, &lt;200 ms motion, `useReducedMotion` |
 | Chrome | Sticky title + close; `InspectorFooter` for primary actions |
-| Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate` |
+| Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate`; tables deep-link policies/apis |
 | Responsive | Below `lg`: Apolyx `Sheet` full-height (same slot content) |
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Wave C (shell) + wave D (column model) closed. Wave E tables: [[../../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]]–[[../../../plan/Jord/phase-03/done/S0058-inline-edit-live-sync|S0058]] done; next [[../../../plan/Jord/phase-03/S0059-policies-apis-drawers|S0059]] policies + APIs drawers.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Waves C–E closed (shell, column model, tables through [[../../../plan/Jord/phase-03/done/S0059-policies-apis-drawers|S0059]]). Next: [[../../../plan/Jord/phase-03/S0060-table-relationships-view|S0060]] relationship canvas wave.

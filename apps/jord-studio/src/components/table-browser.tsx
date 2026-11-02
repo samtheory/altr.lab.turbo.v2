@@ -745,6 +745,26 @@ export function TableBrowser({ table, role }: Props) {
               Insert row
             </Button>
           ) : null}
+          {inspector ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  inspector.open("policies", { table, schema })
+                }
+              >
+                Policies
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => inspector.open("apis", { table, schema })}
+              >
+                APIs
+              </Button>
+            </>
+          ) : null}
           <Button asChild variant="outline">
             <Link href={hrefFor("/tables")}>All tables</Link>
           </Button>

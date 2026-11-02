@@ -3,6 +3,8 @@ export const BUILTIN_POLICY_RULE_KINDS = [
   "bucket_in",
   "bucket_eq",
   "always",
+  "owner_eq",
+  "claim_eq",
 ] as const;
 
 export const BUILTIN_TRIGGER_ACTION_KINDS = [

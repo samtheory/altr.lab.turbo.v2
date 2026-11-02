@@ -62,6 +62,25 @@ describe("studio-inspector URL helpers", () => {
     );
   });
 
+  it("requires table for policies and apis drawers", () => {
+    assert.equal(
+      parseInspectorSearch(new URLSearchParams("inspector=policies")),
+      null,
+    );
+    assert.deepEqual(
+      parseInspectorSearch(
+        new URLSearchParams("inspector=policies&table=notes&schema=app"),
+      ),
+      { id: "policies", props: { table: "notes", schema: "app" } },
+    );
+    assert.deepEqual(
+      parseInspectorSearch(
+        new URLSearchParams("inspector=apis&table=notes&schema=app"),
+      ),
+      { id: "apis", props: { table: "notes", schema: "app" } },
+    );
+  });
+
   it("clears inspector keys while keeping other params", () => {
     const next = withInspectorSearch(
       new URLSearchParams("inspector=migrate&job=1&table=users"),

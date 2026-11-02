@@ -126,33 +126,60 @@ export function TableIndex() {
           <TableHeader>
             <TableRow>
               <TableHead>name</TableHead>
-              <TableHead className="w-32" />
+              <TableHead className="w-64" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {tables.map((name) => {
+              const schema =
+                schemaParam && schemaParam !== SCHEMA_ALL
+                  ? schemaParam
+                  : (workspaceTabs?.defaultSchema ??
+                    fallbackDefaultSchema(["public", "main"]));
               const href =
                 name === "records"
                   ? hrefFor("/records")
                   : hrefFor(`/tables/${encodeURIComponent(name)}`);
+              const drawerQs = (inspector: "policies" | "apis") => {
+                const q = new URLSearchParams();
+                if (schema && schema !== "public" && schema !== "main") {
+                  q.set("schema", schema);
+                }
+                q.set("inspector", inspector);
+                q.set("table", name);
+                if (schema) q.set("schema", schema);
+                return `${href}?${q.toString()}`;
+              };
               return (
                 <TableRow key={name}>
                   <TableCell className="font-mono text-xs">{name}</TableCell>
                   <TableCell>
-                    {name === "records" || !workspaceTabs?.enabled ? (
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={href}>Open</Link>
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openTable(name)}
-                      >
-                        Open
-                      </Button>
-                    )}
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {name === "records" || !workspaceTabs?.enabled ? (
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={href}>Open</Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openTable(name)}
+                        >
+                          Open
+                        </Button>
+                      )}
+                      {name !== "records" ? (
+                        <>
+                          <Button asChild size="sm" variant="ghost">
+                            <Link href={drawerQs("policies")}>Policies</Link>
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <Link href={drawerQs("apis")}>APIs</Link>
+                          </Button>
+                        </>
+                      ) : null}
+                    </div>
                   </TableCell>
                 </TableRow>
               );

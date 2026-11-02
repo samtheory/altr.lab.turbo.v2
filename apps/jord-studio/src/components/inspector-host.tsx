@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +21,8 @@ import {
 import { InsertTableRowForm } from "@/components/insert-table-row-form";
 import { MigrateWizardPanel } from "@/components/migrate-wizard-panel";
 import { RecordDetailInspector } from "@/components/record-detail-inspector";
+import { TableApisDrawer } from "@/components/table-apis-drawer";
+import { TablePoliciesDrawer } from "@/components/table-policies-drawer";
 import { useStudioPanes } from "@/components/studio-panes";
 import type { JordRole } from "@/lib/auth/roles";
 import {
@@ -213,7 +216,65 @@ function InspectorPanelBody({
           onCreated={onClose}
         />
       );
+    case "policies":
+      return (
+        <TablePoliciesInspectorBody
+          role={role}
+          table={props.table ?? ""}
+          schema={props.schema ?? "public"}
+        />
+      );
+    case "apis":
+      return (
+        <TableApisDrawer
+          role={role}
+          table={props.table ?? ""}
+          schema={props.schema ?? "public"}
+        />
+      );
   }
+}
+
+function TablePoliciesInspectorBody({
+  role,
+  table,
+  schema,
+}: {
+  role: JordRole;
+  table: string;
+  schema: string;
+}) {
+  const [columns, setColumns] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    const qs =
+      schema && schema !== "public" && schema !== "main"
+        ? `?schema=${encodeURIComponent(schema)}`
+        : "";
+    void fetch(
+      `/api/schema/tables/${encodeURIComponent(table)}${qs}`,
+      { cache: "no-store" },
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then(
+        (body: { columns?: Array<{ name: string }> } | null) => {
+          if (cancelled || !body?.columns) return;
+          setColumns(body.columns.map((c) => c.name));
+        },
+      )
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [table, schema]);
+  return (
+    <TablePoliciesDrawer
+      role={role}
+      table={table}
+      schema={schema}
+      columns={columns}
+    />
+  );
 }
 
 function CreateTableInspectorBody({
