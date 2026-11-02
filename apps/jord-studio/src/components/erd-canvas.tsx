@@ -14,10 +14,17 @@ import {
   AlertTitle,
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   cn,
   useReducedMotion,
 } from "@altr/apolyx";
 
+import { useProjectSlug } from "@/hooks/use-project-path";
 import type { SchemaTable } from "@/lib/schema";
 import {
   applyGuidesToDelta,
@@ -25,6 +32,9 @@ import {
   clampZoom,
   computeAlignmentGuides,
   edgeLabelPoint,
+  ERD_CARD_HEADER,
+  ERD_CARD_PAD,
+  ERD_CARD_ROW,
   ERD_DEFAULT_ZOOM,
   ERD_GRID_SIZE,
   ERD_MAX_VISIBLE_COLS,
@@ -43,12 +53,33 @@ import {
   type ErdViewport,
   zoomAtScreenPoint,
 } from "@/lib/studio-erd-canvas";
+import {
+  applyStoredLayout,
+  autoLayoutForce,
+  autoLayoutGrid,
+  buildErdSvgMarkup,
+  downloadSvgAsPng,
+  downloadTextFile,
+  nodesToPersist,
+  previewFkSettingsPayload,
+  readLocalLayout,
+  syncLayoutWithTables,
+  validateCanvasFkDrag,
+  viewportWorldCenter,
+  writeLocalLayout,
+  type FkDragProposal,
+  type LayoutNodePersist,
+  type LayoutSaveState,
+} from "@/lib/studio-erd-layout";
 
 type Props = {
   tables: SchemaTable[];
-  /** Currently highlighted table name (optional). */
+  /** Schema scope used for layout persistence (`*` = all). */
+  schemaScope?: string;
   selectedTable?: string | null;
   onSelectTable?: (table: string, schema: string) => void;
+  /** Called after a canvas FK is written so the explorer can refresh. */
+  onSchemaMutated?: () => void;
 };
 
 type DragMode =
@@ -67,10 +98,20 @@ type DragMode =
       curX: number;
       curY: number;
       additive: boolean;
+    }
+  | {
+      kind: "fk";
+      fromNodeId: string;
+      fromColumn: string;
+      startX: number;
+      startY: number;
+      curX: number;
+      curY: number;
     };
 
 const ZOOM_STEP = 1.15;
 const KEY_PAN = 40;
+const AUTOSAVE_MS = 700;
 
 function GridBackground({
   viewport,
@@ -107,12 +148,17 @@ function TableCard({
   hovered,
   reduced,
   onPointerDown,
+  onFkHandleDown,
 }: {
   node: ErdNode;
   selected: boolean;
   hovered: boolean;
   reduced: boolean;
   onPointerDown: (e: ReactPointerEvent<HTMLElement>) => void;
+  onFkHandleDown: (
+    column: string,
+    e: ReactPointerEvent<HTMLButtonElement>,
+  ) => void;
 }) {
   const visible = node.columns.slice(0, ERD_MAX_VISIBLE_COLS);
   const overflow = node.columns.length - visible.length;
@@ -152,7 +198,9 @@ function TableCard({
         {visible.map((c) => (
           <li
             key={c.name}
-            className="flex items-center justify-between gap-2 border-t border-border/50 py-1 first:border-t-0"
+            data-erd-column={c.name}
+            data-erd-kind={c.kind}
+            className="relative flex items-center justify-between gap-2 border-t border-border/50 py-1 first:border-t-0"
           >
             <span className="flex min-w-0 items-center gap-1 truncate text-foreground">
               {c.kind === "pk" || c.kind === "both" ? (
@@ -168,6 +216,12 @@ function TableCard({
               <span className="truncate">{c.name}</span>
             </span>
             <span className="shrink-0 text-muted-foreground">{c.type}</span>
+            <button
+              type="button"
+              aria-label={`Drag foreign key from ${c.name}`}
+              className="absolute -right-1 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-ring bg-background opacity-80 hover:opacity-100"
+              onPointerDown={(e) => onFkHandleDown(c.name, e)}
+            />
           </li>
         ))}
         {overflow > 0 ? (
@@ -256,7 +310,13 @@ function EdgesLayer({
   );
 }
 
-function GuidesLayer({ guides, bounds }: { guides: AlignmentGuide[]; bounds: ReturnType<typeof nodesBounds> }) {
+function GuidesLayer({
+  guides,
+  bounds,
+}: {
+  guides: AlignmentGuide[];
+  bounds: ReturnType<typeof nodesBounds>;
+}) {
   if (!bounds || guides.length === 0) return null;
   const w = Math.max(1, bounds.maxX - bounds.minX);
   const h = Math.max(1, bounds.maxY - bounds.minY);
@@ -298,8 +358,23 @@ function GuidesLayer({ guides, bounds }: { guides: AlignmentGuide[]; bounds: Ret
   );
 }
 
-export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
+function saveLabel(state: LayoutSaveState): string {
+  if (state === "saving") return "Saving…";
+  if (state === "saved") return "Saved";
+  if (state === "dirty") return "Unsaved";
+  if (state === "error") return "Save failed";
+  return "Up to date";
+}
+
+export function ErdCanvas({
+  tables,
+  schemaScope = "public",
+  selectedTable,
+  onSelectTable,
+  onSchemaMutated,
+}: Props) {
   const reduced = useReducedMotion();
+  const projectSlug = useProjectSlug();
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [viewport, setViewport] = useState<ErdViewport>({
     x: 40,
@@ -314,16 +389,133 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
   const [guides, setGuides] = useState<AlignmentGuide[]>([]);
   const [drag, setDrag] = useState<DragMode | null>(null);
   const [spaceDown, setSpaceDown] = useState(false);
+  const [saveState, setSaveState] = useState<LayoutSaveState>("idle");
+  const [undoStack, setUndoStack] = useState<ErdNode[][]>([]);
+  const [fkDialog, setFkDialog] = useState<{
+    proposal: FkDragProposal;
+    sql: string;
+  } | null>(null);
+  const [fkError, setFkError] = useState<string | null>(null);
+  const [fkBusy, setFkBusy] = useState(false);
+  const [pendingDrop, setPendingDrop] = useState<string[]>([]);
   const fittedOnce = useRef(false);
+  const hydrateToken = useRef(0);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipNextDirty = useRef(false);
+  const useControlPlane =
+    Boolean(projectSlug) && projectSlug !== "default";
 
-  useEffect(() => {
+  const persistLayout = useCallback(
+    async (nextNodes: ErdNode[]) => {
+      const payload = nodesToPersist(nextNodes);
+      writeLocalLayout(projectSlug, schemaScope, payload);
+      if (!useControlPlane) {
+        setSaveState("saved");
+        return;
+      }
+      setSaveState("saving");
+      try {
+        const res = await fetch(
+          `/api/admin/projects/${encodeURIComponent(projectSlug)}/layout`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ schema: schemaScope, nodes: payload }),
+          },
+        );
+        setSaveState(res.ok ? "saved" : "error");
+      } catch {
+        setSaveState("error");
+      }
+    },
+    [projectSlug, schemaScope, useControlPlane],
+  );
+
+  const scheduleSave = useCallback(
+    (nextNodes: ErdNode[]) => {
+      setSaveState("dirty");
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        void persistLayout(nextNodes);
+      }, AUTOSAVE_MS);
+    },
+    [persistLayout],
+  );
+
+  const pushUndo = useCallback((snapshot: ErdNode[]) => {
+    setUndoStack((stack) => [...stack.slice(-19), snapshot.map((n) => ({ ...n }))]);
+  }, []);
+
+  const hydrate = useCallback(async () => {
+    const token = ++hydrateToken.current;
     const graph = buildErdGraph(tables);
-    setNodes(graph.nodes);
     setEdges(graph.edges);
+
+    let stored: LayoutNodePersist[] | null = readLocalLayout(
+      projectSlug,
+      schemaScope,
+    );
+    if (useControlPlane) {
+      try {
+        const res = await fetch(
+          `/api/admin/projects/${encodeURIComponent(projectSlug)}/layout?schema=${encodeURIComponent(schemaScope)}`,
+          { cache: "no-store" },
+        );
+        if (res.ok) {
+          const body = (await res.json()) as {
+            layout?: { nodes?: LayoutNodePersist[] };
+          };
+          if (Array.isArray(body.layout?.nodes)) {
+            stored = body.layout.nodes;
+          }
+        }
+      } catch {
+        /* keep local */
+      }
+    }
+    if (token !== hydrateToken.current) return;
+
+    const el = surfaceRef.current;
+    const rect = el?.getBoundingClientRect();
+    const center =
+      rect && rect.width > 0
+        ? viewportWorldCenter(
+            { x: 40, y: 40, zoom: ERD_DEFAULT_ZOOM },
+            rect.width,
+            rect.height,
+          )
+        : { x: 80, y: 80 };
+
+    skipNextDirty.current = true;
+    const next = applyStoredLayout(tables, stored ?? [], {
+      viewportCenter: center,
+    });
+    setNodes(next);
     setSelectedIds(new Set());
     setGuides([]);
+    setUndoStack([]);
     fittedOnce.current = false;
-  }, [tables]);
+    setSaveState("idle");
+  }, [projectSlug, schemaScope, tables, useControlPlane]);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    if (skipNextDirty.current) {
+      skipNextDirty.current = false;
+      return;
+    }
+    if (nodes.length === 0) return;
+    scheduleSave(nodes);
+  }, [nodes, scheduleSave]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, []);
 
   const fit = useCallback(() => {
     const el = surfaceRef.current;
@@ -356,9 +548,9 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
       return;
     }
     const rect = el.getBoundingClientRect();
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    setViewport((v) => zoomAtScreenPoint(v, cx, cy, v.zoom * factor));
+    setViewport((v) =>
+      zoomAtScreenPoint(v, rect.width / 2, rect.height / 2, v.zoom * factor),
+    );
   }, []);
 
   const jumpTo = useCallback(
@@ -377,6 +569,100 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
     },
     [nodes, onSelectTable],
   );
+
+  const runAutoLayout = useCallback(
+    (mode: "grid" | "force") => {
+      pushUndo(nodes);
+      if (mode === "grid") {
+        setNodes(autoLayoutGrid(nodes));
+        return;
+      }
+      setNodes(autoLayoutForce(nodes, edges));
+    },
+    [edges, nodes, pushUndo],
+  );
+
+  const undoLayout = useCallback(() => {
+    setUndoStack((stack) => {
+      if (stack.length === 0) return stack;
+      const prev = stack[stack.length - 1]!;
+      setNodes(prev);
+      return stack.slice(0, -1);
+    });
+  }, []);
+
+  const runSync = useCallback(() => {
+    const el = surfaceRef.current;
+    const rect = el?.getBoundingClientRect();
+    const center =
+      rect && rect.width > 0
+        ? viewportWorldCenter(viewport, rect.width, rect.height)
+        : { x: 80, y: 80 };
+    const result = syncLayoutWithTables(tables, nodes, center);
+    if (result.removed.length > 0) {
+      setPendingDrop(result.removed);
+      return;
+    }
+    pushUndo(nodes);
+    setNodes(result.nodes);
+    setEdges(buildErdGraph(tables).edges);
+  }, [nodes, pushUndo, tables, viewport]);
+
+  const confirmDrop = useCallback(() => {
+    const el = surfaceRef.current;
+    const rect = el?.getBoundingClientRect();
+    const center =
+      rect && rect.width > 0
+        ? viewportWorldCenter(viewport, rect.width, rect.height)
+        : { x: 80, y: 80 };
+    const result = syncLayoutWithTables(tables, nodes, center);
+    pushUndo(nodes);
+    setNodes(result.nodes);
+    setEdges(buildErdGraph(tables).edges);
+    setPendingDrop([]);
+  }, [nodes, pushUndo, tables, viewport]);
+
+  const exportSvg = useCallback(() => {
+    const svg = buildErdSvgMarkup(nodes, edges);
+    downloadTextFile(`jord-erd-${schemaScope}.svg`, svg, "image/svg+xml");
+  }, [edges, nodes, schemaScope]);
+
+  const exportPng = useCallback(() => {
+    const svg = buildErdSvgMarkup(nodes, edges);
+    void downloadSvgAsPng(svg, `jord-erd-${schemaScope}.png`, 2);
+  }, [edges, nodes, schemaScope]);
+
+  const confirmFk = useCallback(async () => {
+    if (!fkDialog) return;
+    setFkBusy(true);
+    setFkError(null);
+    try {
+      const settings = previewFkSettingsPayload(fkDialog.proposal);
+      const qs = new URLSearchParams({ schema: fkDialog.proposal.fromSchema });
+      const res = await fetch(
+        `/api/schema/tables/${encodeURIComponent(fkDialog.proposal.fromTable)}/columns/${encodeURIComponent(fkDialog.proposal.fromColumn)}?${qs}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ settings }),
+        },
+      );
+      const body = (await res.json().catch(() => ({}))) as {
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        setFkError(body.message ?? body.error ?? `FK write failed (${res.status})`);
+        return;
+      }
+      setFkDialog(null);
+      onSchemaMutated?.();
+    } catch {
+      setFkError("Network error writing foreign key");
+    } finally {
+      setFkBusy(false);
+    }
+  }, [fkDialog, onSchemaMutated]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -399,6 +685,11 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
         setSelectedIds(new Set());
         setDrag(null);
         setGuides([]);
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        undoLayout();
         return;
       }
       if (e.key === "+" || e.key === "=") {
@@ -439,7 +730,7 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [fit, zoomBy]);
+  }, [fit, undoLayout, zoomBy]);
 
   const clientToLocal = useCallback((clientX: number, clientY: number) => {
     const el = surfaceRef.current;
@@ -448,19 +739,21 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
     return { x: clientX - rect.left, y: clientY - rect.top };
   }, []);
 
-  const onWheel = useCallback((e: ReactWheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const local = clientToLocal(e.clientX, e.clientY);
-    // Shift+wheel or dominant deltaX → pan; otherwise wheel zooms toward cursor.
-    if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      setViewport((v) => panBy(v, -e.deltaX - (e.shiftKey ? e.deltaY : 0), -e.deltaY));
-      return;
-    }
-    const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-    setViewport((v) =>
-      zoomAtScreenPoint(v, local.x, local.y, v.zoom * factor),
-    );
-  }, [clientToLocal]);
+  const onWheel = useCallback(
+    (e: ReactWheelEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const local = clientToLocal(e.clientX, e.clientY);
+      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        setViewport((v) =>
+          panBy(v, -e.deltaX - (e.shiftKey ? e.deltaY : 0), -e.deltaY),
+        );
+        return;
+      }
+      const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+      setViewport((v) => zoomAtScreenPoint(v, local.x, local.y, v.zoom * factor));
+    },
+    [clientToLocal],
+  );
 
   const onSurfacePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -470,7 +763,6 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
         return;
       }
       if (e.button !== 0) return;
-      // Empty canvas → marquee or clear.
       if ((e.target as HTMLElement).dataset.erdNode) return;
       const local = clientToLocal(e.clientX, e.clientY);
       const world = screenToWorld(local.x, local.y, viewport);
@@ -493,6 +785,7 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
   const onNodePointerDown = useCallback(
     (node: ErdNode) => (e: ReactPointerEvent<HTMLElement>) => {
       if (e.button !== 0 || spaceDown) return;
+      if ((e.target as HTMLElement).closest("button")) return;
       e.stopPropagation();
       e.currentTarget.setPointerCapture(e.pointerId);
       const local = clientToLocal(e.clientX, e.clientY);
@@ -510,15 +803,48 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
       onSelectTable?.(node.table, node.schema);
       setDrag({
         kind: "nodes",
-        ids: nextSelected.has(node.id)
-          ? nextSelected
-          : new Set([node.id]),
+        ids: nextSelected.has(node.id) ? nextSelected : new Set([node.id]),
         originX: local.x,
         originY: local.y,
         startNodes: nodes,
       });
     },
     [clientToLocal, nodes, onSelectTable, selectedIds, spaceDown],
+  );
+
+  const onFkHandleDown = useCallback(
+    (node: ErdNode, column: string) =>
+      (e: ReactPointerEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const local = clientToLocal(e.clientX, e.clientY);
+        const world = screenToWorld(local.x, local.y, viewport);
+        surfaceRef.current?.setPointerCapture(e.pointerId);
+        setDrag({
+          kind: "fk",
+          fromNodeId: node.id,
+          fromColumn: column,
+          startX: world.x,
+          startY: world.y,
+          curX: world.x,
+          curY: world.y,
+        });
+      },
+    [clientToLocal, viewport],
+  );
+
+  const hitColumnAt = useCallback(
+    (worldX: number, worldY: number): { node: ErdNode; column: string; kind: string } | null => {
+      const node = hitTestNode(nodes, worldX, worldY);
+      if (!node) return null;
+      const relY = worldY - node.y - ERD_CARD_HEADER - ERD_CARD_PAD;
+      if (relY < 0) return null;
+      const idx = Math.floor(relY / ERD_CARD_ROW);
+      const col = node.columns[idx];
+      if (!col || idx >= ERD_MAX_VISIBLE_COLS) return null;
+      return { node, column: col.name, kind: col.kind };
+    },
+    [nodes],
   );
 
   const onPointerMove = useCallback(
@@ -538,6 +864,12 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
         return;
       }
       if (drag.kind === "marquee") {
+        const local = clientToLocal(e.clientX, e.clientY);
+        const world = screenToWorld(local.x, local.y, viewport);
+        setDrag({ ...drag, curX: world.x, curY: world.y });
+        return;
+      }
+      if (drag.kind === "fk") {
         const local = clientToLocal(e.clientX, e.clientY);
         const world = screenToWorld(local.x, local.y, viewport);
         setDrag({ ...drag, curX: world.x, curY: world.y });
@@ -585,6 +917,28 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
       if (drag.kind === "nodes" && snap) {
         setNodes((curr) => moveNodes(curr, drag.ids, 0, 0, true));
       }
+      if (drag.kind === "fk") {
+        const target = hitColumnAt(drag.curX, drag.curY);
+        const from = nodes.find((n) => n.id === drag.fromNodeId);
+        if (from && target && target.node.id !== from.id) {
+          const proposal: FkDragProposal = {
+            fromSchema: from.schema,
+            fromTable: from.table,
+            fromColumn: drag.fromColumn,
+            toSchema: target.node.schema,
+            toTable: target.node.table,
+            toColumn: target.column,
+          };
+          const result = validateCanvasFkDrag(tables, proposal);
+          if (result.ok) {
+            setFkDialog({ proposal: result.proposal, sql: result.sql });
+            setFkError(null);
+          } else {
+            setFkError(result.reason);
+            setFkDialog(null);
+          }
+        }
+      }
       setGuides([]);
       setDrag(null);
       try {
@@ -593,7 +947,7 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
         /* already released */
       }
     },
-    [drag, nodes, snap],
+    [drag, hitColumnAt, nodes, snap, tables],
   );
 
   if (tables.length === 0) {
@@ -618,6 +972,10 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
       : null;
 
   const worldBounds = nodesBounds(nodes, 80);
+  const fkPreview =
+    drag?.kind === "fk"
+      ? `M ${drag.startX} ${drag.startY} L ${drag.curX} ${drag.curY}`
+      : null;
 
   return (
     <div className="flex min-h-[min(70vh,720px)] flex-col gap-3">
@@ -643,6 +1001,36 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
         >
           Snap
         </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => runAutoLayout("grid")}>
+          Auto grid
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => runAutoLayout("force")}>
+          Auto force
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={undoLayout}
+          disabled={undoStack.length === 0}
+        >
+          Undo layout
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={runSync}>
+          Sync schema
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={exportSvg}>
+          Export SVG
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={exportPng}>
+          Export PNG
+        </Button>
+        <Badge
+          variant={saveState === "error" ? "destructive" : "outline"}
+          className="font-mono text-[10px]"
+        >
+          {saveLabel(saveState)}
+        </Badge>
         <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
           Jump
           <select
@@ -663,9 +1051,16 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
           </select>
         </label>
         <span className="text-[11px] text-muted-foreground">
-          {nodes.length} tables · {edges.length} relations · arrows pan · +/− zoom · F fit
+          {nodes.length} tables · {edges.length} relations · drag handles for FK
         </span>
       </div>
+
+      {fkError && !fkDialog ? (
+        <Alert variant="destructive">
+          <AlertTitle>Invalid FK target</AlertTitle>
+          <AlertDescription>{fkError}</AlertDescription>
+        </Alert>
+      ) : null}
 
       <div
         ref={surfaceRef}
@@ -676,6 +1071,7 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
           "relative min-h-[min(64vh,640px)] flex-1 overflow-hidden rounded-xl border border-border bg-muted/15 outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
           spaceDown || drag?.kind === "pan" ? "cursor-grab" : "cursor-default",
           drag?.kind === "pan" && "cursor-grabbing",
+          drag?.kind === "fk" && "cursor-crosshair",
         )}
         onWheel={onWheel}
         onPointerDown={onSurfacePointerDown}
@@ -695,6 +1091,17 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
         >
           <EdgesLayer nodes={nodes} edges={edges} selectedIds={selectedIds} />
           <GuidesLayer guides={guides} bounds={worldBounds} />
+          {fkPreview ? (
+            <svg className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden>
+              <path
+                d={fkPreview}
+                fill="none"
+                stroke="var(--ring)"
+                strokeWidth={2}
+                strokeDasharray="5 4"
+              />
+            </svg>
+          ) : null}
           {nodes.map((node) => (
             <TableCard
               key={node.id}
@@ -703,6 +1110,7 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
               hovered={hoveredId === node.id}
               reduced={Boolean(reduced)}
               onPointerDown={onNodePointerDown(node)}
+              onFkHandleDown={(column, ev) => onFkHandleDown(node, column)(ev)}
             />
           ))}
           {marquee ? (
@@ -718,6 +1126,76 @@ export function ErdCanvas({ tables, selectedTable, onSelectTable }: Props) {
           ) : null}
         </div>
       </div>
+
+      <Dialog
+        open={pendingDrop.length > 0}
+        onOpenChange={(open) => {
+          if (!open) setPendingDrop([]);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove dropped tables from layout?</DialogTitle>
+            <DialogDescription>
+              {pendingDrop.length} table
+              {pendingDrop.length === 1 ? "" : "s"} no longer exist in the
+              schema. Remaining positions stay put.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPendingDrop([])}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={confirmDrop}>
+              Prune layout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={fkDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setFkDialog(null);
+            setFkError(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create foreign key</DialogTitle>
+            <DialogDescription>
+              Uses the same column-settings validation path as the relationship
+              editor (ON DELETE/UPDATE default to NO ACTION).
+            </DialogDescription>
+          </DialogHeader>
+          {fkDialog ? (
+            <pre className="max-h-48 overflow-auto rounded-md border border-border bg-muted/30 p-3 font-mono text-[11px] text-foreground">
+              {fkDialog.sql}
+            </pre>
+          ) : null}
+          {fkError ? (
+            <Alert variant="destructive">
+              <AlertTitle>Could not create FK</AlertTitle>
+              <AlertDescription>{fkError}</AlertDescription>
+            </Alert>
+          ) : null}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setFkDialog(null)}
+              disabled={fkBusy}
+            >
+              Cancel
+            </Button>
+            <Button type="button" onClick={() => void confirmFk()} disabled={fkBusy}>
+              {fkBusy ? "Creating…" : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0061 projects + shell + DataGrid tables + policies/APIs + relations + ERD canvas"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0062 projects + shell + DataGrid tables + policies/APIs + relations + ERD canvas/layout"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -100,7 +100,7 @@ ADR: [[ADR-control-plane-store]]. **Decision:** project metadata lives in `jord_
 | DELETE | `/admin/projects/:id` | Archive + revoke keys (never drops target DB) |
 | POST | `/admin/projects/:id/rotate-keys` | New key set; secret returned once |
 
-Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry routes return **503** until the key is set).
+Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry routes return **503** until the key is set). Outside production, `ensureLocalDevMasterKey` persists `data/jord-master.key` on boot so local Studio `/projects` works without a hand-written env (opt out with `JORD_DEV_MASTER_KEY=0`).
 
 ### Studio create flow (S0044)
 
@@ -257,15 +257,16 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 | UI | `TableRelationshipsView` — center / incoming / outgoing cards; constraint detail; empty → column editor |
 | As-built | [[../schema/README#per-table-relationships-view-s0060]] · card [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] |
 
-### ERD canvas (S0061)
+### ERD canvas (S0061 + S0062)
 
 | Piece | Fact |
 |-------|------|
 | Entry | Schema toolbar **ERD** |
 | URL | `/schema?view=visualizer` |
-| UI | `ErdCanvas` — infinite grid, pan/zoom/fit, table cards, orthogonal FK lines, multi-select drag, snap + guides, jump-to list |
-| As-built | [[../schema/README#erd-canvas-s0061]] · card [[../../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]] |
+| UI | `ErdCanvas` — pan/zoom/fit, table cards, orthogonal FK lines, multi-select drag, snap + guides, autosave layout, auto-layout + undo, schema sync, FK handle drag, SVG/PNG export |
+| Persist | Control-plane `GET/PUT /admin/projects/:idOrSlug/layout` (BFF `/api/admin/projects/.../layout`); `default` project → `localStorage` |
+| As-built | [[../schema/README#erd-canvas-s0061--s0062]] · cards [[../../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]] · [[../../../plan/Jord/phase-03/done/S0062-canvas-layout\|S0062]] |
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Waves C–E closed; wave F in progress ([[../../../plan/Jord/phase-03/done/S0060-table-relationships-view|S0060]]–[[../../../plan/Jord/phase-03/done/S0061-erd-canvas|S0061]]). Next: [[../../../plan/Jord/phase-03/S0062-canvas-layout|S0062]] layout persistence + FK drag + export.
+Monaco SQL editor (wave G), multi-tenant hosting, Artemis screens inside Studio. Waves C–F closed. Next: [[../../../plan/Jord/phase-03/S0063-monaco-sql-editor|S0063]].

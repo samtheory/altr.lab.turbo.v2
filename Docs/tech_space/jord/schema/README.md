@@ -1,6 +1,6 @@
 ---
 title: "Jord — schema"
-description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), column settings + write validation (S0053), FK relationships (S0055), per-table relations (S0060), ERD canvas (S0061)"
+description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), column settings + write validation (S0053), FK relationships (S0055), per-table relations (S0060), ERD canvas (S0061), layout persist / FK drag / export (S0062)"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -14,11 +14,12 @@ tags:
   - S0055
   - S0060
   - S0061
+  - S0062
 ---
 
 # Jord — schema
 
-> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]] · settings [[../../../plan/Jord/phase-03/done/S0053-column-settings|S0053]] · FKs [[../../../plan/Jord/phase-03/done/S0055-fk-relationship-editor|S0055]] · relations view [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view|S0060]] · ERD canvas [[../../../plan/Jord/phase-03/done/S0061-erd-canvas|S0061]].
+> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]] · settings [[../../../plan/Jord/phase-03/done/S0053-column-settings|S0053]] · FKs [[../../../plan/Jord/phase-03/done/S0055-fk-relationship-editor|S0055]] · relations view [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view|S0060]] · ERD canvas [[../../../plan/Jord/phase-03/done/S0061-erd-canvas|S0061]] · layout [[../../../plan/Jord/phase-03/done/S0062-canvas-layout|S0062]].
 
 ## Why
 
@@ -103,20 +104,25 @@ Focused Studio view (not the free canvas — that is [[#erd-canvas-s0061|S0061]]
 | Empty | “No relationships” + link to add an FK in the column editor |
 | Helpers | `apps/jord-studio/src/lib/studio-table-relations.ts` · `components/table-relationships-view.tsx` |
 
-### ERD canvas (S0061)
+### ERD canvas (S0061 + S0062)
 
-Full free canvas on Schema **ERD** (`?view=visualizer`). SVG + CSS-transform only — no canvas library. Layout coordinates stay in memory (persistence / FK drag / export → [[../../../plan/Jord/phase-03/S0062-canvas-layout|S0062]]).
+Full free canvas on Schema **ERD** (`?view=visualizer`). SVG + CSS-transform only — no canvas library. **Layout is presentation-only** — stored in the control plane (`jord_erd_layouts`), never in the project target database.
 
 | Piece | Fact |
 |-------|------|
 | Viewport | Pan (drag empty / Space / middle-mouse / shift-wheel), wheel zoom toward cursor (10–400 %), Fit, keyboard arrows / `+` `/` `-` / `F` |
 | Nodes | One card per table: qualified name, pk/fk badges, type, selected/hover; shift-click + marquee multi-select |
 | Edges | Orthogonal elbows with cardinality chips (`1—1` / `1—N` / `N—M`); cross-schema FKs use dashed strokes; highlight when an endpoint is selected |
-| Drag | Single + multi-select drag, alignment guides, snap-to-grid toggle; no DB writes |
+| Drag | Single + multi-select drag, alignment guides, snap-to-grid toggle |
+| Layout API | `GET/PUT /admin/projects/:idOrSlug/layout?schema=` → `{ schema, table, x, y, collapsed }[]` · migration `0013_erd_layouts` · debounced autosave + saved/saving indicator · `default` project falls back to `localStorage` |
+| Auto-layout | Grid + simple force; **Undo layout** restores previous positions |
+| Sync | Diff introspection vs stored nodes; newcomers near viewport center; dropped tables prune after confirm (others stay put) |
+| FK drag | Column handle → target PK, preview line, confirm dialog with SQL → same `PATCH …/columns/:column` settings path as S0055; invalid targets rejected with a reason |
+| Export | SVG (vector) and PNG (2×) of the whole graph |
 | Jump | Toolbar select lists tables and centers the viewport |
 | Perf | Seeded 100 tables / ≥500 relations: graph + path build **~3.4 ms** (`studio-erd-canvas.test.ts`) |
 | Empty | “No tables in this schema” |
-| Helpers | `apps/jord-studio/src/lib/studio-erd-canvas.ts` · `components/erd-canvas.tsx` |
+| Helpers | `studio-erd-canvas.ts` · `studio-erd-layout.ts` · `components/erd-canvas.tsx` · `cloud/jord/src/projects/layout.ts` |
 
 ### Schema scope (S0049)
 
@@ -158,12 +164,12 @@ All DDL runs on the write queue. On Postgres, RLS sync and DML grants for `jord_
 | DROP / RENAME / type | `elements/jord/src/schema/ddl-alter.ts` |
 | Row write + validation | `elements/jord/src/schema/row-write.ts` |
 | RLS planner (qualified) | `elements/jord/src/schema/ddl-rls.ts` |
-| Migration | `elements/jord/migrations/*/0011_schema_scope.sql` · `0012_column_settings.sql` |
+| Migration | `elements/jord/migrations/*/0011_schema_scope.sql` · `0012_column_settings.sql` · `0013_erd_layouts.sql` |
 | Adapters | `elements/jord/src/adapter/{postgres,libsql}.ts` (`listSchemas`, `resolveSchema`, FK introspect, …) |
 | Routes | `cloud/jord/src/app.ts` (`resolveSchemaQuery`) |
 | Table API | `cloud/jord/src/table-api/{routes,sql,query}.ts` (`schema` reserved param) |
 | Outbox tracking | `cloud/jord/src/realtime/outbox.ts` (`{ schema, table }`) |
-| Studio | Schema explorer FK picker + [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] relations view + [[../../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]] ERD canvas · schema picker [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui\|S0050]] |
+| Studio | Schema explorer FK picker + [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] relations view + [[../../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]]/[[../../../plan/Jord/phase-03/done/S0062-canvas-layout\|S0062]] ERD canvas · schema picker [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui\|S0050]] |
 
 `listTables(schema)` uses `sqlite_master` (libSQL / `main`) or `pg_tables` filtered by schema. `describeTable(name, schema)` uses `PRAGMA table_info` + `PRAGMA foreign_key_list` on libSQL (Postgres: `pg_attribute` + `pg_constraint`).
 
@@ -180,4 +186,4 @@ Default omit/`public`/`main` keeps prior behavior for existing clients.
 
 ## Not in Jord yet
 
-Schema create/drop UI · cross-schema FK embeds ([[../../../plan/Jord/phase-03/S0078-fk-embeds|S0078]]) · canvas layout persistence / FK drag / export ([[../../../plan/Jord/phase-03/S0062-canvas-layout|S0062]]) · schema on `jord_policies` / `jord_triggers` / `jord_changes` · arbitrary SQL · column-level policies. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].
+Schema create/drop UI · cross-schema FK embeds ([[../../../plan/Jord/phase-03/S0078-fk-embeds|S0078]]) · schema on `jord_policies` / `jord_triggers` / `jord_changes` · arbitrary SQL · column-level policies. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].

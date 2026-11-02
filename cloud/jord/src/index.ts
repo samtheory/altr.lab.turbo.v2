@@ -8,6 +8,7 @@ import {
   seedDefaultJobs,
   startJobScheduler,
 } from "./jobs/index.js";
+import { ensureLocalDevMasterKey } from "./dev-master-key.js";
 import { loadLocalEnv } from "./load-env.js";
 import { createWriteQueue, resolveWriteConcurrency } from "./queue.js";
 import { RealtimeBus } from "./realtime/index.js";
@@ -122,6 +123,15 @@ export async function startJordServer(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<{ close: () => Promise<void> }> {
   loadLocalEnv();
+  // Local DX: project registry needs AES master key (S0043). Auto-provision
+  // outside production so Studio /projects works without a hand-written .env.
+  const provisionedKey = ensureLocalDevMasterKey(env);
+  if (provisionedKey && !process.env.JORD_MASTER_KEY_LOGGED) {
+    console.info(
+      "[jord] control-plane secret port enabled (JORD_MASTER_KEY from env or data/jord-master.key)",
+    );
+    process.env.JORD_MASTER_KEY_LOGGED = "1";
+  }
   // OTel before the app so HTTP auto-instrumentation wraps Node serve.
   const telemetry = initTelemetry({ env, httpAutoInstrument: true });
   assertPostgresMigrateUrl(env);

@@ -3,6 +3,13 @@ import { HTTPException } from "hono/http-exception";
 
 import type { JordAuthVariables } from "../auth/middleware.js";
 import {
+  getErdLayout,
+  normalizeLayoutSchema,
+  parseLayoutNodes,
+  putErdLayout,
+  resolveProjectId,
+} from "./layout.js";
+import {
   archiveProject,
   createProject,
   getProject,
@@ -205,6 +212,50 @@ export function createProjectRoutes(
       publishable_key: result.publishable_key,
       barrier_key: result.barrier_key,
     });
+  });
+
+  // S0062 — ERD layout (control plane). :id accepts project UUID or slug.
+  routes.get("/projects/:id/layout", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const schema = normalizeLayoutSchema(c.req.query("schema") ?? "public");
+    if (!schema) return c.json({ error: "invalid_schema" }, 400);
+    const resolved = await resolveProjectId(deps, c.req.param("id"));
+    if (!resolved.ok) {
+      return c.json(
+        {
+          error: resolved.error,
+          ...(resolved.reason ? { reason: resolved.reason } : {}),
+        },
+        resolved.status,
+      );
+    }
+    const layout = await getErdLayout(deps, resolved.id, schema);
+    return c.json({ layout });
+  });
+
+  routes.put("/projects/:id/layout", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const body = await readJson(c.req.raw);
+    const schema = normalizeLayoutSchema(
+      typeof body.schema === "string" ? body.schema : c.req.query("schema"),
+    );
+    if (!schema) return c.json({ error: "invalid_schema" }, 400);
+    const parsed = parseLayoutNodes(body.nodes);
+    if (!parsed.ok) return c.json({ error: parsed.error }, 400);
+    const resolved = await resolveProjectId(deps, c.req.param("id"));
+    if (!resolved.ok) {
+      return c.json(
+        {
+          error: resolved.error,
+          ...(resolved.reason ? { reason: resolved.reason } : {}),
+        },
+        resolved.status,
+      );
+    }
+    const layout = await putErdLayout(deps, resolved.id, schema, parsed.nodes);
+    return c.json({ layout });
   });
 
   return routes;

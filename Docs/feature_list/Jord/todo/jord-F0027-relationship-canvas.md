@@ -3,7 +3,7 @@ title: "jord-F0027 — relationship explorer & ERD canvas"
 feature_id: jord-F0027
 description: "Per-table relationship view plus a Figma-like free canvas for all tables: pan, zoom, drag, save layout, relationship lines"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-02
 tags:
   - feature
   - jord
@@ -16,7 +16,7 @@ tags:
 
 # jord-F0027 — relationship explorer & ERD canvas
 
-> **Status:** todo · **Id:** `jord-F0027` · Index: [[../INDEX]] · Existing visualizer: `/schema` · [[../../../tech_space/jord/schema/README]]
+> **Status:** **shipped** (wave F) · **Id:** `jord-F0027` · Index: [[../INDEX]] · Existing visualizer: `/schema` · [[../../../tech_space/jord/schema/README]]
 
 ## What
 
@@ -67,6 +67,6 @@ Diagram editing of table definitions beyond FK creation · real-time multi-user 
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] — per-table relationships | 1.5–2 h | **done** 2026-11-02 |
 | [[../../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]] — ERD canvas | 3 h | **done** 2026-11-02 |
-| [[../../../plan/Jord/phase-03/S0062-canvas-layout\|S0062]] — layout + FK drag + export | 2.5–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0062-canvas-layout\|S0062]] — layout + FK drag + export | 2.5–3 h | **done** 2026-11-02 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

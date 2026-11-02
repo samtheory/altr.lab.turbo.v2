@@ -31,6 +31,15 @@ export {
   type ProjectRegistryDeps,
 } from "./registry.js";
 export {
+  getErdLayout,
+  normalizeLayoutSchema,
+  parseLayoutNodes,
+  putErdLayout,
+  resolveProjectId,
+  type ErdLayoutDocument,
+  type ErdLayoutNode,
+} from "./layout.js";
+export {
   createProjectRoutes,
   createStudioProjectRoutes,
 } from "./routes.js";

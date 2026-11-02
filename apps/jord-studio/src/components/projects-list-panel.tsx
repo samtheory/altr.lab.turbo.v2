@@ -43,7 +43,7 @@ export function ProjectsListPanel({ role }: Props) {
         body.message ??
           body.error ??
           (res.status === 503
-            ? "Project registry unavailable (is JORD_MASTER_KEY set?)."
+            ? "Project registry unavailable. Restart jord-server after setting JORD_MASTER_KEY (64-char hex), or let local dev auto-create data/jord-master.key."
             : `Failed to load projects (${res.status})`),
       );
     }
@@ -133,8 +133,19 @@ export function ProjectsListPanel({ role }: Props) {
 
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Failed</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertTitle>Project registry unavailable</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>{error}</p>
+            <p className="text-sm">
+              Local fix: restart `@altr/jord-server` — non-production boots
+              persist a master key at{" "}
+              <code className="font-mono text-xs">data/jord-master.key</code>.
+              Or set{" "}
+              <code className="font-mono text-xs">JORD_MASTER_KEY</code> in{" "}
+              <code className="font-mono text-xs">cloud/jord/.env</code> (see{" "}
+              <code className="font-mono text-xs">.env.example</code>).
+            </p>
+          </AlertDescription>
         </Alert>
       ) : null}
 
@@ -156,7 +167,7 @@ export function ProjectsListPanel({ role }: Props) {
             </p>
           </div>
           <Button asChild>
-            <Link href="/projects/new">
+            <Link href="/projects/new" prefetch>
               <Plus className="size-4" aria-hidden />
               New project
             </Link>

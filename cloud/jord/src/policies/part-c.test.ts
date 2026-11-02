@@ -205,6 +205,8 @@ const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "PATCH", path: "/admin/projects/abc" },
   { method: "DELETE", path: "/admin/projects/abc" },
   { method: "POST", path: "/admin/projects/abc/rotate-keys" },
+  { method: "GET", path: "/admin/projects/abc/layout" },
+  { method: "PUT", path: "/admin/projects/abc/layout" },
 ];
 
 describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {

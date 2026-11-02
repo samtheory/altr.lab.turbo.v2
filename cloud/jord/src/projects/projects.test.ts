@@ -348,3 +348,66 @@ describe("S0043 project registry API", () => {
     assertNoCredentialFields({ project: (body as { project: unknown }).project });
   });
 });
+
+describe("S0062 ERD layout API", () => {
+  it("round-trips layout per project + schema (id and slug)", async () => {
+    const ctx = await boot();
+    const created = await ctx.app.request("/admin/projects", {
+      method: "POST",
+      headers: adminHeaders(),
+      body: JSON.stringify(createBody("libsql-file", "layout-proj")),
+    });
+    expect(created.status).toBe(201);
+    const { project } = (await created.json()) as {
+      project: { id: string; slug: string };
+    };
+
+    const empty = await ctx.app.request(
+      `/admin/projects/${project.id}/layout?schema=public`,
+      { headers: adminHeaders() },
+    );
+    expect(empty.status).toBe(200);
+    const emptyBody = (await empty.json()) as {
+      layout: { schema: string; nodes: unknown[] };
+    };
+    expect(emptyBody.layout.schema).toBe("public");
+    expect(emptyBody.layout.nodes).toEqual([]);
+
+    const nodes = [
+      { schema: "public", table: "users", x: 12, y: 34, collapsed: false },
+      { schema: "public", table: "posts", x: 240, y: 34, collapsed: true },
+    ];
+    const put = await ctx.app.request(`/admin/projects/${project.slug}/layout`, {
+      method: "PUT",
+      headers: adminHeaders(),
+      body: JSON.stringify({ schema: "public", nodes }),
+    });
+    expect(put.status).toBe(200);
+    const putBody = (await put.json()) as {
+      layout: { nodes: typeof nodes; updatedAt: number };
+    };
+    expect(putBody.layout.nodes).toEqual(nodes);
+    expect(putBody.layout.updatedAt).toBeGreaterThan(0);
+
+    const get = await ctx.app.request(
+      `/admin/projects/${project.id}/layout?schema=public`,
+      { headers: adminHeaders() },
+    );
+    expect(get.status).toBe(200);
+    const getBody = (await get.json()) as { layout: { nodes: typeof nodes } };
+    expect(getBody.layout.nodes).toEqual(nodes);
+
+    const other = await ctx.app.request(
+      `/admin/projects/${project.id}/layout?schema=app`,
+      { headers: adminHeaders() },
+    );
+    const otherBody = (await other.json()) as { layout: { nodes: unknown[] } };
+    expect(otherBody.layout.nodes).toEqual([]);
+
+    const denied = await ctx.app.request(
+      `/admin/projects/${project.id}/layout?schema=public`,
+      { headers: editorHeaders() },
+    );
+    expect(denied.status).toBe(403);
+  });
+});

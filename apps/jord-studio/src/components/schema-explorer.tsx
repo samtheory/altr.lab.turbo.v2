@@ -1499,9 +1499,18 @@ export function SchemaExplorer({ role }: Props) {
       {!error && view === "visualizer" ? (
         <ErdCanvas
           tables={allTables.length > 0 ? allTables : tableInfo ? [tableInfo] : []}
+          schemaScope={
+            searchParams.get("schema") ||
+            tableInfo?.schema ||
+            defaultSchema ||
+            "public"
+          }
           selectedTable={selected}
           onSelectTable={(table) => {
             setSelected(table);
+          }}
+          onSchemaMutated={() => {
+            refreshAll(selected);
           }}
         />
       ) : null}

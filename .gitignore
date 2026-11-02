@@ -48,6 +48,10 @@ apps/apolyx/public/r
 graft/
 
 # Jord libSQL file + snapshots (never commit live DB)
+# Local control-plane AES master key (auto-provisioned by jord-server in dev)
+data/jord-master.key
+**/data/jord-master.key
+
 data/*.db
 data/**/*.db
 data/*.db-wal
