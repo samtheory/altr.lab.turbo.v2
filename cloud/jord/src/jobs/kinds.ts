@@ -91,15 +91,30 @@ export const JOB_KIND_HANDLERS: Record<BuiltinJobKind, JobKindHandler> = {
       resolveHmacSecret,
       resolvePublicBaseUrl,
     } = await import("../storage/factory.js");
+    const { createBucketResolver } = await import(
+      "../storage/resolve-bucket.js"
+    );
     const { resolveBlobsRoot } = await import("../blobs/disk.js");
     const env = process.env;
-    const storage = createStorageFromEnv({
+    const factory = {
       env,
       blobsRoot: resolveBlobsRoot(env),
       hmacSecret: resolveHmacSecret(env, env.JORD_SERVER_TOKEN),
       publicBaseUrl: resolvePublicBaseUrl(env),
+    };
+    const storage = createStorageFromEnv(factory);
+    const resolver = createBucketResolver({
+      jord,
+      envPort: storage,
+      env,
+      factory,
     });
-    const result = await gcExpiredPendingBlobs({ jord, storage });
+    const result = await gcExpiredPendingBlobs({
+      jord,
+      storage,
+      resolveStorage: async (bucket) =>
+        (await resolver.resolveBucket(bucket)).port,
+    });
     return { result };
   },
 

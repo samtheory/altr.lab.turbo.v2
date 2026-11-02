@@ -106,6 +106,15 @@ export {
   type NewJordBlobRow,
 } from "./schema/blobs.js";
 export {
+  JORD_BUCKET_PROVIDERS,
+  JORD_BUCKET_STATUSES,
+  jordBuckets,
+  type JordBucketProvider,
+  type JordBucketRow,
+  type JordBucketStatus,
+  type NewJordBucketRow,
+} from "./schema/buckets.js";
+export {
   jordProjectKeys,
   jordProjects,
   type JordProjectEngine,

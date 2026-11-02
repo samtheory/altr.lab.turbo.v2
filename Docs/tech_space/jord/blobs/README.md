@@ -1,14 +1,15 @@
 ---
 title: "Jord — blobs"
-description: "Storage v2: local HMAC and S3/R2/MinIO adapters, sign-time policy, pending/finalize/GC"
+description: "Storage v2 + S0066 bucket registry: per-bucket provider resolution, local HMAC and S3/R2/MinIO adapters, sign-time policy, pending/finalize/GC"
 created: 2026-10-24
-updated: 2026-10-26
+updated: 2026-11-02
 tags:
   - tech-space
   - jord
   - blobs
   - storage
   - s0025
+  - s0066
 ---
 
 # Jord — blobs
@@ -17,9 +18,30 @@ tags:
 
 ## Why
 
-Assets should not live inside `records.body`. Metadata stays in SQL so both dialects can list buckets; bytes live behind a `JordStoragePort` (local disk by default, or S3 / R2 / MinIO). Signed URLs are checked against policy **when minted**, not only when later fetched.
+Assets should not live inside `records.body`. Metadata stays in SQL so both dialects can list buckets; bytes live behind a `JordStoragePort` (local disk by default, or S3 / R2 / MinIO). Signed URLs are checked against policy **when minted**, not only when later fetched. From **S0066**, each Jord bucket can pick its own provider instead of one global `JORD_STORAGE_BACKEND`.
 
 ## What
+
+### Bucket registry (`jord_buckets`) — S0066
+
+Migration `0015_buckets_registry` adds first-class bucket rows. `jord_blobs.bucket` stays the object join key.
+
+| Field | Role |
+|-------|------|
+| `name` | Immutable slug (same rules as blob bucket names) |
+| `provider` | `local` · `s3` · `r2` · `minio` · `s3-compatible` |
+| Connection | `endpoint`, `region`, `physical_bucket`, `key_prefix`, `force_path_style` |
+| Credentials | `access_key_sealed` / `secret_key_sealed` / `session_token_sealed` — reserved for [[../../../plan/Jord/phase-03/S0067-bucket-config-api\|S0067]]; env-backed rows leave them null |
+| Limits | `max_object_bytes`, `allowed_mime_types` (JSON array), `sign_ttl_seconds` (still hard-capped at 1 h) |
+| Access / lifecycle | `public_read`, `status` (`active`/`paused`), optional `linked_table`, `last_write_at` |
+
+**Resolution.** `createBucketResolver` → `resolveBucket(name)`:
+
+1. No row → env port from `createStorageFromEnv` (unchanged behaviour for pre-registry buckets).
+2. Row present → build (or reuse) a port from provider + connection fields. Cache key = provider + endpoint + region + physical bucket + prefix + path-style + sealed-cred fingerprint so ports are not rebuilt per request.
+3. `POST /blobs/buckets` **materializes** a row with `provider =` env default when missing.
+
+Size / MIME / TTL checks use the resolved bucket limits at PUT, sign, and local signed PUT.
 
 ### Metadata (`jord_blobs`)
 
@@ -35,12 +57,12 @@ Ready objects are listed on `GET /blobs/:bucket`. Pending rows are omitted from 
 
 ### Adapters
 
-| Backend | Env | Notes |
-|---------|-----|--------|
-| **local** (default) | `JORD_STORAGE_BACKEND=local` or unset | Bytes under `data/blobs/` (`JORD_BLOBS_ROOT`). Presign returns HMAC URLs with the same JSON shape as S3 |
-| **s3** | `JORD_STORAGE_BACKEND=s3` (also accepts `r2` / `minio`) | `@aws-sdk/client-s3` + presigner. One physical bucket (`JORD_S3_BUCKET`); Jord buckets are key prefixes |
+| Backend | Env / row | Notes |
+|---------|-----------|--------|
+| **local** (default) | `JORD_STORAGE_BACKEND=local` or unset · or `provider=local` | Bytes under `data/blobs/` (`JORD_BLOBS_ROOT`). Presign returns HMAC URLs with the same JSON shape as S3 |
+| **s3 family** | `JORD_STORAGE_BACKEND=s3` (also `r2` / `minio`) · or matching `provider` | `@aws-sdk/client-s3` + presigner. Physical bucket from row or `JORD_S3_BUCKET`; Jord bucket names are key prefixes |
 
-Signed-URL TTL defaults to **15 minutes**, hard-capped at **1 hour** (`clampSignTtlSeconds`).
+Signed-URL TTL defaults to **15 minutes**, hard-capped at **1 hour** (`clampSignTtlSeconds`); a bucket row may set a lower ceiling.
 
 ### HTTP
 
@@ -84,19 +106,22 @@ or `POST /blobs/copy-plan` (admin). The plan always reports `delete_local: false
 
 | Piece | Path |
 |-------|------|
-| Schema + migration | `elements/jord` `schema/blobs.ts`, `migrations/*/0006_storage_v2.sql` |
+| Schema + migrations | `elements/jord` `schema/blobs.ts`, `schema/buckets.ts`, `migrations/*/0006_storage_v2.sql`, `migrations/*/0015_buckets_registry.sql` |
 | Port + adapters | `cloud/jord/src/storage/` (`port`, `local`, `s3`, `lifecycle`, `copy-plan`, `sign-policy`) |
-| Routes | `cloud/jord/src/blobs/routes.ts` |
-| GC job | `blobs_gc` in `cloud/jord/src/jobs/kinds.ts` |
-| Studio | **Storage** → `/storage` (existing BFF; no secrets in JSON) |
-| Tests | `cloud/jord/src/blobs/delete-failure.test.ts` (stub storage, file + Postgres) · live S3 `cloud/jord/src/storage/s3-live.test.ts`: sign → PUT → finalize → download → delete against MinIO, gated on `JORD_TEST_S3_ENDPOINT` (+ `_ACCESS_KEY_ID`, `_SECRET_ACCESS_KEY`, optional `_BUCKET`, `_REGION`). CI runs it in the `jord-postgres` job |
+| Bucket registry + resolve | `cloud/jord/src/storage/bucket-registry.ts`, `resolve-bucket.ts` |
+| Routes | `cloud/jord/src/blobs/routes.ts` (per-bucket `resolveBucket`) |
+| GC job | `blobs_gc` in `cloud/jord/src/jobs/kinds.ts` (resolves storage per pending bucket) |
+| Studio | **Storage** → `/storage` (existing BFF; no secrets in JSON) — wizard/browser → [[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]] |
+| Tests | `cloud/jord/src/storage/bucket-registry.test.ts` (mixed providers, env fallback, limits, cache) · `blobs/delete-failure.test.ts` · live S3 `storage/s3-live.test.ts` gated on `JORD_TEST_S3_ENDPOINT` |
 
-MinIO needs path-style addressing: set `JORD_S3_FORCE_PATH_STYLE=1` with `JORD_STORAGE_BACKEND=s3`.
+MinIO needs path-style addressing: set `JORD_S3_FORCE_PATH_STYLE=1` with `JORD_STORAGE_BACKEND=s3` (or `force_path_style` / `provider=minio` on the row).
 
 ## Example
 
 Editor `POST /blobs/lab/objects/note.txt/sign` `{ "intent":"upload", "content_type":"text/plain" }` → PUT body to `url` → `POST …/finalize`. Denied `jord_blobs` policies return **403** at sign even if meta already exists.
 
+Admin `POST /blobs/buckets` `{ "name":"lab" }` creates the disk/prefix **and** a `jord_buckets` row with the env default provider when none existed.
+
 ## Not in Jord yet
 
-Automatic cutover without an operator flag · hosted embed API · Studio UI for S3 credential editing (secrets stay in env)
+Admin config API + encrypted credentials ([[../../../plan/Jord/phase-03/S0067-bucket-config-api\|S0067]]) · Studio bucket wizard ([[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]]) · automatic cutover without an operator flag · multipart/resumable ([[../../../plan/Jord/phase-03/S0081-multipart-uploads\|S0081]])

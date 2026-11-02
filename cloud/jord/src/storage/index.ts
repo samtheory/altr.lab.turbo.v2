@@ -11,6 +11,7 @@ export {
   DEFAULT_PENDING_TTL_MS,
   DEFAULT_SIGN_TTL_SECONDS,
   MAX_SIGN_TTL_SECONDS,
+  assertBucketUploadLimits,
   clampSignTtlSeconds,
   resolveMaxBlobBytes,
 } from "./ttl.js";
@@ -56,3 +57,24 @@ export {
   type CopyPlanResult,
 } from "./copy-plan.js";
 export { assertSignAllowed, type SignPolicyDecision } from "./sign-policy.js";
+export {
+  connectionFieldsFromEnv,
+  getBucketRow,
+  limitsFromBucketRow,
+  listBucketRows,
+  materializeBucketRow,
+  portCacheKey,
+  providerFromEnv,
+  type BucketLimits,
+  type BucketRegistryRow,
+  type MaterializeBucketInput,
+} from "./bucket-registry.js";
+export {
+  createBucketResolver,
+  createDefaultEnvPort,
+  createEnvOnlyResolver,
+  type BucketResolver,
+  type BucketResolverOptions,
+  type CreatePortFromBucketConfig,
+  type ResolvedBucket,
+} from "./resolve-bucket.js";

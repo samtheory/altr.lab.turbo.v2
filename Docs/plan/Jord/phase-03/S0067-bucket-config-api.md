@@ -13,7 +13,7 @@ tags:
 
 # S0067 — bucket config API, encrypted credentials, test connection
 
-> **Status:** todo · **Depends on** [[S0066-bucket-registry|S0066]] + [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] · After ship: [[../../../tech_space/jord/blobs/README]]
+> **Status:** todo · **Depends on** [[done/S0066-bucket-registry|S0066]] + [[done/S0042-control-plane-store-adr|S0042]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] · After ship: [[../../../tech_space/jord/blobs/README]]
 
 ## Routing (who / how long / which model)
 

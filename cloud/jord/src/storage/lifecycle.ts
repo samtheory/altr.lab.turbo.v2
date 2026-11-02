@@ -117,7 +117,10 @@ export type GcResult = {
  */
 export async function gcExpiredPendingBlobs(input: {
   jord: JordDriverPort;
+  /** Env/default storage when `resolveStorage` is omitted. */
   storage: JordStoragePort;
+  /** Per-bucket port resolution (S0066). Falls back to `storage`. */
+  resolveStorage?: (bucket: string) => Promise<JordStoragePort>;
   nowMs?: number;
 }): Promise<GcResult> {
   const now = input.nowMs ?? Date.now();
@@ -128,10 +131,12 @@ export async function gcExpiredPendingBlobs(input: {
 
   for (const row of expired) {
     try {
-      const removed = await input.storage.deleteObject(row.bucket, row.key);
+      const storage =
+        (await input.resolveStorage?.(row.bucket)) ?? input.storage;
+      const removed = await storage.deleteObject(row.bucket, row.key);
       if (removed) deletedBytes += 1;
-      if (row.uploadId && input.storage.abortMultipartUpload) {
-        await input.storage
+      if (row.uploadId && storage.abortMultipartUpload) {
+        await storage
           .abortMultipartUpload({
             bucket: row.bucket,
             key: row.key,

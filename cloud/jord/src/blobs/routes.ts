@@ -16,23 +16,32 @@ import {
 } from "../auth/middleware.js";
 import type { WriteQueue } from "../queue.js";
 import {
+  assertBucketUploadLimits,
   assertSignAllowed,
   buildLocalToRemoteCopyPlan,
   clampSignTtlSeconds,
   createPendingBlobMeta,
   FinalizeError,
   finalizeBlob,
+  getBucketRow,
+  listBucketRows,
+  materializeBucketRow,
   parseLocalSignedQuery,
   pendingExpiryFromSign,
   publicCopyPlanSummary,
   verifyLocalSignature,
+  type BucketResolver,
   type JordStoragePort,
+  type ResolvedBucket,
 } from "../storage/index.js";
 
 export type BlobRouteDeps = {
   jord: JordDriverPort;
   enqueueWrite: WriteQueue;
+  /** Env-backed default port (copy-plan / signed fallback). */
   storage: JordStoragePort;
+  /** Per-bucket resolution (S0066). Required for mixed providers. */
+  resolveBucket: BucketResolver["resolveBucket"];
   /** HMAC secret for local signed-URL verification. */
   hmacSecret: string;
   maxBytes?: number;
@@ -62,6 +71,14 @@ function decodeObjectKey(raw: string): string {
     return decodeURIComponent(raw);
   } catch {
     throw new HTTPException(400, { message: "invalid object key encoding" });
+  }
+}
+
+function assertBucketActive(resolved: ResolvedBucket): void {
+  if (resolved.row?.status === "paused") {
+    throw new HTTPException(503, {
+      message: `bucket "${resolved.name}" is paused`,
+    });
   }
 }
 
@@ -101,12 +118,16 @@ export function registerBlobRoutes(
   protectedRoutes: Hono<{ Variables: JordAuthVariables }>,
   deps: BlobRouteDeps,
 ): void {
-  const maxBytes = deps.maxBytes ?? DEFAULT_MAX_BLOB_BYTES;
   const env = deps.env ?? process.env;
 
   protectedRoutes.get("/blobs/buckets", async (c) => {
     const fromMeta = await deps.jord.listBlobBuckets();
-    return c.json({ buckets: fromMeta });
+    const fromRegistry = await listBucketRows(deps.jord);
+    const names = new Set<string>([
+      ...fromMeta,
+      ...fromRegistry.map((row) => row.name),
+    ]);
+    return c.json({ buckets: [...names].sort() });
   });
 
   protectedRoutes.post(
@@ -123,10 +144,27 @@ export function registerBlobRoutes(
             "bucket name must match [a-z0-9][a-z0-9_-]{0,62}",
         });
       }
-      await deps.storage.ensureBucket(name);
-      const existing = await deps.jord.listBlobBuckets();
-      const known = existing.includes(name);
-      return c.json({ ok: true as const, name, existed: known }, known ? 200 : 201);
+      const priorRow = await getBucketRow(deps.jord, name);
+      const knownMeta = (await deps.jord.listBlobBuckets()).includes(name);
+      const row = await deps.enqueueWrite(() =>
+        materializeBucketRow({
+          jord: deps.jord,
+          name,
+          env,
+        }),
+      );
+      const resolved = await deps.resolveBucket(name);
+      await resolved.port.ensureBucket(name);
+      const existed = Boolean(priorRow) || knownMeta;
+      return c.json(
+        {
+          ok: true as const,
+          name,
+          existed,
+          provider: row.provider,
+        },
+        existed ? 200 : 201,
+      );
     },
   );
 
@@ -156,16 +194,22 @@ export function registerBlobRoutes(
         throw new HTTPException(400, { message: "invalid object key" });
       }
 
+      const resolved = await deps.resolveBucket(bucket);
+      assertBucketActive(resolved);
       const { bytes, contentType } = await readUploadBytes(c);
-      if (bytes.byteLength > maxBytes) {
-        throw new HTTPException(413, {
-          message: `object exceeds max size of ${maxBytes} bytes`,
-        });
+      const gate = assertBucketUploadLimits({
+        size: bytes.byteLength,
+        contentType,
+        maxObjectBytes: resolved.limits.maxObjectBytes,
+        allowedMimeTypes: resolved.limits.allowedMimeTypes,
+      });
+      if (!gate.ok) {
+        throw new HTTPException(gate.status, { message: gate.message });
       }
 
       // Byte I/O is outside the serial SQL write queue.
-      await deps.storage.ensureBucket(bucket);
-      const written = await deps.storage.putObject(
+      await resolved.port.ensureBucket(bucket);
+      const written = await resolved.port.putObject(
         bucket,
         key,
         bytes,
@@ -214,7 +258,13 @@ export function registerBlobRoutes(
       const contentType = normalizeContentType(
         typeof body.content_type === "string" ? body.content_type : undefined,
       );
-      const ttl = clampSignTtlSeconds(body.ttl_seconds);
+
+      const resolved = await deps.resolveBucket(bucket);
+      assertBucketActive(resolved);
+      const ttl = clampSignTtlSeconds(
+        body.ttl_seconds,
+        resolved.limits.signTtlSeconds,
+      );
 
       const principal = c.get("principal");
       const gate = await assertSignAllowed({
@@ -233,7 +283,7 @@ export function registerBlobRoutes(
         if (!meta || meta.status !== "ready") {
           throw new HTTPException(404, { message: "object not found" });
         }
-        const signed = await deps.storage.presign({
+        const signed = await resolved.port.presign({
           bucket,
           key,
           intent: "download",
@@ -245,18 +295,30 @@ export function registerBlobRoutes(
           headers: signed.headers,
           expires_at: signed.expiresAt,
           object: publicBlob(meta),
-          storage: deps.storage.kind,
+          storage: resolved.port.kind,
+        });
+      }
+
+      const uploadGate = assertBucketUploadLimits({
+        size: 0,
+        contentType,
+        maxObjectBytes: resolved.limits.maxObjectBytes,
+        allowedMimeTypes: resolved.limits.allowedMimeTypes,
+      });
+      if (!uploadGate.ok && uploadGate.status === 415) {
+        throw new HTTPException(uploadGate.status, {
+          message: uploadGate.message,
         });
       }
 
       let uploadId: string | null = null;
       if (body.multipart === true) {
-        if (!deps.storage.createMultipartUpload) {
+        if (!resolved.port.createMultipartUpload) {
           throw new HTTPException(501, {
             message: "multipart not supported by storage backend",
           });
         }
-        const created = await deps.storage.createMultipartUpload({
+        const created = await resolved.port.createMultipartUpload({
           bucket,
           key,
           contentType,
@@ -264,7 +326,7 @@ export function registerBlobRoutes(
         uploadId = created.uploadId;
       }
 
-      const signed = await deps.storage.presign({
+      const signed = await resolved.port.presign({
         bucket,
         key,
         intent: "upload",
@@ -290,7 +352,7 @@ export function registerBlobRoutes(
         headers: signed.headers,
         expires_at: signed.expiresAt,
         object: publicBlob(pending),
-        storage: deps.storage.kind,
+        storage: resolved.port.kind,
       });
     },
   );
@@ -310,11 +372,14 @@ export function registerBlobRoutes(
       const uploadId =
         typeof body.upload_id === "string" ? body.upload_id : null;
 
+      const resolved = await deps.resolveBucket(bucket);
+      assertBucketActive(resolved);
+
       try {
         const meta = await deps.enqueueWrite(() =>
           finalizeBlob({
             jord: deps.jord,
-            storage: deps.storage,
+            storage: resolved.port,
             bucket,
             key,
             uploadId,
@@ -364,7 +429,8 @@ export function registerBlobRoutes(
     if (!meta || meta.status !== "ready") {
       throw new HTTPException(404, { message: "object not found" });
     }
-    const bytes = await deps.storage.getObject(bucket, key);
+    const resolved = await deps.resolveBucket(bucket);
+    const bytes = await resolved.port.getObject(bucket, key);
     if (!bytes) {
       throw new HTTPException(404, { message: "object bytes missing" });
     }
@@ -388,11 +454,14 @@ export function registerBlobRoutes(
         throw new HTTPException(400, { message: "invalid bucket or key" });
       }
 
+      const resolved = await deps.resolveBucket(bucket);
+      assertBucketActive(resolved);
+
       // Byte delete outside the SQL queue; meta delete on the queue.
       // Already-absent bytes resolve (false); a real storage failure throws,
       // and we keep the metadata row so the client can retry.
       try {
-        await deps.storage.deleteObject(bucket, key);
+        await resolved.port.deleteObject(bucket, key);
       } catch (err) {
         console.error(
           `[@altr/jord-server] blob byte delete failed ${bucket}/${key}`,
@@ -421,20 +490,36 @@ export function registerSignedBlobRoutes(
   app: Hono<any>,
   deps: {
     storage: JordStoragePort;
+    resolveBucket?: BucketResolver["resolveBucket"];
     hmacSecret: string;
     maxBytes?: number;
   },
 ): void {
-  const maxBytes = deps.maxBytes ?? DEFAULT_MAX_BLOB_BYTES;
+  const envMaxBytes = deps.maxBytes ?? DEFAULT_MAX_BLOB_BYTES;
 
   app.all("/blobs/signed/:bucket/objects/:key", async (c) => {
-    if (deps.storage.kind !== "local") {
-      throw new HTTPException(404, { message: "not found" });
-    }
     const bucket = c.req.param("bucket");
     const key = decodeObjectKey(c.req.param("key"));
     if (!isValidBlobBucket(bucket) || !isValidBlobKey(key)) {
       throw new HTTPException(400, { message: "invalid bucket or key" });
+    }
+
+    const resolved = deps.resolveBucket
+      ? await deps.resolveBucket(bucket)
+      : {
+          name: bucket,
+          row: null,
+          port: deps.storage,
+          limits: {
+            maxObjectBytes: envMaxBytes,
+            allowedMimeTypes: null,
+            signTtlSeconds: null,
+          },
+          source: "env" as const,
+        };
+
+    if (resolved.port.kind !== "local") {
+      throw new HTTPException(404, { message: "not found" });
     }
 
     const url = new URL(c.req.url);
@@ -466,7 +551,7 @@ export function registerSignedBlobRoutes(
     }
 
     if (signMethod === "GET") {
-      const bytes = await deps.storage.getObject(bucket, key);
+      const bytes = await resolved.port.getObject(bucket, key);
       if (!bytes) {
         throw new HTTPException(404, { message: "object not found" });
       }
@@ -490,17 +575,21 @@ export function registerSignedBlobRoutes(
     }
 
     const body = new Uint8Array(await c.req.arrayBuffer());
-    if (body.byteLength > maxBytes) {
-      throw new HTTPException(413, {
-        message: `object exceeds max size of ${maxBytes} bytes`,
-      });
-    }
     const contentType = normalizeContentType(
       parsed.contentType ?? c.req.header("content-type") ?? undefined,
     );
+    const gate = assertBucketUploadLimits({
+      size: body.byteLength,
+      contentType,
+      maxObjectBytes: resolved.limits.maxObjectBytes,
+      allowedMimeTypes: resolved.limits.allowedMimeTypes,
+    });
+    if (!gate.ok) {
+      throw new HTTPException(gate.status, { message: gate.message });
+    }
 
     if (parsed.uploadId && parsed.partNumber != null) {
-      const local = deps.storage as JordStoragePort & {
+      const local = resolved.port as JordStoragePort & {
         writeMultipartPart?: (
           uploadId: string,
           partNumber: number,
@@ -518,7 +607,7 @@ export function registerSignedBlobRoutes(
       return c.json({ ok: true as const, etag: written.etag, size: written.size });
     }
 
-    const written = await deps.storage.putObject(
+    const written = await resolved.port.putObject(
       bucket,
       key,
       body,

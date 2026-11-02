@@ -104,10 +104,12 @@ import {
   resolveBlobsRoot,
 } from "./blobs/index.js";
 import {
+  createBucketResolver,
   createStorageFromEnv,
   resolveHmacSecret,
   resolveMaxBlobBytes,
   resolvePublicBaseUrl,
+  type CreatePortFromBucketConfig,
   type JordStoragePort,
 } from "./storage/index.js";
 import {
@@ -210,6 +212,8 @@ export type JordAppDeps = {
   maxBlobBytes?: number;
   /** Injected storage adapter (tests). Defaults from JORD_STORAGE_BACKEND. */
   storage?: JordStoragePort;
+  /** Test override: build a port from a jord_buckets row (S0066). */
+  createBucketPort?: CreatePortFromBucketConfig;
   /** HMAC secret for local signed blob URLs. */
   blobSigningSecret?: string;
   /** Optional process env for CORS / body / rate / idempotency / HTTP log knobs. */
@@ -502,15 +506,24 @@ export function createJordApp(deps: JordAppDeps) {
   const maxBlobBytes = resolveMaxBlobBytes(env, deps.maxBlobBytes);
   const hmacSecret =
     deps.blobSigningSecret ?? resolveHmacSecret(env, deps.auth.secret);
+  const publicBaseUrl = resolvePublicBaseUrl(env);
+  const storageFactory = {
+    env,
+    blobsRoot,
+    hmacSecret,
+    publicBaseUrl,
+  };
   const storage = instrumentStorage(
-    deps.storage ??
-      createStorageFromEnv({
-        env,
-        blobsRoot,
-        hmacSecret,
-        publicBaseUrl: resolvePublicBaseUrl(env),
-      }),
+    deps.storage ?? createStorageFromEnv(storageFactory),
   );
+  const bucketResolver = createBucketResolver({
+    jord: deps.jord,
+    envPort: storage,
+    env,
+    envMaxBytes: maxBlobBytes,
+    factory: storageFactory,
+    createPort: deps.createBucketPort,
+  });
   // S0042/S0043: inject secret port when a master key is configured.
   const secrets: SecretPort | null =
     deps.secrets === undefined
@@ -542,6 +555,7 @@ export function createJordApp(deps: JordAppDeps) {
 
   registerSignedBlobRoutes(app, {
     storage,
+    resolveBucket: (name) => bucketResolver.resolveBucket(name),
     hmacSecret,
     maxBytes: maxBlobBytes,
   });
@@ -2852,6 +2866,7 @@ export function createJordApp(deps: JordAppDeps) {
     jord: deps.jord,
     enqueueWrite: enqueueWrite,
     storage,
+    resolveBucket: (name) => bucketResolver.resolveBucket(name),
     hmacSecret,
     maxBytes: maxBlobBytes,
     env,
