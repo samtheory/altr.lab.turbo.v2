@@ -144,6 +144,7 @@ import {
   clampSqlRowCap,
   clampSqlTimeout,
   isSqlTransactionControl,
+  sqlCancelledError,
   sqlMultiStatementError,
   sqlTimeoutError,
   sqlTxControlError,
@@ -407,10 +408,10 @@ const pgTx = new AsyncLocalStorage<PoolClient>();
 
 /** One simple-protocol round trip: BEGIN plus the session GUCs. */
 /**
- * B11: map the server's console errors to clear, internals-free messages.
+ * B11 / S0065: map the server's console errors to clear, internals-free messages.
  * 42601 "cannot insert multiple commands into a prepared statement" is the
  * extended-protocol multi-statement rejection; 57014 with "statement timeout"
- * is `statement_timeout` cancelling the statement (nothing committed).
+ * is `statement_timeout`; 57014 with "user request" is `pg_cancel_backend`.
  */
 function mapPgConsoleError(err: unknown, timeoutMs: number): unknown {
   const pgErr = err as { code?: unknown; message?: unknown } | null;
@@ -419,8 +420,15 @@ function mapPgConsoleError(err: unknown, timeoutMs: number): unknown {
   if (code === "42601" && /multiple commands/i.test(message)) {
     return sqlMultiStatementError();
   }
-  if (code === "57014" && /statement timeout/i.test(message)) {
-    return sqlTimeoutError(timeoutMs, false);
+  if (code === "57014") {
+    if (/user request/i.test(message) || /canceling statement due to user/i.test(message)) {
+      return sqlCancelledError(false);
+    }
+    if (/statement timeout/i.test(message)) {
+      return sqlTimeoutError(timeoutMs, false);
+    }
+    // Other query_canceled variants (admin cancel, etc.) — treat as cancelled.
+    return sqlCancelledError(false);
   }
   return err;
 }
@@ -563,6 +571,7 @@ export class PostgresAdapter implements JordDriverPort {
     readOnly: boolean;
     timeoutMs?: number;
     rowCap?: number;
+    signal?: AbortSignal;
   }): Promise<{
     columns: string[];
     rows: Array<Record<string, unknown>>;
@@ -573,11 +582,28 @@ export class PostgresAdapter implements JordDriverPort {
     const rowCap = clampSqlRowCap(input.rowCap);
     const timeoutMs = clampSqlTimeout(input.timeoutMs);
     const args = input.args ?? [];
+    const signal = input.signal;
     // B11: COMMIT / ROLLBACK / BEGIN would end or nest our BEGIN [READ ONLY].
     if (isSqlTransactionControl(input.sql)) throw sqlTxControlError();
+    if (signal?.aborted) throw sqlCancelledError(false);
     const started = Date.now();
     const client = await this.pool.connect();
+    let backendPid: number | null = null;
+    let onAbort: (() => void) | null = null;
     try {
+      const pidRow = await client.query<{ pid: number }>("SELECT pg_backend_pid() AS pid");
+      backendPid = Number(pidRow.rows[0]?.pid);
+      if (signal && Number.isFinite(backendPid)) {
+        const pid = backendPid;
+        const pool = this.pool;
+        onAbort = () => {
+          void pool
+            .query("SELECT pg_cancel_backend($1)", [pid])
+            .catch(() => undefined);
+        };
+        signal.addEventListener("abort", onAbort, { once: true });
+        if (signal.aborted) onAbort();
+      }
       await client.query(
         beginWithSessionSql(rlsSession.getStore(), input.readOnly ? "BEGIN READ ONLY" : "BEGIN"),
       );
@@ -595,6 +621,7 @@ export class PostgresAdapter implements JordDriverPort {
       try {
         result = (await client.query(config)) as QueryResult | QueryResult[];
       } catch (err) {
+        if (signal?.aborted) throw sqlCancelledError(false);
         throw mapPgConsoleError(err, timeoutMs);
       }
       // Belt and braces: several results mean several statements ran.
@@ -615,6 +642,7 @@ export class PostgresAdapter implements JordDriverPort {
       await client.query("ROLLBACK").catch(() => undefined);
       throw err;
     } finally {
+      if (signal && onAbort) signal.removeEventListener("abort", onAbort);
       // B11: never hand a console connection back to the pool. A
       // `SET SESSION …` / `SET ROLE …` run here must not leak into later
       // requests that share pooled connections.

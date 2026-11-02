@@ -665,6 +665,7 @@ export interface JordDriverPort {
     readOnly: boolean;
     timeoutMs?: number;
     rowCap?: number;
+    signal?: AbortSignal;
   }): Promise<{
     columns: string[];
     rows: Array<Record<string, unknown>>;

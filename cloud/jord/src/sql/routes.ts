@@ -1,6 +1,13 @@
 import { randomUUID } from "node:crypto";
 
-import type { JordDriverPort } from "@altr/jord";
+import type { ExplainPlanNode, JordDriverPort } from "@altr/jord";
+import {
+  isExplainSql,
+  normalizeExplainPlan,
+  preferLibsqlQueryPlan,
+  preferPostgresJsonExplain,
+  sqlErrorPosition,
+} from "@altr/jord";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
@@ -9,6 +16,12 @@ import type { Principal } from "../auth/principal.js";
 import type { WriteQueue } from "../queue.js";
 import type { LogSink } from "../logs/sink.js";
 import { withSqlSpan } from "../telemetry/spans.js";
+import {
+  cancelActiveSqlQuery,
+  normalizeSqlQueryId,
+  registerActiveSqlQuery,
+  unregisterActiveSqlQuery,
+} from "./active-queries.js";
 import { listSqlHistory } from "./history.js";
 import {
   createSavedQuery,
@@ -20,11 +33,12 @@ import {
   updateSavedQuery,
 } from "./saved-queries.js";
 
-/** B11 engine guard codes (`JordSqlConsoleError.code`), duck-typed. */
+/** Engine guard codes (`JordSqlConsoleError.code`), duck-typed. */
 const ENGINE_SQL_CODES = new Set([
   "JORD_SQL_MULTI_STATEMENT",
   "JORD_SQL_TX_CONTROL",
   "JORD_SQL_TIMEOUT",
+  "JORD_SQL_CANCELLED",
 ]);
 
 function engineErrorCode(err: unknown): string | null {
@@ -42,6 +56,23 @@ function requireAdmin(principal: Principal): void {
   if (principal.kind !== "operator" || principal.role !== "admin") {
     throw new HTTPException(403, { message: "admin operator only" });
   }
+}
+
+function prepareSql(dialect: JordDriverPort["dialect"], sql: string): string {
+  if (!isExplainSql(sql)) return sql;
+  return dialect === "postgres"
+    ? preferPostgresJsonExplain(sql)
+    : preferLibsqlQueryPlan(sql);
+}
+
+function buildPlan(
+  dialect: JordDriverPort["dialect"],
+  sql: string,
+  columns: string[],
+  rows: Array<Record<string, unknown>>,
+): ExplainPlanNode | null {
+  if (!isExplainSql(sql)) return null;
+  return normalizeExplainPlan(dialect === "postgres" ? "postgres" : "libsql", columns, rows);
 }
 
 export function createSqlRoutes(deps: {
@@ -149,6 +180,15 @@ export function createSqlRoutes(deps: {
     return c.json({ query: saved });
   });
 
+  routes.post("/cancel", async (c) => {
+    requireAdmin(c.get("principal"));
+    const body = (await c.req.json().catch(() => ({}))) as { id?: unknown };
+    const id = normalizeSqlQueryId(body.id);
+    if (!id) throw new HTTPException(400, { message: "id required" });
+    const cancelled = cancelActiveSqlQuery(id);
+    return c.json({ ok: true, cancelled });
+  });
+
   routes.post("/execute", async (c) => {
     const principal = c.get("principal");
     requireAdmin(principal);
@@ -157,10 +197,14 @@ export function createSqlRoutes(deps: {
       readOnly?: boolean;
       timeoutMs?: number;
       rowCap?: number;
+      id?: unknown;
     };
-    const sql = typeof body.sql === "string" ? body.sql.trim() : "";
-    if (!sql) throw new HTTPException(400, { message: "sql required" });
+    const sqlRaw = typeof body.sql === "string" ? body.sql.trim() : "";
+    if (!sqlRaw) throw new HTTPException(400, { message: "sql required" });
     const readOnly = body.readOnly !== false;
+    const queryId = normalizeSqlQueryId(body.id) ?? randomUUID();
+    const sql = prepareSql(deps.jord.dialect, sqlRaw);
+    const controller = registerActiveSqlQuery(queryId);
 
     const run = async () =>
       withSqlSpan({ kind: readOnly ? "select" : "execute" }, () =>
@@ -169,6 +213,7 @@ export function createSqlRoutes(deps: {
           readOnly,
           timeoutMs: body.timeoutMs,
           rowCap: body.rowCap,
+          signal: controller.signal,
         }),
       );
 
@@ -176,6 +221,7 @@ export function createSqlRoutes(deps: {
     let errorText: string | null = null;
     let errorCode: string | null = null;
     let committed = false;
+    let position: { line: number; column: number } | null = null;
     try {
       result = readOnly
         ? await run()
@@ -196,17 +242,25 @@ export function createSqlRoutes(deps: {
       errorText = err instanceof Error ? err.message : String(err);
       errorCode = engineErrorCode(err);
       committed = !readOnly && engineCommitted(err);
+      position = sqlErrorPosition(sqlRaw, err);
       result = null;
+    } finally {
+      unregisterActiveSqlQuery(queryId, controller);
     }
 
     const ok = result != null;
+    const cancelled = errorCode === "JORD_SQL_CANCELLED";
     const elapsedMs = result?.elapsedMs ?? 0;
     const auditId = randomUUID();
     const at = Date.now();
 
     // Audit + log outside the hot write queue (direct query).
+    // Cancelled queries are audited as failed (ok=0) with a cancelled message.
     const readOnlyFlag = readOnly ? 1 : 0;
     const okFlag = ok ? 1 : 0;
+    const auditError = cancelled
+      ? errorText ?? "Statement was cancelled."
+      : errorText;
     await deps.jord
       .query(
         deps.jord.dialect === "postgres"
@@ -218,11 +272,11 @@ export function createSqlRoutes(deps: {
           principal.uid ?? null,
           principal.role,
           readOnlyFlag,
-          sql.slice(0, 8_000),
+          sqlRaw.slice(0, 8_000),
           okFlag,
           elapsedMs,
           result?.rowCount ?? null,
-          errorText,
+          auditError,
         ],
       )
       .catch(() => undefined);
@@ -232,22 +286,35 @@ export function createSqlRoutes(deps: {
       source: "system",
       message: ok
         ? `sql ok (${readOnly ? "ro" : "rw"}) ${elapsedMs}ms`
-        : `sql failed: ${errorText ?? "error"}`,
-      meta: { auditId, readOnly },
+        : cancelled
+          ? `sql cancelled: ${errorText ?? "cancelled"}`
+          : `sql failed: ${errorText ?? "error"}`,
+      meta: { auditId, readOnly, queryId, cancelled },
     });
 
     if (!result) {
+      const error =
+        errorCode === "JORD_SQL_TIMEOUT"
+          ? "sql_timeout"
+          : cancelled
+            ? "sql_cancelled"
+            : "sql_failed";
       return c.json(
         {
-          error: errorCode === "JORD_SQL_TIMEOUT" ? "sql_timeout" : "sql_failed",
+          error,
           message: errorText,
           // B11: true only when the statement's changes landed despite the error.
           committed,
+          queryId,
+          cancelled,
           ...(errorCode ? { code: errorCode } : {}),
+          ...(position ? { position } : {}),
         },
         400,
       );
     }
+
+    const plan = buildPlan(deps.jord.dialect, sqlRaw, result.columns, result.rows);
     return c.json({
       columns: result.columns,
       rows: result.rows,
@@ -256,9 +323,11 @@ export function createSqlRoutes(deps: {
       elapsedMs: result.elapsedMs,
       readOnly,
       auditId,
+      queryId,
+      ...(plan ? { plan } : {}),
       note: readOnly
-        ? "Raw SQL bypasses the migration runner."
-        : "Raw SQL bypasses the migration runner. Row-level CDC is not captured; every tracked table gets one op:\"resync\" change so live subscribers refetch.",
+        ? "Raw SQL bypasses the migration runner. Each statement auto-commits; BEGIN/COMMIT/ROLLBACK are rejected."
+        : "Raw SQL bypasses the migration runner. Row-level CDC is not captured; every tracked table gets one op:\"resync\" change so live subscribers refetch. Each statement auto-commits; BEGIN/COMMIT/ROLLBACK are rejected.",
     });
   });
 

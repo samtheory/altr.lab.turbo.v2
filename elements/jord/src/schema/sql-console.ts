@@ -6,6 +6,8 @@ export type ExecuteSqlInput = {
   timeoutMs?: number;
   /** Default 200. */
   rowCap?: number;
+  /** When aborted, adapters cancel the in-flight statement when possible. */
+  signal?: AbortSignal;
 };
 
 export type ExecuteSqlResult = {
@@ -38,7 +40,8 @@ export function clampSqlRowCap(cap: number | undefined): number {
 export type JordSqlConsoleErrorCode =
   | "JORD_SQL_MULTI_STATEMENT"
   | "JORD_SQL_TX_CONTROL"
-  | "JORD_SQL_TIMEOUT";
+  | "JORD_SQL_TIMEOUT"
+  | "JORD_SQL_CANCELLED";
 
 export class JordSqlConsoleError extends Error {
   readonly code: JordSqlConsoleErrorCode;
@@ -74,6 +77,55 @@ export function sqlTimeoutError(timeoutMs: number, committed: boolean): JordSqlC
       : `Statement exceeded the ${timeoutMs} ms timeout and was cancelled. Nothing was committed.`,
     committed,
   );
+}
+
+export function sqlCancelledError(committed = false): JordSqlConsoleError {
+  return new JordSqlConsoleError(
+    "JORD_SQL_CANCELLED",
+    committed
+      ? "Statement was cancelled after it finished; its changes were committed."
+      : "Statement was cancelled. Nothing was committed.",
+    committed,
+  );
+}
+
+/** True when the leading keyword (after comments) is EXPLAIN. */
+export function isExplainSql(sql: string): boolean {
+  for (const token of tokenizeSql(sql)) {
+    if (token.kind !== "word") break;
+    return token.upper === "EXPLAIN";
+  }
+  return false;
+}
+
+/**
+ * Extract engine-reported SQL position into 1-based line/column when possible.
+ * Postgres `position` is a 1-based character offset into the query text.
+ */
+export function sqlErrorPosition(
+  sql: string,
+  err: unknown,
+): { line: number; column: number } | null {
+  const position = (err as { position?: unknown } | null)?.position;
+  const offsetRaw =
+    typeof position === "number"
+      ? position
+      : typeof position === "string"
+        ? Number(position)
+        : NaN;
+  if (!Number.isFinite(offsetRaw) || offsetRaw < 1) return null;
+  const offset = Math.min(Math.trunc(offsetRaw), sql.length);
+  let line = 1;
+  let column = 1;
+  for (let i = 0; i < offset - 1; i++) {
+    if (sql[i] === "\n") {
+      line += 1;
+      column = 1;
+    } else {
+      column += 1;
+    }
+  }
+  return { line, column };
 }
 
 type SqlToken = { kind: "word"; upper: string } | { kind: "semi" } | { kind: "other" };

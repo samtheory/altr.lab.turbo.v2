@@ -192,6 +192,7 @@ const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "GET", path: "/api/v1" },
   { method: "GET", path: "/api/v1/records" },
   { method: "POST", path: "/sql/execute" },
+  { method: "POST", path: "/sql/cancel" },
   { method: "GET", path: "/sql/history" },
   { method: "GET", path: "/sql/saved-queries" },
   { method: "POST", path: "/sql/saved-queries" },

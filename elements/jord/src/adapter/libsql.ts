@@ -145,6 +145,7 @@ import {
   countSqliteStatements,
   isSqlTransactionControl,
   raceSqlTimeout,
+  sqlCancelledError,
   sqlMultiStatementError,
   sqlTimeoutError,
   sqlTxControlError,
@@ -618,6 +619,7 @@ export class LibSqlAdapter implements JordDriverPort {
     readOnly: boolean;
     timeoutMs?: number;
     rowCap?: number;
+    signal?: AbortSignal;
   }): Promise<{
     columns: string[];
     rows: Array<Record<string, unknown>>;
@@ -628,6 +630,7 @@ export class LibSqlAdapter implements JordDriverPort {
     const rowCap = clampSqlRowCap(input.rowCap);
     const timeoutMs = clampSqlTimeout(input.timeoutMs);
     const args = input.args ?? [];
+    const signal = input.signal;
     const started = Date.now();
 
     // B11: libSQL `execute` silently runs only the first of several
@@ -635,6 +638,7 @@ export class LibSqlAdapter implements JordDriverPort {
     // connection would leave it inside (or close) someone else's transaction.
     if (countSqliteStatements(input.sql) > 1) throw sqlMultiStatementError();
     if (isSqlTransactionControl(input.sql)) throw sqlTxControlError();
+    if (signal?.aborted) throw sqlCancelledError(false);
 
     const shape = (result: ResultSet) => {
       const columns = result.columns;
@@ -662,17 +666,61 @@ export class LibSqlAdapter implements JordDriverPort {
         url: this.connectionUrl,
         ...(this.authToken ? { authToken: this.authToken } : {}),
       });
+      const onAbort = () => {
+        try {
+          readClient.close();
+        } catch {
+          // Already closed.
+        }
+      };
+      if (signal) {
+        signal.addEventListener("abort", onAbort, { once: true });
+        if (signal.aborted) onAbort();
+      }
       try {
         await readClient.execute("PRAGMA query_only = ON");
-        // A read cannot commit, so on timeout it is safe to stop waiting.
-        const raced = await raceSqlTimeout(
-          readClient.execute({ sql: input.sql, args }),
-          timeoutMs,
-        );
-        if (raced.kind === "timeout") throw sqlTimeoutError(timeoutMs, false);
-        return shape(raced.value);
+        // Race settle / timeout / user cancel. File libSQL may still block the
+        // event loop for the duration of a sync statement; hosted libSQL and
+        // Postgres yield so cancel can win under 2s.
+        const pending = readClient.execute({ sql: input.sql, args });
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const timeout = new Promise<{ kind: "timeout" }>((resolve) => {
+          timer = setTimeout(() => resolve({ kind: "timeout" }), timeoutMs);
+        });
+        const cancelled = new Promise<{ kind: "cancelled" }>((resolve) => {
+          if (!signal) return;
+          if (signal.aborted) {
+            resolve({ kind: "cancelled" });
+            return;
+          }
+          signal.addEventListener("abort", () => resolve({ kind: "cancelled" }), {
+            once: true,
+          });
+        });
+        try {
+          const raced = await Promise.race([
+            pending.then((value) => ({ kind: "settled" as const, value })),
+            timeout,
+            cancelled,
+          ]);
+          if (raced.kind === "cancelled") throw sqlCancelledError(false);
+          if (raced.kind === "timeout") throw sqlTimeoutError(timeoutMs, false);
+          return shape(raced.value);
+        } finally {
+          clearTimeout(timer);
+          // Keep a handler on pending so a late rejection is never unhandled.
+          void pending.catch(() => undefined);
+        }
+      } catch (err) {
+        if (signal?.aborted) throw sqlCancelledError(false);
+        throw err;
       } finally {
-        readClient.close();
+        if (signal) signal.removeEventListener("abort", onAbort);
+        try {
+          readClient.close();
+        } catch {
+          // Already closed by cancel.
+        }
       }
     }
 
@@ -680,12 +728,17 @@ export class LibSqlAdapter implements JordDriverPort {
     // synchronously; hosted keeps it running server-side). On timeout, wait
     // for it to settle so the caller's write-queue slot is not freed early,
     // then report what really happened. A late failure is rethrown as-is
-    // (one statement in autocommit: nothing landed).
+    // (one statement in autocommit: nothing landed). User cancel while waiting
+    // still waits for settle, then reports cancelled + committed if it landed.
     const pending = this.client.execute({ sql: input.sql, args });
     const raced = await raceSqlTimeout(pending, timeoutMs);
     if (raced.kind === "timeout") {
       await pending;
       throw sqlTimeoutError(timeoutMs, true);
+    }
+    if (signal?.aborted) {
+      // Statement already finished; report truthfully.
+      throw sqlCancelledError(true);
     }
     return shape(raced.value);
   }

@@ -9,15 +9,10 @@ import {
   Button,
   SqlEditor,
   Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "@altr/apolyx";
 import type { SqlCompletionModel, SqlDialect } from "@altr/apolyx";
 
+import { SqlResultsPanel } from "@/components/sql-results-panel";
 import {
   SqlQueryTabsStrip,
   useSqlWorkspaceOptional,
@@ -33,6 +28,7 @@ import {
   studioSqlModelCache,
   tableDetailPath,
 } from "@/lib/studio-sql-editor";
+import type { ExplainPlanNode } from "@/lib/studio-sql-results";
 
 type Props = {
   role: string;
@@ -44,6 +40,15 @@ type Props = {
 const DETAIL_CONCURRENCY = 6;
 /** Refetch the completion model when the window regains focus after this long. */
 const SCHEMA_STALE_MS = 60_000;
+const DEFAULT_ROW_CAP = 200;
+const DEFAULT_TIMEOUT_MS = 30_000;
+
+function newQueryId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `q-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export function SqlConsolePanel({ role, engine }: Props) {
   const projectSlug = useProjectSlug();
@@ -55,8 +60,15 @@ export function SqlConsolePanel({ role, engine }: Props) {
   const [note, setNote] = useState<string | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([]);
+  const [rowCount, setRowCount] = useState(0);
+  const [truncated, setTruncated] = useState(false);
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
+  const [plan, setPlan] = useState<ExplainPlanNode | null>(null);
+  const [rowCap, setRowCap] = useState(DEFAULT_ROW_CAP);
+  const [runningId, setRunningId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const runningIdRef = useRef<string | null>(null);
 
   const [dialect, setDialect] = useState<SqlDialect>(() =>
     sqlDialectForEngine(engine),
@@ -158,7 +170,11 @@ export function SqlConsolePanel({ role, engine }: Props) {
     setNote(null);
     setColumns([]);
     setRows([]);
+    setRowCount(0);
+    setTruncated(false);
     setElapsedMs(null);
+    setPlan(null);
+    setRowCap(DEFAULT_ROW_CAP);
   }, [workspace?.active]);
 
   const onSqlChange = useCallback(
@@ -168,46 +184,111 @@ export function SqlConsolePanel({ role, engine }: Props) {
     [workspace],
   );
 
+  const clearResults = () => {
+    setColumns([]);
+    setRows([]);
+    setRowCount(0);
+    setTruncated(false);
+    setElapsedMs(null);
+    setPlan(null);
+  };
+
+  const runWithCap = useCallback(
+    (cap: number) => {
+      const statement = sql.trim();
+      if (!statement) return;
+      const queryId = newQueryId();
+      runningIdRef.current = queryId;
+      setRunningId(queryId);
+      setCancelling(false);
+      startTransition(async () => {
+        setError(null);
+        setNote(null);
+        try {
+          const res = await fetch("/api/sql/execute", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              sql: statement,
+              readOnly,
+              id: queryId,
+              rowCap: cap,
+              timeoutMs: DEFAULT_TIMEOUT_MS,
+            }),
+          });
+          const body = (await res.json().catch(() => ({}))) as {
+            message?: string;
+            columns?: string[];
+            rows?: Array<Record<string, unknown>>;
+            rowCount?: number;
+            elapsedMs?: number;
+            note?: string;
+            truncated?: boolean;
+            cancelled?: boolean;
+            error?: string;
+            position?: { line: number; column: number };
+            plan?: ExplainPlanNode;
+            code?: string;
+          };
+          if (!res.ok) {
+            const pos = body.position
+              ? ` (line ${body.position.line}, column ${body.position.column})`
+              : "";
+            setError(
+              `${body.message ?? `SQL failed (${res.status})`}${pos}${
+                body.cancelled || body.error === "sql_cancelled"
+                  ? " — cancelled"
+                  : ""
+              }`,
+            );
+            clearResults();
+            workspace?.bumpRevision();
+            return;
+          }
+          setColumns(body.columns ?? []);
+          setRows(body.rows ?? []);
+          setRowCount(body.rowCount ?? body.rows?.length ?? 0);
+          setTruncated(Boolean(body.truncated));
+          setElapsedMs(body.elapsedMs ?? null);
+          setPlan(body.plan ?? null);
+          setRowCap(cap);
+          setNote(
+            body.truncated
+              ? `${body.note ?? ""} (result truncated by the row cap — use Fetch more)`.trim()
+              : (body.note ?? null),
+          );
+          workspace?.markExecuted();
+          workspace?.bumpRevision();
+        } finally {
+          if (runningIdRef.current === queryId) {
+            runningIdRef.current = null;
+            setRunningId(null);
+            setCancelling(false);
+          }
+        }
+      });
+    },
+    [sql, readOnly, workspace],
+  );
+
   const run = useCallback(() => {
-    const statement = sql.trim();
-    if (!statement) return;
-    startTransition(async () => {
-      setError(null);
-      setNote(null);
-      const res = await fetch("/api/sql/execute", {
+    runWithCap(DEFAULT_ROW_CAP);
+  }, [runWithCap]);
+
+  const cancel = useCallback(async () => {
+    const id = runningIdRef.current;
+    if (!id) return;
+    setCancelling(true);
+    try {
+      await fetch("/api/sql/cancel", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sql: statement, readOnly }),
+        body: JSON.stringify({ id }),
       });
-      const body = (await res.json().catch(() => ({}))) as {
-        message?: string;
-        columns?: string[];
-        rows?: Array<Record<string, unknown>>;
-        elapsedMs?: number;
-        note?: string;
-        truncated?: boolean;
-      };
-      if (!res.ok) {
-        setError(body.message ?? `SQL failed (${res.status})`);
-        setRows([]);
-        setColumns([]);
-        setElapsedMs(null);
-        workspace?.bumpRevision();
-        return;
-      }
-      setColumns(body.columns ?? []);
-      setRows(body.rows ?? []);
-      setElapsedMs(body.elapsedMs ?? null);
-      setNote(
-        body.truncated
-          ? `${body.note ?? ""} (result truncated by the row cap)`.trim()
-          : (body.note ?? null),
-      );
-      // Executed snapshot clears dirty; history list refreshes from audit.
-      workspace?.markExecuted();
-      workspace?.bumpRevision();
-    });
-  }, [sql, readOnly, workspace]);
+    } catch {
+      setCancelling(false);
+    }
+  }, []);
 
   if (role !== "admin") {
     return (
@@ -222,6 +303,8 @@ export function SqlConsolePanel({ role, engine }: Props) {
     );
   }
 
+  const busy = isPending || runningId != null;
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6">
       <div className="space-y-1">
@@ -233,6 +316,7 @@ export function SqlConsolePanel({ role, engine }: Props) {
             SQL editor
           </h1>
           <Badge variant="outline">{sqlDialectLabel(dialect)}</Badge>
+          <Badge variant="outline">Auto-commit</Badge>
           <span className="text-xs text-muted-foreground" role="status">
             {schemaState === "loading"
               ? "Loading schema…"
@@ -245,9 +329,9 @@ export function SqlConsolePanel({ role, engine }: Props) {
         </div>
         <p className="text-sm text-muted-foreground">
           Reads use a dedicated connection with engine-enforced query_only /
-          READ ONLY. Writes go through the write queue. Tabs, saved queries, and
-          history live in the Queries sidebar — opening a saved/history item
-          creates a new tab.
+          READ ONLY. Writes go through the write queue. Each statement
+          auto-commits — BEGIN / COMMIT / ROLLBACK are rejected. Ending the
+          session never leaves an open transaction dirty.
         </p>
       </div>
 
@@ -279,14 +363,25 @@ export function SqlConsolePanel({ role, engine }: Props) {
           >
             Refresh schema
           </Button>
-          <Button
-            type="button"
-            disabled={isPending || !sql.trim()}
-            onClick={run}
-            aria-keyshortcuts="Control+Enter Meta+Enter"
-          >
-            Run
-          </Button>
+          {busy ? (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={cancelling}
+              onClick={() => void cancel()}
+            >
+              {cancelling ? "Cancelling…" : "Cancel"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              disabled={!sql.trim()}
+              onClick={run}
+              aria-keyshortcuts="Control+Enter Meta+Enter"
+            >
+              Run
+            </Button>
+          )}
         </div>
       </div>
 
@@ -305,7 +400,8 @@ export function SqlConsolePanel({ role, engine }: Props) {
         <kbd className="font-mono">Ctrl/⌘+T</kbd> new tab ·{" "}
         <kbd className="font-mono">Ctrl/⌘+W</kbd> close ·{" "}
         <kbd className="font-mono">Ctrl/⌘+S</kbd> save ·{" "}
-        <kbd className="font-mono">Shift+Alt+F</kbd> formats.
+        <kbd className="font-mono">Shift+Alt+F</kbd> formats. Default timeout{" "}
+        {DEFAULT_TIMEOUT_MS / 1000}s · row cap {DEFAULT_ROW_CAP}.
       </p>
 
       {error ? (
@@ -320,34 +416,19 @@ export function SqlConsolePanel({ role, engine }: Props) {
           <AlertDescription>{note}</AlertDescription>
         </Alert>
       ) : null}
-      {elapsedMs != null ? (
-        <p className="text-xs text-muted-foreground">
-          {elapsedMs} ms · {rows.length} row{rows.length === 1 ? "" : "s"}
-        </p>
-      ) : null}
 
-      {columns.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columns.map((col) => (
-                <TableHead key={col}>{col}</TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row, i) => (
-              <TableRow key={i}>
-                {columns.map((col) => (
-                  <TableCell key={col} className="font-mono text-xs">
-                    {String(row[col] ?? "")}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : null}
+      <SqlResultsPanel
+        columns={columns}
+        rows={rows}
+        rowCount={rowCount}
+        truncated={truncated}
+        elapsedMs={elapsedMs}
+        plan={plan}
+        fetchMoreDisabled={busy}
+        onFetchMore={() =>
+          runWithCap(Math.min(1_000, Math.max(rowCap * 2, rowCap + 200)))
+        }
+      />
     </div>
   );
 }

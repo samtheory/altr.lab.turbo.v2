@@ -47,3 +47,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0062-canvas-layout\|S0062]] | Canvas layout persistence, auto-layout, FK drag, export | 2026-11-02 |
 | [[S0063-monaco-sql-editor\|S0063]] | Monaco SQL editor + project-scoped completion | 2026-11-02 |
 | [[S0064-query-tabs-history\|S0064]] | Query tabs, saved queries, audit history | 2026-11-02 |
+| [[S0065-results-explain-cancel\|S0065]] | Results grid, export, explain, cancel | 2026-11-02 |

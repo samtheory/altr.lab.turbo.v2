@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0064 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL tabs/history"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0065 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL results/explain/cancel"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -40,7 +40,7 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts` (`icon` + optional `context
 | Tables | `/p/[project]/tables`, `…/tables/[name]` | [[../schema/README]] [[../writes/README]] |
 | Schema | `/p/[project]/schema` | [[../schema/README]] |
 | Connection | `/p/[project]/database/connection` | [[../dialects/README]] — labels only; **no URL editor** |
-| SQL editor | `/p/[project]/database/sql` | `POST /sql/execute` — admin; read-only via engine pragma; Monaco (S0063) |
+| SQL editor | `/p/[project]/database/sql` | `POST /sql/execute` + `/sql/cancel` — admin; Monaco + DataGrid results (S0063–S0065) |
 | Migrate | `/p/[project]/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
 | Users | `/p/[project]/auth/users` | `GET /admin/users` — disable / revoke |
 | Projects | `/projects`, `/projects/new`, `/projects/[id]/edit` | BFF → `GET/POST /admin/projects` · test · rotate · archive · one-time key reveal (control plane, not project-prefixed) |
@@ -55,11 +55,11 @@ Legacy unscoped paths (`/tables`, `/records`, …) **redirect** via middleware t
 
 BFF routes live under `apps/jord-studio/src/app/api/` and mirror the server paths.
 
-## SQL editor (S0024 + S0063 + S0064)
+## SQL editor (S0024 + S0063 + S0064 + S0065)
 
-Admin operator only. Read-only default uses a **dedicated** libSQL connection with `PRAGMA query_only=ON` (Postgres: `BEGIN READ ONLY` + `statement_timeout`). Those reads never enter the write queue. Writes require the toggle off and go through `enqueueWrite`. Every statement is audited in `jord_sql_audit`. Raw SQL bypasses the migration runner and, on libSQL, the outbox.
+Admin operator only. Read-only default uses a **dedicated** libSQL connection with `PRAGMA query_only=ON` (Postgres: `BEGIN READ ONLY` + `statement_timeout`). Those reads never enter the write queue. Writes require the toggle off and go through `enqueueWrite`. Every statement is audited in `jord_sql_audit`. Raw SQL bypasses the migration runner and, on libSQL, the outbox. Each statement **auto-commits** — `BEGIN` / `COMMIT` / `ROLLBACK` are rejected.
 
-S0063 replaced the textarea with the Apolyx `SqlEditor` (Monaco). S0064 adds query tabs, project saved queries, and audit-backed history in the Queries sidebar.
+S0063 replaced the textarea with the Apolyx `SqlEditor` (Monaco). S0064 adds query tabs, project saved queries, and audit-backed history in the Queries sidebar. S0065 adds DataGrid results, explain plan tree, cancel, and CSV/JSON export of the visible set.
 
 | Piece | Fact |
 |-------|------|
@@ -76,7 +76,11 @@ S0063 replaced the textarea with the Apolyx `SqlEditor` (Monaco). S0064 adds que
 | Open policy | Opening a saved query or history row always creates a **new** tab |
 | Sidebar | `StudioSqlSidebar` when `contextual === "queries"` — Saved / History sections with search |
 | Shortcuts | `Ctrl/Cmd+Enter` run · `Ctrl/Cmd+T` new tab · `Ctrl/Cmd+W` close · `Ctrl/Cmd+S` save |
-| Out of scope | Results grid, explain, cancel → [[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]] |
+| Results (S0065) | Apolyx `DataGrid` — client sort/filter/search; copy row/cell; CSV/JSON export of the **visible** set; fetch-more bumps `rowCap` (max 1000); JSON/blob cell detail dialog |
+| Explain (S0065) | Leading `EXPLAIN` → Postgres `FORMAT JSON` / libSQL `QUERY PLAN`; response includes `plan: { node, detail, rows, cost, children[] }` |
+| Cancel (S0065) | Client query `id` on `POST /sql/execute`; `POST /sql/cancel` aborts via `AbortSignal` + Postgres `pg_cancel_backend`; cancelled runs audited `ok=0`. File libSQL sync statements block the Node thread so cancel cannot interleave there |
+| Guards | Default timeout 30 s (Studio) / engine clamp 100–60_000 ms; `rowCap` default 200 (clamp 1–1000) with `truncated: true` |
+| Anchor | [[../../../plan/Jord/phase-03/done/S0065-results-explain-cancel\|S0065]] |
 
 ## Migrate wizard (S0024)
 

@@ -285,6 +285,15 @@ export {
   clampSqlTimeout,
   DEFAULT_SQL_ROW_CAP,
   DEFAULT_SQL_TIMEOUT_MS,
+  isExplainSql,
+  sqlCancelledError,
+  sqlErrorPosition,
   type ExecuteSqlInput,
   type ExecuteSqlResult,
 } from "./schema/sql-console.js";
+export {
+  normalizeExplainPlan,
+  preferLibsqlQueryPlan,
+  preferPostgresJsonExplain,
+  type ExplainPlanNode,
+} from "./schema/sql-explain.js";
