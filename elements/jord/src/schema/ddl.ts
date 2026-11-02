@@ -1,3 +1,12 @@
+import {
+  type ColumnSettings,
+  columnConstraintSql,
+  parseColumnSettings,
+} from "./column-settings.js";
+import {
+  idStrategyDdl,
+  postgresSerialType,
+} from "./id-strategy.js";
 import { getTypeEntry, toSql } from "./types/index.js";
 
 /** Whitelisted SQLite column types for additive live save (Studio S2). */
@@ -60,8 +69,12 @@ export function buildAddColumnSql(
   column: string,
   type: JordColumnType,
   schema?: string,
+  settings?: ColumnSettings,
+  dialect: "libsql" | "postgres" = "libsql",
 ): string {
-  return `ALTER TABLE ${tableRef(table, schema)} ADD COLUMN ${quoteIdent(column)} ${type}`;
+  const sqlType = dialect === "postgres" ? pgColumnType(type) : type;
+  const constraints = columnConstraintSql(settings, dialect);
+  return `ALTER TABLE ${tableRef(table, schema)} ADD COLUMN ${quoteIdent(column)} ${sqlType}${constraints}`;
 }
 
 /** Names Studio CREATE TABLE must not overwrite (scratchpad + control plane + system). */
@@ -79,17 +92,20 @@ export type CreateTableColumnInput = {
   name: string;
   type: JordColumnType;
   pk?: boolean;
+  settings?: ColumnSettings;
 };
 
 export type PlannedCreateColumn = {
   name: string;
   type: JordColumnType;
   pk: boolean;
+  settings?: ColumnSettings;
 };
 
 export type CreateTablePlanError =
   | "invalid_identifier"
   | "invalid_type"
+  | "invalid_settings"
   | "no_columns"
   | "duplicate_column"
   | "multiple_pk"
@@ -153,9 +169,21 @@ export function planCreateTable(input: {
       };
     }
     seen.add(col.name);
-    const pk = col.pk === true;
+    let settings: ColumnSettings | undefined;
+    if (col.settings !== undefined) {
+      const parsed = parseColumnSettings(col.settings);
+      if (!parsed.ok) {
+        return {
+          ok: false,
+          error: "invalid_settings",
+          message: parsed.message,
+        };
+      }
+      settings = parsed.settings;
+    }
+    const pk = col.pk === true || settings?.primaryKey === true;
     if (pk) pkCount += 1;
-    planned.push({ name: col.name, type: col.type, pk });
+    planned.push({ name: col.name, type: col.type, pk, settings });
   }
 
   if (pkCount > 1) {
@@ -193,8 +221,25 @@ export function buildCreateTableSql(
   schema?: string,
 ): string {
   const defs = columns.map((col) => {
-    const sqlType = dialect === "postgres" ? pgColumnType(col.type) : col.type;
-    return `${quoteIdent(col.name)} ${sqlType}${col.pk ? " PRIMARY KEY" : ""}`;
+    const strategy = col.settings?.idStrategy;
+    const serialType = dialect === "postgres" ? postgresSerialType(strategy) : null;
+    const sqlType = serialType
+      ? serialType
+      : dialect === "postgres"
+        ? pgColumnType(col.type)
+        : col.type;
+    const idDdl = idStrategyDdl(strategy, dialect, col.type);
+    // PK is owned by `col.pk` (planCreateTable); strip settings.primaryKey to avoid duplicates.
+    const settings = col.settings
+      ? { ...col.settings, primaryKey: undefined, idStrategy: undefined }
+      : undefined;
+    const constraints = columnConstraintSql(settings, dialect);
+    const identityOwnsPk =
+      strategy?.kind === "identity" || strategy?.kind === "serial";
+    const pk = col.pk && !identityOwnsPk && !idDdl.fragment.includes("PRIMARY KEY")
+      ? " PRIMARY KEY"
+      : "";
+    return `${quoteIdent(col.name)} ${sqlType}${idDdl.fragment}${constraints}${pk}`;
   });
   return `CREATE TABLE ${tableRef(table, schema)} (${defs.join(", ")})`;
 }

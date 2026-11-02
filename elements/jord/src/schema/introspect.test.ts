@@ -215,18 +215,21 @@ describe("schema introspect + ADD COLUMN", () => {
         table: "lab_items",
         column: "score",
         type: "REAL",
+        confirm: true,
       });
       expect(typed.ok).toBe(true);
 
       const droppedCol = await jord.dropColumn({
         table: "lab_items",
         column: "label",
+        confirm: true,
       });
       expect(droppedCol.ok).toBe(true);
 
       const pkDrop = await jord.dropColumn({
         table: "lab_items",
         column: "id",
+        confirm: true,
       });
       expect(pkDrop.ok).toBe(false);
       if (!pkDrop.ok) expect(pkDrop.error).toBe("pk_required");
@@ -239,15 +242,15 @@ describe("schema introspect + ADD COLUMN", () => {
       expect(await jord.describeTable("lab_items")).toBeNull();
       expect(await jord.describeTable("lab_stuff")).not.toBeNull();
 
-      const reservedDrop = await jord.dropTable({ name: "records" });
+      const reservedDrop = await jord.dropTable({ name: "records", confirm: true });
       expect(reservedDrop.ok).toBe(false);
       if (!reservedDrop.ok) expect(reservedDrop.error).toBe("reserved");
 
-      const dropped = await jord.dropTable({ name: "lab_stuff" });
+      const dropped = await jord.dropTable({ name: "lab_stuff", confirm: true });
       expect(dropped.ok).toBe(true);
       expect(await jord.describeTable("lab_stuff")).toBeNull();
 
-      const missing = await jord.dropTable({ name: "lab_stuff" });
+      const missing = await jord.dropTable({ name: "lab_stuff", confirm: true });
       expect(missing.ok).toBe(false);
       if (!missing.ok) expect(missing.error).toBe("table_not_found");
     } finally {

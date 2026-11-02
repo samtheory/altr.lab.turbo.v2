@@ -12,11 +12,15 @@ export async function PATCH(request: Request, context: RouteContext) {
   return forwardUpstream(upstream);
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
   const { name, column } = await context.params;
+  const body = await request.text();
   const upstream = await proxyToJord(
     `/schema/tables/${encodeURIComponent(name)}/columns/${encodeURIComponent(column)}`,
-    { method: "DELETE" },
+    {
+      method: "DELETE",
+      body: body || JSON.stringify({ confirm: true }),
+    },
   );
   return forwardUpstream(upstream);
 }

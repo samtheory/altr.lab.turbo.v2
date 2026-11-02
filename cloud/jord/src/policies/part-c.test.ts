@@ -619,7 +619,7 @@ describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {
     const retyped = await ctx.app.request("/schema/tables/lab_notes/columns/title", {
       method: "PATCH",
       headers: { "content-type": "application/json", ...bearer(adminToken()) },
-      body: JSON.stringify({ type: "REAL" }),
+      body: JSON.stringify({ type: "REAL", confirm: true }),
     });
     expect(retyped.status).toBe(200);
     expect(await ctx.db.ddl.query("SELECT id FROM lab_notes ORDER BY id")).toEqual([
@@ -712,7 +712,7 @@ describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {
       const retyped = await ctx.app.request("/schema/tables/lab_notes/columns/title", {
         method: "PATCH",
         headers: admin,
-        body: JSON.stringify({ type: "REAL" }),
+        body: JSON.stringify({ type: "REAL", confirm: true }),
       });
       expect(retyped.status).toBe(200);
       const renamed = await ctx.app.request("/schema/tables/lab_notes", {

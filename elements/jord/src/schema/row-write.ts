@@ -1,5 +1,10 @@
 import type { JordColumnInfo, JordTableInfo } from "../port.js";
+import {
+  applyAutoUpdateTimestamps,
+  validateColumnValue,
+} from "./column-settings.js";
 import { isReservedCreateTableName, isValidSqlIdent } from "./ddl.js";
+import { generateId, idStrategyDdl } from "./id-strategy.js";
 
 /** Bound parameter for libSQL (`?`) and Postgres (`$n`). */
 export type SqlValue = string | number | Uint8Array | null;
@@ -11,12 +16,15 @@ export type TableRowWriteCode =
   | "missing_pk"
   | "unknown_column"
   | "bad_value"
+  | "validation"
   | "empty_patch";
 
 export type TableRowWriteFailure = {
   ok: false;
   error: TableRowWriteCode;
   message: string;
+  field?: string;
+  reason?: string;
 };
 
 export type PlannedInsert = {
@@ -61,8 +69,12 @@ export function columnKind(sqlType: string): ColumnKind {
   return "TEXT";
 }
 
-function fail(error: TableRowWriteCode, message: string): TableRowWriteFailure {
-  return { ok: false, error, message };
+function fail(
+  error: TableRowWriteCode,
+  message: string,
+  extra?: { field?: string; reason?: string },
+): TableRowWriteFailure {
+  return { ok: false, error, message, ...extra };
 }
 
 export function coerceColumnValue(
@@ -146,6 +158,33 @@ function isValues(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === "object" && !Array.isArray(value);
 }
 
+function isSqlBackedId(strategy: NonNullable<JordColumnInfo["settings"]>["idStrategy"]): boolean {
+  if (!strategy) return false;
+  return (
+    strategy.kind === "identity" ||
+    strategy.kind === "serial" ||
+    strategy.kind === "custom" ||
+    (strategy.kind === "uuid_v4" &&
+      idStrategyDdl(strategy, "postgres", "TEXT").appSide === false)
+  );
+}
+
+function isAppSideId(strategy: NonNullable<JordColumnInfo["settings"]>["idStrategy"]): boolean {
+  if (!strategy) return false;
+  if (strategy.kind === "identity" || strategy.kind === "serial" || strategy.kind === "custom") {
+    return false;
+  }
+  // uuid_v4 is app-side on libSQL; always generate in the planner so both dialects work.
+  return (
+    strategy.kind === "uuid_v4" ||
+    strategy.kind === "uuid_v7" ||
+    strategy.kind === "ulid" ||
+    strategy.kind === "nanoid" ||
+    strategy.kind === "cuid2" ||
+    strategy.kind === "sequence"
+  );
+}
+
 export function planInsertRow(
   info: JordTableInfo,
   values: unknown,
@@ -157,30 +196,62 @@ export function planInsertRow(
   if (!isValues(values)) {
     return fail("bad_value", "values must be an object");
   }
+  const stamped = applyAutoUpdateTimestamps(info.columns, {
+    ...(values as Record<string, unknown>),
+  });
   const byName = new Map(info.columns.map((col) => [col.name, col]));
-  for (const key of Object.keys(values)) {
+  for (const key of Object.keys(stamped)) {
     if (!byName.has(key)) {
       return fail("unknown_column", `unknown column ${key}`);
     }
   }
-  if (values[pk.column.name] === undefined || values[pk.column.name] === null) {
+
+  for (const col of info.columns) {
+    if (stamped[col.name] !== undefined && stamped[col.name] !== null) continue;
+    const strategy = col.settings?.idStrategy;
+    if (isAppSideId(strategy)) {
+      stamped[col.name] = generateId(strategy!);
+    }
+  }
+
+  const pkMissing =
+    stamped[pk.column.name] === undefined || stamped[pk.column.name] === null;
+  if (pkMissing && !isSqlBackedId(pk.column.settings?.idStrategy) && !isAppSideId(pk.column.settings?.idStrategy)) {
     return fail("missing_pk", `primary key ${pk.column.name} is required`);
   }
 
   const columns: string[] = [];
   const args: SqlValue[] = [];
   for (const col of info.columns) {
-    if (!(col.name in values)) {
-      if (col.notnull && !col.pk) {
+    const missing =
+      !(col.name in stamped) ||
+      stamped[col.name] === undefined ||
+      stamped[col.name] === null;
+    if (missing) {
+      if (isSqlBackedId(col.settings?.idStrategy)) continue;
+      if ((col.notnull || col.settings?.nullable === false) && !col.pk) {
         return fail("bad_value", `column ${col.name} is required`);
+      }
+      if (col.pk) {
+        return fail("missing_pk", `primary key ${col.name} is required`);
       }
       continue;
     }
-    const coerced = coerceColumnValue(col.type, values[col.name]);
+    const raw = stamped[col.name];
+    const ruled = validateColumnValue(col.name, raw, col.settings);
+    if (!ruled.ok) {
+      return fail("validation", ruled.reason, {
+        field: ruled.field,
+        reason: ruled.reason,
+      });
+    }
+    const coerced = coerceColumnValue(col.type, raw);
     if (!coerced.ok) {
       return fail("bad_value", `${col.name}: ${coerced.message}`);
     }
-    if (coerced.value === null && col.notnull) {
+    const requiredNull =
+      col.notnull || col.settings?.nullable === false;
+    if (coerced.value === null && requiredNull) {
       return fail("bad_value", `column ${col.name} cannot be null`);
     }
     columns.push(col.name);
@@ -212,16 +283,26 @@ export function planUpdateRow(
   if (!isValues(values)) {
     return fail("bad_value", "values must be an object");
   }
+  const stamped = applyAutoUpdateTimestamps(info.columns, values);
   const byName = new Map(info.columns.map((col) => [col.name, col]));
   const setColumns: string[] = [];
   const args: SqlValue[] = [];
-  for (const [key, raw] of Object.entries(values)) {
+  for (const [key, raw] of Object.entries(stamped)) {
     if (key === pk.column.name) continue;
     const col = byName.get(key);
     if (!col) return fail("unknown_column", `unknown column ${key}`);
+    const ruled = validateColumnValue(col.name, raw, col.settings);
+    if (!ruled.ok) {
+      return fail("validation", ruled.reason, {
+        field: ruled.field,
+        reason: ruled.reason,
+      });
+    }
     const coerced = coerceColumnValue(col.type, raw);
     if (!coerced.ok) return fail("bad_value", `${col.name}: ${coerced.message}`);
-    if (coerced.value === null && col.notnull) {
+    const requiredNull =
+      col.notnull || col.settings?.nullable === false;
+    if (coerced.value === null && requiredNull) {
       return fail("bad_value", `column ${col.name} cannot be null`);
     }
     setColumns.push(col.name);

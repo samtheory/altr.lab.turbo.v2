@@ -25,9 +25,10 @@ export async function PATCH(request: Request, context: RouteContext) {
 export async function DELETE(request: Request, context: RouteContext) {
   const { name } = await context.params;
   const url = new URL(request.url);
+  const body = await request.text();
   const upstream = await proxyToJord(
     `/schema/tables/${encodeURIComponent(name)}${url.search}`,
-    { method: "DELETE" },
+    { method: "DELETE", body: body || JSON.stringify({ confirm: true }) },
   );
   return forwardUpstream(upstream);
 }

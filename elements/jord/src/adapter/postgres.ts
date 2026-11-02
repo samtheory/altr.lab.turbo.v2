@@ -81,12 +81,26 @@ import {
 import { JORD_APP_ROLE } from "../schema/jord-app.js";
 import { rowScopeSql } from "../schema/row-scope.js";
 import {
+  buildColumnCommentSql,
+  isNotNullWithoutDefault,
+  parseColumnSettings,
+  requiresConfirm,
+} from "../schema/column-settings.js";
+import {
+  deleteColumnSettings,
+  loadColumnSettingsMap,
+  renameColumnSettings,
+  renameTableColumnSettings,
+  upsertColumnSettings,
+  type ColumnMetaQuery,
+} from "../schema/column-meta.js";
+import {
+  buildAddColumnSql,
   buildCreateTableSql,
   clampRowWindow,
   isJordColumnType,
   isReservedCreateTableName,
   isValidSqlIdent,
-  pgColumnType,
   planCreateTable,
   quoteIdent,
   quoteQualified,
@@ -1368,6 +1382,17 @@ export class PostgresAdapter implements JordDriverPort {
     return result.rows.map((r) => String(r.name));
   }
 
+  private columnMetaClient(): ColumnMetaQuery {
+    return {
+      execute: async ({ sql, args }) => {
+        const result = await this.exec(sql, args);
+        return {
+          rows: result.rows as Array<Record<string, unknown>>,
+        };
+      },
+    };
+  }
+
   async describeTable(
     name: string,
     schemaName?: string,
@@ -1408,6 +1433,16 @@ export class PostgresAdapter implements JordDriverPort {
       dflt_value: r.dflt_value == null ? null : String(r.dflt_value),
     }));
     const columns = normalizeColumns("postgres", rawColumns);
+    const settingsMap = await loadColumnSettingsMap(
+      this.columnMetaClient(),
+      "postgres",
+      scoped.schema,
+      name,
+    );
+    for (const col of columns) {
+      const settings = settingsMap.get(col.name);
+      if (settings) col.settings = settings;
+    }
     return { name, schema: scoped.schema, columns };
   }
 
@@ -1429,6 +1464,26 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
 
+    let settings = input.settings;
+    if (settings !== undefined) {
+      const parsed = parseColumnSettings(settings);
+      if (!parsed.ok) {
+        return {
+          ok: false,
+          error: "invalid_settings",
+          message: parsed.message,
+        };
+      }
+      settings = parsed.settings;
+      if (isNotNullWithoutDefault(settings) && input.confirm !== true) {
+        return {
+          ok: false,
+          error: "confirm_required",
+          message: requiresConfirm("not_null_without_default"),
+        };
+      }
+    }
+
     const described = await this.describeTable(input.table, scoped.schema);
     if (!described) {
       return {
@@ -1445,10 +1500,34 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
 
-    const pgType = pgColumnType(input.type);
     await this.exec(
-      `ALTER TABLE ${quoteQualified(scoped.schema, input.table)} ADD COLUMN ${quoteIdent(input.name)} ${pgType}`,
+      buildAddColumnSql(
+        input.table,
+        input.name,
+        input.type,
+        scoped.schema,
+        settings,
+        "postgres",
+      ),
     );
+    const commentSql = buildColumnCommentSql(
+      scoped.schema,
+      input.table,
+      input.name,
+      settings?.comment,
+      quoteIdent,
+    );
+    if (commentSql) await this.exec(commentSql);
+    if (settings && Object.keys(settings).length > 0) {
+      await upsertColumnSettings(
+        this.columnMetaClient(),
+        "postgres",
+        scoped.schema,
+        input.table,
+        input.name,
+        settings,
+      );
+    }
     return { ok: true };
   }
 
@@ -1472,6 +1551,26 @@ export class PostgresAdapter implements JordDriverPort {
       scoped.schema,
     );
     await this.exec(sql);
+    for (const col of plan.columns) {
+      const commentSql = buildColumnCommentSql(
+        scoped.schema,
+        plan.name,
+        col.name,
+        col.settings?.comment,
+        quoteIdent,
+      );
+      if (commentSql) await this.exec(commentSql);
+      if (col.settings && Object.keys(col.settings).length > 0) {
+        await upsertColumnSettings(
+          this.columnMetaClient(),
+          "postgres",
+          scoped.schema,
+          plan.name,
+          col.name,
+          col.settings,
+        );
+      }
+    }
     return { ok: true, sql };
   }
 
@@ -1520,16 +1619,18 @@ export class PostgresAdapter implements JordDriverPort {
     const plan = planInsertRow(described.info, input.values);
     if (!plan.ok) return plan;
     const target = quoteQualified(described.schema, plan.table);
-    const existing = await this.exec(
-      `SELECT 1 AS hit FROM ${target} WHERE ${quoteIdent(plan.pkColumn)} = $1 LIMIT 1`,
-      [plan.pkValue],
-    );
-    if (existing.rows.length > 0) {
-      return {
-        ok: false,
-        error: "pk_exists",
-        message: "primary key already exists",
-      };
+    if (plan.pkValue !== null && plan.columns.includes(plan.pkColumn)) {
+      const existing = await this.exec(
+        `SELECT 1 AS hit FROM ${target} WHERE ${quoteIdent(plan.pkColumn)} = $1 LIMIT 1`,
+        [plan.pkValue],
+      );
+      if (existing.rows.length > 0) {
+        return {
+          ok: false,
+          error: "pk_exists",
+          message: "primary key already exists",
+        };
+      }
     }
     const cols = plan.columns.map((name) => quoteIdent(name)).join(", ");
     const marks = plan.columns.map((_, i) => `$${i + 1}`).join(", ");
@@ -1578,6 +1679,13 @@ export class PostgresAdapter implements JordDriverPort {
     if (!plan.ok) return plan;
     const scoped = await this.scope(input.schema);
     if (!scoped.ok) return scoped;
+    if (input.confirm !== true) {
+      return {
+        ok: false,
+        error: "confirm_required",
+        message: requiresConfirm("drop_table"),
+      };
+    }
     const existing = await this.describeTable(plan.name, scoped.schema);
     if (!existing) {
       return {
@@ -1587,6 +1695,12 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
     await this.exec(`DROP TABLE ${quoteQualified(scoped.schema, plan.name)}`);
+    await deleteColumnSettings(
+      this.columnMetaClient(),
+      "postgres",
+      scoped.schema,
+      plan.name,
+    );
     return { ok: true };
   }
 
@@ -1631,6 +1745,13 @@ export class PostgresAdapter implements JordDriverPort {
           ]);
         }
       }
+      await renameTableColumnSettings(
+        this.columnMetaClient(),
+        "postgres",
+        schemaName,
+        plan.from,
+        plan.to,
+      );
       // Compiled policies keep the old name; the caller's RLS sync recreates them.
       const stale = await this.exec(
         `SELECT policyname FROM pg_policies
@@ -1661,8 +1782,22 @@ export class PostgresAdapter implements JordDriverPort {
     }
     const plan = planDropColumn(info, input.column);
     if (!plan.ok) return plan;
+    if (input.confirm !== true) {
+      return {
+        ok: false,
+        error: "confirm_required",
+        message: requiresConfirm("drop_column"),
+      };
+    }
     await this.exec(
       `ALTER TABLE ${quoteQualified(scoped.schema, plan.table)} DROP COLUMN ${quoteIdent(plan.column)}`,
+    );
+    await deleteColumnSettings(
+      this.columnMetaClient(),
+      "postgres",
+      scoped.schema,
+      plan.table,
+      plan.column,
     );
     return { ok: true };
   }
@@ -1681,70 +1816,173 @@ export class PostgresAdapter implements JordDriverPort {
         message: `table ${gate.name} not found`,
       };
     }
-    const plan = planAlterColumn(info, input.column, {
-      name: input.name,
-      type: input.type,
-    });
-    if (!plan.ok) return plan;
 
-    if (plan.mode === "rename") {
-      await this.exec(
-        `ALTER TABLE ${quoteQualified(schemaName, plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
-      );
-      return { ok: true };
+    let nextSettings = input.settings;
+    if (nextSettings !== undefined) {
+      const parsed = parseColumnSettings(nextSettings);
+      if (!parsed.ok) {
+        return {
+          ok: false,
+          error: "invalid_settings",
+          message: parsed.message,
+        };
+      }
+      nextSettings = parsed.settings;
+      if (isNotNullWithoutDefault(nextSettings) && input.confirm !== true) {
+        return {
+          ok: false,
+          error: "confirm_required",
+          message: requiresConfirm("not_null_without_default"),
+        };
+      }
     }
 
-    const temp = rebuildTempName(plan.table);
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      // A non-superuser owner is filtered by FORCE RLS and would copy no rows.
-      await client.query(
-        `ALTER TABLE ${quoteQualified(schemaName, plan.table)} NO FORCE ROW LEVEL SECURITY`,
-      );
-      await client.query(
-        buildRebuildCreateSql(temp, plan.columns, "postgres", schemaName),
-      );
-      await client.query(
-        buildRebuildCopySql(
-          plan.table,
-          temp,
-          info,
-          plan.from,
-          plan.to,
-          plan.nextType,
-          "postgres",
-          schemaName,
-        ),
-      );
-      await client.query(`DROP TABLE ${quoteQualified(schemaName, plan.table)}`);
-      await client.query(
-        `ALTER TABLE ${quoteQualified(schemaName, temp)} RENAME TO ${quoteIdent(plan.table)}`,
-      );
-      await client.query("COMMIT");
-      return { ok: true };
-    } catch (err) {
-      try {
-        await client.query("ROLLBACK");
-      } catch {
-        /* ignore */
-      }
-      try {
-        await this.exec(
-          `DROP TABLE IF EXISTS ${quoteQualified(schemaName, temp)}`,
-        );
-      } catch {
-        /* ignore cleanup */
-      }
+    const hasNameOrType =
+      (typeof input.name === "string" && input.name.length > 0) ||
+      input.type !== undefined;
+
+    if (!hasNameOrType && nextSettings === undefined) {
       return {
         ok: false,
-        error: "type_change_failed",
-        message:
-          err instanceof Error ? err.message : "column type change failed",
+        error: "empty_patch",
+        message: "name, type, and/or settings is required",
       };
-    } finally {
-      client.release();
     }
+
+    if (hasNameOrType) {
+      const plan = planAlterColumn(info, input.column, {
+        name: input.name,
+        type: input.type,
+      });
+      if (!plan.ok) return plan;
+
+      if (plan.mode === "rebuild" && input.confirm !== true) {
+        return {
+          ok: false,
+          error: "confirm_required",
+          message: requiresConfirm("type_change"),
+        };
+      }
+
+      if (plan.mode === "rename") {
+        await this.exec(
+          `ALTER TABLE ${quoteQualified(schemaName, plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
+        );
+        await renameColumnSettings(
+          this.columnMetaClient(),
+          "postgres",
+          schemaName,
+          plan.table,
+          plan.from,
+          plan.to,
+        );
+      } else {
+        const temp = rebuildTempName(plan.table);
+        const client = await this.pool.connect();
+        try {
+          await client.query("BEGIN");
+          // A non-superuser owner is filtered by FORCE RLS and would copy no rows.
+          await client.query(
+            `ALTER TABLE ${quoteQualified(schemaName, plan.table)} NO FORCE ROW LEVEL SECURITY`,
+          );
+          await client.query(
+            buildRebuildCreateSql(temp, plan.columns, "postgres", schemaName),
+          );
+          await client.query(
+            buildRebuildCopySql(
+              plan.table,
+              temp,
+              info,
+              plan.from,
+              plan.to,
+              plan.nextType,
+              "postgres",
+              schemaName,
+            ),
+          );
+          await client.query(
+            `DROP TABLE ${quoteQualified(schemaName, plan.table)}`,
+          );
+          await client.query(
+            `ALTER TABLE ${quoteQualified(schemaName, temp)} RENAME TO ${quoteIdent(plan.table)}`,
+          );
+          await client.query("COMMIT");
+          if (plan.from !== plan.to) {
+            await renameColumnSettings(
+              this.columnMetaClient(),
+              "postgres",
+              schemaName,
+              plan.table,
+              plan.from,
+              plan.to,
+            );
+          }
+        } catch (err) {
+          try {
+            await client.query("ROLLBACK");
+          } catch {
+            /* ignore */
+          }
+          try {
+            await this.exec(
+              `DROP TABLE IF EXISTS ${quoteQualified(schemaName, temp)}`,
+            );
+          } catch {
+            /* ignore cleanup */
+          }
+          return {
+            ok: false,
+            error: "type_change_failed",
+            message:
+              err instanceof Error ? err.message : "column type change failed",
+          };
+        } finally {
+          client.release();
+        }
+      }
+
+      if (nextSettings !== undefined) {
+        const colName =
+          plan.mode === "rename" || plan.mode === "rebuild"
+            ? plan.to
+            : input.column;
+        const commentSql = buildColumnCommentSql(
+          schemaName,
+          plan.table,
+          colName,
+          nextSettings.comment,
+          quoteIdent,
+        );
+        if (commentSql) await this.exec(commentSql);
+        await upsertColumnSettings(
+          this.columnMetaClient(),
+          "postgres",
+          schemaName,
+          plan.table,
+          colName,
+          nextSettings,
+        );
+      }
+      return { ok: true };
+    }
+
+    const commentSql = buildColumnCommentSql(
+      schemaName,
+      gate.name,
+      input.column,
+      nextSettings!.comment,
+      quoteIdent,
+    );
+    if (commentSql) await this.exec(commentSql);
+    await upsertColumnSettings(
+      this.columnMetaClient(),
+      "postgres",
+      schemaName,
+      gate.name,
+      input.column,
+      nextSettings!,
+    );
+    return { ok: true };
   }
 
   private async openUserTable(

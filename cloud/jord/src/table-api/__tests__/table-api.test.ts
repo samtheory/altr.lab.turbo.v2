@@ -401,8 +401,13 @@ describe.each(TEST_BACKENDS)("S0022 table API (%s)", (backend) => {
       expect(tracked).toEqual([{ schema_name: "app" }]);
 
       expect(
-        (await app.request("/schema/tables/notes?schema=app", { method: "DELETE", headers: admin }))
-          .status,
+        (
+          await app.request("/schema/tables/notes?schema=app", {
+            method: "DELETE",
+            headers: { ...admin, "content-type": "application/json" },
+            body: JSON.stringify({ confirm: true }),
+          })
+        ).status,
       ).toBe(200);
     },
   );

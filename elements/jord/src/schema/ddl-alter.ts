@@ -21,6 +21,8 @@ export type SchemaDdlError =
   | "pk_required"
   | "pk_type_change"
   | "invalid_type"
+  | "invalid_settings"
+  | "confirm_required"
   | "empty_patch"
   | "type_change_failed";
 

@@ -1,4 +1,5 @@
 import type { JordDriverPort } from "@altr/jord";
+import { validateColumnValue } from "@altr/jord";
 import { Hono } from "hono";
 
 import type { JordAuthVariables } from "../auth/middleware.js";
@@ -36,11 +37,25 @@ function dialectOf(jord: JordDriverPort): "libsql" | "postgres" {
   return jord.dialect === "postgres" ? "postgres" : "libsql";
 }
 
-function jsonError(status: number, error: string, message: string): Response {
-  return new Response(JSON.stringify({ error, message }), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
+function jsonError(
+  status: number,
+  error: string,
+  message: string,
+  extra?: { field?: string; reason?: string },
+): Response {
+  return new Response(
+    JSON.stringify({
+      error,
+      message,
+      ...(extra?.field
+        ? { field: extra.field, reason: extra.reason ?? message }
+        : {}),
+    }),
+    {
+      status,
+      headers: { "content-type": "application/json" },
+    },
+  );
 }
 
 export function createTableApiRoutes(deps: {
@@ -239,7 +254,10 @@ export function createTableApiRoutes(deps: {
       return c.json(parsed.representation ? { data: rows } : { ok: true, affected: rows.length });
     } catch (err) {
       if (err instanceof TableApiError) {
-        return jsonError(err.status, err.code, err.message);
+        return jsonError(err.status, err.code, err.message, {
+          field: err.field,
+          reason: err.reason,
+        });
       }
       throw err;
     }
@@ -261,13 +279,29 @@ function rowId(keys: string[], row: Record<string, unknown>): string {
 }
 
 function coerceBody(
-  info: { columns: Array<{ name: string; type: string; notnull: boolean; pk: boolean; dflt_value: string | null }> },
+  info: {
+    columns: Array<{
+      name: string;
+      type: string;
+      notnull: boolean;
+      pk: boolean;
+      dflt_value: string | null;
+      settings?: Parameters<typeof validateColumnValue>[2];
+    }>;
+  },
   body: Record<string, unknown>,
 ): Record<string, SqlValue> {
   const out: Record<string, SqlValue> = {};
   for (const [key, value] of Object.entries(body)) {
     const col = info.columns.find((item) => item.name === key);
     if (!col) throw new TableApiError(400, "bad_column", `unknown column ${key}`);
+    const ruled = validateColumnValue(key, value, col.settings);
+    if (!ruled.ok) {
+      throw new TableApiError(422, "validation", ruled.reason, {
+        field: ruled.field,
+        reason: ruled.reason,
+      });
+    }
     if (value == null) {
       out[key] = null;
       continue;

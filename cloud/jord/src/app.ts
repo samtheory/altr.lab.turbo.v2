@@ -451,9 +451,10 @@ function requireGeneratedEnabled(
   );
 }
 
-function tableRowStatus(error: string): 400 | 404 | 409 {
+function tableRowStatus(error: string): 400 | 404 | 409 | 422 {
   if (error === "pk_exists") return 409;
   if (error === "table_not_found" || error === "not_found") return 404;
+  if (error === "validation") return 422;
   return 400;
 }
 
@@ -1011,7 +1012,13 @@ export function createJordApp(deps: JordAppDeps) {
       );
       if (!result.ok) {
         return c.json(
-          { error: result.error, message: result.message },
+          {
+            error: result.error,
+            message: result.message,
+            ...(result.field
+              ? { field: result.field, reason: result.reason ?? result.message }
+              : {}),
+          },
           tableRowStatus(result.error),
         );
       }
@@ -1074,7 +1081,13 @@ export function createJordApp(deps: JordAppDeps) {
       );
       if (!result.ok) {
         return c.json(
-          { error: result.error, message: result.message },
+          {
+            error: result.error,
+            message: result.message,
+            ...(result.field
+              ? { field: result.field, reason: result.reason ?? result.message }
+              : {}),
+          },
           tableRowStatus(result.error),
         );
       }
@@ -1208,7 +1221,12 @@ export function createJordApp(deps: JordAppDeps) {
     requireAlterSchema(),
     async (c) => {
       const table = c.req.param("name");
-      const body = await c.req.json<{ name?: string; type?: string }>();
+      const body = await c.req.json<{
+        name?: string;
+        type?: string;
+        settings?: unknown;
+        confirm?: unknown;
+      }>();
       if (typeof body.name !== "string" || typeof body.type !== "string") {
         throw new HTTPException(400, {
           message: "name and type (string) are required",
@@ -1228,11 +1246,25 @@ export function createJordApp(deps: JordAppDeps) {
               body.name,
               type,
               deps.jord.dialect === "postgres" ? schema : undefined,
+              typeof body.settings === "object" && body.settings
+                ? (body.settings as never)
+                : undefined,
+              deps.jord.dialect === "postgres" ? "postgres" : "libsql",
             )
           : null;
 
       const result = await enqueueWrite(() =>
-        ddlJord.addColumn({ table, name: body.name!, type, schema }),
+        ddlJord.addColumn({
+          table,
+          name: body.name!,
+          type,
+          schema,
+          settings:
+            body.settings !== undefined
+              ? (body.settings as never)
+              : undefined,
+          confirm: body.confirm === true,
+        }),
       );
 
       if (!result.ok) {
@@ -1259,8 +1291,15 @@ export function createJordApp(deps: JordAppDeps) {
     async (c) => {
       const name = c.req.param("name");
       const schema = await resolveSchemaQuery(c);
+      const body = (await c.req.json().catch(() => null)) as {
+        confirm?: unknown;
+      } | null;
       const result = await enqueueWrite(() =>
-        ddlJord.dropTable({ name, schema }),
+        ddlJord.dropTable({
+          name,
+          schema,
+          confirm: body?.confirm === true,
+        }),
       );
       if (!result.ok) {
         return c.json(
@@ -1310,11 +1349,18 @@ export function createJordApp(deps: JordAppDeps) {
       const body = (await c.req.json().catch(() => null)) as {
         name?: unknown;
         type?: unknown;
+        settings?: unknown;
+        confirm?: unknown;
       } | null;
       if (!body) {
         throw new HTTPException(400, { message: "JSON body is required" });
       }
-      const patch: { name?: string; type?: JordColumnType } = {};
+      const patch: {
+        name?: string;
+        type?: JordColumnType;
+        settings?: unknown;
+        confirm?: boolean;
+      } = {};
       if (body.name !== undefined) {
         if (typeof body.name !== "string") {
           throw new HTTPException(400, { message: "name must be a string" });
@@ -1329,14 +1375,30 @@ export function createJordApp(deps: JordAppDeps) {
         }
         patch.type = body.type;
       }
-      if (patch.name === undefined && patch.type === undefined) {
+      if (body.settings !== undefined) {
+        patch.settings = body.settings;
+      }
+      patch.confirm = body.confirm === true;
+      if (
+        patch.name === undefined &&
+        patch.type === undefined &&
+        patch.settings === undefined
+      ) {
         throw new HTTPException(400, {
-          message: "name and/or type is required",
+          message: "name, type, and/or settings is required",
         });
       }
       const schema = await resolveSchemaQuery(c);
       const result = await enqueueWrite(() =>
-        ddlJord.alterColumn({ table, schema, column, ...patch }),
+        ddlJord.alterColumn({
+          table,
+          schema,
+          column,
+          name: patch.name,
+          type: patch.type,
+          settings: patch.settings as never,
+          confirm: patch.confirm,
+        }),
       );
       if (!result.ok) {
         return c.json(
@@ -1357,8 +1419,16 @@ export function createJordApp(deps: JordAppDeps) {
       const table = c.req.param("name");
       const column = c.req.param("column");
       const schema = await resolveSchemaQuery(c);
+      const body = (await c.req.json().catch(() => null)) as {
+        confirm?: unknown;
+      } | null;
       const result = await enqueueWrite(() =>
-        ddlJord.dropColumn({ table, schema, column }),
+        ddlJord.dropColumn({
+          table,
+          schema,
+          column,
+          confirm: body?.confirm === true,
+        }),
       );
       if (!result.ok) {
         return c.json(

@@ -27,15 +27,23 @@ import {
 import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
 import {
   COLUMN_TYPES,
+  EMPTY_COLUMN_SETTINGS,
   isAlterableUserTable,
   previewAddColumnSql,
+  settingsFormToPayload,
+  type ColumnSettingsForm,
   type ColumnType,
   type SchemaTable,
 } from "@/lib/schema";
 
 type ViewMode = "browser" | "visualizer";
 
-type ApiError = { error?: string; message?: string };
+type ApiError = {
+  error?: string;
+  message?: string;
+  field?: string;
+  reason?: string;
+};
 
 type DraftColumn = { key: string; name: string; type: ColumnType };
 
@@ -57,6 +65,7 @@ export function SchemaExplorer({ role }: Props) {
   const [view, setView] = useState<ViewMode>("browser");
   const [colName, setColName] = useState("");
   const [colType, setColType] = useState<ColumnType>("TEXT");
+  const [colSettings, setColSettings] = useState<ColumnSettingsForm>(EMPTY_COLUMN_SETTINGS);
   const [formError, setFormError] = useState<string | null>(null);
   const [formOk, setFormOk] = useState<string | null>(null);
   const [tableName, setTableName] = useState("");
@@ -301,7 +310,11 @@ export function SchemaExplorer({ role }: Props) {
       try {
         const res = await fetch(
           `/api/schema/tables/${encodeURIComponent(selected)}`,
-          { method: "DELETE" },
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ confirm: true }),
+          },
         );
         const body = (await res.json().catch(() => ({}))) as ApiError;
         if (!res.ok) {
@@ -323,11 +336,18 @@ export function SchemaExplorer({ role }: Props) {
     if (!edit) return;
     setDdlErr(null);
     setDdlMsg(null);
-    const patch: { name?: string; type?: ColumnType } = {};
+    const patch: {
+      name?: string;
+      type?: ColumnType;
+      confirm?: boolean;
+    } = {};
     if (edit.name.trim() !== column) patch.name = edit.name.trim();
     const current = tableInfo?.columns.find((c) => c.name === column);
     const currentType = (current?.type ?? "").toUpperCase();
-    if (edit.type !== currentType) patch.type = edit.type;
+    if (edit.type !== currentType) {
+      patch.type = edit.type;
+      patch.confirm = true;
+    }
     if (!patch.name && !patch.type) {
       setDdlErr("Nothing to change on this column.");
       return;
@@ -373,7 +393,11 @@ export function SchemaExplorer({ role }: Props) {
       try {
         const res = await fetch(
           `/api/schema/tables/${encodeURIComponent(selected)}/columns/${encodeURIComponent(column)}`,
-          { method: "DELETE" },
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ confirm: true }),
+          },
         );
         const body = (await res.json().catch(() => ({}))) as ApiError & {
           table?: SchemaTable;
@@ -407,12 +431,19 @@ export function SchemaExplorer({ role }: Props) {
 
     startTransition(async () => {
       try {
+        const settings = settingsFormToPayload(colSettings);
+        const needsConfirm = colSettings.nullable === false && colSettings.defaultKind === "none";
         const res = await fetch(
           `/api/schema/tables/${encodeURIComponent(selected)}/columns`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, type: colType }),
+            body: JSON.stringify({
+              name,
+              type: colType,
+              settings,
+              confirm: needsConfirm ? true : undefined,
+            }),
           },
         );
         const body = (await res.json().catch(() => ({}))) as ApiError & {
@@ -425,6 +456,7 @@ export function SchemaExplorer({ role }: Props) {
         }
         setFormOk(`Applied ${body.sql ?? "ADD COLUMN"}`);
         setColName("");
+        setColSettings(EMPTY_COLUMN_SETTINGS);
         if (body.table) {
           setTableInfo(body.table);
           setAllTables((prev) => {
@@ -443,7 +475,7 @@ export function SchemaExplorer({ role }: Props) {
 
   const sqlPreview =
     colName.trim().length > 0 && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(colName.trim())
-      ? previewAddColumnSql(selected, colName.trim(), colType)
+      ? previewAddColumnSql(selected, colName.trim(), colType, colSettings)
       : `ALTER TABLE "${selected}" ADD COLUMN … ${colType};`;
 
   return (
@@ -868,6 +900,191 @@ export function SchemaExplorer({ role }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
+              </Field>
+              <Field label="nullable">
+                <Select
+                  value={colSettings.nullable ? "yes" : "no"}
+                  onValueChange={(v) =>
+                    setColSettings((s) => ({ ...s, nullable: v === "yes" }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">nullable</SelectItem>
+                    <SelectItem value="no">NOT NULL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="default">
+                <Select
+                  value={colSettings.defaultKind}
+                  onValueChange={(v) =>
+                    setColSettings((s) => ({
+                      ...s,
+                      defaultKind: v as ColumnSettingsForm["defaultKind"],
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">none</SelectItem>
+                    <SelectItem value="literal">literal</SelectItem>
+                    <SelectItem value="now">now()</SelectItem>
+                    <SelectItem value="gen_random_uuid">gen_random_uuid()</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              {colSettings.defaultKind === "literal" ? (
+                <Field label="default literal">
+                  <FieldInput
+                    value={colSettings.defaultLiteral}
+                    onChange={(e) =>
+                      setColSettings((s) => ({
+                        ...s,
+                        defaultLiteral: e.target.value,
+                      }))
+                    }
+                    className="font-mono text-sm"
+                  />
+                </Field>
+              ) : null}
+              <Field label="unique">
+                <Select
+                  value={colSettings.unique ? "yes" : "no"}
+                  onValueChange={(v) =>
+                    setColSettings((s) => ({ ...s, unique: v === "yes" }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">no</SelectItem>
+                    <SelectItem value="yes">UNIQUE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="auto-update timestamp">
+                <Select
+                  value={colSettings.autoUpdateTimestamp ? "yes" : "no"}
+                  onValueChange={(v) =>
+                    setColSettings((s) => ({
+                      ...s,
+                      autoUpdateTimestamp: v === "yes",
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">no</SelectItem>
+                    <SelectItem value="yes">yes (write path)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="id strategy">
+                <Select
+                  value={colSettings.idStrategy}
+                  onValueChange={(v) =>
+                    setColSettings((s) => ({
+                      ...s,
+                      idStrategy: v as ColumnSettingsForm["idStrategy"],
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">none</SelectItem>
+                    <SelectItem value="uuid_v4">uuid v4</SelectItem>
+                    <SelectItem value="uuid_v7">uuid v7</SelectItem>
+                    <SelectItem value="ulid">ULID</SelectItem>
+                    <SelectItem value="nanoid">nanoid</SelectItem>
+                    <SelectItem value="cuid2">cuid2</SelectItem>
+                    <SelectItem value="identity">identity</SelectItem>
+                    <SelectItem value="serial">serial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="check">
+                <FieldInput
+                  value={colSettings.check}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, check: e.target.value }))
+                  }
+                  placeholder="title <> ''"
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="comment">
+                <FieldInput
+                  value={colSettings.comment}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, comment: e.target.value }))
+                  }
+                />
+              </Field>
+              <Field label="min length">
+                <FieldInput
+                  value={colSettings.minLength}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, minLength: e.target.value }))
+                  }
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="max length">
+                <FieldInput
+                  value={colSettings.maxLength}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, maxLength: e.target.value }))
+                  }
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="pattern (regex)">
+                <FieldInput
+                  value={colSettings.pattern}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, pattern: e.target.value }))
+                  }
+                  placeholder="^[a-z]+$"
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="enum (comma-separated)">
+                <FieldInput
+                  value={colSettings.enumValues}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, enumValues: e.target.value }))
+                  }
+                  placeholder="draft, published"
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="min (number)">
+                <FieldInput
+                  value={colSettings.min}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, min: e.target.value }))
+                  }
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="max (number)">
+                <FieldInput
+                  value={colSettings.max}
+                  onChange={(e) =>
+                    setColSettings((s) => ({ ...s, max: e.target.value }))
+                  }
+                  className="font-mono text-sm"
+                />
               </Field>
             </div>
 

@@ -35,3 +35,5 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0050-schema-picker-ui\|S0050]] | Schema picker + scoped table list (Data sidebar) | 2026-11-01 |
 | [[S0051-workspace-tabs\|S0051]] | Workspace tab bar (one tab per table) | 2026-11-02 |
 | [[S0052-type-registry\|S0052]] | Dialect type registry + introspection model | 2026-11-02 |
+| [[S0053-column-settings\|S0053]] | Column settings + server-side validation | 2026-11-02 |
+| [[S0054-id-strategies\|S0054]] | Generated id strategies | 2026-11-02 |

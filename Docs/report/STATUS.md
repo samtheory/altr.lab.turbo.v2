@@ -1,5 +1,5 @@
 ---title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0052; next S0053); Functions runtime still gated"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0054; next S0055); Functions runtime still gated"
 created: 2026-09-19
 updated: 2026-11-02
 tags:
@@ -13,7 +13,7 @@ tags:
 
 # Status
 
-Last updated: 2026-11-02 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0052 type registry** · Prior: **S0051** workspace tabs · **S0050** schema picker · **S0049** schema-scoped introspection · **S0048** right inspector · **S0047** · **S0046** · **S0045** `/p/[project]` scoping · **S0044** Projects wizard · **S0043** project registry API · **S0042** control-plane store · **S0041** Dockerfile · **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-11-02 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0054 id strategies** · Prior: **S0053** column settings · **S0052** type registry · **S0051** workspace tabs · **S0050** schema picker · **S0049** schema-scoped introspection · **S0048** right inspector · **S0047** · **S0046** · **S0045** `/p/[project]` scoping · **S0044** Projects wizard · **S0043** project registry API · **S0042** control-plane store · **S0041** Dockerfile · **S0040** backup/restore · **S0039** OTel · **S0038** PG write concurrency · **S0037** LISTEN fan-out · **S0036** shared PG rate/idempotency · **S0035** JSON HTTP logs · **S0034** health probes · **phase-02.75 closed** [[../plan/Jord/phase-02.75/README]] · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -36,10 +36,12 @@ Last updated: 2026-11-02 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Phase-03 S0050 / jord-F0023 (partial)** — Data sidebar schema picker + scoped table list + create-table inspector stub · [[../tech_space/jord/studio/README#schema-picker--scoped-table-list-s0050]] · card [[../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]]
 - **Phase-03 S0051 / jord-F0023 (partial)** — workspace tabs (`schema.table` keys, URL `?tabs=&active=`, per-project persist) · [[../tech_space/jord/studio/README#workspace-tabs-s0051]] · card [[../plan/Jord/phase-03/done/S0051-workspace-tabs|S0051]]
 - **Phase-03 S0052 / jord-F0024 (partial)** — dialect type registry (`toSql`/`fromSql`, custom read-only, migrate via registry) · [[../tech_space/jord/schema/README#type-registry-s0052]] · card [[../plan/Jord/phase-03/done/S0052-type-registry|S0052]]
+- **Phase-03 S0053 / jord-F0024 (partial)** — column settings + server-side validation (422 field errors, `confirm` on unsafe DDL, `jord_column_settings`) · [[../tech_space/jord/schema/README#column-settings--validation-s0053]] · card [[../plan/Jord/phase-03/done/S0053-column-settings|S0053]]
+- **Phase-03 S0054 / jord-F0024 (partial)** — generated id strategies (uuid v4/v7, ULID, nanoid, cuid2, identity/serial) · [[../tech_space/jord/schema/README#generated-id-strategies-s0054]] · card [[../plan/Jord/phase-03/done/S0054-id-strategies|S0054]]
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B done** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]). **Wave C done** ([[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]–[[../plan/Jord/phase-03/done/S0051-workspace-tabs|S0051]]). **Wave D:** [[../plan/Jord/phase-03/done/S0052-type-registry|S0052]] done · **Next:** [[../plan/Jord/phase-03/S0053-column-settings|S0053]]. Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **63 cards, S0034–S0096**, waves A–P. **Wave A done** (S0034–S0041 / [[../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]). **Wave B done** ([[../plan/Jord/phase-03/done/S0042-control-plane-store-adr|S0042]]–[[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]). **Wave C done** ([[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]–[[../plan/Jord/phase-03/done/S0051-workspace-tabs|S0051]]). **Wave D:** [[../plan/Jord/phase-03/done/S0052-type-registry|S0052]]–[[../plan/Jord/phase-03/done/S0054-id-strategies|S0054]] done · **Next:** [[../plan/Jord/phase-03/S0055-fk-relationship-editor|S0055]]. Open features: [[../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]]–[[../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]. Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — do not implement yet

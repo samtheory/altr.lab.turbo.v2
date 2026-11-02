@@ -45,12 +45,21 @@ export type ParsedTableQuery = {
 export class TableApiError extends Error {
   readonly status: number;
   readonly code: string;
+  readonly field?: string;
+  readonly reason?: string;
 
-  constructor(status: number, code: string, message: string) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    extra?: { field?: string; reason?: string },
+  ) {
     super(message);
     this.name = "TableApiError";
     this.status = status;
     this.code = code;
+    this.field = extra?.field;
+    this.reason = extra?.reason;
   }
 }
 

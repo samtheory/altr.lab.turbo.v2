@@ -1,11 +1,13 @@
 import type { Client } from "@libsql/client";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
+import type { ColumnSettings } from "./schema/column-settings.js";
 import type { JordColumnType } from "./schema/ddl.js";
 import type { schema } from "./schema/records.js";
 import type { JordSchemaInfo } from "./schema/schema-scope.js";
 import type { LogicalColumnType } from "./schema/types/types.js";
 
+export type { ColumnSettings } from "./schema/column-settings.js";
 export type { JordColumnType } from "./schema/ddl.js";
 export type { JordSchemaInfo } from "./schema/schema-scope.js";
 export type { LogicalColumnType } from "./schema/types/types.js";
@@ -25,6 +27,8 @@ export type JordColumnInfo = {
   dflt_value: string | null;
   /** Registry mapping (S0052); omitted only by older callers. */
   logicalType?: LogicalColumnType;
+  /** Jord column settings (S0053); validation / auto-update / comment. */
+  settings?: ColumnSettings;
 };
 
 export type JordTableInfo = {
@@ -40,6 +44,9 @@ export type AddColumnInput = {
   type: JordColumnType;
   /** Defaults to the adapter's default schema. */
   schema?: string;
+  settings?: ColumnSettings;
+  /** Required when adding NOT NULL without a default. */
+  confirm?: boolean;
 };
 
 export type AddColumnResult =
@@ -49,6 +56,8 @@ export type AddColumnResult =
       error:
         | "invalid_identifier"
         | "invalid_type"
+        | "invalid_settings"
+        | "confirm_required"
         | "table_not_found"
         | "column_exists"
         | "unknown_schema";
@@ -61,6 +70,7 @@ export type CreateTableInput = {
     name: string;
     type: JordColumnType;
     pk?: boolean;
+    settings?: ColumnSettings;
   }>;
   /** Defaults to the adapter's default schema. */
   schema?: string;
@@ -73,6 +83,7 @@ export type CreateTableResult =
       error:
         | "invalid_identifier"
         | "invalid_type"
+        | "invalid_settings"
         | "no_columns"
         | "duplicate_column"
         | "multiple_pk"
@@ -129,6 +140,7 @@ export type TableRowWriteError =
   | "missing_pk"
   | "unknown_column"
   | "bad_value"
+  | "validation"
   | "empty_patch"
   | "pk_exists"
   | "not_found";
@@ -137,7 +149,14 @@ export type TableRowValues = Record<string, unknown>;
 
 export type MutateTableRowResult =
   | { ok: true }
-  | { ok: false; error: TableRowWriteError; message: string };
+  | {
+      ok: false;
+      error: TableRowWriteError;
+      message: string;
+      /** Present when error is `validation` (HTTP 422). */
+      field?: string;
+      reason?: string;
+    };
 
 export type InsertTableRowInput = {
   table: string;
@@ -169,6 +188,8 @@ export type SchemaDdlError =
   | "pk_required"
   | "pk_type_change"
   | "invalid_type"
+  | "invalid_settings"
+  | "confirm_required"
   | "empty_patch"
   | "type_change_failed";
 
@@ -176,7 +197,12 @@ export type SchemaDdlResult =
   | { ok: true }
   | { ok: false; error: SchemaDdlError; message: string };
 
-export type DropTableInput = { name: string; schema?: string };
+export type DropTableInput = {
+  name: string;
+  schema?: string;
+  /** Required — drop is destructive. */
+  confirm?: boolean;
+};
 
 export type RenameTableInput = {
   name: string;
@@ -188,6 +214,8 @@ export type DropColumnInput = {
   table: string;
   column: string;
   schema?: string;
+  /** Required — drop is destructive. */
+  confirm?: boolean;
 };
 
 export type AlterColumnInput = {
@@ -196,6 +224,9 @@ export type AlterColumnInput = {
   column: string;
   name?: string;
   type?: JordColumnType;
+  settings?: ColumnSettings;
+  /** Required for type change or NOT NULL without default. */
+  confirm?: boolean;
 };
 
 export const JORD_BLOB_STATUSES = ["pending", "ready"] as const;

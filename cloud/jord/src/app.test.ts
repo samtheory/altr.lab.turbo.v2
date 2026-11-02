@@ -523,13 +523,17 @@ describe("jord-server routes", () => {
           "content-type": "application/json",
           ...authHeaders("admin"),
         },
-        body: JSON.stringify({ type: "REAL" }),
+        body: JSON.stringify({ type: "REAL", confirm: true }),
       });
       expect(typed.status).toBe(200);
 
       const dropCol = await app.request("/schema/tables/lab_ddl/columns/label", {
         method: "DELETE",
-        headers: authHeaders("admin"),
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ confirm: true }),
       });
       expect(dropCol.status).toBe(200);
 
@@ -545,19 +549,31 @@ describe("jord-server routes", () => {
 
       const reserved = await app.request("/schema/tables/records", {
         method: "DELETE",
-        headers: authHeaders("admin"),
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ confirm: true }),
       });
       expect(reserved.status).toBe(400);
 
       const dropped = await app.request("/schema/tables/lab_ddl_v2", {
         method: "DELETE",
-        headers: authHeaders("admin"),
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ confirm: true }),
       });
       expect(dropped.status).toBe(200);
 
       const missing = await app.request("/schema/tables/lab_ddl_v2", {
         method: "DELETE",
-        headers: authHeaders("admin"),
+        headers: {
+          "content-type": "application/json",
+          ...authHeaders("admin"),
+        },
+        body: JSON.stringify({ confirm: true }),
       });
       expect(missing.status).toBe(404);
     } finally {

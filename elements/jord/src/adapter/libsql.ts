@@ -75,6 +75,19 @@ import type {
   UpdateTriggerInput,
 } from "../port.js";
 import {
+  isNotNullWithoutDefault,
+  parseColumnSettings,
+  requiresConfirm,
+} from "../schema/column-settings.js";
+import {
+  deleteColumnSettings,
+  loadColumnSettingsMap,
+  renameColumnSettings,
+  renameTableColumnSettings,
+  upsertColumnSettings,
+  type ColumnMetaQuery,
+} from "../schema/column-meta.js";
+import {
   buildAddColumnSql,
   buildCreateTableSql,
   clampRowWindow,
@@ -1322,6 +1335,23 @@ export class LibSqlAdapter implements JordDriverPort {
     return rs.rows.map((r) => String(r.name ?? r[0]));
   }
 
+  private columnMetaClient(): ColumnMetaQuery {
+    return {
+      execute: async ({ sql, args }) => {
+        const rs = await this.client.execute({ sql, args });
+        return {
+          rows: rs.rows.map((row) => {
+            const out: Record<string, unknown> = {};
+            for (const key of Object.keys(row)) {
+              out[key] = (row as Record<string, unknown>)[key];
+            }
+            return out;
+          }),
+        };
+      },
+    };
+  }
+
   async describeTable(
     name: string,
     schemaName?: string,
@@ -1347,6 +1377,16 @@ export class LibSqlAdapter implements JordDriverPort {
           : String(r.dflt_value),
     }));
     const columns = normalizeColumns("libsql", rawColumns);
+    const settingsMap = await loadColumnSettingsMap(
+      this.columnMetaClient(),
+      "libsql",
+      LIBSQL_SCHEMA,
+      name,
+    );
+    for (const col of columns) {
+      const settings = settingsMap.get(col.name);
+      if (settings) col.settings = settings;
+    }
     return { name, schema: LIBSQL_SCHEMA, columns };
   }
 
@@ -1367,6 +1407,26 @@ export class LibSqlAdapter implements JordDriverPort {
       };
     }
 
+    let settings = input.settings;
+    if (settings !== undefined) {
+      const parsed = parseColumnSettings(settings);
+      if (!parsed.ok) {
+        return {
+          ok: false,
+          error: "invalid_settings",
+          message: parsed.message,
+        };
+      }
+      settings = parsed.settings;
+      if (isNotNullWithoutDefault(settings) && input.confirm !== true) {
+        return {
+          ok: false,
+          error: "confirm_required",
+          message: requiresConfirm("not_null_without_default"),
+        };
+      }
+    }
+
     const described = await this.describeTable(input.table);
     if (!described) {
       return {
@@ -1384,8 +1444,18 @@ export class LibSqlAdapter implements JordDriverPort {
     }
 
     await this.client.execute(
-      buildAddColumnSql(input.table, input.name, input.type),
+      buildAddColumnSql(input.table, input.name, input.type, undefined, settings, "libsql"),
     );
+    if (settings && Object.keys(settings).length > 0) {
+      await upsertColumnSettings(
+        this.columnMetaClient(),
+        "libsql",
+        LIBSQL_SCHEMA,
+        input.table,
+        input.name,
+        settings,
+      );
+    }
     return { ok: true };
   }
 
@@ -1403,6 +1473,18 @@ export class LibSqlAdapter implements JordDriverPort {
     }
     const sql = buildCreateTableSql(plan.name, plan.columns, "libsql");
     await this.client.execute(sql);
+    for (const col of plan.columns) {
+      if (col.settings && Object.keys(col.settings).length > 0) {
+        await upsertColumnSettings(
+          this.columnMetaClient(),
+          "libsql",
+          LIBSQL_SCHEMA,
+          plan.name,
+          col.name,
+          col.settings,
+        );
+      }
+    }
     return { ok: true, sql };
   }
 
@@ -1449,16 +1531,18 @@ export class LibSqlAdapter implements JordDriverPort {
     if (!described.ok) return described;
     const plan = planInsertRow(described.info, input.values);
     if (!plan.ok) return plan;
-    const existing = await this.client.execute({
-      sql: `SELECT 1 AS hit FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = ? LIMIT 1`,
-      args: [plan.pkValue],
-    });
-    if (existing.rows.length > 0) {
-      return {
-        ok: false,
-        error: "pk_exists",
-        message: "primary key already exists",
-      };
+    if (plan.pkValue !== null && plan.columns.includes(plan.pkColumn)) {
+      const existing = await this.client.execute({
+        sql: `SELECT 1 AS hit FROM ${quoteIdent(plan.table)} WHERE ${quoteIdent(plan.pkColumn)} = ? LIMIT 1`,
+        args: [plan.pkValue],
+      });
+      if (existing.rows.length > 0) {
+        return {
+          ok: false,
+          error: "pk_exists",
+          message: "primary key already exists",
+        };
+      }
     }
     const cols = plan.columns.map((name) => quoteIdent(name)).join(", ");
     const marks = plan.columns.map(() => "?").join(", ");
@@ -1506,6 +1590,13 @@ export class LibSqlAdapter implements JordDriverPort {
     if (!isMainSchema(input.schema)) return unknownSchemaFailure(input.schema);
     const plan = planDropTable(input.name);
     if (!plan.ok) return plan;
+    if (input.confirm !== true) {
+      return {
+        ok: false,
+        error: "confirm_required",
+        message: requiresConfirm("drop_table"),
+      };
+    }
     const existing = await this.describeTable(plan.name);
     if (!existing) {
       return {
@@ -1515,6 +1606,12 @@ export class LibSqlAdapter implements JordDriverPort {
       };
     }
     await this.client.execute(`DROP TABLE ${quoteIdent(plan.name)}`);
+    await deleteColumnSettings(
+      this.columnMetaClient(),
+      "libsql",
+      LIBSQL_SCHEMA,
+      plan.name,
+    );
     return { ok: true };
   }
 
@@ -1555,6 +1652,13 @@ export class LibSqlAdapter implements JordDriverPort {
               },
         );
       }
+      await renameTableColumnSettings(
+        this.columnMetaClient(),
+        "libsql",
+        LIBSQL_SCHEMA,
+        plan.from,
+        plan.to,
+      );
     });
     return { ok: true };
   }
@@ -1573,8 +1677,22 @@ export class LibSqlAdapter implements JordDriverPort {
     }
     const plan = planDropColumn(info, input.column);
     if (!plan.ok) return plan;
+    if (input.confirm !== true) {
+      return {
+        ok: false,
+        error: "confirm_required",
+        message: requiresConfirm("drop_column"),
+      };
+    }
     await this.client.execute(
       `ALTER TABLE ${quoteIdent(plan.table)} DROP COLUMN ${quoteIdent(plan.column)}`,
+    );
+    await deleteColumnSettings(
+      this.columnMetaClient(),
+      "libsql",
+      LIBSQL_SCHEMA,
+      plan.table,
+      plan.column,
     );
     return { ok: true };
   }
@@ -1591,53 +1709,135 @@ export class LibSqlAdapter implements JordDriverPort {
         message: `table ${gate.name} not found`,
       };
     }
-    const plan = planAlterColumn(info, input.column, {
-      name: input.name,
-      type: input.type,
-    });
-    if (!plan.ok) return plan;
 
-    if (plan.mode === "rename") {
-      await this.client.execute(
-        `ALTER TABLE ${quoteIdent(plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
-      );
-      return { ok: true };
+    let nextSettings = input.settings;
+    if (nextSettings !== undefined) {
+      const parsed = parseColumnSettings(nextSettings);
+      if (!parsed.ok) {
+        return {
+          ok: false,
+          error: "invalid_settings",
+          message: parsed.message,
+        };
+      }
+      nextSettings = parsed.settings;
+      if (isNotNullWithoutDefault(nextSettings) && input.confirm !== true) {
+        return {
+          ok: false,
+          error: "confirm_required",
+          message: requiresConfirm("not_null_without_default"),
+        };
+      }
     }
 
-    const temp = rebuildTempName(plan.table);
-    try {
-      await this.client.execute(
-        buildRebuildCreateSql(temp, plan.columns, "libsql"),
-      );
-      await this.client.execute(
-        buildRebuildCopySql(
-          plan.table,
-          temp,
-          info,
-          plan.from,
-          plan.to,
-          plan.nextType,
-          "libsql",
-        ),
-      );
-      await this.client.execute(`DROP TABLE ${quoteIdent(plan.table)}`);
-      await this.client.execute(
-        `ALTER TABLE ${quoteIdent(temp)} RENAME TO ${quoteIdent(plan.table)}`,
-      );
-      return { ok: true };
-    } catch (err) {
-      try {
-        await this.client.execute(`DROP TABLE IF EXISTS ${quoteIdent(temp)}`);
-      } catch {
-        /* ignore cleanup */
-      }
+    const hasNameOrType =
+      (typeof input.name === "string" && input.name.length > 0) ||
+      input.type !== undefined;
+
+    if (!hasNameOrType && nextSettings === undefined) {
       return {
         ok: false,
-        error: "type_change_failed",
-        message:
-          err instanceof Error ? err.message : "column type change failed",
+        error: "empty_patch",
+        message: "name, type, and/or settings is required",
       };
     }
+
+    if (hasNameOrType) {
+      const plan = planAlterColumn(info, input.column, {
+        name: input.name,
+        type: input.type,
+      });
+      if (!plan.ok) return plan;
+
+      if (plan.mode === "rebuild" && input.confirm !== true) {
+        return {
+          ok: false,
+          error: "confirm_required",
+          message: requiresConfirm("type_change"),
+        };
+      }
+
+      if (plan.mode === "rename") {
+        await this.client.execute(
+          `ALTER TABLE ${quoteIdent(plan.table)} RENAME COLUMN ${quoteIdent(plan.from)} TO ${quoteIdent(plan.to)}`,
+        );
+        await renameColumnSettings(
+          this.columnMetaClient(),
+          "libsql",
+          LIBSQL_SCHEMA,
+          plan.table,
+          plan.from,
+          plan.to,
+        );
+      } else {
+        const temp = rebuildTempName(plan.table);
+        try {
+          await this.client.execute(
+            buildRebuildCreateSql(temp, plan.columns, "libsql"),
+          );
+          await this.client.execute(
+            buildRebuildCopySql(
+              plan.table,
+              temp,
+              info,
+              plan.from,
+              plan.to,
+              plan.nextType,
+              "libsql",
+            ),
+          );
+          await this.client.execute(`DROP TABLE ${quoteIdent(plan.table)}`);
+          await this.client.execute(
+            `ALTER TABLE ${quoteIdent(temp)} RENAME TO ${quoteIdent(plan.table)}`,
+          );
+          if (plan.from !== plan.to) {
+            await renameColumnSettings(
+              this.columnMetaClient(),
+              "libsql",
+              LIBSQL_SCHEMA,
+              plan.table,
+              plan.from,
+              plan.to,
+            );
+          }
+        } catch (err) {
+          try {
+            await this.client.execute(`DROP TABLE IF EXISTS ${quoteIdent(temp)}`);
+          } catch {
+            /* ignore cleanup */
+          }
+          return {
+            ok: false,
+            error: "type_change_failed",
+            message:
+              err instanceof Error ? err.message : "column type change failed",
+          };
+        }
+      }
+
+      if (nextSettings !== undefined) {
+        const colName = plan.mode === "rename" || plan.mode === "rebuild" ? plan.to : input.column;
+        await upsertColumnSettings(
+          this.columnMetaClient(),
+          "libsql",
+          LIBSQL_SCHEMA,
+          plan.table,
+          colName,
+          nextSettings,
+        );
+      }
+      return { ok: true };
+    }
+
+    await upsertColumnSettings(
+      this.columnMetaClient(),
+      "libsql",
+      LIBSQL_SCHEMA,
+      gate.name,
+      input.column,
+      nextSettings!,
+    );
+    return { ok: true };
   }
 
   private async openUserTable(

@@ -333,6 +333,7 @@ describe.runIf(Boolean(liveUrl))("PostgresAdapter schema scope (live)", () => {
             schema: "app",
             column: "score",
             type: "REAL",
+            confirm: true,
           })
         ).ok,
       ).toBe(true);
@@ -349,7 +350,12 @@ describe.runIf(Boolean(liveUrl))("PostgresAdapter schema scope (live)", () => {
       expect(afterAlter.ok && afterAlter.rows[0]).toMatchObject({ id: "1", label: "b" });
 
       expect(
-        (await jord.dropColumn({ table: "notes", schema: "app", column: "score" })).ok,
+        (await jord.dropColumn({
+          table: "notes",
+          schema: "app",
+          column: "score",
+          confirm: true,
+        })).ok,
       ).toBe(true);
       expect(
         (await jord.renameTable({ name: "notes", newName: "memos", schema: "app" })).ok,
@@ -358,7 +364,9 @@ describe.runIf(Boolean(liveUrl))("PostgresAdapter schema scope (live)", () => {
       expect(await jord.describeTable("notes")).not.toBeNull();
 
       expect((await jord.deleteTableRow({ table: "memos", schema: "app", pk: "1" })).ok).toBe(true);
-      expect((await jord.dropTable({ name: "memos", schema: "app" })).ok).toBe(true);
+      expect(
+        (await jord.dropTable({ name: "memos", schema: "app", confirm: true })).ok,
+      ).toBe(true);
       expect(await jord.listTables("app")).toEqual([]);
       expect(await jord.describeTable("notes")).not.toBeNull();
 

@@ -169,6 +169,27 @@ export {
   toTableCell,
 } from "./schema/ddl.js";
 export {
+  applyAutoUpdateTimestamps,
+  buildColumnCommentSql,
+  columnConstraintSql,
+  emptyColumnSettings,
+  isNotNullWithoutDefault,
+  parseColumnSettings,
+  requiresConfirm,
+  serializeColumnSettings,
+  validateColumnValue,
+  type ColumnDefault,
+  type ColumnSettings,
+  type ColumnValidationRules,
+  type FieldValidationFailure,
+} from "./schema/column-settings.js";
+export {
+  generateId,
+  idStrategyDdl,
+  parseIdStrategy,
+  type IdStrategy,
+} from "./schema/id-strategy.js";
+export {
   buildOperationExpr,
   compilePolicySql,
   planSyncRecordsRls,
