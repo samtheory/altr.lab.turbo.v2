@@ -745,6 +745,15 @@ export function TableBrowser({ table, role }: Props) {
               Insert row
             </Button>
           ) : null}
+          <Button asChild variant="outline">
+            <Link
+              href={`${hrefFor("/schema")}?view=relations&table=${encodeURIComponent(table)}${
+                schema ? `&schema=${encodeURIComponent(schema)}` : ""
+              }`}
+            >
+              Relationships
+            </Link>
+          </Button>
           {inspector ? (
             <>
               <Button

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Alert,
   AlertDescription,
@@ -29,6 +30,8 @@ import {
   cn,
 } from "@altr/apolyx";
 
+import { TableRelationshipsView } from "@/components/table-relationships-view";
+import { useProjectHref } from "@/hooks/use-project-path";
 import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
 import {
   COLUMN_TYPES,
@@ -41,8 +44,9 @@ import {
   type ColumnType,
   type SchemaTable,
 } from "@/lib/schema";
+import { isRelationsView, relationsHref } from "@/lib/studio-table-relations";
 
-type ViewMode = "browser" | "visualizer";
+type ViewMode = "browser" | "visualizer" | "relations";
 
 type ApiError = {
   error?: string;
@@ -63,12 +67,25 @@ function nextDraftKey(): string {
 
 export function SchemaExplorer({ role }: Props) {
   const canAlter = canAlterSchema(role);
+  const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams();
+  const hrefFor = useProjectHref();
+  const schemaPath = hrefFor("/schema");
   const [tables, setTables] = useState<string[] | null>(null);
   const [selected, setSelected] = useState<string>("records");
   const [tableInfo, setTableInfo] = useState<SchemaTable | null>(null);
   const [allTables, setAllTables] = useState<SchemaTable[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<ViewMode>("browser");
+  const [view, setView] = useState<ViewMode>(() => {
+    const raw = searchParams.get("view");
+    if (isRelationsView(raw)) return "relations";
+    if (raw === "visualizer") return "visualizer";
+    return "browser";
+  });
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(
+    () => searchParams.get("edge"),
+  );
   const [colName, setColName] = useState("");
   const [colType, setColType] = useState<ColumnType>("TEXT");
   const [colSettings, setColSettings] = useState<ColumnSettingsForm>(EMPTY_COLUMN_SETTINGS);
@@ -93,8 +110,56 @@ export function SchemaExplorer({ role }: Props) {
   const [fkTableNames, setFkTableNames] = useState<string[]>([]);
   const [fkColumnNames, setFkColumnNames] = useState<string[]>([]);
   const [defaultSchema, setDefaultSchema] = useState("public");
+  const [urlBootstrapped, setUrlBootstrapped] = useState(false);
 
   const canDdlTable = canAlter && isAlterableUserTable(selected);
+
+  const pushRelationsUrl = useCallback(
+    (table: string, edge: string | null, schema?: string) => {
+      const resolved =
+        schema ?? tableInfo?.schema ?? searchParams.get("schema") ?? undefined;
+      const href = relationsHref(pathname || schemaPath, searchParams, {
+        table,
+        schema: resolved || undefined,
+        edge: edge || undefined,
+      });
+      router.replace(href, { scroll: false });
+    },
+    [pathname, schemaPath, searchParams, router, tableInfo?.schema],
+  );
+
+  const setSchemaView = useCallback(
+    (next: ViewMode) => {
+      setView(next);
+      if (next === "relations") {
+        pushRelationsUrl(selected, selectedEdgeId);
+        return;
+      }
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("edge");
+      if (next === "visualizer") params.set("view", "visualizer");
+      else if (next === "browser") {
+        params.set("view", "browser");
+        params.set("table", selected);
+      } else {
+        params.delete("view");
+      }
+      if (selected) params.set("table", selected);
+      const q = params.toString();
+      router.replace(q ? `${pathname || schemaPath}?${q}` : pathname || schemaPath, {
+        scroll: false,
+      });
+    },
+    [
+      pushRelationsUrl,
+      selected,
+      selectedEdgeId,
+      searchParams,
+      router,
+      pathname,
+      schemaPath,
+    ],
+  );
 
   const loadTables = useCallback(async () => {
     setError(null);
@@ -153,10 +218,24 @@ export function SchemaExplorer({ role }: Props) {
   }, [loadTable, loadTables, selected]);
 
   useEffect(() => {
-    refreshAll();
+    const prefer = searchParams.get("table") ?? undefined;
+    refreshAll(prefer);
     // initial load only
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount
   }, []);
+
+  useEffect(() => {
+    if (urlBootstrapped) return;
+    const urlTable = searchParams.get("table");
+    const urlView = searchParams.get("view");
+    const urlEdge = searchParams.get("edge");
+    if (urlTable) setSelected(urlTable);
+    if (isRelationsView(urlView)) setView("relations");
+    else if (urlView === "visualizer") setView("visualizer");
+    else if (urlView === "browser") setView("browser");
+    if (urlEdge) setSelectedEdgeId(urlEdge);
+    setUrlBootstrapped(true);
+  }, [searchParams, urlBootstrapped]);
 
   useEffect(() => {
     let cancelled = false;
@@ -581,15 +660,23 @@ export function SchemaExplorer({ role }: Props) {
             type="button"
             size="sm"
             variant={view === "browser" ? "default" : "outline"}
-            onClick={() => setView("browser")}
+            onClick={() => setSchemaView("browser")}
           >
             Browser
           </Button>
           <Button
             type="button"
             size="sm"
+            variant={view === "relations" ? "default" : "outline"}
+            onClick={() => setSchemaView("relations")}
+          >
+            Relations
+          </Button>
+          <Button
+            type="button"
+            size="sm"
             variant={view === "visualizer" ? "default" : "outline"}
-            onClick={() => setView("visualizer")}
+            onClick={() => setSchemaView("visualizer")}
           >
             Visualizer
           </Button>
@@ -929,9 +1016,19 @@ export function SchemaExplorer({ role }: Props) {
             </Table>
           ) : null}
 
-          {tableInfo?.foreignKeys && tableInfo.foreignKeys.length > 0 ? (
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-sm font-medium">Relationships</h3>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setSchemaView("relations")}
+              >
+                Open relationships view
+              </Button>
+            </div>
+            {tableInfo?.foreignKeys && tableInfo.foreignKeys.length > 0 ? (
               <ul className="space-y-1 text-sm text-muted-foreground">
                 {tableInfo.foreignKeys.map((fk) => (
                   <li
@@ -947,8 +1044,12 @@ export function SchemaExplorer({ role }: Props) {
                   </li>
                 ))}
               </ul>
-            </div>
-          ) : null}
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No outgoing foreign keys on this table.
+              </p>
+            )}
+          </div>
 
           <form
             onSubmit={onAddColumn}
@@ -1364,6 +1465,34 @@ export function SchemaExplorer({ role }: Props) {
             </Button>
           </form>
         </>
+      ) : null}
+
+      {!error && view === "relations" && tableInfo ? (
+        <TableRelationshipsView
+          center={tableInfo}
+          catalog={allTables.length > 0 ? allTables : [tableInfo]}
+          schemaHref={schemaPath}
+          selectedEdgeId={selectedEdgeId}
+          onSelectEdge={(edgeId) => {
+            setSelectedEdgeId(edgeId);
+            pushRelationsUrl(selected, edgeId, tableInfo.schema);
+          }}
+          onRecenter={({ table, schema }) => {
+            setSelectedEdgeId(null);
+            setSelected(table);
+            refreshAll(table);
+            pushRelationsUrl(table, null, schema);
+          }}
+        />
+      ) : null}
+
+      {!error && view === "relations" && !tableInfo && !isPending ? (
+        <Alert variant="info">
+          <AlertTitle>Pick a table</AlertTitle>
+          <AlertDescription>
+            Load the catalog, then open Relationships from the toolbar.
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       {!error && view === "visualizer" ? (

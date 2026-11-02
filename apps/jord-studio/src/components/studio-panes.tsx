@@ -22,21 +22,33 @@ import type { StudioContextual } from "@/lib/studio-nav";
 
 export type SidebarPaneStatus = "ready" | "loading" | "empty" | "error";
 
-export type StudioPanesValue = {
-  contextual: StudioContextual | null;
-  sidebarStatus: SidebarPaneStatus;
+export type StudioPanesActions = {
   setSidebarStatus: (status: SidebarPaneStatus) => void;
-  inspectorOpen: boolean;
   setInspectorOpen: (open: boolean) => void;
-  /** Optional page-provided sidebar body (S0047); null → shell placeholder. */
-  sidebarSlot: ReactNode | null;
   setSidebarSlot: (node: ReactNode | null) => void;
-  /** Optional page-provided inspector body (S0048). */
-  inspectorSlot: ReactNode | null;
   setInspectorSlot: (node: ReactNode | null) => void;
 };
 
-const StudioPanesContext = createContext<StudioPanesValue | null>(null);
+export type StudioPanesState = {
+  contextual: StudioContextual | null;
+  sidebarStatus: SidebarPaneStatus;
+  inspectorOpen: boolean;
+  /** Optional page-provided sidebar body (S0047); null → shell placeholder. */
+  sidebarSlot: ReactNode | null;
+  /** Optional page-provided inspector body (S0048). */
+  inspectorSlot: ReactNode | null;
+};
+
+export type StudioPanesValue = StudioPanesState & StudioPanesActions;
+
+/**
+ * Setters stay in a separate context so slot registration does not re-render
+ * when `sidebarSlot` / `inspectorSlot` change (avoids max-update-depth loops).
+ */
+const StudioPanesActionsContext = createContext<StudioPanesActions | null>(
+  null,
+);
+const StudioPanesStateContext = createContext<StudioPanesState | null>(null);
 
 export function StudioPanesProvider({
   contextual,
@@ -51,39 +63,60 @@ export function StudioPanesProvider({
   const [sidebarSlot, setSidebarSlot] = useState<ReactNode | null>(null);
   const [inspectorSlot, setInspectorSlot] = useState<ReactNode | null>(null);
 
-  const value = useMemo<StudioPanesValue>(
+  // useState setters are stable; keep actions identity fixed across slot updates
+  // so registrars that only subscribe here do not re-render when slots change.
+  const actions = useMemo<StudioPanesActions>(
+    () => ({
+      setSidebarStatus,
+      setInspectorOpen,
+      setSidebarSlot,
+      setInspectorSlot,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setState identities are stable
+    [],
+  );
+
+  const state = useMemo<StudioPanesState>(
     () => ({
       contextual,
       sidebarStatus,
-      setSidebarStatus,
       inspectorOpen,
-      setInspectorOpen,
       sidebarSlot,
-      setSidebarSlot,
       inspectorSlot,
-      setInspectorSlot,
     }),
     [contextual, sidebarStatus, inspectorOpen, sidebarSlot, inspectorSlot],
   );
 
   return (
-    <StudioPanesContext.Provider value={value}>
-      {children}
-    </StudioPanesContext.Provider>
+    <StudioPanesActionsContext.Provider value={actions}>
+      <StudioPanesStateContext.Provider value={state}>
+        {children}
+      </StudioPanesStateContext.Provider>
+    </StudioPanesActionsContext.Provider>
   );
 }
 
 export function useStudioPanes(): StudioPanesValue {
-  const ctx = useContext(StudioPanesContext);
-  if (!ctx) {
+  const state = useContext(StudioPanesStateContext);
+  const actions = useContext(StudioPanesActionsContext);
+  const value = useMemo(() => {
+    if (!state || !actions) return null;
+    return { ...state, ...actions };
+  }, [state, actions]);
+  if (!value) {
     throw new Error("useStudioPanes must be used within StudioPanesProvider");
   }
-  return ctx;
+  return value;
 }
 
 /** Optional hook for surfaces outside the shell (login) — returns null. */
 export function useStudioPanesOptional(): StudioPanesValue | null {
-  return useContext(StudioPanesContext);
+  const state = useContext(StudioPanesStateContext);
+  const actions = useContext(StudioPanesActionsContext);
+  return useMemo(() => {
+    if (!state || !actions) return null;
+    return { ...state, ...actions };
+  }, [state, actions]);
 }
 
 type PaneProps = {
@@ -228,10 +261,17 @@ export function StudioInspector({
 
 /** Register sidebar body from a page; clears on unmount (S0047). */
 export function useRegisterStudioSidebar(node: ReactNode | null): void {
-  const panes = useStudioPanesOptional();
+  // Actions-only: do not subscribe to sidebarSlot or this effect loops.
+  const actions = useContext(StudioPanesActionsContext);
+  const setSidebarSlot = actions?.setSidebarSlot;
+
   useEffect(() => {
-    if (!panes) return;
-    panes.setSidebarSlot(node);
-    return () => panes.setSidebarSlot(null);
-  }, [panes, node]);
+    if (!setSidebarSlot) return;
+    setSidebarSlot(node);
+  }, [setSidebarSlot, node]);
+
+  useEffect(() => {
+    if (!setSidebarSlot) return;
+    return () => setSidebarSlot(null);
+  }, [setSidebarSlot]);
 }

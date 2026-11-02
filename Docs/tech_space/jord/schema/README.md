@@ -1,6 +1,6 @@
 ---
 title: "Jord — schema"
-description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), column settings + write validation (S0053), FK relationships (S0055)"
+description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), column settings + write validation (S0053), FK relationships (S0055), per-table relations view (S0060)"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -12,11 +12,12 @@ tags:
   - S0052
   - S0053
   - S0055
+  - S0060
 ---
 
 # Jord — schema
 
-> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]] · settings [[../../../plan/Jord/phase-03/done/S0053-column-settings|S0053]] · FKs [[../../../plan/Jord/phase-03/done/S0055-fk-relationship-editor|S0055]].
+> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]] · settings [[../../../plan/Jord/phase-03/done/S0053-column-settings|S0053]] · FKs [[../../../plan/Jord/phase-03/done/S0055-fk-relationship-editor|S0055]] · relations view [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view|S0060]].
 
 ## Why
 
@@ -88,6 +89,19 @@ Module: `elements/jord/src/schema/fk.ts`. A foreign key targets **schema + table
 
 Cardinality: unique/PK local columns → **1:1**; otherwise **1:N**; join table with two FKs whose columns cover a composite PK → **M:N**. Invalid targets (missing table/column, non-key ref) → **`invalid_fk`** before DDL. Studio ADD COLUMN has a schema → searchable table → column picker (Apolyx Combobox), behavior selects, and SQL preview; the column browser lists introspected relationships.
 
+### Per-table relationships view (S0060)
+
+Focused Studio view (not the free canvas — that is [[../../../plan/Jord/phase-03/S0061-erd-canvas|S0061]]). Reuses existing `describeTable` / catalog introspection; no new schema reader.
+
+| Piece | Fact |
+|-------|------|
+| Entry | Schema toolbar **Relations**; browser “Open relationships view”; table grid **Relationships** → `/schema?view=relations&table=&schema=` |
+| Layout | Center table · **Incoming** (referenced-by) · **Outgoing** (references); column pairs, cardinality badge, `ON DELETE` / `ON UPDATE` chips |
+| URL | Shareable `?view=relations&table=&schema=&edge=`; click neighbour re-centers; click edge selects constraint detail |
+| Detail | Constraint name (or unnamed), columns, target, behaviors, link to column editor (`view=browser`) |
+| Empty | “No relationships” + link to add an FK in the column editor |
+| Helpers | `apps/jord-studio/src/lib/studio-table-relations.ts` · `components/table-relationships-view.tsx` |
+
 ### Schema scope (S0049)
 
 | Dialect | Default | List | Unknown `?schema=` |
@@ -133,7 +147,7 @@ All DDL runs on the write queue. On Postgres, RLS sync and DML grants for `jord_
 | Routes | `cloud/jord/src/app.ts` (`resolveSchemaQuery`) |
 | Table API | `cloud/jord/src/table-api/{routes,sql,query}.ts` (`schema` reserved param) |
 | Outbox tracking | `cloud/jord/src/realtime/outbox.ts` (`{ schema, table }`) |
-| Studio | Schema explorer FK picker + relationships list · schema picker [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui\|S0050]] |
+| Studio | Schema explorer FK picker + [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] relations view · schema picker [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui\|S0050]] |
 
 `listTables(schema)` uses `sqlite_master` (libSQL / `main`) or `pg_tables` filtered by schema. `describeTable(name, schema)` uses `PRAGMA table_info` + `PRAGMA foreign_key_list` on libSQL (Postgres: `pg_attribute` + `pg_constraint`).
 

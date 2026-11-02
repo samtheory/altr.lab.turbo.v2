@@ -13,7 +13,7 @@ tags:
 
 # S0061 — ERD canvas (pan, zoom, drag, relations)
 
-> **Status:** todo · **Depends on** [[S0055-fk-relationship-editor|S0055]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]] · After ship: [[../../../tech_space/jord/schema/README]]
+> **Status:** todo · **Depends on** [[done/S0060-table-relationships-view|S0060]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]] · After ship: [[../../../tech_space/jord/schema/README]]
 
 ## Routing (who / how long / which model)
 

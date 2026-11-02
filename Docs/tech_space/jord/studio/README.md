@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0059 projects + shell + DataGrid tables + policies/APIs drawers"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0060 projects + shell + DataGrid tables + policies/APIs + relations view"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -248,6 +248,15 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 | Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate`; tables deep-link policies/apis |
 | Responsive | Below `lg`: Apolyx `Sheet` full-height (same slot content) |
 
+### Per-table relationships (S0060)
+
+| Piece | Fact |
+|-------|------|
+| Entry | Schema **Relations** tab · table toolbar **Relationships** |
+| URL | `/schema?view=relations&table=&schema=&edge=` |
+| UI | `TableRelationshipsView` — center / incoming / outgoing cards; constraint detail; empty → column editor |
+| As-built | [[../schema/README#per-table-relationships-view-s0060]] · card [[../../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] |
+
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Waves C–E closed (shell, column model, tables through [[../../../plan/Jord/phase-03/done/S0059-policies-apis-drawers|S0059]]). Next: [[../../../plan/Jord/phase-03/S0060-table-relationships-view|S0060]] relationship canvas wave.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Waves C–E closed; wave F started ([[../../../plan/Jord/phase-03/done/S0060-table-relationships-view|S0060]]). Next: [[../../../plan/Jord/phase-03/S0061-erd-canvas|S0061]] free ERD canvas.

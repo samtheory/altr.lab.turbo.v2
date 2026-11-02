@@ -54,6 +54,8 @@ export type SchemaForeignKey = {
   onDelete?: string;
   onUpdate?: string;
   cardinality?: string;
+  /** Constraint name when the dialect reports one. */
+  name?: string;
 };
 
 export type SchemaTable = {
