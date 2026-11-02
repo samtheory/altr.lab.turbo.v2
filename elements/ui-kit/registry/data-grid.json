@@ -1,0 +1,41 @@
+{
+  "$schema": "./schema.json",
+  "name": "data-grid",
+  "type": "ui",
+  "title": "DataGrid",
+  "description": "Virtualized data grid with column ops, typed filters, and controlled view state",
+  "files": [
+    {
+      "path": "src/components/ui/data-grid.tsx",
+      "target": "data-grid.tsx"
+    },
+    {
+      "path": "src/components/ui/data-grid-types.ts",
+      "target": "data-grid-types.ts"
+    },
+    {
+      "path": "src/components/ui/data-grid-filters.ts",
+      "target": "data-grid-filters.ts"
+    },
+    {
+      "path": "src/components/ui/data-grid-filter-builder.tsx",
+      "target": "data-grid-filter-builder.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": [
+    "utils",
+    "button",
+    "badge",
+    "alert",
+    "input",
+    "select",
+    "dropdown-menu",
+    "skeleton",
+    "use-controllable-state"
+  ],
+  "docs": "components/data-grid"
+}

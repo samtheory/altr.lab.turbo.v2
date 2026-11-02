@@ -13,7 +13,7 @@ tags:
 
 # S0057 — row operations, pagination and 10k-row performance
 
-> **Status:** todo · **Depends on** [[S0056-grid-column-ops|S0056]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0056-grid-column-ops|S0056]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ The grid without row operations is read-only; `jord-F0025` acceptance requires 1
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] (Rows) |
-| Depends on | [[S0056-grid-column-ops|S0056]] · [[S0048-right-inspector|S0048]] |
+| Depends on | [[done/S0056-grid-column-ops|S0056]] · [[done/S0048-right-inspector|S0048]] |
 | Code today | `components/{create-record-form,record-detail}.tsx` · `lib/records.ts` · `cloud/jord/src/table-api/routes.ts` |
 | Later | keyset paging lands in [[S0079-keyset-pagination|S0079]] — use offset paging now and keep the request shape swappable |
 

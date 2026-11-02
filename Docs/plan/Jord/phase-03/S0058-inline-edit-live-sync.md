@@ -38,7 +38,7 @@ Editing is the core of the tables workspace and the place where optimistic state
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] (Cell edit / Hot sync) |
-| Depends on | [[S0057-row-ops-pagination|S0057]] · [[S0056-grid-column-ops|S0056]] · realtime from `jord-F0009` |
+| Depends on | [[S0057-row-ops-pagination|S0057]] · [[done/S0056-grid-column-ops|S0056]] · realtime from `jord-F0009` |
 | Code today | `components/records-browser.tsx` · `lib/realtime-table.ts` · `elements/jord/src/adapter/records.ts` (OCC helpers) |
 | Tests | `elements/jord/src/adapter/records.occ.test.ts` (existing optimistic-concurrency contract) |
 

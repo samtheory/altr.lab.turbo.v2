@@ -115,6 +115,7 @@ import SwitchCardGridDemo from "./switch-card-grid-demo";
 import SwitchConfirmAlertDemo from "./switch-confirm-alert-demo";
 import SwitchConfirmDialogDemo from "./switch-confirm-dialog-demo";
 import TableDemo from "./table-demo";
+import DataGridDemo from "./data-grid-demo";
 import TabsDemo from "./tabs-demo";
 import TextDemo from "./text-demo";
 import TextareaDemo from "./textarea-demo";
@@ -251,6 +252,7 @@ export const demos = {
   "navigation-menu-demo": NavigationMenuDemo,
   "sheet-demo": SheetDemo,
   "table-demo": TableDemo,
+  "data-grid-demo": DataGridDemo,
   "text-demo": TextDemo,
   "textarea-demo": TextareaDemo,
   "timeline-alternate-demo": TimelineAlternateDemo,

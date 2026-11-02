@@ -1,0 +1,54 @@
+<ComponentPreview name="data-grid-demo" />
+
+## Installation
+
+<InstallTabs name="data-grid" exports="DataGrid, DataGridFilterBuilder, emptyColumnLayout, mergeColumnLayout, processDataGridRows" />
+
+## Usage
+
+```tsx
+import { DataGrid, type DataGridColumnDef } from "@altr/apolyx"
+
+type Row = { id: string; name: string; score: number }
+
+const columns: DataGridColumnDef<Row>[] = [
+  { id: "name", header: "Name", type: "text" },
+  { id: "score", header: "Score", type: "number" },
+]
+
+<DataGrid
+  columns={columns}
+  rows={rows}
+  getRowId={(row) => row.id}
+  height={420}
+/>
+```
+
+`DataGrid` owns column chrome (sort, hide, pin, resize, drag reorder), a typed filter builder, quick search, and a virtualized body. Filtering and sorting run client-side by default; pass `clientProcess={false}` when the parent already processed the rows.
+
+Persist view state with the controlled `columnLayout`, `filters`, `sort`, and `quickSearch` props (and their `on*Change` counterparts). Call **Reset view** or write your own reset that restores `emptyColumnLayout(columnIds)`.
+
+When the column set grows, `mergeColumnLayout` appends new ids without wiping widths, pins, or hidden state.
+
+## Accessibility
+
+- Root uses `role="grid"` with `aria-rowcount` / `aria-colcount`.
+- Headers expose `aria-sort`; the column menu is a standard `DropdownMenu`.
+- Resize handles are `role="separator"` with an accessible name.
+- Keyboard: focus the grid scrollport; header sort buttons and menus are tabbable.
+
+## Props
+
+<PropsTable title="DataGrid" rows={[
+  { prop: "columns", type: "DataGridColumnDef<T>[]", description: "Declarative column model." },
+  { prop: "rows", type: "T[]", description: "Row data." },
+  { prop: "getRowId", type: "(row: T) => string", description: "Stable row identity." },
+  { prop: "columnLayout", type: "DataGridColumnLayout", description: "Controlled order / hidden / widths / pins." },
+  { prop: "sort", type: "DataGridSort", description: "Controlled sort." },
+  { prop: "filters", type: "DataGridFilter[]", description: "Controlled AND filters." },
+  { prop: "quickSearch", type: "string", description: "Search across text-like columns." },
+  { prop: "clientProcess", type: "boolean", default: "true", description: "Apply filters/sort/search inside the grid." },
+  { prop: "height", type: "number | string", default: "420", description: "Viewport height for virtualization." },
+  { prop: "loading", type: "boolean", description: "Skeleton when there are no rows yet." },
+  { prop: "showFilterBuilder", type: "boolean", default: "true", description: "Toolbar filter chips + quick search." },
+]} />

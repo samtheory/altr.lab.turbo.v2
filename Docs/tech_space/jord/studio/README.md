@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0051 projects + shell + schema picker + workspace tabs"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0056 projects + shell + DataGrid tables + saved views"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -177,10 +177,25 @@ Tab strip above `StudioContent` when the Data section is active. Keys are always
 | Open | Sidebar (or Tables index) click → `openTab`; existing key focuses instead of duplicating |
 | Close | Per-tab × · overflow Close/Close others/Close all · `Ctrl/Cmd+W` · `Alt+←/→` reorder |
 | URL | `?tabs=public.users,auth.users&active=public.users` + path `/tables/[name]` for the active table; `schema` query when not the dialect default |
-| Persist | `localStorage` `jord.studio.tabs:v1:<projectSlug>` — order, active, per-tab `{ offset, scrollY, filters, columnOrder, columnWidths, inspector }` |
+| Persist | `localStorage` `jord.studio.tabs:v1:<projectSlug>` — order, active, per-tab `{ offset, scrollY, filters[], columnOrder, columnWidths, hiddenColumns, pinnedColumns, sort, quickSearch, activeViewId, inspector }` |
 | Missing | 404 on table info/rows → “Table missing” panel with Close tab |
 | Scope | Tables only (records / SQL / functions stay out of the strip) |
 | Motion | &lt;150 ms transitions; `useReducedMotion` disables |
+
+### Tables DataGrid + saved views (S0056)
+
+Tables `[name]` renders through `@altr/apolyx` **DataGrid** (not a local grid). Kit owns virtualization, header menu, typed filter builder, and controlled column layout.
+
+| Piece | Fact |
+|-------|------|
+| Kit | `DataGrid` / `DataGridFilterBuilder` in `elements/ui-kit` · docs `/docs/components/data-grid` · registry `data-grid` |
+| Wire-up | `apps/jord-studio/src/components/table-browser.tsx` maps introspected SQL types via `sqlTypeToGridType` |
+| Header ops | Sort cycle · hide/show · pin left/right · resize · drag reorder · reset view |
+| Filters | Typed operators (text/number/boolean/date/json/fk) + quick search; AND chips above the grid; client-side on the loaded page |
+| Tab persist | Filter/sort/layout/quickSearch written into workspace tab state (survives tab switch + reload) |
+| Named views | `localStorage` `jord.studio.table-views:v1:<projectSlug>` keyed by `schema.table` — create / rename / update / delete / set default; default applied on tab open |
+| Column merge | New columns from DDL append via `mergeColumnLayout` without wiping widths/pins/hidden |
+| Out of scope here | Bulk row ops / keyset paging → [[../../../plan/Jord/phase-03/S0057-row-ops-pagination\|S0057]] · inline edit + live merge → [[../../../plan/Jord/phase-03/S0058-inline-edit-live-sync\|S0058]] |
 
 ### Right inspector (S0048)
 
@@ -198,4 +213,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Schema server scope [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · picker UI [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]] · workspace tabs [[../../../plan/Jord/phase-03/done/S0051-workspace-tabs|S0051]]. Wave C (shell) closed; type registry [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]]. Next: [[../../../plan/Jord/phase-03/S0053-column-settings|S0053]] column settings.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Wave C (shell) + wave D (column model) closed. Wave E tables: [[../../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]] done; next [[../../../plan/Jord/phase-03/S0057-row-ops-pagination|S0057]] row ops + paging.

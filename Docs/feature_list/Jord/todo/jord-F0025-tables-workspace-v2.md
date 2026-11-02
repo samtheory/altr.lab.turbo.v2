@@ -68,7 +68,7 @@ Spreadsheet formulas · CSV import wizard · cell-level audit history · collabo
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0056-grid-column-ops\|S0056]] — grid column ops + views | 2.5–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0056-grid-column-ops\|S0056]] — grid column ops + views | 2.5–3 h | **done** 2026-11-02 |
 | [[../../../plan/Jord/phase-03/S0057-row-ops-pagination\|S0057]] — row ops + paging | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0058-inline-edit-live-sync\|S0058]] — inline edit + live merge | 2.5–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0059-policies-apis-drawers\|S0059]] — policies + APIs drawers | 2.5–3 h | todo |

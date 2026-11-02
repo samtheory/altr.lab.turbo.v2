@@ -190,6 +190,7 @@
   },
   "active": "83951ac55895cc18",
   "lastOpenFiles": [
+    "plan/Jord/phase-03/done/S0056-grid-column-ops.md",
     "plan/Jord/phase-03/done/S0055-fk-relationship-editor.md",
     "plan/Jord/phase-03/done/S0050-schema-picker-ui.md",
     "plan/Jord/phase-03/done/S0049-schema-scoped-introspection.md",
@@ -216,7 +217,6 @@
     "brain/00-Docs-Hub.md",
     "brain/README.md",
     "agents/docs_man/instructions/00-workflow.md",
-    "agents/docs_man/00-index.md",
     "feature_list/Jord/done",
     "temp/output",
     "temp/input",

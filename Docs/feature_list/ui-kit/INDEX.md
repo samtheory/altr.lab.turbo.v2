@@ -23,7 +23,7 @@ tags:
 | **apolyx-F0005** | [[04-apolyx-s0003-switch-inputs]] | done (S0003) |
 | **apolyx-F0006** | [[05-apolyx-s0004-popover]] | done (S0004) |
 | **apolyx-F0007** | [[06-apolyx-s0005-product-gate]] | done (S0005) |
-| **apolyx-F0008** | [[apolyx-F0008-datagrid]] | todo |
+| **apolyx-F0008** | [[apolyx-F0008-datagrid]] | in progress (column ops via S0056; editing open) |
 
 ## Next free id
 

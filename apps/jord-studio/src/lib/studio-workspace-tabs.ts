@@ -12,15 +12,32 @@ const VERSION = "v1";
 
 export type TabKey = string;
 
+export type WorkspaceTabFilter = {
+  id: string;
+  columnId: string;
+  operator: string;
+  value?: string | number | boolean | null;
+  valueTo?: string | number | null;
+};
+
 export type WorkspaceTabState = {
   /** Row page offset for the table browser. */
   offset: number;
   /** Scroll position of `#main` when the tab was last active. */
   scrollY: number;
-  /** Reserved for S0056 saved views / filters. */
-  filters: Record<string, string>;
+  /**
+   * Active grid filters (S0056). Legacy `Record<string,string>` snapshots
+   * are ignored and start empty.
+   */
+  filters: WorkspaceTabFilter[];
   columnOrder: string[] | null;
   columnWidths: Record<string, number> | null;
+  hiddenColumns: string[] | null;
+  pinnedColumns: Record<string, "left" | "right"> | null;
+  sort: { columnId: string; direction: "asc" | "desc" } | null;
+  quickSearch: string;
+  /** Named view id currently applied (from table-views store). */
+  activeViewId: string | null;
   /** Optional inspector deep-link fragment for this tab. */
   inspector: string | null;
 };
@@ -34,14 +51,43 @@ export type WorkspaceTabsSnapshot = {
 const DEFAULT_STATE: WorkspaceTabState = {
   offset: 0,
   scrollY: 0,
-  filters: {},
+  filters: [],
   columnOrder: null,
   columnWidths: null,
+  hiddenColumns: null,
+  pinnedColumns: null,
+  sort: null,
+  quickSearch: "",
+  activeViewId: null,
   inspector: null,
 };
 
 export function emptyTabState(): WorkspaceTabState {
-  return { ...DEFAULT_STATE, filters: {} };
+  return {
+    ...DEFAULT_STATE,
+    filters: [],
+    pinnedColumns: null,
+    hiddenColumns: null,
+  };
+}
+
+function parseTabFilters(raw: unknown): WorkspaceTabFilter[] {
+  if (!Array.isArray(raw)) return [];
+  const out: WorkspaceTabFilter[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const v = item as Partial<WorkspaceTabFilter>;
+    if (typeof v.id !== "string" || typeof v.columnId !== "string") continue;
+    if (typeof v.operator !== "string") continue;
+    out.push({
+      id: v.id,
+      columnId: v.columnId,
+      operator: v.operator,
+      value: v.value ?? "",
+      valueTo: v.valueTo ?? null,
+    });
+  }
+  return out;
 }
 
 function storageKey(projectSlug: string): string {
@@ -164,10 +210,7 @@ export function loadTabsSnapshot(
         states[key] = {
           offset: typeof v.offset === "number" && v.offset >= 0 ? v.offset : 0,
           scrollY: typeof v.scrollY === "number" && v.scrollY >= 0 ? v.scrollY : 0,
-          filters:
-            v.filters && typeof v.filters === "object"
-              ? { ...(v.filters as Record<string, string>) }
-              : {},
+          filters: parseTabFilters(v.filters),
           columnOrder: Array.isArray(v.columnOrder)
             ? v.columnOrder.filter((c): c is string => typeof c === "string")
             : null,
@@ -175,6 +218,35 @@ export function loadTabsSnapshot(
             v.columnWidths && typeof v.columnWidths === "object"
               ? { ...(v.columnWidths as Record<string, number>) }
               : null,
+          hiddenColumns: Array.isArray(v.hiddenColumns)
+            ? v.hiddenColumns.filter((c): c is string => typeof c === "string")
+            : null,
+          pinnedColumns:
+            v.pinnedColumns && typeof v.pinnedColumns === "object"
+              ? Object.fromEntries(
+                  Object.entries(
+                    v.pinnedColumns as Record<string, unknown>,
+                  ).flatMap(([k, pin]) =>
+                    pin === "left" || pin === "right" ? [[k, pin] as const] : [],
+                  ),
+                )
+              : null,
+          sort:
+            v.sort &&
+            typeof v.sort === "object" &&
+            typeof (v.sort as { columnId?: unknown }).columnId === "string" &&
+            ((v.sort as { direction?: unknown }).direction === "asc" ||
+              (v.sort as { direction?: unknown }).direction === "desc")
+              ? {
+                  columnId: (v.sort as { columnId: string }).columnId,
+                  direction: (v.sort as { direction: "asc" | "desc" })
+                    .direction,
+                }
+              : null,
+          quickSearch:
+            typeof v.quickSearch === "string" ? v.quickSearch : "",
+          activeViewId:
+            typeof v.activeViewId === "string" ? v.activeViewId : null,
           inspector: typeof v.inspector === "string" ? v.inspector : null,
         };
       }

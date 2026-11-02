@@ -15,21 +15,41 @@ import {
   AlertTitle,
   Badge,
   Button,
+  DataGrid,
+  emptyColumnLayout,
   Field,
   FieldInput,
+  Input,
+  mergeColumnLayout,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  type DataGridColumnDef,
+  type DataGridColumnLayout,
+  type DataGridFilter,
+  type DataGridSort,
 } from "@altr/apolyx";
 
 import { useWorkspaceTabsOptional } from "@/components/workspace-tabs";
-import { useProjectHref } from "@/hooks/use-project-path";
+import { useProjectHref, useProjectSlug } from "@/hooks/use-project-path";
 import { canWriteTableRows, type JordRole } from "@/lib/auth/roles";
+import { sqlTypeToGridType } from "@/lib/studio-grid-columns";
 import { SCHEMA_ALL } from "@/lib/studio-schema-prefs";
+import {
+  deleteTableView,
+  getTableViewsBucket,
+  loadTableViewsStore,
+  renameTableView,
+  saveTableViewsStore,
+  setDefaultTableView,
+  snapshotFromState,
+  upsertTableView,
+  type TableViewSnapshot,
+  type TableViewsStore,
+} from "@/lib/studio-table-views";
 import { makeTabKey, parseTabKey } from "@/lib/studio-workspace-tabs";
 
 type ApiError = { message?: string };
@@ -85,8 +105,28 @@ function schemaQuery(schema: string | null): string {
   return `schema=${encodeURIComponent(schema)}`;
 }
 
+function layoutFromTab(input: {
+  columnIds: string[];
+  columnOrder: string[] | null;
+  columnWidths: Record<string, number> | null;
+  hiddenColumns: string[] | null;
+  pinnedColumns: Record<string, "left" | "right"> | null;
+}): DataGridColumnLayout {
+  const base = emptyColumnLayout(input.columnIds);
+  return mergeColumnLayout(
+    {
+      order: input.columnOrder ?? base.order,
+      hidden: input.hiddenColumns ?? [],
+      widths: input.columnWidths ?? {},
+      pins: input.pinnedColumns ?? {},
+    },
+    input.columnIds,
+  );
+}
+
 export function TableBrowser({ table, role }: Props) {
   const hrefFor = useProjectHref();
+  const projectSlug = useProjectSlug();
   const searchParams = useSearchParams();
   const workspaceTabs = useWorkspaceTabsOptional();
   const canWrite = canWriteTableRows(role);
@@ -126,16 +166,49 @@ export function TableBrowser({ table, role }: Props) {
   >("off");
   const [isPending, startTransition] = useTransition();
 
-  // Restore offset when the active tab key changes.
+  const [columnLayout, setColumnLayout] = useState<DataGridColumnLayout>(() =>
+    emptyColumnLayout([]),
+  );
+  const [filters, setFilters] = useState<DataGridFilter[]>([]);
+  const [sort, setSort] = useState<DataGridSort>(null);
+  const [quickSearch, setQuickSearch] = useState("");
+  const [viewsStore, setViewsStore] = useState<TableViewsStore>({});
+  const [activeViewId, setActiveViewId] = useState<string | null>(null);
+  const [viewNameDraft, setViewNameDraft] = useState("");
+
+  // Restore per-tab grid state when the active tab key changes.
   useEffect(() => {
     if (!tabKey || !workspaceTabs) return;
-    setOffset(workspaceTabs.getTabState(tabKey).offset);
+    const state = workspaceTabs.getTabState(tabKey);
+    setOffset(state.offset);
+    setFilters((state.filters as DataGridFilter[]) ?? []);
+    setSort(state.sort);
+    setQuickSearch(state.quickSearch ?? "");
+    setActiveViewId(state.activeViewId);
     setPage(null);
     setError(null);
     setMissing(false);
     resetDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabKey]);
+
+  useEffect(() => {
+    if (!projectSlug) return;
+    const store = loadTableViewsStore(projectSlug);
+    setViewsStore(store);
+  }, [projectSlug]);
+
+  // Apply default named view once when tab opens (if no persisted layout yet).
+  useEffect(() => {
+    if (!tabKey || !projectSlug || !workspaceTabs) return;
+    const state = workspaceTabs.getTabState(tabKey);
+    if (state.columnOrder || state.activeViewId) return;
+    const bucket = getTableViewsBucket(loadTableViewsStore(projectSlug), tabKey);
+    const def = bucket.views.find((v) => v.id === bucket.defaultViewId);
+    if (!def) return;
+    applyView(def, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabKey, projectSlug]);
 
   const setOffsetPersisted = useCallback(
     (next: number | ((cur: number) => number)) => {
@@ -149,6 +222,48 @@ export function TableBrowser({ table, role }: Props) {
     },
     [tabKey, workspaceTabs],
   );
+
+  const persistGridState = useCallback(
+    (patch: {
+      columnLayout?: DataGridColumnLayout;
+      filters?: DataGridFilter[];
+      sort?: DataGridSort;
+      quickSearch?: string;
+      activeViewId?: string | null;
+    }) => {
+      if (!tabKey || !workspaceTabs) return;
+      const layout = patch.columnLayout;
+      workspaceTabs.patchTabState(tabKey, {
+        filters: patch.filters as never,
+        sort: patch.sort === undefined ? undefined : patch.sort,
+        quickSearch: patch.quickSearch,
+        activeViewId:
+          patch.activeViewId === undefined ? undefined : patch.activeViewId,
+        columnOrder: layout?.order ?? undefined,
+        columnWidths: layout?.widths ?? undefined,
+        hiddenColumns: layout?.hidden ?? undefined,
+        pinnedColumns: layout?.pins ?? undefined,
+      });
+    },
+    [tabKey, workspaceTabs],
+  );
+
+  function applyView(view: TableViewSnapshot, persistActive: boolean) {
+    setColumnLayout(view.columnLayout);
+    setFilters(view.filters);
+    setSort(view.sort);
+    setQuickSearch(view.quickSearch);
+    setActiveViewId(view.id);
+    if (persistActive) {
+      persistGridState({
+        columnLayout: view.columnLayout,
+        filters: view.filters,
+        sort: view.sort,
+        quickSearch: view.quickSearch,
+        activeViewId: view.id,
+      });
+    }
+  }
 
   const load = useCallback(
     (nextOffset: number) => {
@@ -239,6 +354,44 @@ export function TableBrowser({ table, role }: Props) {
       ? `${schema}.${table}`
       : table;
 
+  const columnIds = useMemo(() => gridColumns, [gridColumns]);
+
+  // Merge layout when the column set changes (new column from DDL).
+  useEffect(() => {
+    if (columnIds.length === 0) return;
+    setColumnLayout((prev) => {
+      if (prev.order.length === 0 && tabKey && workspaceTabs) {
+        const state = workspaceTabs.getTabState(tabKey);
+        return layoutFromTab({
+          columnIds,
+          columnOrder: state.columnOrder,
+          columnWidths: state.columnWidths,
+          hiddenColumns: state.hiddenColumns,
+          pinnedColumns: state.pinnedColumns,
+        });
+      }
+      return mergeColumnLayout(prev, columnIds);
+    });
+  }, [columnIds.join("\0"), tabKey, workspaceTabs]);
+
+  const gridColumnDefs = useMemo<DataGridColumnDef<Record<string, Cell>>[]>(
+    () =>
+      columnIds.map((name) => {
+        const info = columns.find((c) => c.name === name);
+        return {
+          id: name,
+          header: info?.pk ? `${name} (pk)` : name,
+          type: sqlTypeToGridType(info?.type ?? "TEXT"),
+          accessor: (row) => row[name],
+        };
+      }),
+    [columnIds, columns],
+  );
+
+  const viewsBucket = tabKey
+    ? getTableViewsBucket(viewsStore, tabKey)
+    : { views: [], defaultViewId: null };
+
   function beginEdit(row: Record<string, Cell>) {
     const next: Record<string, string> = {};
     for (const col of columns) {
@@ -313,9 +466,33 @@ export function TableBrowser({ table, role }: Props) {
     });
   }
 
+  function saveCurrentView(asNew: boolean) {
+    if (!tabKey || !projectSlug) return;
+    const name =
+      viewNameDraft.trim() ||
+      (asNew
+        ? `View ${viewsBucket.views.length + 1}`
+        : viewsBucket.views.find((v) => v.id === activeViewId)?.name) ||
+      "View";
+    const snap = snapshotFromState({
+      id: asNew ? undefined : activeViewId ?? undefined,
+      name,
+      columnLayout,
+      filters,
+      sort,
+      quickSearch,
+    });
+    const next = upsertTableView(viewsStore, tabKey, snap, !viewsBucket.defaultViewId);
+    setViewsStore(next);
+    saveTableViewsStore(projectSlug, next);
+    setActiveViewId(snap.id);
+    setViewNameDraft("");
+    persistGridState({ activeViewId: snap.id });
+  }
+
   if (missing) {
     return (
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
         <Alert variant="destructive">
           <AlertTitle>Table missing</AlertTitle>
           <AlertDescription>
@@ -338,7 +515,7 @@ export function TableBrowser({ table, role }: Props) {
   }
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -356,9 +533,8 @@ export function TableBrowser({ table, role }: Props) {
             ) : null}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {canWrite
-              ? "Insert, edit, and delete rows. The records scratchpad stays on its own editor."
-              : "Read-only for this role."}
+            Apolyx DataGrid · column ops and saved views persist per table.
+            {canWrite ? " Insert/edit form stays below until inline edit lands." : " Read-only for this role."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -385,6 +561,104 @@ export function TableBrowser({ table, role }: Props) {
           <AlertTitle>Rows unavailable</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      ) : null}
+
+      {tabKey ? (
+        <section className="flex flex-wrap items-end gap-2 rounded-lg border border-border bg-muted/20 p-3">
+          <Field label="Saved view" className="min-w-[12rem]">
+            <Select
+              value={activeViewId ?? "__none__"}
+              onValueChange={(value) => {
+                if (value === "__none__") {
+                  setActiveViewId(null);
+                  persistGridState({ activeViewId: null });
+                  return;
+                }
+                const view = viewsBucket.views.find((v) => v.id === value);
+                if (view) applyView(view, true);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="No saved view" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">No saved view</SelectItem>
+                {viewsBucket.views.map((view) => (
+                  <SelectItem key={view.id} value={view.id}>
+                    {view.name}
+                    {viewsBucket.defaultViewId === view.id ? " (default)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Name" className="min-w-[10rem]">
+            <Input
+              value={viewNameDraft}
+              onChange={(e) => setViewNameDraft(e.target.value)}
+              placeholder="New view name"
+              size="sm"
+            />
+          </Field>
+          <Button type="button" size="sm" onClick={() => saveCurrentView(true)}>
+            Save as new
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={!activeViewId}
+            onClick={() => saveCurrentView(false)}
+          >
+            Update
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={!activeViewId || !projectSlug}
+            onClick={() => {
+              if (!activeViewId || !projectSlug || !tabKey) return;
+              const next = setDefaultTableView(viewsStore, tabKey, activeViewId);
+              setViewsStore(next);
+              saveTableViewsStore(projectSlug, next);
+            }}
+          >
+            Set default
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={!activeViewId || !projectSlug}
+            onClick={() => {
+              if (!activeViewId || !projectSlug || !tabKey) return;
+              const name = window.prompt("Rename view", viewNameDraft || "View");
+              if (!name) return;
+              const next = renameTableView(viewsStore, tabKey, activeViewId, name);
+              setViewsStore(next);
+              saveTableViewsStore(projectSlug, next);
+            }}
+          >
+            Rename
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={!activeViewId || !projectSlug}
+            onClick={() => {
+              if (!activeViewId || !projectSlug || !tabKey) return;
+              const next = deleteTableView(viewsStore, tabKey, activeViewId);
+              setViewsStore(next);
+              saveTableViewsStore(projectSlug, next);
+              setActiveViewId(null);
+              persistGridState({ activeViewId: null });
+            }}
+          >
+            Delete
+          </Button>
+        </section>
       ) : null}
 
       {canWrite && columns.length > 0 ? (
@@ -425,46 +699,53 @@ export function TableBrowser({ table, role }: Props) {
         </section>
       ) : null}
 
-      {!error && page === null ? (
-        <p className="text-sm text-muted-foreground">Loading rows…</p>
-      ) : null}
-
-      {page && rows.length === 0 ? (
-        <Alert variant="info">
-          <AlertTitle>Empty table</AlertTitle>
-          <AlertDescription>
-            <code className="font-mono">{table}</code> has no rows in this page.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {page && gridColumns.length > 0 && rows.length > 0 ? (
-        <Table striped>
-          <TableHeader>
-            <TableRow>
-              {gridColumns.map((name) => (
-                <TableHead key={name} className="font-mono text-xs">
-                  {name}
-                </TableHead>
-              ))}
-              {canWrite ? <TableHead className="text-xs">Actions</TableHead> : null}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row, index) => {
-              const pk = row[pkName] == null ? "" : String(row[pkName]);
-              return (
-                <TableRow key={`${offset}-${pk}-${index}`}>
-                  {gridColumns.map((name) => (
-                    <TableCell key={name} className="font-mono text-xs">
-                      {row[name] == null ? "null" : String(row[name])}
-                    </TableCell>
-                  ))}
-                  {canWrite ? (
-                    <TableCell className="space-x-2">
+      {page || isPending || error ? (
+        <DataGrid
+          columns={gridColumnDefs}
+          rows={rows}
+          getRowId={(row) => {
+            const pk = row[pkName];
+            if (pk != null) return String(pk);
+            return `row:${JSON.stringify(row)}`;
+          }}
+          columnLayout={columnLayout}
+          onColumnLayoutChange={(next) => {
+            setColumnLayout(next);
+            persistGridState({ columnLayout: next });
+          }}
+          filters={filters}
+          onFiltersChange={(next) => {
+            setFilters(next);
+            persistGridState({ filters: next });
+          }}
+          sort={sort}
+          onSortChange={(next) => {
+            setSort(next);
+            persistGridState({ sort: next });
+          }}
+          quickSearch={quickSearch}
+          onQuickSearchChange={(next) => {
+            setQuickSearch(next);
+            persistGridState({ quickSearch: next });
+          }}
+          loading={isPending && page === null}
+          error={null}
+          height={420}
+          emptyMessage={
+            page && rows.length === 0
+              ? "No rows on this page."
+              : "Loading…"
+          }
+          renderRowActions={
+            canWrite
+              ? (row) => {
+                  const pk = row[pkName] == null ? "" : String(row[pkName]);
+                  return (
+                    <>
                       <Button
                         type="button"
                         variant="outline"
+                        size="xs"
                         disabled={isPending}
                         onClick={() => beginEdit(row)}
                       >
@@ -473,19 +754,21 @@ export function TableBrowser({ table, role }: Props) {
                       <Button
                         type="button"
                         variant="outline"
+                        size="xs"
                         disabled={isPending || pk === ""}
                         onClick={() => removeRow(pk)}
                       >
                         Delete
                       </Button>
-                    </TableCell>
-                  ) : null}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      ) : null}
+                    </>
+                  );
+                }
+              : undefined
+          }
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground">Loading rows…</p>
+      )}
 
       <div className="flex gap-2">
         <Button

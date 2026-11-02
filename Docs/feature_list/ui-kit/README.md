@@ -42,7 +42,7 @@ Intent for **Apolyx** — portable design system for altr.lab and future publish
 | **apolyx-F0005** | [[04-apolyx-s0003-switch-inputs]] | **Apolyx-S0003** closed |
 | **apolyx-F0006** | [[05-apolyx-s0004-popover]] | **Apolyx-S0004** closed |
 | **apolyx-F0007** | [[06-apolyx-s0005-product-gate]] | **Apolyx-S0005** closed 2026-10-21 |
-| **apolyx-F0008** | [[apolyx-F0008-datagrid]] | todo — DataGrid for Jord Studio tables/SQL results |
+| **apolyx-F0008** | [[apolyx-F0008-datagrid]] | in progress — DataGrid column ops shipped (S0056); editing/live hooks still open |
 
 ## Related shipped foundation (pre-Apolyx)
 

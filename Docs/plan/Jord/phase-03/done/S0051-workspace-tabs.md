@@ -32,7 +32,7 @@ A tab strip above the content pane: clicking a table in the sidebar opens it as 
 
 ## Why now
 
-Requested together with the schema picker; without tabs, switching tables loses every filter and scroll position, and [[../S0056-grid-column-ops|S0056]] saved views have nowhere to live.
+Requested together with the schema picker; without tabs, switching tables loses every filter and scroll position, and [[S0056-grid-column-ops|S0056]] saved views have nowhere to live.
 
 ## Context (read before coding)
 

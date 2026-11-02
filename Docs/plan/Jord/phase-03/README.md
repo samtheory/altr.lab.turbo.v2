@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-02):** **S0034–S0055 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) **closed**. Archived under [[done/README|done/]]. Next open card: [[S0056-grid-column-ops|S0056]] (wave E — needs [[../../../feature_list/ui-kit/apolyx-F0008-datagrid|apolyx-F0008]]). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-02):** **S0034–S0056 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E started ([[done/S0056-grid-column-ops|S0056]]). Archived under [[done/README|done/]]. Next open card: [[S0057-row-ops-pagination|S0057]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -106,7 +106,7 @@ flowchart LR
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| E1 | [[S0056-grid-column-ops\|S0056]] | DataGrid column ops + filters + saved views (needs [[../../../feature_list/ui-kit/apolyx-F0008-datagrid\|apolyx-F0008]]) | 2.5–3 h |
+| E1 | [[done/S0056-grid-column-ops\|S0056]] | DataGrid column ops + filters + saved views | **done** 2026-11-02 |
 | E2 | [[S0057-row-ops-pagination\|S0057]] | Row ops, bulk delete, paging, 10k rows | 2–3 h |
 | E3 | [[S0058-inline-edit-live-sync\|S0058]] | Double-click edit + optimistic + live merge | 2.5–3 h |
 | E4 | [[S0059-policies-apis-drawers\|S0059]] | Per-table Policies + APIs drawers | 2.5–3 h |
@@ -214,7 +214,7 @@ Gate: parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord
 | [[done/S0045-project-scoped-routes\|S0045]] | S0044 (projects UI) — **done** |
 | [[done/S0049-schema-scoped-introspection\|S0049]] | — (server only) — **done** |
 | [[done/S0050-schema-picker-ui\|S0050]] | S0047, S0049 — **done** |
-| [[S0056-grid-column-ops\|S0056]] | apolyx-F0008 DataGrid |
+| [[done/S0056-grid-column-ops\|S0056]] | apolyx-F0008 DataGrid (column-ops slice) — **done** |
 | [[S0066-bucket-registry\|S0066]] | — |
 | [[S0068-storage-studio-ui\|S0068]] | S0067 |
 | [[S0071-auth-console-sections\|S0071]] | S0069 (OAuth/magic-link sections need S0074/S0075) |

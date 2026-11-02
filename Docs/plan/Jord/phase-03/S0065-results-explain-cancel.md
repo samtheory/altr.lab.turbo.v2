@@ -38,7 +38,7 @@ Query results render in the Apolyx DataGrid (sort, filter, copy cell/row, CSV/JS
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]] (Results, Explain, Control) |
-| Depends on | [[S0063-monaco-sql-editor|S0063]] · [[S0056-grid-column-ops|S0056]] (DataGrid) |
+| Depends on | [[S0063-monaco-sql-editor|S0063]] · [[done/S0056-grid-column-ops|S0056]] (DataGrid) |
 | Code today | `cloud/jord/src/sql/routes.ts` · `sql/routes.ts` guards tests · `cloud/jord/src/http/body-limit.ts` |
 | Dialect | Postgres `pg_cancel_backend` / `statement_timeout`; libSQL interrupt via the adapter's execute handle |
 

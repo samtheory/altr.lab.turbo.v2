@@ -1,19 +1,20 @@
 ---
 title: "tech_space/ui-kit — Apolyx as-built index"
-description: "Index of as-built notes for Apolyx (@altr/apolyx) from sprints Apolyx-S0001 through Apolyx-S0005"
+description: "Index of as-built notes for Apolyx (@altr/apolyx) from sprints Apolyx-S0001 through Apolyx-S0005 + DataGrid (apolyx-F0008)"
 created: 2026-10-11
-updated: 2026-10-27
+updated: 2026-11-02
 tags:
   - tech-space
   - ui-kit
   - apolyx
   - Apolyx-S0005
+  - datagrid
   - readme
 ---
 
 # tech_space / ui-kit — Apolyx
 
-> Who: anyone reading how Apolyx was actually built. Prefer this over plan text when they disagree. Latest closed sprint: **Apolyx-S0005** ([[10-s0005-product-gate]]).
+> Who: anyone reading how Apolyx was actually built. Prefer this over plan text when they disagree. Latest closed sprint: **Apolyx-S0005** ([[10-s0005-product-gate]]). **DataGrid** column-ops slice shipped with Jord [[../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]] ([[../../feature_list/ui-kit/apolyx-F0008-datagrid|apolyx-F0008]]).
 
 | Note | Covers |
 |------|--------|
@@ -28,6 +29,7 @@ tags:
 | [[08-s0003-switch-inputs]] | Switch family, ControlBox, Password / Number / OTP / Mask, Forms group |
 | [[09-s0004-popover]] | Popover parts, click/hover, origin-aware motion (67 registry, 149 tests) |
 | [[10-s0005-product-gate]] | **S0005:** Select, Combobox, Pagination, Scroll Area, Progress, Accordion, Radio Group (74 registry, 163 tests) |
+| **DataGrid (F0008)** | `elements/ui-kit/src/components/ui/data-grid*.tsx` — virtualized body, column ops, typed filter builder, controlled layout; docs `/docs/components/data-grid`; registry `data-grid`. Editing / `onCellCommit` / live patch hooks still open for Jord [[../../plan/Jord/phase-03/S0058-inline-edit-live-sync\|S0058]]. |
 
 Sprint screenshots (Docs only, not used by apps): `Docs/tech_space/ui-kit/assets/` (`apolyx-s0001` … `apolyx-s0004`, `apolyx-sidebar`, `apolyx-timeline`).
 

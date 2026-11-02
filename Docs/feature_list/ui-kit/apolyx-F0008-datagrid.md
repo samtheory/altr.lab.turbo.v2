@@ -3,7 +3,7 @@ title: "apolyx-F0008 — DataGrid"
 feature_id: apolyx-F0008
 description: "Apolyx data grid primitive: column actions, virtualized rows, typed inline editing, optimistic + live sync hooks"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-02
 tags:
   - feature
   - apolyx
@@ -14,7 +14,7 @@ tags:
 
 # apolyx-F0008 — DataGrid
 
-> **Status:** todo · **Id:** `apolyx-F0008` · Index: [[INDEX]] · Consumer: [[../Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]]
+> **Status:** in progress · **Id:** `apolyx-F0008` · Index: [[INDEX]] · Consumer: [[../Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] · Column-ops slice shipped with [[../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]]
 
 ## What
 

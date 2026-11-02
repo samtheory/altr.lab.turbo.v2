@@ -97,6 +97,12 @@ export const docsConfig: DocGroup[] = [
       component("grid", "Grid", "Responsive CSS grid for cards and tiles."),
       component("list", "List", "Rows with leading, content, and trailing slots."),
       component("table", "Table", "Semantic data table with density and sticky header."),
+      component(
+        "data-grid",
+        "DataGrid",
+        "Virtualized grid with column ops, typed filters, and controlled views.",
+        "new",
+      ),
     ],
   },
   {
