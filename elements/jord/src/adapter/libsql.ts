@@ -104,6 +104,7 @@ import {
   planInsertRow,
   planUpdateRow,
 } from "../schema/row-write.js";
+import { normalizeColumns } from "../schema/types/introspect.js";
 import { JordUnsupportedError } from "../errors.js";
 import { jordBlobs } from "../schema/blobs.js";
 import { jordEmbeddings } from "../schema/embeddings.js";
@@ -1333,7 +1334,7 @@ export class LibSqlAdapter implements JordDriverPort {
     const rs = await this.client.execute(
       `PRAGMA table_info(${quoteIdent(name)})`,
     );
-    const columns: JordColumnInfo[] = rs.rows.map((r) => ({
+    const rawColumns: JordColumnInfo[] = rs.rows.map((r) => ({
       name: String(r.name ?? r[1]),
       type: String(r.type ?? r[2] ?? ""),
       notnull: Number(r.notnull ?? r[3] ?? 0) === 1,
@@ -1345,6 +1346,7 @@ export class LibSqlAdapter implements JordDriverPort {
             : String(r[4])
           : String(r.dflt_value),
     }));
+    const columns = normalizeColumns("libsql", rawColumns);
     return { name, schema: LIBSQL_SCHEMA, columns };
   }
 

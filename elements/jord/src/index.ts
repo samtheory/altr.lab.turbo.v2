@@ -226,6 +226,21 @@ export {
   type SqliteAffinity,
 } from "./schema/migrate-type-map.js";
 export {
+  TYPE_REGISTRY,
+  fromSql,
+  getTypeEntry,
+  listTypeEntries,
+  listTypeIdsForDialect,
+  normalizeColumn,
+  normalizeColumns,
+  toSql,
+  type JordDialect,
+  type LogicalColumnType,
+  type RegistryEntry,
+  type ToSqlResult,
+  type TypeParams,
+} from "./schema/types/index.js";
+export {
   clampSqlRowCap,
   clampSqlTimeout,
   DEFAULT_SQL_ROW_CAP,

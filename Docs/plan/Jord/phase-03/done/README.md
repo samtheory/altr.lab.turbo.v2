@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-03/done — completed task cards"
 description: "Archived phase-03 cards after Done-when + proof. Queue index stays in ../README"
 created: 2026-11-01
-updated: 2026-11-01
+updated: 2026-11-02
 tags:
   - plan
   - jord
@@ -33,3 +33,5 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0048-right-inspector\|S0048]] | Right inspector drawer + deep links | 2026-11-01 |
 | [[S0049-schema-scoped-introspection\|S0049]] | Schema-scoped introspection / DDL / table API | 2026-11-01 |
 | [[S0050-schema-picker-ui\|S0050]] | Schema picker + scoped table list (Data sidebar) | 2026-11-01 |
+| [[S0051-workspace-tabs\|S0051]] | Workspace tab bar (one tab per table) | 2026-11-02 |
+| [[S0052-type-registry\|S0052]] | Dialect type registry + introspection model | 2026-11-02 |

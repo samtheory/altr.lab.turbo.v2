@@ -1,19 +1,20 @@
 ---
 title: "Jord — schema"
-description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, and GET /schema/schemas"
+description: "Schema-scoped list/describe, CREATE/ADD/DROP/RENAME/type change, type registry (S0052), and GET /schema/schemas"
 created: 2026-10-24
-updated: 2026-11-01
+updated: 2026-11-02
 tags:
   - tech-space
   - jord
   - schema
   - ddl
   - S0049
+  - S0052
 ---
 
 # Jord — schema
 
-> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]].
+> Who: anyone changing tables. Row DML: [[../writes/README]]. Admin role: [[../auth/README]]. Ship: [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · types [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]].
 
 ## Why
 
@@ -21,7 +22,21 @@ Studio needs to see real SQL tables and change them through the server, on both 
 
 ## What
 
-Column types accepted from the API: `TEXT`, `INTEGER`, `REAL`, `BLOB`. Postgres stores `REAL` as `DOUBLE PRECISION` and `BLOB` as `BYTEA`.
+### Type registry (S0052)
+
+Single source: `elements/jord/src/schema/types/`. Each entry has `id`, `family`, dialect `toSql`/`fromSql`, coarse `codec.affinity`, and `ui` metadata for Studio later.
+
+| API | Fact |
+|-----|------|
+| `toSql(dialect, id, params?)` | DDL fragment; rejects unknown id or unsupported dialect |
+| `fromSql(dialect, raw)` | `{ kind: "known", id, params }` or `{ kind: "custom", raw, readOnly: true }` |
+| `normalizeColumns` | Attached on every `describeTable` as `logicalType` |
+| Legacy create API | Still `TEXT` / `INTEGER` / `REAL` / `BLOB` (aliases → registry) |
+| Migrate wizard | `mapSqliteTypeToPostgres` is a thin wrapper over the registry (`INTEGER` → `bigint` preserved) |
+
+Coverage matches [[../../../feature_list/Jord/todo/jord-F0024-column-model-v2|jord-F0024]] families (strings, numbers, boolean, time, uuid, json/jsonb, binary, PG network/array, enum_text stub). Unknown PG types (e.g. `geometry`) stay **custom read-only** — never coerced into TEXT.
+
+Column types accepted from the create/add API today: `TEXT`, `INTEGER`, `REAL`, `BLOB`. Postgres stores `REAL` as `DOUBLE PRECISION` and `BLOB` as `BYTEA` via `pgColumnType` (registry-backed).
 
 ### Schema scope (S0049)
 
@@ -55,6 +70,7 @@ All DDL runs on the write queue. On Postgres, RLS sync and DML grants for `jord_
 
 | Piece | Path |
 |-------|------|
+| Type registry | `elements/jord/src/schema/types/` (`toSql` / `fromSql` / migrate) |
 | Schema helpers | `elements/jord/src/schema/schema-scope.ts` |
 | Introspect + ADD + CREATE | `elements/jord/src/schema/ddl.ts` |
 | DROP / RENAME / type | `elements/jord/src/schema/ddl-alter.ts` |

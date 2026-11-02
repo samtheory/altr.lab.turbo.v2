@@ -1,29 +1,12 @@
-/** SQLite affinity → Postgres type for the S0024 migrate wizard. */
+/** SQLite affinity → Postgres type for the S0024 migrate wizard (via type registry). */
+
+import { mapSqliteTypeToPostgres as mapViaRegistry } from "./types/migrate.js";
 
 export type SqliteAffinity = "TEXT" | "INTEGER" | "REAL" | "BLOB";
 
-const AFFINITY_TO_PG: Record<SqliteAffinity, string> = {
-  TEXT: "text",
-  INTEGER: "bigint",
-  REAL: "double precision",
-  BLOB: "bytea",
-};
-
+/** Re-export of the registry migrate path — single mapping source (S0052). */
 export function mapSqliteTypeToPostgres(sqliteType: string): string {
-  const upper = sqliteType.trim().toUpperCase();
-  if (upper.includes("INT")) return AFFINITY_TO_PG.INTEGER;
-  if (upper.includes("CHAR") || upper.includes("CLOB") || upper.includes("TEXT")) {
-    return AFFINITY_TO_PG.TEXT;
-  }
-  if (upper.includes("BLOB") || upper.length === 0) return AFFINITY_TO_PG.BLOB;
-  if (
-    upper.includes("REAL") ||
-    upper.includes("FLOA") ||
-    upper.includes("DOUB")
-  ) {
-    return AFFINITY_TO_PG.REAL;
-  }
-  return AFFINITY_TO_PG.TEXT;
+  return mapViaRegistry(sqliteType);
 }
 
 /** Shadow / ANN tables from S0020 — rebuild on the target; never copy. */

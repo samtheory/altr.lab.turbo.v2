@@ -77,7 +77,7 @@ Automatic migration generation from diffs · database-level enums management scr
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0052-type-registry\|S0052]] — dialect type registry | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0052-type-registry\|S0052]] — dialect type registry | 2–3 h | **done** 2026-11-02 |
 | [[../../../plan/Jord/phase-03/S0053-column-settings\|S0053]] — column settings + validation | 2.5–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0054-id-strategies\|S0054]] — generated id strategies | 1.5–2 h | todo |
 | [[../../../plan/Jord/phase-03/S0055-fk-relationship-editor\|S0055]] — FK editor | 2.5–3 h | todo |

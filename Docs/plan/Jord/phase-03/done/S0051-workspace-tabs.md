@@ -2,18 +2,19 @@
 title: "S0051 — workspace tab bar (one tab per table)"
 description: "Clicking a table opens it in a new workspace tab; per-tab state, drag reorder, close shortcuts, URL-reflected active tab, survives reload"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-02
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0051
+  - done
 ---
 
 # S0051 — workspace tab bar (one tab per table)
 
-> **Status:** todo · **Depends on** [[S0050-schema-picker-ui|S0050]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** **done** 2026-11-02 · **Depends on** [[S0050-schema-picker-ui|S0050]] · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] · After ship: [[../../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -31,13 +32,13 @@ A tab strip above the content pane: clicking a table in the sidebar opens it as 
 
 ## Why now
 
-Requested together with the schema picker; without tabs, switching tables loses every filter and scroll position, and [[S0056-grid-column-ops|S0056]] saved views have nowhere to live.
+Requested together with the schema picker; without tabs, switching tables loses every filter and scroll position, and [[../S0056-grid-column-ops|S0056]] saved views have nowhere to live.
 
 ## Context (read before coding)
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (workspace tabs) · [[../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]] (workspace tabs) · [[../../../../feature_list/Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] |
 | Depends on | [[S0050-schema-picker-ui|S0050]] (keying) · [[S0046-three-pane-shell|S0046]] (slot above content) |
 | Code today | `app/p/[project]/tables/page.tsx` (single `?table=` view) |
 | Tests | typecheck + build; keyboard smoke |
@@ -48,7 +49,7 @@ Requested together with the schema picker; without tabs, switching tables loses 
 
 - `<WorkspaceTabs>`: add (from sidebar click), focus-existing, close (× and `Ctrl/Cmd+W`), overflow menu when the strip is full, drag reorder (keyboard reorder with `Alt+←/→`).
 - Per-tab state: scroll offset, filters, column order/widths, open inspector; kept in a per-project store, not global.
-- URL: `?tabs=public.users,auth.users&active=public.users` (or `?table=` for the active only — pick one and document).
+- URL: `?tabs=public.users,auth.users&active=public.users` (documented; path `/tables/[name]` mirrors active table name).
 - Persistence across reload; a tab whose table was dropped shows a "table missing" state with a close action.
 - Tabs appear for tables only in this card; SQL/function tabs are out of scope.
 - Motion: tab add/remove under 150 ms, respects reduced motion.
@@ -66,7 +67,7 @@ flowchart LR
   ADD -->|no| NEW[new tab schema.table]
   NEW --> ST[per-tab state store]
   FOC --> ST
-  ST --> URL["?active=schema.table"]
+  ST --> URL["?tabs=&active=schema.table"]
 ```
 
 ## Steps (do in order)
@@ -81,21 +82,23 @@ flowchart LR
 
 ## Done when
 
-- [ ] Sidebar click opens/focuses a tab; keys use `schema.table`
-- [ ] Filters + scroll survive switching tabs and reload
-- [ ] Close via ×, `Ctrl/Cmd+W`, and overflow menu
-- [ ] Dropped table shows a recoverable state
-- [ ] Typecheck + build pass; proof pasted
+- [x] Sidebar click opens/focuses a tab; keys use `schema.table`
+- [x] Filters + scroll survive switching tabs and reload
+- [x] Close via ×, `Ctrl/Cmd+W`, and overflow menu
+- [x] Dropped table shows a recoverable state
+- [x] Typecheck + build pass; proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-studio typecheck` | |
+| 2026-11-02 | `pnpm --filter @altr/jord-studio typecheck` | exit 0 |
+| 2026-11-02 | `pnpm --filter @altr/jord-studio exec node --import tsx --test src/lib/studio-workspace-tabs.test.ts src/lib/studio-schema-prefs.test.ts` | 12 passed |
+| 2026-11-02 | `pnpm --filter @altr/jord-studio build` | Compiled + typed successfully |
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/studio/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

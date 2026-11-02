@@ -86,6 +86,7 @@ import {
   isJordColumnType,
   isReservedCreateTableName,
   isValidSqlIdent,
+  pgColumnType,
   planCreateTable,
   quoteIdent,
   quoteQualified,
@@ -109,6 +110,7 @@ import {
   planInsertRow,
   planUpdateRow,
 } from "../schema/row-write.js";
+import { normalizeColumns } from "../schema/types/introspect.js";
 import { samePostgresConnection } from "../schema/connection-identity.js";
 import { ensurePostgresSchema } from "../schema/migrate-postgres.js";
 import { migrationLockKey } from "../schema/migrations/runner.js";
@@ -1398,13 +1400,14 @@ export class PostgresAdapter implements JordDriverPort {
       [name, scoped.schema],
     );
 
-    const columns: JordColumnInfo[] = result.rows.map((r) => ({
+    const rawColumns: JordColumnInfo[] = result.rows.map((r) => ({
       name: String(r.name),
       type: String(r.type ?? ""),
       notnull: bool(r.notnull),
       pk: bool(r.pk),
       dflt_value: r.dflt_value == null ? null : String(r.dflt_value),
     }));
+    const columns = normalizeColumns("postgres", rawColumns);
     return { name, schema: scoped.schema, columns };
   }
 
@@ -1442,14 +1445,7 @@ export class PostgresAdapter implements JordDriverPort {
       };
     }
 
-    const pgType =
-      input.type === "TEXT"
-        ? "TEXT"
-        : input.type === "INTEGER"
-          ? "INTEGER"
-          : input.type === "REAL"
-            ? "DOUBLE PRECISION"
-            : "BYTEA";
+    const pgType = pgColumnType(input.type);
     await this.exec(
       `ALTER TABLE ${quoteQualified(scoped.schema, input.table)} ADD COLUMN ${quoteIdent(input.name)} ${pgType}`,
     );

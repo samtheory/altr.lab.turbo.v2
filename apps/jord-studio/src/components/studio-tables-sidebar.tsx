@@ -28,6 +28,7 @@ import {
   resolveSchemaSelection,
   saveSchemaPref,
 } from "@/lib/studio-schema-prefs";
+import { useWorkspaceTabsOptional } from "@/components/workspace-tabs";
 
 type ApiError = { message?: string };
 
@@ -56,6 +57,7 @@ export function StudioTablesSidebar() {
   const hrefFor = useProjectHref();
   const projectSlug = useProjectSlug();
   const inspector = useInspectorOptional();
+  const workspaceTabs = useWorkspaceTabsOptional();
 
   const [schemas, setSchemas] = useState<SchemaInfo[]>([]);
   const [tables, setTables] = useState<TableRow[]>([]);
@@ -104,10 +106,17 @@ export function StudioTablesSidebar() {
     }
   }, [searchParams]);
 
-  const selectedId = useMemo(
-    () => activeTableId(pathname, searchParams, selectedSchema),
-    [pathname, searchParams, selectedSchema],
-  );
+  const selectedId = useMemo(() => {
+    // Tab keys and list item ids are both `schema.table`.
+    if (workspaceTabs?.active) return workspaceTabs.active;
+    return activeTableId(pathname, searchParams, selectedSchema, defaultSchema);
+  }, [
+    workspaceTabs?.active,
+    pathname,
+    searchParams,
+    selectedSchema,
+    defaultSchema,
+  ]);
 
   const rewriteParams = useCallback(
     (mutate: (next: URLSearchParams) => void) => {
@@ -303,9 +312,23 @@ export function StudioTablesSidebar() {
       const row = tables.find((t) => t.id === item.id);
       if (!row) return;
       const isRecords = row.name === "records";
-      const base = isRecords
-        ? hrefFor("/records")
-        : hrefFor(`/tables/${encodeURIComponent(row.name)}`);
+      if (isRecords) {
+        const next = new URLSearchParams();
+        const q = searchParams.get("q");
+        const filter = searchParams.get("filter");
+        if (q) next.set("q", q);
+        if (filter) next.set("filter", filter);
+        const qs = next.toString();
+        const base = hrefFor("/records");
+        router.push(qs ? `${base}?${qs}` : base);
+        return;
+      }
+      // S0051 — open/focus a workspace tab keyed schema.table.
+      if (workspaceTabs?.enabled) {
+        workspaceTabs.openTab({ schema: row.schema, table: row.name });
+        return;
+      }
+      const base = hrefFor(`/tables/${encodeURIComponent(row.name)}`);
       const next = new URLSearchParams();
       const q = searchParams.get("q");
       const filter = searchParams.get("filter");
@@ -314,7 +337,6 @@ export function StudioTablesSidebar() {
       if (row.schema !== defaultSchema) {
         next.set("schema", row.schema);
       } else if (selectedSchema === SCHEMA_ALL) {
-        // Keep all-mode in URL when navigating from All schemas.
         next.set("schema", SCHEMA_ALL);
       }
       const qs = next.toString();
@@ -327,6 +349,7 @@ export function StudioTablesSidebar() {
       searchParams,
       defaultSchema,
       selectedSchema,
+      workspaceTabs,
     ],
   );
 
@@ -484,16 +507,22 @@ function activeTableId(
   pathname: string,
   searchParams: URLSearchParams,
   selectedSchema: string,
+  defaultSchema: string,
 ): string {
   const nameMatch = pathname.match(/^\/p\/[^/]+\/tables\/([^/]+)$/);
   if (nameMatch) {
     try {
       const name = decodeURIComponent(nameMatch[1] ?? "");
-      if (selectedSchema === SCHEMA_ALL) {
-        const schema = searchParams.get("schema");
-        if (schema && schema !== SCHEMA_ALL) return `${schema}.${name}`;
+      const schemaParam = searchParams.get("schema");
+      const activeParam = searchParams.get("active");
+      if (activeParam && activeParam.includes(".")) return activeParam;
+      if (schemaParam && schemaParam !== SCHEMA_ALL) {
+        return `${schemaParam}.${name}`;
       }
-      return name;
+      if (selectedSchema === SCHEMA_ALL) {
+        return `${defaultSchema}.${name}`;
+      }
+      return `${selectedSchema || defaultSchema}.${name}`;
     } catch {
       return "";
     }

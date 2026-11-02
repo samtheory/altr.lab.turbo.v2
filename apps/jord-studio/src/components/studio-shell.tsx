@@ -38,6 +38,10 @@ import {
 } from "@/components/studio-panes";
 import { StudioSideNav } from "@/components/studio-side-nav";
 import { StudioTablesSidebar } from "@/components/studio-tables-sidebar";
+import {
+  WorkspaceTabsProvider,
+  WorkspaceTabsStrip,
+} from "@/components/workspace-tabs";
 import { useProjectSlug } from "@/hooks/use-project-path";
 import type { JordRole } from "@/lib/auth/roles";
 import {
@@ -71,15 +75,17 @@ export function StudioShell({ children, role, bypass }: Props) {
   return (
     <StudioPanesProvider contextual={contextual} key={projectSlug}>
       <InspectorProvider role={role}>
-        <ContextualSidebarMount contextual={contextual} />
-        <StudioShellFrame
-          role={role}
-          bypass={bypass}
-          contextual={contextual}
-          projectSlug={projectSlug}
-        >
-          {children}
-        </StudioShellFrame>
+        <WorkspaceTabsProvider enabled={contextual === "tables"}>
+          <ContextualSidebarMount contextual={contextual} />
+          <StudioShellFrame
+            role={role}
+            bypass={bypass}
+            contextual={contextual}
+            projectSlug={projectSlug}
+          >
+            {children}
+          </StudioShellFrame>
+        </WorkspaceTabsProvider>
       </InspectorProvider>
     </StudioPanesProvider>
   );
@@ -348,6 +354,7 @@ function StudioShellFrame({
 
         {/* Content + inspector overlay region */}
         <div className="relative flex min-w-0 flex-1 flex-col">
+          {contextual === "tables" ? <WorkspaceTabsStrip /> : null}
           <StudioContent>{children}</StudioContent>
 
           {/* Desktop inspector overlays content only — no layout shift */}

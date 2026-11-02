@@ -1,7 +1,20 @@
+import { getTypeEntry, toSql } from "./types/index.js";
+
 /** Whitelisted SQLite column types for additive live save (Studio S2). */
 export const JORD_COLUMN_TYPES = ["TEXT", "INTEGER", "REAL", "BLOB"] as const;
 
 export type JordColumnType = (typeof JORD_COLUMN_TYPES)[number];
+
+/**
+ * Historical CREATE/ADD DDL spellings for the four legacy affinities.
+ * Newer registry ids use {@link toSql} lowercase Postgres forms.
+ */
+const LEGACY_PG_CREATE: Record<string, string> = {
+  text: "TEXT",
+  integer: "INTEGER",
+  real: "DOUBLE PRECISION",
+  blob: "BYTEA",
+};
 
 const IDENT_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
@@ -165,10 +178,12 @@ export function planCreateTable(input: {
 }
 
 export function pgColumnType(type: JordColumnType): string {
-  if (type === "INTEGER") return "INTEGER";
-  if (type === "REAL") return "DOUBLE PRECISION";
-  if (type === "BLOB") return "BYTEA";
-  return "TEXT";
+  const entry = getTypeEntry(type);
+  if (entry && LEGACY_PG_CREATE[entry.id]) {
+    return LEGACY_PG_CREATE[entry.id]!;
+  }
+  const rendered = toSql("postgres", type);
+  return rendered.ok ? rendered.sql : "TEXT";
 }
 
 export function buildCreateTableSql(

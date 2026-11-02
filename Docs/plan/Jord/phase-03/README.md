@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-03 — single-task queue"
 description: "Phase-03 queue: one file per AI task, 63 cards across production ops, Studio v2, storage, auth, table API and security"
 created: 2026-10-27
-updated: 2026-11-01
+updated: 2026-11-02
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-01):** **S0034–S0050 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C in progress ([[done/S0046-three-pane-shell|S0046]] · [[done/S0047-contextual-sidebar|S0047]] · [[done/S0048-right-inspector|S0048]] · [[done/S0049-schema-scoped-introspection|S0049]] · [[done/S0050-schema-picker-ui|S0050]]). Archived under [[done/README|done/]]. Next open card: [[S0051-workspace-tabs|S0051]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-02):** **S0034–S0052 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D started ([[done/S0052-type-registry|S0052]]). Archived under [[done/README|done/]]. Next open card: [[S0053-column-settings|S0053]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -91,13 +91,13 @@ flowchart LR
 | C3 | [[done/S0048-right-inspector\|S0048]] | Right inspector drawer + deep links | **done** 2026-11-01 |
 | C4 | [[done/S0049-schema-scoped-introspection\|S0049]] | Server: schema-scoped introspection/DDL (**unblocks the picker**) | **done** 2026-11-01 |
 | C5 | [[done/S0050-schema-picker-ui\|S0050]] | Schema dropdown → add table → search → list | **done** 2026-11-01 |
-| C6 | [[S0051-workspace-tabs\|S0051]] | Workspace tab bar (one tab per table) | 2.5–3 h |
+| C6 | [[done/S0051-workspace-tabs\|S0051]] | Workspace tab bar (one tab per table) | **done** 2026-11-02 |
 
 ### Wave D — column model ([[../../../feature_list/Jord/todo/jord-F0024-column-model-v2|jord-F0024]])
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| D1 | [[S0052-type-registry\|S0052]] | Dialect type registry + introspection model | 2–3 h |
+| D1 | [[done/S0052-type-registry\|S0052]] | Dialect type registry + introspection model | **done** 2026-11-02 |
 | D2 | [[S0053-column-settings\|S0053]] | Column settings + server-side validation | 2.5–3 h |
 | D3 | [[S0054-id-strategies\|S0054]] | Generated id strategies | 1.5–2 h |
 | D4 | [[S0055-fk-relationship-editor\|S0055]] | FK / relationship editor (cross-schema) | 2.5–3 h |

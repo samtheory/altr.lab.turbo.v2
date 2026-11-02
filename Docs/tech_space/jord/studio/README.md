@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0050 projects + shell + schema picker"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0051 projects + shell + schema picker + workspace tabs"
 created: 2026-10-24
-updated: 2026-11-01T18:00
+updated: 2026-11-02
 tags:
   - tech-space
   - jord
@@ -167,6 +167,21 @@ Data sidebar order is fixed: **schema dropdown → + Add new table → search/fi
 | Hotkeys | `/` search · `n` add table |
 | Leading slot | `StudioSidebarList` `leading` prop keeps picker + add above search |
 
+### Workspace tabs (S0051)
+
+Tab strip above `StudioContent` when the Data section is active. Keys are always `schema.table` so same-named tables in different schemas never collide.
+
+| Piece | Fact |
+|-------|------|
+| UI | `WorkspaceTabsStrip` + `WorkspaceTabsProvider` in `src/components/workspace-tabs.tsx` — Apolyx `Button` / `DropdownMenu` / `Badge`; drag reorder; overflow menu |
+| Open | Sidebar (or Tables index) click → `openTab`; existing key focuses instead of duplicating |
+| Close | Per-tab × · overflow Close/Close others/Close all · `Ctrl/Cmd+W` · `Alt+←/→` reorder |
+| URL | `?tabs=public.users,auth.users&active=public.users` + path `/tables/[name]` for the active table; `schema` query when not the dialect default |
+| Persist | `localStorage` `jord.studio.tabs:v1:<projectSlug>` — order, active, per-tab `{ offset, scrollY, filters, columnOrder, columnWidths, inspector }` |
+| Missing | 404 on table info/rows → “Table missing” panel with Close tab |
+| Scope | Tables only (records / SQL / functions stay out of the strip) |
+| Motion | &lt;150 ms transitions; `useReducedMotion` disables |
+
 ### Right inspector (S0048)
 
 One host overlays the **content pane only** (primary nav stays clear). State is URL-addressable; ESC / backdrop / browser Back close it.
@@ -183,4 +198,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Schema server scope [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · picker UI [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]]. Next shell card: [[../../../plan/Jord/phase-03/S0051-workspace-tabs|S0051]] workspace tabs.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Schema server scope [[../../../plan/Jord/phase-03/done/S0049-schema-scoped-introspection|S0049]] · picker UI [[../../../plan/Jord/phase-03/done/S0050-schema-picker-ui|S0050]] · workspace tabs [[../../../plan/Jord/phase-03/done/S0051-workspace-tabs|S0051]]. Wave C (shell) closed; type registry [[../../../plan/Jord/phase-03/done/S0052-type-registry|S0052]]. Next: [[../../../plan/Jord/phase-03/S0053-column-settings|S0053]] column settings.

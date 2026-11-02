@@ -17,18 +17,33 @@ import {
   TableRow,
 } from "@altr/apolyx";
 
+import { useWorkspaceTabsOptional } from "@/components/workspace-tabs";
 import { useProjectHref } from "@/hooks/use-project-path";
-import { SCHEMA_ALL } from "@/lib/studio-schema-prefs";
+import { SCHEMA_ALL, fallbackDefaultSchema } from "@/lib/studio-schema-prefs";
 
 type ApiError = { message?: string };
 
 export function TableIndex() {
   const hrefFor = useProjectHref();
   const searchParams = useSearchParams();
+  const workspaceTabs = useWorkspaceTabsOptional();
   const schemaParam = searchParams.get("schema");
   const [tables, setTables] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const openTable = (name: string) => {
+    if (name === "records") return;
+    const schema =
+      schemaParam && schemaParam !== SCHEMA_ALL
+        ? schemaParam
+        : (workspaceTabs?.defaultSchema ??
+          fallbackDefaultSchema(["public", "main"]));
+    if (workspaceTabs?.enabled) {
+      workspaceTabs.openTab({ schema, table: name });
+      return;
+    }
+  };
 
   useEffect(() => {
     startTransition(async () => {
@@ -124,9 +139,20 @@ export function TableIndex() {
                 <TableRow key={name}>
                   <TableCell className="font-mono text-xs">{name}</TableCell>
                   <TableCell>
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={href}>Open</Link>
-                    </Button>
+                    {name === "records" || !workspaceTabs?.enabled ? (
+                      <Button asChild size="sm" variant="outline">
+                        <Link href={href}>Open</Link>
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openTable(name)}
+                      >
+                        Open
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               );

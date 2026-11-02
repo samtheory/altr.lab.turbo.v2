@@ -4,9 +4,11 @@ import type { LibSQLDatabase } from "drizzle-orm/libsql";
 import type { JordColumnType } from "./schema/ddl.js";
 import type { schema } from "./schema/records.js";
 import type { JordSchemaInfo } from "./schema/schema-scope.js";
+import type { LogicalColumnType } from "./schema/types/types.js";
 
 export type { JordColumnType } from "./schema/ddl.js";
 export type { JordSchemaInfo } from "./schema/schema-scope.js";
+export type { LogicalColumnType } from "./schema/types/types.js";
 
 /** Outcome of validating a `?schema=` value against the live schema list. */
 export type ResolveSchemaResult =
@@ -16,10 +18,13 @@ export type ResolveSchemaResult =
 /** PRAGMA table_info–shaped column (Studio schema browser). */
 export type JordColumnInfo = {
   name: string;
+  /** Raw SQL type from the dialect (unchanged). */
   type: string;
   notnull: boolean;
   pk: boolean;
   dflt_value: string | null;
+  /** Registry mapping (S0052); omitted only by older callers. */
+  logicalType?: LogicalColumnType;
 };
 
 export type JordTableInfo = {
