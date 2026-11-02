@@ -3,7 +3,12 @@
 export const INSPECTOR_PARAM = "inspector";
 
 /** Query keys kept as inspector props (deep-linkable). */
-export const INSPECTOR_PROP_KEYS = ["recordId", "table", "schema"] as const;
+export const INSPECTOR_PROP_KEYS = [
+  "recordId",
+  "table",
+  "schema",
+  "seedPk",
+] as const;
 
 export type InspectorPropKey = (typeof INSPECTOR_PROP_KEYS)[number];
 
@@ -12,6 +17,7 @@ export const INSPECTOR_IDS = [
   "create-table",
   "record-detail",
   "migrate",
+  "insert-table-row",
 ] as const;
 
 export type InspectorId = (typeof INSPECTOR_IDS)[number];
@@ -41,6 +47,7 @@ export function parseInspectorSearch(
     if (v != null && v !== "") props[key] = v;
   }
   if (raw === "record-detail" && !props.recordId) return null;
+  if (raw === "insert-table-row" && !props.table) return null;
   return { id: raw, props };
 }
 
@@ -81,5 +88,7 @@ export function inspectorTitle(id: InspectorId): string {
       return "Edit row";
     case "migrate":
       return "Migrate wizard";
+    case "insert-table-row":
+      return "Insert table row";
   }
 }

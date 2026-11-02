@@ -8,6 +8,8 @@ function rowsQuery(url: URL): string {
   const qs = new URLSearchParams({ limit, offset });
   const schema = url.searchParams.get("schema");
   if (schema) qs.set("schema", schema);
+  const total = url.searchParams.get("total");
+  if (total) qs.set("total", total);
   return qs.toString();
 }
 

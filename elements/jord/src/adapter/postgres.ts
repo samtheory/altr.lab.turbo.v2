@@ -1803,6 +1803,17 @@ export class PostgresAdapter implements JordDriverPort {
     const where = input.rowScope
       ? ` WHERE ${rowScopeSql(input.rowScope, columns, args, (n) => `$${n}`)}`
       : "";
+    let total: number | undefined;
+    if (input.includeTotal) {
+      const countArgs = args.slice();
+      const countResult = await this.exec(
+        `SELECT COUNT(*)::bigint AS n FROM ${quoteQualified(scoped.schema, input.table)}${where}`,
+        countArgs,
+      );
+      const raw = countResult.rows[0]?.n;
+      total = typeof raw === "bigint" ? Number(raw) : Number(raw ?? 0);
+      if (!Number.isFinite(total)) total = 0;
+    }
     args.push(window.limit, window.offset);
     const result = await this.exec(
       `SELECT * FROM ${quoteQualified(scoped.schema, input.table)}${where} LIMIT $${args.length - 1} OFFSET $${args.length}`,
@@ -1815,7 +1826,14 @@ export class PostgresAdapter implements JordDriverPort {
       }
       return out;
     });
-    return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
+    return {
+      ok: true,
+      columns,
+      rows,
+      limit: window.limit,
+      offset: window.offset,
+      ...(total !== undefined ? { total } : {}),
+    };
   }
 
   async insertTableRow(input: InsertTableRowInput): Promise<MutateTableRowResult> {

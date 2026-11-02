@@ -30,6 +30,8 @@ Persist view state with the controlled `columnLayout`, `filters`, `sort`, and `q
 
 When the column set grows, `mergeColumnLayout` appends new ids without wiping widths, pins, or hidden state.
 
+Row multi-select is opt-in: set `selectionMode="multi"` with controlled `selectedRowIds` / `onSelectedRowIdsChange`. The leading checkbox column includes select-all for the currently processed page; body rows are memoised so selection updates do not remount every cell.
+
 ## Accessibility
 
 - Root uses `role="grid"` with `aria-rowcount` / `aria-colcount`.
@@ -51,4 +53,7 @@ When the column set grows, `mergeColumnLayout` appends new ids without wiping wi
   { prop: "height", type: "number | string", default: "420", description: "Viewport height for virtualization." },
   { prop: "loading", type: "boolean", description: "Skeleton when there are no rows yet." },
   { prop: "showFilterBuilder", type: "boolean", default: "true", description: "Toolbar filter chips + quick search." },
+  { prop: "selectionMode", type: '"none" | "multi"', default: '"none"', description: "Leading checkbox column for multi-select." },
+  { prop: "selectedRowIds", type: "string[]", description: "Controlled selection (row ids from getRowId)." },
+  { prop: "onSelectedRowIdsChange", type: "(ids: string[]) => void", description: "Selection change handler." },
 ]} />

@@ -104,7 +104,7 @@ Every `/schema/tables*` route and `/api/v1/:table` accepts `?schema=` (default =
 | `GET` | `/schema/schemas` | authenticated | `{ schemas: [{ name, readOnly }] }` |
 | `GET` | `/schema/tables?schema=` | authenticated | `{ tables }` in that schema |
 | `GET` | `/schema/tables/:name?schema=` | authenticated | columns (+ `schema`), or 404 |
-| `GET` | `/schema/tables/:name/rows?schema=` | authenticated | 1–100 rows, read-only |
+| `GET` | `/schema/tables/:name/rows?schema=&total=1` | authenticated | 1–100 rows; optional `total=1` adds exact `COUNT(*)` |
 | `POST` | `/schema/tables` | admin | `{ name, columns, schema?, foreignKeys? }` (+ `?schema=`) |
 | `POST` | `/schema/tables/:name/columns` | admin | `{ name, type, settings?, confirm? }` ADD COLUMN |
 | `PATCH` | `/schema/tables/:name` | admin | rename `{ name }` |

@@ -123,4 +123,53 @@ describe("DataGrid", () => {
     expect(screen.getByText("Grace")).toBeTruthy();
     expect(screen.queryByText("Ada")).toBeNull();
   });
+
+  it("supports multi-select and select-all on the loaded page", async () => {
+    const user = userEvent.setup();
+    const onSelectedRowIdsChange = vi.fn();
+    render(
+      <DataGrid
+        columns={columns}
+        rows={rows}
+        getRowId={(r) => r.id}
+        height={240}
+        selectionMode="multi"
+        selectedRowIds={[]}
+        onSelectedRowIdsChange={onSelectedRowIdsChange}
+        showFilterBuilder={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("checkbox", { name: "Select row 1" }));
+    expect(onSelectedRowIdsChange).toHaveBeenCalledWith(["1"]);
+
+    await user.click(
+      screen.getByRole("checkbox", { name: "Select all rows on this page" }),
+    );
+    expect(onSelectedRowIdsChange).toHaveBeenCalledWith(["1", "2", "3"]);
+  });
+
+  it("virtualizes a 10k-row body so only a window is mounted", () => {
+    const many = Array.from({ length: 10_000 }, (_, i) => ({
+      id: String(i + 1),
+      name: `N${i + 1}`,
+      age: i,
+      active: true,
+    }));
+    render(
+      <DataGrid
+        columns={columns}
+        rows={many}
+        getRowId={(r) => r.id}
+        height={240}
+        showFilterBuilder={false}
+      />,
+    );
+    const mounted = document.querySelectorAll("[data-row-id]").length;
+    expect(mounted).toBeGreaterThan(0);
+    expect(mounted).toBeLessThan(200);
+    expect(screen.getByRole("grid").getAttribute("aria-rowcount")).toBe(
+      "10000",
+    );
+  });
 });

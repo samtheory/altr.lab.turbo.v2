@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0056 projects + shell + DataGrid tables + saved views"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0057 projects + shell + DataGrid tables + row ops"
 created: 2026-10-24
 updated: 2026-11-02
 tags:
@@ -195,7 +195,21 @@ Tables `[name]` renders through `@altr/apolyx` **DataGrid** (not a local grid). 
 | Tab persist | Filter/sort/layout/quickSearch written into workspace tab state (survives tab switch + reload) |
 | Named views | `localStorage` `jord.studio.table-views:v1:<projectSlug>` keyed by `schema.table` — create / rename / update / delete / set default; default applied on tab open |
 | Column merge | New columns from DDL append via `mergeColumnLayout` without wiping widths/pins/hidden |
-| Out of scope here | Bulk row ops / keyset paging → [[../../../plan/Jord/phase-03/S0057-row-ops-pagination\|S0057]] · inline edit + live merge → [[../../../plan/Jord/phase-03/S0058-inline-edit-live-sync\|S0058]] |
+| Out of scope here | Bulk row ops → [[../../../plan/Jord/phase-03/done/S0057-row-ops-pagination\|S0057]] · inline edit + live merge → [[../../../plan/Jord/phase-03/S0058-inline-edit-live-sync\|S0058]] |
+
+### Tables row ops + fetch-more (S0057)
+
+| Piece | Fact |
+|-------|------|
+| Insert | Inspector `insert-table-row` — form from column model (defaults, generated-id blank, validation messages) |
+| Duplicate | Seeds via ephemeral `putRowSeed` + `seedPk` prop; PK cleared for a fresh insert |
+| Delete | Confirm dialog names the row; waits for write-queue ack before refresh |
+| Multi-select | Apolyx DataGrid `selectionMode="multi"` + select-all on loaded page |
+| Bulk delete | Chunked (`BULK_DELETE_CHUNK=25`); progress + per-row failure list; successes kept |
+| Paging | Offset fetch-more append; page size 25/50/100; `?total=1` returns exact `COUNT(*)`; jump-to-end when total known |
+| Empty | Primary **Insert row** when `total === 0` |
+| Perf | Kit virtualization: 10k-row test mounts &lt; 200 DOM rows |
+| Helpers | `lib/studio-row-ops.ts` · `lib/studio-row-seed.ts` |
 
 ### Right inspector (S0048)
 
@@ -205,7 +219,7 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 |-------|------|
 | API | `InspectorProvider` + `useInspector()` in `inspector-host.tsx` — `open(id, props)`, `close()` |
 | URL | `?inspector=<id>` plus optional `recordId` / `table` / `schema`; helpers in `lib/studio-inspector.ts` |
-| Panels | `create-record` · `create-table` · `record-detail` · `migrate` (policies land in later cards) |
+| Panels | `create-record` · `create-table` · `record-detail` · `migrate` · `insert-table-row` (policies land in later cards) |
 | Frame | `StudioInspector` — FocusScope trap + restore, dim+blur backdrop, ~420–520 px, &lt;200 ms motion, `useReducedMotion` |
 | Chrome | Sticky title + close; `InspectorFooter` for primary actions |
 | Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate` |
@@ -213,4 +227,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Monaco, multi-tenant hosting, Artemis screens inside Studio. Wave C (shell) + wave D (column model) closed. Wave E tables: [[../../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]] done; next [[../../../plan/Jord/phase-03/S0057-row-ops-pagination|S0057]] row ops + paging.
+Monaco, multi-tenant hosting, Artemis screens inside Studio. Wave C (shell) + wave D (column model) closed. Wave E tables: [[../../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]] + [[../../../plan/Jord/phase-03/done/S0057-row-ops-pagination|S0057]] done; next [[../../../plan/Jord/phase-03/S0058-inline-edit-live-sync|S0058]] inline edit + live merge.

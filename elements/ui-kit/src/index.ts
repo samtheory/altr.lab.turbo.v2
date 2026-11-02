@@ -161,6 +161,7 @@ export {
   type DataGridPin,
   type DataGridSort,
   type DataGridSortDirection,
+  type DataGridSelectionMode,
 } from "./components/ui/data-grid";
 export {
   List,

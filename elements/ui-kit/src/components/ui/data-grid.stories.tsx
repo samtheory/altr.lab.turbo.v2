@@ -94,3 +94,25 @@ export const TenThousand: Story = {
     );
   },
 };
+
+export const MultiSelect: Story = {
+  render: function MultiSelectStory() {
+    const [selected, setSelected] = React.useState<string[]>([]);
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">
+          Selected: {selected.length || "none"}
+        </p>
+        <DataGrid
+          columns={columns}
+          rows={people.slice(0, 40)}
+          getRowId={(r) => r.id}
+          height={360}
+          selectionMode="multi"
+          selectedRowIds={selected}
+          onSelectedRowIdsChange={setSelected}
+        />
+      </div>
+    );
+  },
+};

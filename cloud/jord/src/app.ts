@@ -967,11 +967,14 @@ export function createJordApp(deps: JordAppDeps) {
     }
     const limit = Number(c.req.query("limit") ?? "50");
     const offset = Number(c.req.query("offset") ?? "0");
+    const includeTotal =
+      c.req.query("total") === "1" || c.req.query("total") === "true";
     const result = await deps.jord.listTableRows({
       table: name,
       schema,
       limit: Number.isFinite(limit) ? limit : 50,
       offset: Number.isFinite(offset) ? offset : 0,
+      includeTotal,
       rowScope: principal.kind === "service" ? undefined : decision.scope,
     });
     if (!result.ok) {

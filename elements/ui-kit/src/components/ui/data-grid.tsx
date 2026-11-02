@@ -32,6 +32,7 @@ import {
   type DataGridPin,
   type DataGridSort,
 } from "./data-grid-types";
+import { Checkbox } from "./checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -48,6 +49,9 @@ const DEFAULT_HEADER_HEIGHT = 40;
 const OVERSCAN = 8;
 const DEFAULT_COL_WIDTH = 140;
 const MIN_COL_WIDTH = 72;
+const SELECTION_COL_WIDTH = 40;
+
+export type DataGridSelectionMode = "none" | "multi";
 
 export type DataGridProps<T> = {
   columns: DataGridColumnDef<T>[];
@@ -84,6 +88,13 @@ export type DataGridProps<T> = {
   /** Extra cells rendered after data columns (e.g. row actions). */
   renderRowActions?: (row: T) => React.ReactNode;
   actionsHeader?: React.ReactNode;
+  /** Width of the actions column when `renderRowActions` is set. */
+  actionsWidth?: number;
+  /** Row multi-select via a leading checkbox column. */
+  selectionMode?: DataGridSelectionMode;
+  selectedRowIds?: readonly string[];
+  defaultSelectedRowIds?: readonly string[];
+  onSelectedRowIdsChange?: (ids: string[]) => void;
 };
 
 function resolveWidth(
@@ -141,6 +152,130 @@ function stickyLeftOffsets(
   return out;
 }
 
+function normalizeSelectedIds(
+  ids: readonly string[] | undefined,
+): string[] {
+  return ids ? [...ids] : [];
+}
+
+type DataGridBodyRowProps<T> = {
+  id: string;
+  index: number;
+  rowHeight: number;
+  density: "compact" | "default";
+  striped: boolean;
+  clickable: boolean;
+  selected: boolean;
+  selectionEnabled: boolean;
+  onToggleSelected?: (next: boolean) => void;
+  onRowClick?: () => void;
+  visible: DataGridColumnDef<T>[];
+  layoutWidths: Record<string, number>;
+  layoutPins: Record<string, DataGridPin>;
+  leftOffsets: Record<string, number>;
+  row: T;
+  renderRowActions?: (row: T) => React.ReactNode;
+  actionsWidth: number;
+};
+
+const DataGridBodyRow = React.memo(function DataGridBodyRow<T>({
+  id,
+  index,
+  rowHeight,
+  density,
+  striped,
+  clickable,
+  selected,
+  selectionEnabled,
+  onToggleSelected,
+  onRowClick,
+  visible,
+  layoutWidths,
+  layoutPins,
+  leftOffsets,
+  row,
+  renderRowActions,
+  actionsWidth,
+}: DataGridBodyRowProps<T>) {
+  return (
+    <div
+      role="row"
+      aria-rowindex={index + 2}
+      aria-selected={selectionEnabled ? selected : undefined}
+      data-row-id={id}
+      data-selected={selected ? "" : undefined}
+      className={cn(
+        "flex border-b border-border",
+        striped && "bg-muted/30",
+        selected && "bg-accent/35",
+        clickable && "cursor-pointer hover:bg-accent/40",
+      )}
+      style={{ height: rowHeight }}
+      onClick={onRowClick}
+    >
+      {selectionEnabled ? (
+        <div
+          role="gridcell"
+          aria-colindex={1}
+          className="flex shrink-0 items-center justify-center border-r border-border px-1"
+          style={{ width: SELECTION_COL_WIDTH }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            checked={selected}
+            onCheckedChange={(value) =>
+              onToggleSelected?.(value === true)
+            }
+            aria-label={`Select row ${id}`}
+          />
+        </div>
+      ) : null}
+      {visible.map((col, colIndex) => {
+        const width = resolveWidth(
+          col as DataGridColumnDef<unknown>,
+          layoutWidths,
+        );
+        const pin = layoutPins[col.id];
+        const value = getCellValue(row, col);
+        return (
+          <div
+            key={col.id}
+            role="gridcell"
+            aria-colindex={colIndex + 1 + (selectionEnabled ? 1 : 0)}
+            className={cn(
+              "flex shrink-0 items-center truncate border-r border-border px-2 font-mono text-xs",
+              pin === "left" && "z-10 bg-background",
+              pin === "right" && "z-10 bg-background",
+              density === "compact" && "text-[11px]",
+            )}
+            style={{
+              width,
+              left: pin === "left" ? leftOffsets[col.id] : undefined,
+              position: pin ? "sticky" : undefined,
+              right: pin === "right" ? 0 : undefined,
+            }}
+            title={formatCellDisplay(value)}
+          >
+            {col.render
+              ? col.render(value, row, index)
+              : formatCellDisplay(value)}
+          </div>
+        );
+      })}
+      {renderRowActions ? (
+        <div
+          role="gridcell"
+          className="flex shrink-0 items-center gap-1 px-2"
+          style={{ width: actionsWidth }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {renderRowActions(row)}
+        </div>
+      ) : null}
+    </div>
+  );
+}) as <T>(props: DataGridBodyRowProps<T>) => React.ReactElement;
+
 export function DataGrid<T>({
   columns,
   rows,
@@ -172,6 +307,11 @@ export function DataGrid<T>({
   onRowClick,
   renderRowActions,
   actionsHeader = "Actions",
+  actionsWidth = 120,
+  selectionMode = "none",
+  selectedRowIds: selectedRowIdsProp,
+  defaultSelectedRowIds = [],
+  onSelectedRowIdsChange,
 }: DataGridProps<T>) {
   const columnIds = React.useMemo(() => columns.map((c) => c.id), [columns]);
   const [layout, setLayout] = useControllableState<DataGridColumnLayout>({
@@ -201,6 +341,20 @@ export function DataGrid<T>({
     defaultValue: defaultQuickSearch,
     onChange: onQuickSearchChange,
   });
+  const [selectedRowIds, setSelectedRowIds] = useControllableState<string[]>({
+    value:
+      selectedRowIdsProp === undefined
+        ? undefined
+        : normalizeSelectedIds(selectedRowIdsProp),
+    defaultValue: normalizeSelectedIds(defaultSelectedRowIds),
+    onChange: onSelectedRowIdsChange,
+  });
+
+  const selectionEnabled = selectionMode === "multi";
+  const selectedSet = React.useMemo(
+    () => new Set(selectedRowIds),
+    [selectedRowIds],
+  );
 
   const processed = React.useMemo(() => {
     if (!clientProcess) return rows;
@@ -210,6 +364,52 @@ export function DataGrid<T>({
       sort,
     });
   }, [clientProcess, rows, columns, filters, quickSearch, sort]);
+
+  const processedIds = React.useMemo(
+    () => processed.map((row) => getRowId(row)),
+    [processed, getRowId],
+  );
+
+  const pageSelectionState = React.useMemo(() => {
+    if (!selectionEnabled || processedIds.length === 0) {
+      return false as boolean | "indeterminate";
+    }
+    let selectedCount = 0;
+    for (const id of processedIds) {
+      if (selectedSet.has(id)) selectedCount += 1;
+    }
+    if (selectedCount === 0) return false;
+    if (selectedCount === processedIds.length) return true;
+    return "indeterminate";
+  }, [selectionEnabled, processedIds, selectedSet]);
+
+  const toggleRowSelected = React.useCallback(
+    (id: string, next: boolean) => {
+      setSelectedRowIds((prev) => {
+        const set = new Set(prev);
+        if (next) set.add(id);
+        else set.delete(id);
+        return [...set];
+      });
+    },
+    [setSelectedRowIds],
+  );
+
+  const toggleSelectAllProcessed = React.useCallback(
+    (next: boolean | "indeterminate") => {
+      const checked = next === true;
+      setSelectedRowIds((prev) => {
+        const set = new Set(prev);
+        if (checked) {
+          for (const id of processedIds) set.add(id);
+        } else {
+          for (const id of processedIds) set.delete(id);
+        }
+        return [...set];
+      });
+    },
+    [processedIds, setSelectedRowIds],
+  );
 
   const visible = React.useMemo(
     () =>
@@ -338,7 +538,14 @@ export function DataGrid<T>({
     visible.reduce(
       (sum, col) => sum + resolveWidth(col as DataGridColumnDef<unknown>, layout.widths),
       0,
-    ) + (renderRowActions ? 120 : 0);
+    ) +
+    (selectionEnabled ? SELECTION_COL_WIDTH : 0) +
+    (renderRowActions ? actionsWidth : 0);
+
+  const colCount =
+    visible.length +
+    (selectionEnabled ? 1 : 0) +
+    (renderRowActions ? 1 : 0);
 
   return (
     <div data-slot="data-grid" className={cn("flex flex-col gap-3", className)}>
@@ -406,7 +613,7 @@ export function DataGrid<T>({
         ref={scrollRef}
         role="grid"
         aria-rowcount={processed.length}
-        aria-colcount={visible.length + (renderRowActions ? 1 : 0)}
+        aria-colcount={colCount}
         aria-busy={loading || undefined}
         data-density={density}
         className={cn(
@@ -424,6 +631,21 @@ export function DataGrid<T>({
             style={{ height: headerHeight }}
             aria-rowindex={1}
           >
+            {selectionEnabled ? (
+              <div
+                role="columnheader"
+                aria-colindex={1}
+                className="flex shrink-0 items-center justify-center border-r border-border px-1"
+                style={{ width: SELECTION_COL_WIDTH }}
+              >
+                <Checkbox
+                  checked={pageSelectionState}
+                  onCheckedChange={toggleSelectAllProcessed}
+                  aria-label="Select all rows on this page"
+                  disabled={processedIds.length === 0}
+                />
+              </div>
+            ) : null}
             {visible.map((col, colIndex) => {
               const width = resolveWidth(
                 col as DataGridColumnDef<unknown>,
@@ -436,7 +658,7 @@ export function DataGrid<T>({
                 <div
                   key={col.id}
                   role="columnheader"
-                  aria-colindex={colIndex + 1}
+                  aria-colindex={colIndex + 1 + (selectionEnabled ? 1 : 0)}
                   aria-sort={
                     sorted === "asc"
                       ? "ascending"
@@ -551,8 +773,9 @@ export function DataGrid<T>({
             {renderRowActions ? (
               <div
                 role="columnheader"
+                aria-colindex={colCount}
                 className="flex shrink-0 items-center px-2 text-xs font-medium"
-                style={{ width: 120 }}
+                style={{ width: actionsWidth }}
               >
                 {actionsHeader}
               </div>
@@ -582,64 +805,32 @@ export function DataGrid<T>({
               {slice.map((row, i) => {
                 const index = start + i;
                 const id = getRowId(row);
+                const isSelected = selectionEnabled && selectedSet.has(id);
                 return (
-                  <div
+                  <DataGridBodyRow
                     key={id}
-                    role="row"
-                    aria-rowindex={index + 2}
-                    data-row-id={id}
-                    className={cn(
-                      "flex border-b border-border",
-                      index % 2 === 1 && "bg-muted/30",
-                      onRowClick && "cursor-pointer hover:bg-accent/40",
-                    )}
-                    style={{ height: rowHeight }}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  >
-                    {visible.map((col, colIndex) => {
-                      const width = resolveWidth(
-                        col as DataGridColumnDef<unknown>,
-                        layout.widths,
-                      );
-                      const pin = layout.pins[col.id];
-                      const value = getCellValue(row, col);
-                      return (
-                        <div
-                          key={col.id}
-                          role="gridcell"
-                          aria-colindex={colIndex + 1}
-                          className={cn(
-                            "flex shrink-0 items-center truncate border-r border-border px-2 font-mono text-xs",
-                            pin === "left" && "z-10 bg-background",
-                            pin === "right" && "z-10 bg-background",
-                            density === "compact" && "text-[11px]",
-                          )}
-                          style={{
-                            width,
-                            left:
-                              pin === "left" ? leftOffsets[col.id] : undefined,
-                            position: pin ? "sticky" : undefined,
-                            right: pin === "right" ? 0 : undefined,
-                          }}
-                          title={formatCellDisplay(value)}
-                        >
-                          {col.render
-                            ? col.render(value, row, index)
-                            : formatCellDisplay(value)}
-                        </div>
-                      );
-                    })}
-                    {renderRowActions ? (
-                      <div
-                        role="gridcell"
-                        className="flex shrink-0 items-center gap-1 px-2"
-                        style={{ width: 120 }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {renderRowActions(row)}
-                      </div>
-                    ) : null}
-                  </div>
+                    id={id}
+                    index={index}
+                    rowHeight={rowHeight}
+                    density={density}
+                    striped={index % 2 === 1}
+                    clickable={Boolean(onRowClick)}
+                    selected={isSelected}
+                    selectionEnabled={selectionEnabled}
+                    onToggleSelected={
+                      selectionEnabled
+                        ? (next) => toggleRowSelected(id, next)
+                        : undefined
+                    }
+                    onRowClick={onRowClick ? () => onRowClick(row) : undefined}
+                    visible={visible}
+                    layoutWidths={layout.widths}
+                    layoutPins={layout.pins}
+                    leftOffsets={leftOffsets}
+                    row={row}
+                    renderRowActions={renderRowActions}
+                    actionsWidth={actionsWidth}
+                  />
                 );
               })}
               <div style={{ height: padBottom }} aria-hidden />

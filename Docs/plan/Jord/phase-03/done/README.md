@@ -39,3 +39,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0054-id-strategies\|S0054]] | Generated id strategies | 2026-11-02 |
 | [[S0055-fk-relationship-editor\|S0055]] | FK / relationship editor (cross-schema) | 2026-11-02 |
 | [[S0056-grid-column-ops\|S0056]] | DataGrid column ops + filters + saved views | 2026-11-02 |
+| [[S0057-row-ops-pagination\|S0057]] | Row ops, bulk delete, fetch-more paging, 10k virtualization | 2026-11-02 |

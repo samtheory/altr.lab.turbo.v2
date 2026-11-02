@@ -156,6 +156,11 @@ export type ListTableRowsInput = {
    * nothing (fail closed); libSQL has no database RLS to fall back on.
    */
   rowScope?: RowScope;
+  /**
+   * When true, also run `COUNT(*)` (same scope) and return `total`.
+   * Studio paging uses this; keep off for hot paths that only need a window.
+   */
+  includeTotal?: boolean;
 };
 
 export type ListTableRowsResult =
@@ -165,6 +170,8 @@ export type ListTableRowsResult =
       rows: Array<Record<string, TableCell>>;
       limit: number;
       offset: number;
+      /** Present when `includeTotal` was requested. */
+      total?: number;
     }
   | {
       ok: false;

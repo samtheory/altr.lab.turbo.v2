@@ -17,6 +17,7 @@ import {
   InspectorPanelChrome,
   INSPECTOR_TITLE_ID,
 } from "@/components/inspector-chrome";
+import { InsertTableRowForm } from "@/components/insert-table-row-form";
 import { MigrateWizardPanel } from "@/components/migrate-wizard-panel";
 import { RecordDetailInspector } from "@/components/record-detail-inspector";
 import { useStudioPanes } from "@/components/studio-panes";
@@ -94,7 +95,9 @@ export function InspectorProvider({ role, children }: ProviderProps) {
         current &&
         current.id === next.id &&
         current.props.recordId === next.props.recordId &&
-        current.props.table === next.props.table
+        current.props.table === next.props.table &&
+        current.props.seedPk === next.props.seedPk &&
+        current.props.schema === next.props.schema
       ) {
         return;
       }
@@ -197,6 +200,17 @@ function InspectorPanelBody({
           role={role}
           layout="inspector"
           onClose={onClose}
+        />
+      );
+    case "insert-table-row":
+      return (
+        <InsertTableRowForm
+          role={role}
+          table={props.table ?? ""}
+          schema={props.schema ?? "public"}
+          seedPk={props.seedPk}
+          onCancel={onClose}
+          onCreated={onClose}
         />
       );
   }

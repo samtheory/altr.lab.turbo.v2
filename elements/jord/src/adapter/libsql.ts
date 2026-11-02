@@ -1615,6 +1615,17 @@ export class LibSqlAdapter implements JordDriverPort {
     const where = input.rowScope
       ? ` WHERE ${rowScopeSql(input.rowScope, columns, args)}`
       : "";
+    let total: number | undefined;
+    if (input.includeTotal) {
+      const countArgs = args.slice();
+      const countRs = await this.client.execute({
+        sql: `SELECT COUNT(*) AS n FROM ${quoteIdent(input.table)}${where}`,
+        args: countArgs,
+      });
+      const raw = countRs.rows[0]?.n;
+      total = typeof raw === "bigint" ? Number(raw) : Number(raw ?? 0);
+      if (!Number.isFinite(total)) total = 0;
+    }
     args.push(window.limit, window.offset);
     const rs = await this.client.execute({
       sql: `SELECT * FROM ${quoteIdent(input.table)}${where} LIMIT ? OFFSET ?`,
@@ -1627,7 +1638,14 @@ export class LibSqlAdapter implements JordDriverPort {
       }
       return out;
     });
-    return { ok: true, columns, rows, limit: window.limit, offset: window.offset };
+    return {
+      ok: true,
+      columns,
+      rows,
+      limit: window.limit,
+      offset: window.offset,
+      ...(total !== undefined ? { total } : {}),
+    };
   }
 
   async insertTableRow(input: InsertTableRowInput): Promise<MutateTableRowResult> {

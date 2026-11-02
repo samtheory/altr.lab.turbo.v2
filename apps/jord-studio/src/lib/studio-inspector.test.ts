@@ -44,6 +44,24 @@ describe("studio-inspector URL helpers", () => {
     );
   });
 
+  it("requires table for insert-table-row", () => {
+    assert.equal(
+      parseInspectorSearch(new URLSearchParams("inspector=insert-table-row")),
+      null,
+    );
+    assert.deepEqual(
+      parseInspectorSearch(
+        new URLSearchParams(
+          "inspector=insert-table-row&table=notes&schema=app&seedPk=n1",
+        ),
+      ),
+      {
+        id: "insert-table-row",
+        props: { table: "notes", schema: "app", seedPk: "n1" },
+      },
+    );
+  });
+
   it("clears inspector keys while keeping other params", () => {
     const next = withInspectorSearch(
       new URLSearchParams("inspector=migrate&job=1&table=users"),
