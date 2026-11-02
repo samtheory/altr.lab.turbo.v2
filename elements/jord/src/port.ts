@@ -191,7 +191,9 @@ export type TableRowWriteError =
   | "validation"
   | "empty_patch"
   | "pk_exists"
-  | "not_found";
+  | "not_found"
+  /** Conditional `old` values no longer match the row (HTTP 409). */
+  | "conflict";
 
 export type TableRowValues = Record<string, unknown>;
 
@@ -217,6 +219,12 @@ export type UpdateTableRowInput = {
   schema?: string;
   pk: string;
   values: TableRowValues;
+  /**
+   * Optional compare-and-swap snapshot of previous column values.
+   * When set, the UPDATE matches only if those columns still equal `old`
+   * (null-safe). Zero matches → `conflict` (409).
+   */
+  old?: TableRowValues;
 };
 
 export type DeleteTableRowInput = {

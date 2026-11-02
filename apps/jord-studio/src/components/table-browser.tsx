@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -35,6 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
+  toast,
+  type DataGridCellCoord,
   type DataGridColumnDef,
   type DataGridColumnLayout,
   type DataGridFilter,
@@ -46,6 +49,12 @@ import { useWorkspaceTabsOptional } from "@/components/workspace-tabs";
 import { useProjectHref, useProjectSlug } from "@/hooks/use-project-path";
 import { canWriteTableRows, type JordRole } from "@/lib/auth/roles";
 import { sqlTypeToGridType } from "@/lib/studio-grid-columns";
+import {
+  buildCellPatchBody,
+  mergeLiveChangeIntoRows,
+  mergeRefetchPreservingEdit,
+  parseLiveChangeEvent,
+} from "@/lib/studio-inline-edit";
 import {
   bulkDeleteRows,
   clampPageSize,
@@ -178,6 +187,9 @@ export function TableBrowser({ table, role }: Props) {
   const [viewsStore, setViewsStore] = useState<TableViewsStore>({});
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
   const [viewNameDraft, setViewNameDraft] = useState("");
+  const editingCellRef = useRef<DataGridCellCoord | null>(null);
+  const columnsRef = useRef(columns);
+  columnsRef.current = columns;
 
   useEffect(() => {
     if (!tabKey || !workspaceTabs) return;
@@ -295,10 +307,25 @@ export function TableBrowser({ table, role }: Props) {
           setTotal(typeof data.total === "number" ? data.total : null);
           setLastFetchCount(data.rows.length);
           setNextOffset(opts.offset + data.rows.length);
-          setRows((prev) =>
-            opts.mode === "append" ? [...prev, ...data.rows] : data.rows,
-          );
-          if (opts.mode === "replace") setSelectedRowIds([]);
+          const rowPk =
+            (info.columns ?? []).find((col) => col.pk)?.name ?? "id";
+          setRows((prev) => {
+            if (opts.mode === "append") return [...prev, ...data.rows];
+            const editing = editingCellRef.current;
+            if (!editing) return data.rows;
+            return mergeRefetchPreservingEdit({
+              previous: prev,
+              next: data.rows,
+              getRowId: (row) => {
+                const pk = row[rowPk];
+                return pk == null ? `row:${JSON.stringify(row)}` : String(pk);
+              },
+              editing,
+            });
+          });
+          if (opts.mode === "replace" && !editingCellRef.current) {
+            setSelectedRowIds([]);
+          }
           setMissing(false);
           setError(null);
           if (tabKey && workspaceTabs) {
@@ -341,9 +368,48 @@ export function TableBrowser({ table, role }: Props) {
     );
     setLiveState("connecting");
 
-    source.addEventListener("jord.change", () => {
+    source.addEventListener("jord.change", (evt) => {
       setLiveState("live");
-      loadWindow({ offset: 0, mode: "replace" });
+      const message = (evt as MessageEvent).data;
+      const event =
+        typeof message === "string" ? parseLiveChangeEvent(message) : null;
+      if (!event) {
+        loadWindow({ offset: 0, mode: "replace" });
+        return;
+      }
+      const editing = editingCellRef.current;
+      const pkCol = columnsRef.current.find((col) => col.pk)?.name ?? "id";
+      setRows((prev) => {
+        const merged = mergeLiveChangeIntoRows({
+          rows: prev,
+          getRowId: (row) => {
+            const pk = row[pkCol];
+            return pk == null ? `row:${JSON.stringify(row)}` : String(pk);
+          },
+          event,
+          editing,
+        });
+        if (merged.blockedDeleteWhileEditing) {
+          void Promise.resolve().then(() => {
+            toast.warning(
+              "This row was deleted elsewhere. Finish or cancel your edit.",
+            );
+          });
+          return merged.rows;
+        }
+        if (merged.needsRefetch) {
+          void Promise.resolve().then(() => {
+            loadWindow({ offset: 0, mode: "replace" });
+          });
+          return prev;
+        }
+        if (event.op === "delete") {
+          void Promise.resolve().then(() => {
+            setTotal((t) => (t == null ? t : Math.max(0, t - 1)));
+          });
+        }
+        return merged.rows;
+      });
     });
     source.onopen = () => setLiveState("live");
     source.onerror = () => {
@@ -390,15 +456,74 @@ export function TableBrowser({ table, role }: Props) {
     () =>
       columnIds.map((name) => {
         const info = columns.find((c) => c.name === name);
+        const type = sqlTypeToGridType(info?.type ?? "TEXT");
         return {
           id: name,
           header: info?.pk ? `${name} (pk)` : name,
-          type: sqlTypeToGridType(info?.type ?? "TEXT"),
+          type,
           accessor: (row) => row[name],
+          editable: canWrite && !info?.pk,
+          editor:
+            type === "boolean"
+              ? "boolean"
+              : type === "number"
+                ? "number"
+                : type === "date"
+                  ? "date"
+                  : type === "json"
+                    ? "json"
+                    : type === "fk"
+                      ? "fk"
+                      : "text",
         };
       }),
-    [columnIds, columns],
+    [columnIds, columns, canWrite],
   );
+
+  async function commitCellEdit(args: {
+    rowId: string;
+    columnId: string;
+    oldValue: unknown;
+    nextValue: unknown;
+  }) {
+    const body = buildCellPatchBody({
+      columnId: args.columnId,
+      nextValue: args.nextValue,
+      oldValue: args.oldValue,
+    });
+    const sq = schemaQuery(schema);
+    const qs = sq ? `?${sq}` : "";
+    const res = await fetch(
+      `/api/schema/tables/${encodeURIComponent(table)}/rows/${encodeURIComponent(args.rowId)}${qs}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!res.ok) {
+      const payload = (await res.json().catch(() => ({}))) as ApiError & {
+        error?: string;
+      };
+      const message =
+        payload.message ??
+        (res.status === 409
+          ? "Conflict — reload and try again."
+          : `Save failed (${res.status}).`);
+      toast.error(message);
+      if (res.status === 409) {
+        loadWindow({ offset: 0, mode: "replace" });
+      }
+      throw new Error(message);
+    }
+    setRows((prev) =>
+      prev.map((row) => {
+        const pk = row[pkName];
+        if (pk == null || String(pk) !== args.rowId) return row;
+        return { ...row, [args.columnId]: args.nextValue as Cell };
+      }),
+    );
+  }
 
   const viewsBucket = tabKey
     ? getTableViewsBucket(viewsStore, tabKey)
@@ -594,7 +719,7 @@ export function TableBrowser({ table, role }: Props) {
             ) : null}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Row ops · fetch-more paging · virtualized grid
+            Double-click a cell to edit · live merge · fetch-more
             {canWrite ? "." : " · read-only for this role."}
           </p>
         </div>
@@ -862,6 +987,10 @@ export function TableBrowser({ table, role }: Props) {
           selectionMode={canWrite ? "multi" : "none"}
           selectedRowIds={selectedRowIds}
           onSelectedRowIdsChange={setSelectedRowIds}
+          onCellCommit={canWrite ? commitCellEdit : undefined}
+          onEditingCellChange={(cell) => {
+            editingCellRef.current = cell;
+          }}
           loading={isPending && rows.length === 0}
           error={null}
           height={480}

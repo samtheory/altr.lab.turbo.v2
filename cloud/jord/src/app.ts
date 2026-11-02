@@ -452,7 +452,7 @@ function requireGeneratedEnabled(
 }
 
 function tableRowStatus(error: string): 400 | 404 | 409 | 422 {
-  if (error === "pk_exists") return 409;
+  if (error === "pk_exists" || error === "conflict") return 409;
   if (error === "table_not_found" || error === "not_found") return 404;
   if (error === "validation") return 422;
   return 400;
@@ -1055,11 +1055,16 @@ export function createJordApp(deps: JordAppDeps) {
       const pk = c.req.param("pk");
       const body = (await c.req.json().catch(() => null)) as {
         values?: unknown;
+        old?: unknown;
       } | null;
       if (!body || body.values == null || typeof body.values !== "object") {
         throw new HTTPException(400, { message: "values object is required" });
       }
       const values = body.values as Record<string, unknown>;
+      const old =
+        body.old != null && typeof body.old === "object" && !Array.isArray(body.old)
+          ? (body.old as Record<string, unknown>)
+          : undefined;
       const principal = c.get("principal");
       const schema = await resolveSchemaQuery(c);
       const existing = await readUserTableRow(name, pk, schema);
@@ -1087,7 +1092,14 @@ export function createJordApp(deps: JordAppDeps) {
         );
       }
       const result = await writeChangeAs(principal)(
-        () => deps.jord.updateTableRow({ table: name, schema, pk, values }),
+        () =>
+          deps.jord.updateTableRow({
+            table: name,
+            schema,
+            pk,
+            values,
+            ...(old ? { old } : {}),
+          }),
         (updated) =>
           updated.ok
             ? {

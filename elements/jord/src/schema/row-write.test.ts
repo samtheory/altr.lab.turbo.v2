@@ -39,4 +39,19 @@ describe("plan user-table writes", () => {
     expect(empty.ok).toBe(false);
     if (!empty.ok) expect(empty.error).toBe("empty_patch");
   });
+
+  it("plans conditional old predicates for compare-and-swap", () => {
+    const plan = planUpdateRow(
+      notes,
+      "1",
+      { title: "b" },
+      { title: "a", n: null },
+    );
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.setColumns).toEqual(["title"]);
+    expect(plan.args).toEqual(["b"]);
+    expect(plan.oldColumns).toEqual(["title", "n"]);
+    expect(plan.oldArgs).toEqual(["a", null]);
+  });
 });

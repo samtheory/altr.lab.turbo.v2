@@ -14,7 +14,7 @@ tags:
 
 # apolyx-F0008 — DataGrid
 
-> **Status:** in progress · **Id:** `apolyx-F0008` · Index: [[INDEX]] · Consumer: [[../Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] · Column-ops slice shipped with [[../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]]
+> **Status:** in progress · **Id:** `apolyx-F0008` · Index: [[INDEX]] · Consumer: [[../Jord/todo/jord-F0025-tables-workspace-v2|jord-F0025]] · Column-ops [[../../plan/Jord/phase-03/done/S0056-grid-column-ops|S0056]] · row select [[../../plan/Jord/phase-03/done/S0057-row-ops-pagination|S0057]] · **inline edit + external patch** [[../../plan/Jord/phase-03/done/S0058-inline-edit-live-sync|S0058]]
 
 ## What
 

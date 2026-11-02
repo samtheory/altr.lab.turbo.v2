@@ -149,6 +149,39 @@ describe("DataGrid", () => {
     expect(onSelectedRowIdsChange).toHaveBeenCalledWith(["1", "2", "3"]);
   });
 
+  it("double-click commits an editable cell through onCellCommit", async () => {
+    const user = userEvent.setup();
+    const onCellCommit = vi.fn(async () => undefined);
+    const editableColumns: DataGridColumnDef<Row>[] = [
+      { id: "name", header: "Name", type: "text", editable: true },
+      { id: "age", header: "Age", type: "number" },
+    ];
+    render(
+      <DataGrid
+        columns={editableColumns}
+        rows={rows}
+        getRowId={(r) => r.id}
+        height={240}
+        onCellCommit={onCellCommit}
+        showFilterBuilder={false}
+      />,
+    );
+
+    const cell = screen.getByText("Ada");
+    await user.dblClick(cell);
+    const input = screen.getByDisplayValue("Ada");
+    await user.clear(input);
+    await user.type(input, "Augusta{Enter}");
+    expect(onCellCommit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rowId: "1",
+        columnId: "name",
+        oldValue: "Ada",
+        nextValue: "Augusta",
+      }),
+    );
+  });
+
   it("virtualizes a 10k-row body so only a window is mounted", () => {
     const many = Array.from({ length: 10_000 }, (_, i) => ({
       id: String(i + 1),

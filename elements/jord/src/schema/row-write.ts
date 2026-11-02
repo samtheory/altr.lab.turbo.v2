@@ -43,6 +43,9 @@ export type PlannedUpdate = {
   pkValue: SqlValue;
   setColumns: string[];
   args: SqlValue[];
+  /** Null-safe compare-and-swap predicates (column + expected value). */
+  oldColumns: string[];
+  oldArgs: SqlValue[];
 };
 
 export type PlannedDelete = {
@@ -273,6 +276,7 @@ export function planUpdateRow(
   info: JordTableInfo,
   pkRaw: string,
   values: unknown,
+  old?: unknown,
 ): PlannedUpdate | TableRowWriteFailure {
   const gated = gateTable(info.name);
   if (gated) return gated;
@@ -282,6 +286,9 @@ export function planUpdateRow(
   if (!pkValue.ok) return pkValue;
   if (!isValues(values)) {
     return fail("bad_value", "values must be an object");
+  }
+  if (old !== undefined && !isValues(old)) {
+    return fail("bad_value", "old must be an object when provided");
   }
   const stamped = applyAutoUpdateTimestamps(info.columns, values);
   const byName = new Map(info.columns.map((col) => [col.name, col]));
@@ -311,6 +318,23 @@ export function planUpdateRow(
   if (setColumns.length === 0) {
     return fail("empty_patch", "update needs at least one non-key column");
   }
+
+  const oldColumns: string[] = [];
+  const oldArgs: SqlValue[] = [];
+  if (old) {
+    for (const [key, raw] of Object.entries(old)) {
+      if (key === pk.column.name) continue;
+      const col = byName.get(key);
+      if (!col) return fail("unknown_column", `unknown column ${key} in old`);
+      const coerced = coerceColumnValue(col.type, raw);
+      if (!coerced.ok) {
+        return fail("bad_value", `old.${col.name}: ${coerced.message}`);
+      }
+      oldColumns.push(col.name);
+      oldArgs.push(coerced.value);
+    }
+  }
+
   return {
     ok: true,
     table: info.name,
@@ -318,6 +342,8 @@ export function planUpdateRow(
     pkValue: pkValue.value,
     setColumns,
     args,
+    oldColumns,
+    oldArgs,
   };
 }
 

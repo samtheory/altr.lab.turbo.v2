@@ -3,7 +3,7 @@
   "name": "data-grid",
   "type": "ui",
   "title": "DataGrid",
-  "description": "Virtualized data grid with column ops, typed filters, and controlled view state",
+  "description": "Virtualized data grid with column ops, typed filters, inline edit, and controlled view state",
   "files": [
     {
       "path": "src/components/ui/data-grid.tsx",
@@ -20,6 +20,14 @@
     {
       "path": "src/components/ui/data-grid-filter-builder.tsx",
       "target": "data-grid-filter-builder.tsx"
+    },
+    {
+      "path": "src/components/ui/data-grid-edit.ts",
+      "target": "data-grid-edit.ts"
+    },
+    {
+      "path": "src/components/ui/data-grid-cell-editor.tsx",
+      "target": "data-grid-cell-editor.tsx"
     }
   ],
   "dependencies": {
@@ -32,7 +40,9 @@
     "badge",
     "alert",
     "input",
+    "textarea",
     "select",
+    "switch",
     "dropdown-menu",
     "skeleton",
     "use-controllable-state"

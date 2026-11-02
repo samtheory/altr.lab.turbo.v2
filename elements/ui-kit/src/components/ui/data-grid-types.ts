@@ -42,6 +42,20 @@ export type DataGridFilter = {
 
 export type DataGridPin = "left" | "right";
 
+export type DataGridEditorKind =
+  | "text"
+  | "number"
+  | "boolean"
+  | "date"
+  | "select"
+  | "json"
+  | "fk";
+
+export type DataGridEditorOption = {
+  value: string;
+  label: string;
+};
+
 export type DataGridColumnDef<T> = {
   id: string;
   header: React.ReactNode;
@@ -55,6 +69,12 @@ export type DataGridColumnDef<T> = {
   pinnable?: boolean;
   hideable?: boolean;
   resizable?: boolean;
+  /** When true (and parent passes `onCellCommit`), double-click / Enter edits. */
+  editable?: boolean;
+  /** Override editor widget; defaults from `type`. */
+  editor?: DataGridEditorKind;
+  /** Options for `select` / enum-like editors. */
+  editorOptions?: DataGridEditorOption[];
   render?: (value: unknown, row: T, index: number) => React.ReactNode;
 };
 

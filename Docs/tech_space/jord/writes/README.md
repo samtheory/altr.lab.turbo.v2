@@ -42,15 +42,15 @@ Accessors: `pending()` (waiting + in-flight) and `inFlight()` (running). `/healt
 | `PATCH` | `/records/:id` | body includes `version` |
 | `DELETE` | `/records/:id` | write role |
 
-**User tables** (not `records`). Identity is exactly one primary key. No `version` column.
+**User tables** (not `records`). Identity is exactly one primary key. No required `version` column.
 
 | Method | Path | Role |
 |--------|------|------|
 | `POST` | `/schema/tables/:name/rows` | editor+ `{ values }` |
-| `PATCH` | `/schema/tables/:name/rows/:pk` | editor+ |
+| `PATCH` | `/schema/tables/:name/rows/:pk` | editor+ `{ values, old? }` |
 | `DELETE` | `/schema/tables/:name/rows/:pk` | editor+ |
 
-Duplicate primary key → **409** `pk_exists`. Missing row → **404**. Reserved names (`records`, `jord_*`, `sqlite_*`, `pg_*`) → **400**.
+Duplicate primary key → **409** `pk_exists`. Missing row → **404**. Optional `old` is a compare-and-swap snapshot of previous column values (null-safe); mismatch → **409** `conflict` (Studio inline edit / S0058). Reserved names (`records`, `jord_*`, `sqlite_*`, `pg_*`) → **400**.
 
 ## How
 
@@ -79,4 +79,4 @@ A second PATCH that still sends `"version": 1` returns **409**.
 
 ## Not in Jord yet
 
-OCC on arbitrary user tables. A generated API catalog per user table. Direct writes to `data/jord.db` from the browser.
+Full multi-column OCC without an explicit `old` snapshot. A generated API catalog per user table. Direct writes to `data/jord.db` from the browser.

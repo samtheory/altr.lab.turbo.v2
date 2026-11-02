@@ -40,3 +40,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0055-fk-relationship-editor\|S0055]] | FK / relationship editor (cross-schema) | 2026-11-02 |
 | [[S0056-grid-column-ops\|S0056]] | DataGrid column ops + filters + saved views | 2026-11-02 |
 | [[S0057-row-ops-pagination\|S0057]] | Row ops, bulk delete, fetch-more paging, 10k virtualization | 2026-11-02 |
+| [[S0058-inline-edit-live-sync\|S0058]] | Inline double-click edit + optimistic write + live merge | 2026-11-02 |

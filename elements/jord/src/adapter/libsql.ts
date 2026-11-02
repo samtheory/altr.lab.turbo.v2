@@ -1678,16 +1678,30 @@ export class LibSqlAdapter implements JordDriverPort {
   async updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult> {
     const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
-    const plan = planUpdateRow(described.info, input.pk, input.values);
+    const plan = planUpdateRow(described.info, input.pk, input.values, input.old);
     if (!plan.ok) return plan;
     const sets = plan.setColumns
       .map((name) => `${quoteIdent(name)} = ?`)
       .join(", ");
+    const oldPreds = plan.oldColumns
+      .map((name) => `${quoteIdent(name)} IS ?`)
+      .join(" AND ");
+    const where =
+      oldPreds.length > 0
+        ? `${quoteIdent(plan.pkColumn)} = ? AND ${oldPreds}`
+        : `${quoteIdent(plan.pkColumn)} = ?`;
     const result = await this.client.execute({
-      sql: `UPDATE ${quoteIdent(plan.table)} SET ${sets} WHERE ${quoteIdent(plan.pkColumn)} = ?`,
-      args: [...plan.args, plan.pkValue],
+      sql: `UPDATE ${quoteIdent(plan.table)} SET ${sets} WHERE ${where}`,
+      args: [...plan.args, plan.pkValue, ...plan.oldArgs],
     });
     if (result.rowsAffected === 0) {
+      if (plan.oldColumns.length > 0) {
+        return {
+          ok: false,
+          error: "conflict",
+          message: "row changed since edit started",
+        };
+      }
       return { ok: false, error: "not_found", message: "row not found" };
     }
     return { ok: true };

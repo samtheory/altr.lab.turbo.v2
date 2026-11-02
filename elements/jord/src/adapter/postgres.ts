@@ -1867,16 +1867,35 @@ export class PostgresAdapter implements JordDriverPort {
   async updateTableRow(input: UpdateTableRowInput): Promise<MutateTableRowResult> {
     const described = await this.openUserTable(input.table, input.schema);
     if (!described.ok) return described;
-    const plan = planUpdateRow(described.info, input.pk, input.values);
+    const plan = planUpdateRow(described.info, input.pk, input.values, input.old);
     if (!plan.ok) return plan;
     const sets = plan.setColumns
       .map((name, i) => `${quoteIdent(name)} = $${i + 1}`)
       .join(", ");
+    let next = plan.setColumns.length + 1;
+    const pkParam = next;
+    next += 1;
+    const oldPreds = plan.oldColumns.map((name) => {
+      const param = next;
+      next += 1;
+      return `${quoteIdent(name)} IS NOT DISTINCT FROM $${param}`;
+    });
+    const where =
+      oldPreds.length > 0
+        ? `${quoteIdent(plan.pkColumn)} = $${pkParam} AND ${oldPreds.join(" AND ")}`
+        : `${quoteIdent(plan.pkColumn)} = $${pkParam}`;
     const result = await this.exec(
-      `UPDATE ${quoteQualified(described.schema, plan.table)} SET ${sets} WHERE ${quoteIdent(plan.pkColumn)} = $${plan.setColumns.length + 1}`,
-      [...plan.args, plan.pkValue],
+      `UPDATE ${quoteQualified(described.schema, plan.table)} SET ${sets} WHERE ${where}`,
+      [...plan.args, plan.pkValue, ...plan.oldArgs],
     );
     if ((result.rowCount ?? 0) === 0) {
+      if (plan.oldColumns.length > 0) {
+        return {
+          ok: false,
+          error: "conflict",
+          message: "row changed since edit started",
+        };
+      }
       return { ok: false, error: "not_found", message: "row not found" };
     }
     return { ok: true };

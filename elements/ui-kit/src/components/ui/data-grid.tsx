@@ -22,6 +22,14 @@ import {
   getCellValue,
   processDataGridRows,
 } from "./data-grid-filters";
+import { DataGridCellEditor } from "./data-grid-cell-editor";
+import {
+  applyDataGridExternalPatch,
+  dataGridCellKey,
+  type DataGridCellCommitArgs,
+  type DataGridCellCoord,
+  type DataGridExternalPatch,
+} from "./data-grid-edit";
 import { DataGridFilterBuilder } from "./data-grid-filter-builder";
 import {
   emptyColumnLayout,
@@ -95,6 +103,29 @@ export type DataGridProps<T> = {
   selectedRowIds?: readonly string[];
   defaultSelectedRowIds?: readonly string[];
   onSelectedRowIdsChange?: (ids: string[]) => void;
+  /**
+   * Inline cell commit. Return a promise; the grid shows pending until it
+   * settles and reverts the optimistic value on rejection.
+   */
+  onCellCommit?: (args: DataGridCellCommitArgs) => void | Promise<void>;
+  /** Notify when the focused edit cell changes (null when idle). */
+  onEditingCellChange?: (cell: DataGridCellCoord | null) => void;
+  /** Imperative handle for realtime merge helpers. */
+  gridRef?: React.Ref<DataGridHandle>;
+};
+
+export type DataGridHandle = {
+  getEditingCell: () => DataGridCellCoord | null;
+  applyExternalPatch: <R>(
+    rows: R[],
+    getRowId: (row: R) => string,
+    patch: DataGridExternalPatch<R>,
+    opts?: { keepEditingRowOnDelete?: boolean },
+  ) => {
+    rows: R[];
+    skippedEditingCell: boolean;
+    blockedDeleteWhileEditing: boolean;
+  };
 };
 
 function resolveWidth(
@@ -176,6 +207,14 @@ type DataGridBodyRowProps<T> = {
   row: T;
   renderRowActions?: (row: T) => React.ReactNode;
   actionsWidth: number;
+  editingColumnId: string | null;
+  cellStates: Record<string, "pending" | "error">;
+  optimistic: Record<string, unknown>;
+  editingEnabled: boolean;
+  onStartEdit: (columnId: string) => void;
+  onCancelEdit: () => void;
+  onCommitEdit: (columnId: string, next: unknown) => void;
+  onTabEdit: (direction: 1 | -1) => void;
 };
 
 const DataGridBodyRow = React.memo(function DataGridBodyRow<T>({
@@ -196,7 +235,16 @@ const DataGridBodyRow = React.memo(function DataGridBodyRow<T>({
   row,
   renderRowActions,
   actionsWidth,
+  editingColumnId,
+  cellStates,
+  optimistic,
+  editingEnabled,
+  onStartEdit,
+  onCancelEdit,
+  onCommitEdit,
+  onTabEdit,
 }: DataGridBodyRowProps<T>) {
+  const editingThisRow = editingColumnId != null;
   return (
     <div
       role="row"
@@ -208,10 +256,12 @@ const DataGridBodyRow = React.memo(function DataGridBodyRow<T>({
         "flex border-b border-border",
         striped && "bg-muted/30",
         selected && "bg-accent/35",
-        clickable && "cursor-pointer hover:bg-accent/40",
+        clickable && !editingThisRow && "cursor-pointer hover:bg-accent/40",
       )}
-      style={{ height: rowHeight }}
-      onClick={onRowClick}
+      style={{
+        height: editingThisRow ? Math.max(rowHeight, 56) : rowHeight,
+      }}
+      onClick={editingThisRow ? undefined : onRowClick}
     >
       {selectionEnabled ? (
         <div
@@ -236,17 +286,30 @@ const DataGridBodyRow = React.memo(function DataGridBodyRow<T>({
           layoutWidths,
         );
         const pin = layoutPins[col.id];
-        const value = getCellValue(row, col);
+        const key = dataGridCellKey(id, col.id);
+        const rawValue = getCellValue(row, col);
+        const value =
+          Object.prototype.hasOwnProperty.call(optimistic, key)
+            ? optimistic[key]
+            : rawValue;
+        const state = cellStates[key];
+        const isEditing = editingColumnId === col.id;
+        const canEdit = editingEnabled && col.editable === true;
         return (
           <div
             key={col.id}
             role="gridcell"
             aria-colindex={colIndex + 1 + (selectionEnabled ? 1 : 0)}
+            data-cell-state={state ?? "idle"}
             className={cn(
-              "flex shrink-0 items-center truncate border-r border-border px-2 font-mono text-xs",
+              "flex shrink-0 items-center border-r border-border px-2 font-mono text-xs",
+              !isEditing && "truncate",
               pin === "left" && "z-10 bg-background",
               pin === "right" && "z-10 bg-background",
               density === "compact" && "text-[11px]",
+              canEdit && "cursor-text",
+              state === "pending" && "bg-muted/50",
+              state === "error" && "bg-destructive/10 ring-1 ring-inset ring-destructive/40",
             )}
             style={{
               width,
@@ -254,11 +317,36 @@ const DataGridBodyRow = React.memo(function DataGridBodyRow<T>({
               position: pin ? "sticky" : undefined,
               right: pin === "right" ? 0 : undefined,
             }}
-            title={formatCellDisplay(value)}
+            title={isEditing ? undefined : formatCellDisplay(value)}
+            onDoubleClick={(e) => {
+              if (!canEdit) return;
+              e.stopPropagation();
+              onStartEdit(col.id);
+            }}
+            onKeyDown={(e) => {
+              if (!canEdit || isEditing) return;
+              if (e.key === "Enter" || e.key === "F2") {
+                e.preventDefault();
+                onStartEdit(col.id);
+              }
+            }}
+            tabIndex={canEdit && !isEditing ? 0 : undefined}
           >
-            {col.render
-              ? col.render(value, row, index)
-              : formatCellDisplay(value)}
+            {isEditing ? (
+              <DataGridCellEditor
+                type={col.type}
+                editor={col.editor}
+                editorOptions={col.editorOptions}
+                value={rawValue}
+                onCommit={(next) => onCommitEdit(col.id, next)}
+                onCancel={onCancelEdit}
+                onTab={onTabEdit}
+              />
+            ) : col.render ? (
+              col.render(value, row, index)
+            ) : (
+              formatCellDisplay(value)
+            )}
           </div>
         );
       })}
@@ -312,6 +400,9 @@ export function DataGrid<T>({
   selectedRowIds: selectedRowIdsProp,
   defaultSelectedRowIds = [],
   onSelectedRowIdsChange,
+  onCellCommit,
+  onEditingCellChange,
+  gridRef,
 }: DataGridProps<T>) {
   const columnIds = React.useMemo(() => columns.map((c) => c.id), [columns]);
   const [layout, setLayout] = useControllableState<DataGridColumnLayout>({
@@ -354,6 +445,94 @@ export function DataGrid<T>({
   const selectedSet = React.useMemo(
     () => new Set(selectedRowIds),
     [selectedRowIds],
+  );
+
+  const [editingCell, setEditingCell] =
+    React.useState<DataGridCellCoord | null>(null);
+  const [cellStates, setCellStates] = React.useState<
+    Record<string, "pending" | "error">
+  >({});
+  const [optimistic, setOptimistic] = React.useState<Record<string, unknown>>(
+    {},
+  );
+  const editingCellRef = React.useRef(editingCell);
+  editingCellRef.current = editingCell;
+
+  React.useEffect(() => {
+    onEditingCellChange?.(editingCell);
+  }, [editingCell, onEditingCellChange]);
+
+  React.useImperativeHandle(
+    gridRef,
+    () => ({
+      getEditingCell: () => editingCellRef.current,
+      applyExternalPatch: (patchRows, patchGetRowId, patch, opts) =>
+        applyDataGridExternalPatch(patchRows, patchGetRowId, patch, {
+          editing: editingCellRef.current,
+          keepEditingRowOnDelete: opts?.keepEditingRowOnDelete,
+        }),
+    }),
+    [],
+  );
+
+  const editingEnabled = typeof onCellCommit === "function";
+
+  const startEdit = React.useCallback((rowId: string, columnId: string) => {
+    setEditingCell({ rowId, columnId });
+  }, []);
+
+  const cancelEdit = React.useCallback(() => {
+    setEditingCell(null);
+  }, []);
+
+  const commitEdit = React.useCallback(
+    async (rowId: string, columnId: string, nextValue: unknown) => {
+      if (!onCellCommit) return;
+      const row = rows.find((r) => getRowId(r) === rowId);
+      if (!row) {
+        setEditingCell(null);
+        return;
+      }
+      const col = columns.find((c) => c.id === columnId);
+      if (!col) {
+        setEditingCell(null);
+        return;
+      }
+      const oldValue = getCellValue(row, col);
+      const key = dataGridCellKey(rowId, columnId);
+      setEditingCell(null);
+      if (Object.is(oldValue, nextValue)) return;
+      setOptimistic((prev) => ({ ...prev, [key]: nextValue }));
+      setCellStates((prev) => ({ ...prev, [key]: "pending" }));
+      try {
+        await onCellCommit({ rowId, columnId, oldValue, nextValue });
+        setOptimistic((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        setCellStates((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+      } catch {
+        setOptimistic((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        setCellStates((prev) => ({ ...prev, [key]: "error" }));
+        window.setTimeout(() => {
+          setCellStates((prev) => {
+            const next = { ...prev };
+            if (next[key] === "error") delete next[key];
+            return next;
+          });
+        }, 2400);
+      }
+    },
+    [onCellCommit, rows, getRowId, columns],
   );
 
   const processed = React.useMemo(() => {
@@ -415,6 +594,21 @@ export function DataGrid<T>({
     () =>
       pinSortedColumns(visibleOrderedColumns(columns, layout), layout.pins),
     [columns, layout],
+  );
+
+  const tabEdit = React.useCallback(
+    (rowId: string, fromColumnId: string, direction: 1 | -1) => {
+      const editable = visible
+        .filter((c) => c.editable === true)
+        .map((c) => c.id);
+      const idx = editable.indexOf(fromColumnId);
+      if (idx < 0) return;
+      const nextIdx = idx + direction;
+      if (nextIdx < 0 || nextIdx >= editable.length) return;
+      const nextCol = editable[nextIdx]!;
+      void Promise.resolve().then(() => startEdit(rowId, nextCol));
+    },
+    [visible, startEdit],
   );
 
   const leftOffsets = React.useMemo(
@@ -830,6 +1024,21 @@ export function DataGrid<T>({
                     row={row}
                     renderRowActions={renderRowActions}
                     actionsWidth={actionsWidth}
+                    editingColumnId={
+                      editingCell?.rowId === id ? editingCell.columnId : null
+                    }
+                    cellStates={cellStates}
+                    optimistic={optimistic}
+                    editingEnabled={editingEnabled}
+                    onStartEdit={(columnId) => startEdit(id, columnId)}
+                    onCancelEdit={cancelEdit}
+                    onCommitEdit={(columnId, next) => {
+                      void commitEdit(id, columnId, next);
+                    }}
+                    onTabEdit={(direction) => {
+                      if (!editingCell || editingCell.rowId !== id) return;
+                      tabEdit(id, editingCell.columnId, direction);
+                    }}
                   />
                 );
               })}
@@ -863,10 +1072,23 @@ export {
   formatCellDisplay,
   getCellValue,
 } from "./data-grid-filters";
+export {
+  applyDataGridExternalPatch,
+  dataGridCellKey,
+  draftFromCellValue,
+  parseDataGridCellKey,
+  parseTypedCellDraft,
+  type DataGridCellCommitArgs,
+  type DataGridCellCoord,
+  type DataGridCellState,
+  type DataGridExternalPatch,
+} from "./data-grid-edit";
 export type {
   DataGridColumnDef,
   DataGridColumnLayout,
   DataGridColumnType,
+  DataGridEditorKind,
+  DataGridEditorOption,
   DataGridFilter,
   DataGridFilterOperator,
   DataGridPin,

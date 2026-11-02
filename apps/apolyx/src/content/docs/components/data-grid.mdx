@@ -32,6 +32,8 @@ When the column set grows, `mergeColumnLayout` appends new ids without wiping wi
 
 Row multi-select is opt-in: set `selectionMode="multi"` with controlled `selectedRowIds` / `onSelectedRowIdsChange`. The leading checkbox column includes select-all for the currently processed page; body rows are memoised so selection updates do not remount every cell.
 
+Inline editing is opt-in per column (`editable`) with `onCellCommit`. Double-click or Enter opens a typed editor; Enter commits, Esc cancels, Tab moves to the next editable cell. Pending/error cell chrome is non-layout-shifting. Use `applyDataGridExternalPatch` (or `gridRef.applyExternalPatch`) so realtime merges skip the cell under edit.
+
 ## Accessibility
 
 - Root uses `role="grid"` with `aria-rowcount` / `aria-colcount`.

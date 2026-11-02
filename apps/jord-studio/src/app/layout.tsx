@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ApolyxProvider, ApolyxThemeScript } from "@altr/apolyx";
+import { ApolyxProvider, ApolyxThemeScript, Toaster } from "@altr/apolyx";
 
 import { LocalBanner } from "@/components/local-banner";
 import { StudioBlocked } from "@/components/studio-gate";
@@ -49,6 +49,7 @@ export default async function RootLayout({
             ) : (
               <StudioBlocked reason="signed-out" />
             )}
+            <Toaster />
           </div>
         </ApolyxProvider>
       </body>
