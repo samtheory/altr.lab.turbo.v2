@@ -13,7 +13,7 @@ tags:
 
 # S0068 — Studio bucket wizard, object browser and settings
 
-> **Status:** todo · **Depends on** [[S0067-bucket-config-api|S0067]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] · After ship: [[../../../tech_space/jord/studio/README]]
+> **Status:** todo · **Depends on** [[done/S0067-bucket-config-api|S0067]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] · After ship: [[../../../tech_space/jord/studio/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ The **Storage** section becomes bucket-centric: sidebar list with provider badge
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]] (Studio surfaces) |
-| Depends on | [[S0067-bucket-config-api|S0067]] · [[done/S0047-contextual-sidebar|S0047]] · [[S0048-right-inspector|S0048]] |
+| Depends on | [[done/S0067-bucket-config-api|S0067]] · [[done/S0047-contextual-sidebar|S0047]] · [[done/S0048-right-inspector|S0048]] |
 | Code today | `components/storage-panel.tsx` · `app/p/[project]/storage/` · `lib/blobs.ts` · BFF `app/api/blobs/` |
 | UI kit | Apolyx `Field`, `Select`, `Tabs`, `Progress`, `Sheet`, `Table` |
 
