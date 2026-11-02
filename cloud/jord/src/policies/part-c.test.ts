@@ -213,6 +213,14 @@ const MOUNTED: Array<{ method: string; path: string }> = [
   { method: "POST", path: "/admin/projects/abc/rotate-keys" },
   { method: "GET", path: "/admin/projects/abc/layout" },
   { method: "PUT", path: "/admin/projects/abc/layout" },
+  { method: "GET", path: "/admin/buckets" },
+  { method: "POST", path: "/admin/buckets" },
+  { method: "GET", path: "/admin/buckets/abc" },
+  { method: "PATCH", path: "/admin/buckets/abc" },
+  { method: "POST", path: "/admin/buckets/abc/test" },
+  { method: "POST", path: "/admin/buckets/abc/rotate" },
+  { method: "POST", path: "/admin/buckets/abc/pause" },
+  { method: "POST", path: "/admin/buckets/abc/resume" },
 ];
 
 describe.each(TEST_BACKENDS)("S0021-C server enforcement (%s)", (name) => {

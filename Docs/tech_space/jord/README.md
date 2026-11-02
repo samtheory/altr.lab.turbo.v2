@@ -28,7 +28,7 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[jobs/README]] | Scheduler, built-in kinds, log ring |
 | [[policies/README]] | Deny-overrides, user/anon default-deny, `jord_app`, Postgres RLS |
 | [[realtime/README]] | Outbox CDC, SSE / WebSocket, `since` resume |
-| [[blobs/README]] | Local HMAC + S3/R2/MinIO, `jord_buckets` per-bucket providers (S0066), sign-time policy, pending/finalize/GC |
+| [[blobs/README]] | Local HMAC + S3/R2/MinIO, `jord_buckets` + `/admin/buckets` encrypted creds (S0066–S0067), sign-time policy, pending/finalize/GC |
 | [[vectors/README]] | Embeddings, cosine, libSQL engine, pgvector |
 | [[studio/README]] | Control plane, BFF, nav, Apolyx-only · [[studio/ADR-control-plane-store\|control-plane ADR (S0042)]] |
 

@@ -1,4 +1,8 @@
-import type { JordBucketProvider, JordDriverPort } from "@altr/jord";
+import type {
+  JordBucketProvider,
+  JordDriverPort,
+  SecretPort,
+} from "@altr/jord";
 
 import {
   getBucketRow,
@@ -7,6 +11,7 @@ import {
   type BucketLimits,
   type BucketRegistryRow,
 } from "./bucket-registry.js";
+import { credentialsFromBucketRow } from "./bucket-admin.js";
 import {
   createLocalStorageAdapter,
   type LocalStorageAdapterOptions,
@@ -40,6 +45,8 @@ export type BucketResolverOptions = {
   envMaxBytes?: number;
   /** Factory inputs for building ports from registry rows. */
   factory: StorageFactoryInput;
+  /** Unseals per-bucket credentials when present (S0067). */
+  secrets?: SecretPort | null;
   /**
    * Test / advanced override. Return a port to short-circuit adapter creation,
    * or null/undefined to use the default builder.
@@ -67,6 +74,7 @@ function isS3Family(provider: JordBucketProvider): boolean {
 function buildPortFromRow(
   row: BucketRegistryRow,
   factory: StorageFactoryInput,
+  secrets: SecretPort | null | undefined,
 ): JordStoragePort {
   if (!isS3Family(row.provider)) {
     const localOpts: LocalStorageAdapterOptions = {
@@ -90,15 +98,22 @@ function buildPortFromRow(
     );
   }
 
+  const fromRow = credentialsFromBucketRow(row, secrets ?? null);
+
   const s3Opts: S3StorageAdapterOptions = {
     physicalBucket,
     endpoint: row.endpoint ?? factory.s3?.endpoint ?? env.JORD_S3_ENDPOINT?.trim(),
     region:
       row.region ?? factory.s3?.region ?? env.JORD_S3_REGION?.trim() ?? "auto",
     accessKeyId:
-      factory.s3?.accessKeyId ?? env.JORD_S3_ACCESS_KEY_ID?.trim(),
+      fromRow.accessKeyId ??
+      factory.s3?.accessKeyId ??
+      env.JORD_S3_ACCESS_KEY_ID?.trim(),
     secretAccessKey:
-      factory.s3?.secretAccessKey ?? env.JORD_S3_SECRET_ACCESS_KEY?.trim(),
+      fromRow.secretAccessKey ??
+      factory.s3?.secretAccessKey ??
+      env.JORD_S3_SECRET_ACCESS_KEY?.trim(),
+    sessionToken: fromRow.sessionToken,
     forcePathStyle:
       row.forcePathStyle ||
       factory.s3?.forcePathStyle ||
@@ -143,7 +158,7 @@ export function createBucketResolver(
         const overridden = options.createPort?.(row);
         port =
           overridden ??
-          buildPortFromRow(row, options.factory);
+          buildPortFromRow(row, options.factory, options.secrets);
         portCache.set(cacheKey, port);
       }
 

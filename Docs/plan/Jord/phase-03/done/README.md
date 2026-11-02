@@ -49,3 +49,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0064-query-tabs-history\|S0064]] | Query tabs, saved queries, audit history | 2026-11-02 |
 | [[S0065-results-explain-cancel\|S0065]] | Results grid, export, explain, cancel | 2026-11-02 |
 | [[S0066-bucket-registry\|S0066]] | `jord_buckets` registry + per-bucket provider resolution | 2026-11-02 |
+| [[S0067-bucket-config-api\|S0067]] | Bucket config API + encrypted credentials + test | 2026-11-02 |

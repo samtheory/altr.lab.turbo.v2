@@ -30,6 +30,8 @@ export type S3StorageAdapterOptions = {
   region?: string;
   accessKeyId?: string;
   secretAccessKey?: string;
+  /** Optional STS / temporary session token (S0067). */
+  sessionToken?: string;
   forcePathStyle?: boolean;
   /** Physical S3/R2/MinIO bucket name (one bucket; Jord buckets are key prefixes). */
   physicalBucket: string;
@@ -60,6 +62,9 @@ export function createS3ClientFromOptions(
     config.credentials = {
       accessKeyId: options.accessKeyId,
       secretAccessKey: options.secretAccessKey,
+      ...(options.sessionToken
+        ? { sessionToken: options.sessionToken }
+        : {}),
     };
   }
   return new S3Client(config);

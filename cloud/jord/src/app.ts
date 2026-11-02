@@ -104,11 +104,13 @@ import {
   resolveBlobsRoot,
 } from "./blobs/index.js";
 import {
+  createBucketAdminRoutes,
   createBucketResolver,
   createStorageFromEnv,
   resolveHmacSecret,
   resolveMaxBlobBytes,
   resolvePublicBaseUrl,
+  type BucketAdminDeps,
   type CreatePortFromBucketConfig,
   type JordStoragePort,
 } from "./storage/index.js";
@@ -214,6 +216,10 @@ export type JordAppDeps = {
   storage?: JordStoragePort;
   /** Test override: build a port from a jord_buckets row (S0066). */
   createBucketPort?: CreatePortFromBucketConfig;
+  /** Test override: probe port factory for /admin/buckets (S0067). */
+  createBucketProbePort?: BucketAdminDeps["createProbePort"];
+  /** Test override: connection probe for /admin/buckets (S0067). */
+  runBucketProbe?: BucketAdminDeps["runProbe"];
   /** HMAC secret for local signed blob URLs. */
   blobSigningSecret?: string;
   /** Optional process env for CORS / body / rate / idempotency / HTTP log knobs. */
@@ -516,14 +522,6 @@ export function createJordApp(deps: JordAppDeps) {
   const storage = instrumentStorage(
     deps.storage ?? createStorageFromEnv(storageFactory),
   );
-  const bucketResolver = createBucketResolver({
-    jord: deps.jord,
-    envPort: storage,
-    env,
-    envMaxBytes: maxBlobBytes,
-    factory: storageFactory,
-    createPort: deps.createBucketPort,
-  });
   // S0042/S0043: inject secret port when a master key is configured.
   const secrets: SecretPort | null =
     deps.secrets === undefined
@@ -531,6 +529,15 @@ export function createJordApp(deps: JordAppDeps) {
         ? createSecretPortFromEnv(env)
         : null
       : deps.secrets;
+  const bucketResolver = createBucketResolver({
+    jord: deps.jord,
+    envPort: storage,
+    env,
+    envMaxBytes: maxBlobBytes,
+    factory: storageFactory,
+    secrets,
+    createPort: deps.createBucketPort,
+  });
   const enqueueWrite = instrumentWriteQueue(deps.enqueueWrite);
   // Prefer `enqueueWrite` below so jobs get `jord.write` spans (S0039).
   const projectRegistry = {
@@ -539,6 +546,15 @@ export function createJordApp(deps: JordAppDeps) {
     testConnect: deps.projectConnectTest,
     baseline: deps.projectBaseline,
     enqueueWrite,
+  };
+  const bucketAdmin: BucketAdminDeps = {
+    jord: deps.jord,
+    secrets,
+    enqueueWrite,
+    factory: storageFactory,
+    clearPortCache: () => bucketResolver.clearPortCache(),
+    createProbePort: deps.createBucketProbePort,
+    runProbe: deps.runBucketProbe,
   };
 
   app.use("*", createCorsMiddleware(parseCorsOrigins(env)));
@@ -2994,6 +3010,8 @@ export function createJordApp(deps: JordAppDeps) {
 
   // S0043 — project registry (admin-only; secrets required for mutate/list).
   protectedRoutes.route("/admin", createProjectRoutes(projectRegistry));
+  // S0067 — bucket config API (admin-only; secrets for s3-family credentials).
+  protectedRoutes.route("/admin", createBucketAdminRoutes(bucketAdmin));
   // S0045 — Studio project catalog / resolve (any authenticated principal).
   protectedRoutes.route("/studio", createStudioProjectRoutes(projectRegistry));
 
