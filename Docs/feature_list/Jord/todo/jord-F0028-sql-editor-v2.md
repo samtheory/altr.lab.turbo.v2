@@ -3,7 +3,7 @@ title: "jord-F0028 — SQL editor v2"
 feature_id: jord-F0028
 description: "Full-page Monaco SQL workspace: schema-aware completion, tabs, history, results grid, explain, cancel, guarded writes"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-02
 tags:
   - feature
   - jord
@@ -56,7 +56,7 @@ Schema diff/migration authoring from SQL · saved stored procedures UI · query 
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0063-monaco-sql-editor\|S0063]] — Monaco + completion | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0063-monaco-sql-editor\|S0063]] — Monaco + completion | 2–3 h | **done** 2026-11-02 |
 | [[../../../plan/Jord/phase-03/S0064-query-tabs-history\|S0064]] — tabs, saved queries, history | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0065-results-explain-cancel\|S0065]] — results, explain, cancel | 2.5–3 h | todo |
 

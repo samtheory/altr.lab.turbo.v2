@@ -417,4 +417,27 @@ export {
   type ThemeMode,
   type CssVariableToken,
 } from "./theme";
+export {
+  SqlEditor,
+  loadSqlEditorEngine,
+  type SqlEditorProps,
+} from "./components/ui/sql-editor";
+export {
+  buildSqlCompletionItems,
+  fkJoinSuggestions,
+  formatSql,
+  isJoinConditionContext,
+  qualifyTable,
+  sqlFunctions,
+  sqlKeywords,
+  sqlLanguageId,
+  type SqlCompletionColumn,
+  type SqlCompletionForeignKey,
+  type SqlCompletionItem,
+  type SqlCompletionKind,
+  type SqlCompletionModel,
+  type SqlCompletionReference,
+  type SqlCompletionTable,
+  type SqlDialect,
+} from "./lib/sql-language";
 export * from "./primitives";

@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-02):** **S0034–S0062 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Archived under [[done/README|done/]]. Next open card: [[S0063-monaco-sql-editor|S0063]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-02):** **S0034–S0063 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Wave G started ([[done/S0063-monaco-sql-editor|S0063]] / [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]]). Archived under [[done/README|done/]]. Next open card: [[S0064-query-tabs-history|S0064]]. **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0028). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -123,7 +123,7 @@ flowchart LR
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| G1 | [[S0063-monaco-sql-editor\|S0063]] | Monaco + schema-aware completion | 2–3 h |
+| G1 | [[done/S0063-monaco-sql-editor\|S0063]] | Monaco + schema-aware completion | **done** 2026-11-02 |
 | G2 | [[S0064-query-tabs-history\|S0064]] | Query tabs, saved queries, history | 2–3 h |
 | G3 | [[S0065-results-explain-cancel\|S0065]] | Results grid, export, explain, cancel | 2.5–3 h |
 

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
-  Field,
-  FieldTextarea,
+  SqlEditor,
   Switch,
   Table,
   TableBody,
@@ -16,11 +16,38 @@ import {
   TableHeader,
   TableRow,
 } from "@altr/apolyx";
+import type { SqlCompletionModel, SqlDialect } from "@altr/apolyx";
 
-type Props = { role: string };
+import { useProjectSlug } from "@/hooks/use-project-path";
+import type { SchemaTable } from "@/lib/schema";
+import {
+  DEFAULT_SQL,
+  buildStudioSqlModel,
+  inferSqlDialect,
+  mapWithConcurrency,
+  readSqlDraft,
+  sqlDialectForEngine,
+  sqlDialectLabel,
+  studioSqlModelCache,
+  tableDetailPath,
+  writeSqlDraft,
+} from "@/lib/studio-sql-editor";
 
-export function SqlConsolePanel({ role }: Props) {
-  const [sql, setSql] = useState("SELECT 1 AS n");
+type Props = {
+  role: string;
+  /** Registry engine for this project; `env` means the primary server DB. */
+  engine?: string | null;
+};
+
+/** Table details fetched per introspection refresh. */
+const DETAIL_CONCURRENCY = 6;
+/** Refetch the completion model when the window regains focus after this long. */
+const SCHEMA_STALE_MS = 60_000;
+
+export function SqlConsolePanel({ role, engine }: Props) {
+  const projectSlug = useProjectSlug();
+
+  const [sql, setSql] = useState(DEFAULT_SQL);
   const [readOnly, setReadOnly] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -28,6 +55,151 @@ export function SqlConsolePanel({ role }: Props) {
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([]);
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [dialect, setDialect] = useState<SqlDialect>(() =>
+    sqlDialectForEngine(engine),
+  );
+  const [model, setModel] = useState<SqlCompletionModel | null>(() =>
+    studioSqlModelCache.get(projectSlug),
+  );
+  const [schemaState, setSchemaState] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+  const [schemaError, setSchemaError] = useState<string | null>(null);
+  const loadedAtRef = useRef(0);
+
+  // S0063: the draft is per project and lives for the browser session.
+  useEffect(() => {
+    setSql(readSqlDraft(window.sessionStorage, projectSlug, DEFAULT_SQL));
+  }, [projectSlug]);
+
+  const loadSchema = useCallback(
+    async (silent = false) => {
+      if (!silent) setSchemaState("loading");
+      setSchemaError(null);
+      try {
+        const schemasRes = await fetch("/api/schema/schemas", {
+          cache: "no-store",
+        });
+        if (!schemasRes.ok) {
+          throw new Error(`Schema listing failed (${schemasRes.status}).`);
+        }
+        const schemasBody = (await schemasRes.json()) as {
+          schemas?: Array<{ name?: string }>;
+        };
+        const schemaNames = (schemasBody.schemas ?? [])
+          .map((entry) => entry.name)
+          .filter((name): name is string => Boolean(name));
+
+        const nextDialect = inferSqlDialect(engine, schemaNames);
+        setDialect(nextDialect);
+
+        const listings = await Promise.all(
+          schemaNames.map(async (schema) => {
+            const res = await fetch(
+              `/api/schema/tables?schema=${encodeURIComponent(schema)}`,
+              { cache: "no-store" },
+            );
+            if (!res.ok) return [] as Array<{ schema: string; table: string }>;
+            const body = (await res.json()) as { tables?: string[] };
+            return (body.tables ?? []).map((table) => ({ schema, table }));
+          }),
+        );
+        const targets = listings.flat();
+
+        const described = await mapWithConcurrency(
+          targets,
+          DETAIL_CONCURRENCY,
+          async ({ schema, table }): Promise<SchemaTable | null> => {
+            const res = await fetch(tableDetailPath(table, schema), {
+              cache: "no-store",
+            });
+            if (!res.ok) return null;
+            const info = (await res.json()) as SchemaTable;
+            return { ...info, name: table, schema: info.schema ?? schema };
+          },
+        );
+        const tables = described.filter(
+          (table): table is SchemaTable => table !== null,
+        );
+
+        const nextModel = buildStudioSqlModel({
+          dialect: nextDialect,
+          schemas: schemaNames,
+          tables,
+        });
+        studioSqlModelCache.set(projectSlug, nextModel);
+        setModel(nextModel);
+        setSchemaState("ready");
+        loadedAtRef.current = Date.now();
+      } catch (err) {
+        setSchemaError(
+          err instanceof Error ? err.message : "Schema introspection failed",
+        );
+        setSchemaState("error");
+      }
+    },
+    [engine, projectSlug],
+  );
+
+  useEffect(() => {
+    void loadSchema();
+  }, [loadSchema]);
+
+  // Completion stays current after DDL elsewhere without polling.
+  useEffect(() => {
+    const onFocus = () => {
+      if (Date.now() - loadedAtRef.current < SCHEMA_STALE_MS) return;
+      void loadSchema(true);
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [loadSchema]);
+
+  const onSqlChange = useCallback(
+    (next: string) => {
+      setSql(next);
+      writeSqlDraft(window.sessionStorage, projectSlug, next);
+    },
+    [projectSlug],
+  );
+
+  const run = useCallback(() => {
+    const statement = sql.trim();
+    if (!statement) return;
+    startTransition(async () => {
+      setError(null);
+      setNote(null);
+      const res = await fetch("/api/sql/execute", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ sql: statement, readOnly }),
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        message?: string;
+        columns?: string[];
+        rows?: Array<Record<string, unknown>>;
+        elapsedMs?: number;
+        note?: string;
+        truncated?: boolean;
+      };
+      if (!res.ok) {
+        setError(body.message ?? `SQL failed (${res.status})`);
+        setRows([]);
+        setColumns([]);
+        setElapsedMs(null);
+        return;
+      }
+      setColumns(body.columns ?? []);
+      setRows(body.rows ?? []);
+      setElapsedMs(body.elapsedMs ?? null);
+      setNote(
+        body.truncated
+          ? `${body.note ?? ""} (result truncated by the row cap)`.trim()
+          : (body.note ?? null),
+      );
+    });
+  }, [sql, readOnly]);
 
   if (role !== "admin") {
     return (
@@ -43,14 +215,26 @@ export function SqlConsolePanel({ role }: Props) {
   }
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6">
       <div className="space-y-1">
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Database
         </p>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          SQL console
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            SQL editor
+          </h1>
+          <Badge variant="outline">{sqlDialectLabel(dialect)}</Badge>
+          <span className="text-xs text-muted-foreground" role="status">
+            {schemaState === "loading"
+              ? "Loading schema…"
+              : schemaState === "error"
+                ? (schemaError ?? "Schema unavailable")
+                : `${model?.tables.length ?? 0} tables · ${
+                    model?.schemas.length ?? 0
+                  } schemas in completion`}
+          </span>
+        </div>
         <p className="text-sm text-muted-foreground">
           Reads use a dedicated connection with engine-enforced query_only /
           READ ONLY. Writes go through the write queue. Raw SQL bypasses
@@ -60,57 +244,49 @@ export function SqlConsolePanel({ role }: Props) {
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Switch checked={readOnly} onCheckedChange={setReadOnly} id="ro" />
-        <label htmlFor="ro" className="text-sm">
-          Read-only
-        </label>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Switch checked={readOnly} onCheckedChange={setReadOnly} id="ro" />
+          <label htmlFor="ro" className="text-sm">
+            Read-only
+          </label>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => void loadSchema()}
+            disabled={schemaState === "loading"}
+          >
+            Refresh schema
+          </Button>
+          <Button
+            type="button"
+            disabled={isPending || !sql.trim()}
+            onClick={run}
+            aria-keyshortcuts="Control+Enter Meta+Enter"
+          >
+            Run
+          </Button>
+        </div>
       </div>
 
-      <Field label="Statement">
-        <FieldTextarea
-          rows={8}
-          value={sql}
-          onChange={(e) => setSql(e.target.value)}
-          className="font-mono text-sm"
-        />
-      </Field>
+      <SqlEditor
+        value={sql}
+        onChange={onSqlChange}
+        onRun={run}
+        dialect={dialect}
+        model={model}
+        ariaLabel="SQL statement"
+        placeholder="SELECT * FROM …"
+      />
 
-      <div className="flex gap-3">
-        <Button
-          disabled={isPending || !sql.trim()}
-          onClick={() => {
-            startTransition(async () => {
-              setError(null);
-              setNote(null);
-              const res = await fetch("/api/sql/execute", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ sql, readOnly }),
-              });
-              const body = (await res.json().catch(() => ({}))) as {
-                message?: string;
-                columns?: string[];
-                rows?: Array<Record<string, unknown>>;
-                elapsedMs?: number;
-                note?: string;
-              };
-              if (!res.ok) {
-                setError(body.message ?? `SQL failed (${res.status})`);
-                setRows([]);
-                setColumns([]);
-                return;
-              }
-              setColumns(body.columns ?? []);
-              setRows(body.rows ?? []);
-              setElapsedMs(body.elapsedMs ?? null);
-              setNote(body.note ?? null);
-            });
-          }}
-        >
-          Run
-        </Button>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        <kbd className="font-mono">Ctrl/⌘+Enter</kbd> runs ·{" "}
+        <kbd className="font-mono">Shift+Alt+F</kbd> formats ·{" "}
+        <kbd className="font-mono">Ctrl/⌘+F</kbd> finds and replaces.
+      </p>
 
       {error ? (
         <Alert variant="destructive">
@@ -125,7 +301,9 @@ export function SqlConsolePanel({ role }: Props) {
         </Alert>
       ) : null}
       {elapsedMs != null ? (
-        <p className="text-xs text-muted-foreground">{elapsedMs} ms</p>
+        <p className="text-xs text-muted-foreground">
+          {elapsedMs} ms · {rows.length} row{rows.length === 1 ? "" : "s"}
+        </p>
       ) : null}
 
       {columns.length > 0 ? (

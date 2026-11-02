@@ -30,6 +30,7 @@ tags:
 | [[09-s0004-popover]] | Popover parts, click/hover, origin-aware motion (67 registry, 149 tests) |
 | [[10-s0005-product-gate]] | **S0005:** Select, Combobox, Pagination, Scroll Area, Progress, Accordion, Radio Group (74 registry, 163 tests) |
 | **DataGrid (F0008)** | `elements/ui-kit/src/components/ui/data-grid*.tsx` — virtualized body, column ops, typed filter builder, controlled layout; docs `/docs/components/data-grid`; registry `data-grid`. Editing / `onCellCommit` / live patch hooks still open for Jord [[../../plan/Jord/phase-03/S0058-inline-edit-live-sync\|S0058]]. |
+| **SqlEditor (Jord S0063)** | `elements/ui-kit/src/components/ui/sql-editor.tsx` + `src/lib/sql-language.ts` — lazy Monaco (`monaco-editor` kit dependency, chunk-split), dialect `sql`/`pgsql`, completion from a `SqlCompletionModel` (schemas, tables, typed columns, FK joins), `formatSql` formatting provider, `Ctrl/Cmd+Enter` run hook. Consumer keeps its own model per project. As-built: [[../jord/studio/README#sql-editor-s0024--s0063]] · card [[../../plan/Jord/phase-03/done/S0063-monaco-sql-editor\|S0063]]. |
 
 Sprint screenshots (Docs only, not used by apps): `Docs/tech_space/ui-kit/assets/` (`apolyx-s0001` … `apolyx-s0004`, `apolyx-sidebar`, `apolyx-timeline`).
 

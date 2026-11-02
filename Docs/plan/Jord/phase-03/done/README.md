@@ -45,3 +45,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0060-table-relationships-view\|S0060]] | Per-table relationships view (incoming / outgoing) | 2026-11-02 |
 | [[S0061-erd-canvas\|S0061]] | ERD canvas (pan, zoom, drag, relations) | 2026-11-02 |
 | [[S0062-canvas-layout\|S0062]] | Canvas layout persistence, auto-layout, FK drag, export | 2026-11-02 |
+| [[S0063-monaco-sql-editor\|S0063]] | Monaco SQL editor + project-scoped completion | 2026-11-02 |
