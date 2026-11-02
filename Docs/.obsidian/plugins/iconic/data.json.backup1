@@ -36,9 +36,6 @@
     "agents": {
       "icon": "lucide-bot",
       "color": "red"
-    },
-    "plan/Jord/phase-03/S0034-health-probes.md": {
-      "icon": "lucide-check"
     }
   },
   "bookmarkIcons": {},
