@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-03/done — completed task cards"
 description: "Archived phase-03 cards after Done-when + proof. Queue index stays in ../README"
 created: 2026-11-01
-updated: 2026-11-02
+updated: 2026-11-03
 tags:
   - plan
   - jord
@@ -50,3 +50,5 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0065-results-explain-cancel\|S0065]] | Results grid, export, explain, cancel | 2026-11-02 |
 | [[S0066-bucket-registry\|S0066]] | `jord_buckets` registry + per-bucket provider resolution | 2026-11-02 |
 | [[S0067-bucket-config-api\|S0067]] | Bucket config API + encrypted credentials + test | 2026-11-02 |
+| [[S0068-storage-studio-ui\|S0068]] | Bucket wizard, object browser, settings | 2026-11-03 |
+| [[S0069-auth-settings-store\|S0069]] | Auth settings store + config API | 2026-11-03 |

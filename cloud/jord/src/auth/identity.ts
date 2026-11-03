@@ -107,12 +107,20 @@ export async function signupUser(input: {
   email: string;
   password: string;
   nowMs?: number;
+  /** S0069: skip the confirm mail and mark the account confirmed. */
+  autoconfirm?: boolean;
+  /** S0069: project password policy (defaults to 10). */
+  minPasswordLength?: number;
 }): Promise<{ ok: true } | { ok: false; error: "invalid_password" | "invalid_email" }> {
   const email = normalizeEmail(input.email);
   if (!email.includes("@") || email.startsWith("@") || email.endsWith("@")) {
     return { ok: false, error: "invalid_email" };
   }
-  if (passwordPolicyError(input.password, email)) {
+  if (
+    passwordPolicyError(input.password, email, {
+      minLength: input.minPasswordLength,
+    })
+  ) {
     return { ok: false, error: "invalid_password" };
   }
   const now = input.nowMs ?? Date.now();
@@ -120,23 +128,32 @@ export async function signupUser(input: {
   const existing = await findUserByEmail(input.jord, email);
   if (!existing) {
     const id = randomUUID();
-    const confirmed = input.jord.dialect === "postgres" ? "FALSE" : "0";
+    const autoconfirm = input.autoconfirm === true;
+    const confirmed = autoconfirm
+      ? input.jord.dialect === "postgres"
+        ? "TRUE"
+        : "1"
+      : input.jord.dialect === "postgres"
+        ? "FALSE"
+        : "0";
     await q(
       input.jord,
       `INSERT INTO jord_users (id, email, password_hash, email_confirmed, created_at, updated_at) VALUES (?, ?, ?, ${confirmed}, ?, ?)`,
       [id, email, passwordHash, now, now],
     );
-    const token = randomBytes(32).toString("base64url");
-    await q(
-      input.jord,
-      "INSERT INTO jord_auth_tokens (id, user_id, purpose, token_hash, expires_at, used_at, created_at) VALUES (?, ?, 'confirm', ?, ?, NULL, ?)",
-      [randomUUID(), id, sha256(token), now + CONFIRM_TTL_MS, now],
-    );
-    await input.mailer.send({
-      to: email,
-      subject: "Confirm your Jord account",
-      text: `confirm:${token}`,
-    });
+    if (!autoconfirm) {
+      const token = randomBytes(32).toString("base64url");
+      await q(
+        input.jord,
+        "INSERT INTO jord_auth_tokens (id, user_id, purpose, token_hash, expires_at, used_at, created_at) VALUES (?, ?, 'confirm', ?, ?, NULL, ?)",
+        [randomUUID(), id, sha256(token), now + CONFIRM_TTL_MS, now],
+      );
+      await input.mailer.send({
+        to: email,
+        subject: "Confirm your Jord account",
+        text: `confirm:${token}`,
+      });
+    }
   }
   return { ok: true };
 }
@@ -233,6 +250,8 @@ export async function resetUserPassword(input: {
   token: string;
   password: string;
   nowMs?: number;
+  /** S0069: project password policy (defaults to 10). */
+  minPasswordLength?: number;
 }): Promise<{ ok: true } | { ok: false; error: "invalid_token" | "invalid_password" }> {
   const now = input.nowMs ?? Date.now();
   const user = await consumeOneTime({
@@ -242,7 +261,11 @@ export async function resetUserPassword(input: {
     nowMs: now,
   });
   if (!user) return { ok: false, error: "invalid_token" };
-  if (passwordPolicyError(input.password, user.email)) {
+  if (
+    passwordPolicyError(input.password, user.email, {
+      minLength: input.minPasswordLength,
+    })
+  ) {
     return { ok: false, error: "invalid_password" };
   }
   const passwordHash = await hashPassword(input.password);

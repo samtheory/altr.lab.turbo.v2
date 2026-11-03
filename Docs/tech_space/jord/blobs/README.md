@@ -130,7 +130,7 @@ or `POST /blobs/copy-plan` (admin). The plan always reports `delete_local: false
 | Admin config (S0067) | `cloud/jord/src/storage/bucket-admin.ts`, `bucket-admin-routes.ts` |
 | Routes | `cloud/jord/src/blobs/routes.ts` (per-bucket `resolveBucket`) · `/admin/buckets` via `createBucketAdminRoutes` |
 | GC job | `blobs_gc` in `cloud/jord/src/jobs/kinds.ts` (resolves storage per pending bucket) |
-| Studio | **Storage** → `/storage` (existing BFF; no secrets in JSON) — wizard/browser → [[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]] |
+| Studio | **Storage** → `/storage` — sidebar, test-gated wizard, object browser, settings ([studio as-built](../studio/README#storage-buckets-s0066--s0067--s0068) · [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui\|S0068]]) |
 | Tests | `storage/bucket-registry.test.ts` · `storage/bucket-admin.test.ts` · `blobs/delete-failure.test.ts` · live S3 `storage/s3-live.test.ts` gated on `JORD_TEST_S3_ENDPOINT` |
 
 MinIO needs path-style addressing: set `JORD_S3_FORCE_PATH_STYLE=1` with `JORD_STORAGE_BACKEND=s3` (or `force_path_style` / `provider=minio` on the row). Admin create defaults path-style for minio/`s3-compatible`.
@@ -145,4 +145,4 @@ Admin `POST /admin/buckets/:name/test` with provider + keys probes without savin
 
 ## Not in Jord yet
 
-Studio bucket wizard ([[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]]) · automatic cutover without an operator flag · multipart/resumable ([[../../../plan/Jord/phase-03/S0081-multipart-uploads\|S0081]])
+Automatic cutover without an operator flag · multipart/resumable ([[../../../plan/Jord/phase-03/S0081-multipart-uploads\|S0081]])

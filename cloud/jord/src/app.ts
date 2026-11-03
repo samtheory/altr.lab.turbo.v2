@@ -32,6 +32,7 @@ import { streamSSE } from "hono/streaming";
 import {
   createAuthMiddleware,
   createAuthRoutes,
+  createAuthSettingsRoutes,
   ConsoleMailer,
   requireAlterSchema,
   requireInvokeApis,
@@ -757,6 +758,7 @@ export function createJordApp(deps: JordAppDeps) {
       auth: deps.auth,
       mailer,
       enqueueWrite: enqueueWrite,
+      rateLimit: rateLimitStore,
     }),
   );
 
@@ -3008,6 +3010,11 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json(result);
   });
 
+  // S0069 — auth settings document (admin-only; enforced inside /auth/*).
+  protectedRoutes.route(
+    "/admin/auth",
+    createAuthSettingsRoutes({ jord: deps.jord, enqueueWrite }),
+  );
   // S0043 — project registry (admin-only; secrets required for mutate/list).
   protectedRoutes.route("/admin", createProjectRoutes(projectRegistry));
   // S0067 — bucket config API (admin-only; secrets for s3-family credentials).

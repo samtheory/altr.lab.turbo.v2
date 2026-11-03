@@ -1,8 +1,8 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0065 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL results/explain/cancel"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0068 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL + storage buckets"
 created: 2026-10-24
-updated: 2026-11-02
+updated: 2026-11-03
 tags:
   - tech-space
   - jord
@@ -48,7 +48,7 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts` (`icon` + optional `context
 | Policies / Triggers | `/p/[project]/database/…` | [[../policies/README]] |
 | Generated / Function / Custom / Table APIs | `/p/[project]/apis/…` | [[../apis/README]] |
 | Jobs / Logs | `/p/[project]/jobs`, `…/logs` | [[../jobs/README]] — logs batch into `jord_logs` |
-| Storage | `/p/[project]/storage` | [[../blobs/README]] |
+| Storage | `/p/[project]/storage` | [[../blobs/README]] + [[#storage-buckets-s0066--s0067--s0068]] — bucket detail (S0068) |
 | Vectors | `/p/[project]/vectors` | [[../vectors/README]] |
 
 Legacy unscoped paths (`/tables`, `/records`, …) **redirect** via middleware to `/p/<cookie|default>/…`.
@@ -171,7 +171,7 @@ Real second-column lists for the wired sections; selection is URL-driven and the
 | Mount | `ContextualSidebarMount` in `studio-shell.tsx` registers the active section body into the slot |
 | SQL | Reserved `queries` slot; real list is [[../../../plan/Jord/phase-03/S0064-query-tabs-history\|S0064]] |
 | Auth | Reserved `users` slot; real list is [[../../../plan/Jord/phase-03/S0070-auth-console-users\|S0070]] |
-| Storage | Reserved `buckets` slot; real list is [[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]] |
+| Storage | `StudioBucketsSidebar` (S0068) — provider badge, object count, paused state, `?bucket=` selection; non-admin falls back to `/api/blobs/buckets` |
 | Resize + persist | Drag handle with 12rem–30rem clamp; `sidebarWidth` + `sidebarCollapsed` kept in the S0046 shell prefs |
 | Selection | `?table=`, `?job=`, `?endpoint=` rewritten on item click; restored on reload |
 | Search | Debounced ~150 ms; `/` focuses, Escape clears |
@@ -257,6 +257,24 @@ Tables `[name]` renders through `@altr/apolyx` **DataGrid** (not a local grid). 
 | Cross-link | Save/toggle policy dispatches `jord:policies-changed`; APIs drawer reloads the policy summary |
 | Helpers | `lib/studio-table-policies.ts` · `lib/studio-table-apis.ts` |
 
+### Storage buckets (S0066 + S0067 + S0068)
+
+Registry rows live in the project DB (`jord_buckets`, migration `0015`); credentials stay sealed in the control-plane AES-GCM store. Studio never renders a secret — only `configured` plus the access-key prefix/last4.
+
+| Piece | Fact |
+|-------|------|
+| Sidebar | `StudioBucketsSidebar` when `contextual === "buckets"` — `GET /api/admin/buckets`; rows show provider badge, object count and paused state. Non-admin 403 falls back to `/api/blobs/buckets` with an `env` badge |
+| Wizard | Inspector `?inspector=create-bucket` — provider matrix (local / s3 / r2 / minio / s3-compatible), per-provider connection fields, write-only credentials, `POST /admin/buckets/:name/test` gate. Create is disabled until the tested draft fingerprint still matches |
+| Detail | `/storage?bucket=<name>` — drag-and-drop + picker upload with per-file XHR progress, search, image/PDF/text preview, download, signed URL copy (`POST …/sign`, TTL from the row, expiry shown), delete confirm |
+| Settings | Connection, path-style, max size, MIME allowlist, signed TTL, public read, linked table, test, rotate, pause/resume — `PATCH /admin/buckets/:name` |
+| BFF | `src/app/api/admin/buckets/…` mirrors `/admin/buckets`; `src/app/api/blobs/[bucket]/objects/[key]/sign` |
+| Errors | Server reason shown inline (`413` size, `415` MIME, probe detail), parsed from JSON or Hono plain text — not a generic toast |
+| Helpers | `src/lib/bucket-admin.ts` — provider matrix, draft validation/serialization, test signature, error reader |
+| Kit | Apolyx `Tabs` / `Progress` / `Dialog` / `AlertDialog` / `PasswordInput` / `Switch` / `Field` only |
+| Anchor | [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui\|S0068]] |
+
+Rotation probes with the new keys first; a failed probe keeps the old seals, a successful rotate revokes them immediately (S0067 `bucket-admin.test.ts`).
+
 ### Right inspector (S0048)
 
 One host overlays the **content pane only** (primary nav stays clear). State is URL-addressable; ESC / backdrop / browser Back close it.
@@ -265,7 +283,7 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 |-------|------|
 | API | `InspectorProvider` + `useInspector()` in `inspector-host.tsx` — `open(id, props)`, `close()` |
 | URL | `?inspector=<id>` plus optional `recordId` / `table` / `schema`; helpers in `lib/studio-inspector.ts` |
-| Panels | `create-record` · `create-table` · `record-detail` · `migrate` · `insert-table-row` · `policies` · `apis` |
+| Panels | `create-record` · `create-table` · `record-detail` · `migrate` · `insert-table-row` · `policies` · `apis` · `create-bucket` |
 | Frame | `StudioInspector` — FocusScope trap + restore, dim+blur backdrop, ~420–520 px, &lt;200 ms motion, `useReducedMotion` |
 | Chrome | Sticky title + close; `InspectorFooter` for primary actions |
 | Deep links | `/records/new` and `/records/[id]` redirect to `?inspector=…`; migrate page auto-opens `migrate`; tables deep-link policies/apis |
@@ -292,4 +310,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Results grid + explain + cancel ([[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]]), multi-tenant hosting, Artemis screens inside Studio. Waves C–F closed; wave G through S0064. Next: [[../../../plan/Jord/phase-03/S0065-results-explain-cancel|S0065]].
+Multi-tenant hosting, Artemis screens inside Studio, image transforms and multipart uploads ([[../../../plan/Jord/phase-03/S0081-multipart-uploads|S0081]]). Waves C–H closed through [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui|S0068]]; the auth settings API is [[../../../plan/Jord/phase-03/done/S0069-auth-settings-store|S0069]] (server only). Next Studio card: [[../../../plan/Jord/phase-03/S0070-auth-console-users|S0070]].

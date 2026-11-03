@@ -12,6 +12,7 @@ import {
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { BucketWizardPanel } from "@/components/bucket-wizard-panel";
 import { CreateRecordForm } from "@/components/create-record-form";
 import { CreateTableForm } from "@/components/create-table-form";
 import {
@@ -232,6 +233,8 @@ function InspectorPanelBody({
           schema={props.schema ?? "public"}
         />
       );
+    case "create-bucket":
+      return <BucketWizardPanel role={role} onClose={onClose} />;
   }
 }
 

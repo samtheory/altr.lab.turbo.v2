@@ -66,6 +66,7 @@ export function surfaceFor(method: string, path: string): string | null {
   if (normalized === "/migrate" || normalized.startsWith("/migrate/")) {
     return "migrate";
   }
+  if (normalized.startsWith("/admin/auth/")) return "admin auth";
   if (normalized === "/admin" || normalized.startsWith("/admin/")) return "admin";
   if (normalized === "/functions" || normalized.startsWith("/functions/")) {
     return "functions";

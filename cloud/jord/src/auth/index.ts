@@ -48,6 +48,19 @@ export {
   type PrincipalKind,
 } from "./principal.js";
 export { createAuthRoutes, tokenFromMail } from "./routes.js";
+export { createAuthSettingsRoutes } from "./settings-routes.js";
+export {
+  AUTH_SETTINGS_ID,
+  defaultAuthSettings,
+  isAllowedRedirect,
+  loadAuthSettings,
+  parseAuthSettingsPatch,
+  updateAuthSettings,
+  validateRedirectParam,
+  validateRedirectPattern,
+  type AuthRateLimits,
+  type JordAuthSettings,
+} from "./settings.js";
 export {
   canAlterSchema,
   canInvokeApis,

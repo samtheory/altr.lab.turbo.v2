@@ -27,6 +27,7 @@ import {
 } from "@/components/inspector-host";
 import { ProjectSwitcher } from "@/components/project-switcher";
 import { SessionBadge } from "@/components/session-badge";
+import { StudioBucketsSidebar } from "@/components/studio-buckets-sidebar";
 import { StudioContextualSidebar } from "@/components/studio-contextual-sidebar";
 import { StudioEndpointsSidebar } from "@/components/studio-endpoints-sidebar";
 import { StudioJobsSidebar } from "@/components/studio-jobs-sidebar";
@@ -79,7 +80,7 @@ export function StudioShell({ children, role, bypass }: Props) {
       <InspectorProvider role={role}>
         <WorkspaceTabsProvider enabled={contextual === "tables"}>
           <SqlWorkspaceProvider enabled={contextual === "queries"}>
-            <ContextualSidebarMount contextual={contextual} />
+            <ContextualSidebarMount contextual={contextual} role={role} />
             <StudioShellFrame
               role={role}
               bypass={bypass}
@@ -98,13 +99,16 @@ export function StudioShell({ children, role, bypass }: Props) {
 /** Registers the section sidebar body into the shell slot (S0047 / S0050 / S0064). */
 function ContextualSidebarMount({
   contextual,
+  role,
 }: {
   contextual: ReturnType<typeof resolveContextual>;
+  role: JordRole;
 }) {
   if (contextual === "tables") return <StudioTablesSidebar />;
   if (contextual === "jobs") return <StudioJobsSidebar />;
   if (contextual === "endpoints") return <StudioEndpointsSidebar />;
   if (contextual === "queries") return <StudioSqlSidebar />;
+  if (contextual === "buckets") return <StudioBucketsSidebar role={role} />;
   return null;
 }
 

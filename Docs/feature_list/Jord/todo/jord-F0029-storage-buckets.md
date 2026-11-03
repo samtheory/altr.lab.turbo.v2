@@ -3,7 +3,7 @@ title: "jord-F0029 — storage buckets & providers"
 feature_id: jord-F0029
 description: "Buckets as first-class rows with per-bucket provider config: local, S3, R2, MinIO or custom S3-compatible, managed from Studio"
 created: 2026-10-28
-updated: 2026-11-02
+updated: 2026-11-03
 tags:
   - feature
   - jord
@@ -16,7 +16,7 @@ tags:
 
 # jord-F0029 — storage buckets & providers
 
-> **Status:** in progress (S0066–S0067 done) · **Id:** `jord-F0029` · Index: [[../INDEX]] · Registry + admin config API shipped · Studio open · [[../done/jord-F0010-blobs|jord-F0010]] · [[../../../tech_space/jord/blobs/README]]
+> **Status:** Studio shipped (S0066–S0068) · **Id:** `jord-F0029` · Index: [[../INDEX]] · Registry + admin config API shipped · Studio open · [[../done/jord-F0010-blobs|jord-F0010]] · [[../../../tech_space/jord/blobs/README]]
 
 ## What
 
@@ -78,6 +78,6 @@ Per-bucket billing/quota · image transforms · CDN configuration · file versio
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/done/S0066-bucket-registry\|S0066]] — jord_buckets + provider resolution | 2.5–3 h | **done** 2026-11-02 |
 | [[../../../plan/Jord/phase-03/done/S0067-bucket-config-api\|S0067]] — config API + credentials + test | 2.5–3 h | **done** 2026-11-02 |
-| [[../../../plan/Jord/phase-03/S0068-storage-studio-ui\|S0068]] — Studio bucket UI | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui\|S0068]] — Studio bucket UI | 3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

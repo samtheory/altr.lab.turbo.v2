@@ -23,12 +23,19 @@ const KEYLEN = 32;
 
 const MIN_PASSWORD = 10;
 
+export type PasswordPolicyOptions = {
+  /** Project policy from `jord_auth_settings`; defaults preserve phase-01. */
+  minLength?: number;
+};
+
 export function passwordPolicyError(
   password: string,
   email: string,
+  options: PasswordPolicyOptions = {},
 ): string | null {
-  if (password.length < MIN_PASSWORD) {
-    return "password must be at least 10 characters";
+  const minLength = options.minLength ?? MIN_PASSWORD;
+  if (password.length < minLength) {
+    return `password must be at least ${minLength} characters`;
   }
   if (password.toLowerCase() === email.trim().toLowerCase()) {
     return "password must not equal the email";

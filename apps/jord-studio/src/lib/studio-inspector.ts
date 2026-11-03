@@ -20,6 +20,7 @@ export const INSPECTOR_IDS = [
   "insert-table-row",
   "policies",
   "apis",
+  "create-bucket",
 ] as const;
 
 export type InspectorId = (typeof INSPECTOR_IDS)[number];
@@ -97,5 +98,7 @@ export function inspectorTitle(id: InspectorId): string {
       return "Policies";
     case "apis":
       return "APIs";
+    case "create-bucket":
+      return "New bucket";
   }
 }

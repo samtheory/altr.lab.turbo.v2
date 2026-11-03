@@ -115,6 +115,15 @@ export {
   type NewJordBucketRow,
 } from "./schema/buckets.js";
 export {
+  AUTH_RATE_LIMIT_KEYS,
+  AUTH_SETTINGS_BOUNDS,
+  DEFAULT_AUTH_SETTINGS,
+  jordAuthSettings,
+  type AuthRateLimitKey,
+  type JordAuthSettingsRow,
+  type NewJordAuthSettingsRow,
+} from "./schema/auth-settings.js";
+export {
   jordProjectKeys,
   jordProjects,
   type JordProjectEngine,

@@ -1,8 +1,8 @@
 ---
 title: "Jord — auth and roles"
-description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, and the route matrix"
+description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, the route matrix, and the S0069 auth settings document"
 created: 2026-10-24
-updated: 2026-10-29
+updated: 2026-11-03
 tags:
   - tech-space
   - jord
@@ -58,6 +58,7 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 | `/realtime`, `/realtime/ws` | yes | yes | yes | yes | yes until exp | yes until exp |
 | Custom `/x/:slug` | yes | yes | no | yes | as caller, no escalate | as caller, no escalate |
 | Jobs, policies, triggers | yes | no | inspect | no | no | no |
+| `GET/PATCH /admin/auth/settings` | yes | no | no | no | no | no |
 | `/api/v1` | yes (policies) | write / read | read | yes (bypass) | policies | policies |
 
 | HTTP | Meaning |
@@ -83,6 +84,32 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 SSE writes `event: expired` / `token_expired` and ends when `exp` passes. WebSocket closes with code **4401**.
 
 Accounts live in migration `0002_principals`: `jord_users`, `jord_auth_tokens`, `jord_refresh_tokens`.
+
+### Auth settings store (S0069)
+
+One row per project database in `jord_auth_settings` (`id = default`). A **missing row means today's behavior** — nothing changes on upgrade. `GET/PATCH /admin/auth/settings` is operator-admin only; `PATCH` validates strictly (unknown keys rejected) and writes a `jord_logs` row with `source = auth.settings` (actor + changed keys). Enforcement reads the row inside `/auth/*`, so a toggle actually changes behavior.
+
+| Setting | Default | Enforced at |
+|---------|---------|-------------|
+| `signups_enabled` | `true` | `POST /auth/signup` → **403** `signups_disabled` |
+| `autoconfirm` | `false` | Signup inserts `email_confirmed=1`, skips the confirm token + mail |
+| `password_min_length` | `10` (6–128) | Signup + reset; unchanged rule: password must not equal the email |
+| `site_url` | `null` | Same-origin redirects allowed |
+| `redirect_allowlist` | `[]` | Absolute http(s) patterns — `*` one path segment, `**` anything. Fail closed: with no config every `redirect_to` is **400** `redirect_not_allowed` |
+| `rate_limits` | `30`/min each | `signup`, `signin`, `refresh`, `recover`, `reset`, `confirm` on the S0036 `RateLimitStore` (Postgres shared / memory); limiter outage allows |
+| `session_ttl_seconds` | `900` (60–86 400) | Access-token `exp` and `expires_in` on signin/refresh |
+
+`redirect_to` is accepted by signup, recover, reset and confirm. Validation rejects non-http(s) schemes, protocol-relative `//host` values, embedded credentials and off-list hosts; wildcard patterns may not appear in the scheme. Redirect targets are only validated — email links are still console `confirm:` / `reset:` bodies until [[../../../plan/Jord/phase-03/S0073-mailer-port|S0073]]–[[../../../plan/Jord/phase-03/S0074-magic-link|S0074]].
+
+| Piece | Path |
+|-------|------|
+| Migration | `elements/jord/migrations/{libsql,postgres}/0016_auth_settings.sql` |
+| Schema mirror | `elements/jord/src/schema/auth-settings.ts` (defaults + bounds) |
+| Loader / validation / allowlist | `cloud/jord/src/auth/settings.ts` |
+| Admin routes | `cloud/jord/src/auth/settings-routes.ts` → mounted at `/admin/auth` |
+| Enforcement | `cloud/jord/src/auth/routes.ts` · `identity.ts` · `password.ts` |
+| Inventory | `/admin/auth/*` → `admin auth` surface in `route-inventory.ts` |
+| Tests | `cloud/jord/src/auth/settings.test.ts` — defaults, persistence, validation, 403 gate, autoconfirm, policy, open redirect, 429, TTL, audit |
 
 ## How
 
@@ -115,4 +142,4 @@ A raw `Authorization: Bearer $JORD_SERVER_TOKEN` is `service` / `service_role` u
 
 ## Not in Jord yet
 
-OAuth and SMTP.
+OAuth, SMTP/real mail delivery, magic link, and the Studio Auth console UI ([[../../../plan/Jord/phase-03/S0070-auth-console-users|S0070]]–[[../../../plan/Jord/phase-03/S0072-email-templates|S0072]]). Provider credentials and JWT key management are [[../../../plan/Jord/phase-03/S0071-auth-console-sections|S0071]].
