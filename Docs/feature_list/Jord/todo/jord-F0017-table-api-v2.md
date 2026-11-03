@@ -35,8 +35,8 @@ Embed never returns a row the caller could not read directly; keyset paging stab
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0078-fk-embeds\|S0078]] — FK embeds with per-table policies | 3 h | todo |
-| [[../../../plan/Jord/phase-03/S0079-keyset-pagination\|S0079]] — keyset pagination | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0080-bulk-upsert-rpc\|S0080]] — bulk upsert + RPC | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0078-fk-embeds\|S0078]] — FK embeds with per-table policies | 3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0079-keyset-pagination\|S0079]] — keyset pagination | 2–3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0080-bulk-upsert-rpc\|S0080]] — bulk upsert + RPC | 3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

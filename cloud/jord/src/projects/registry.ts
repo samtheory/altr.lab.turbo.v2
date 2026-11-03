@@ -17,7 +17,16 @@ import {
   type ProjectConnectTester,
   type ProjectTlsMode,
 } from "./connect-test.js";
-import { generateProjectKeySet, type GeneratedProjectKey } from "./keys.js";
+import {
+  DEFAULT_PROJECT_KEY_OVERLAP_SECONDS,
+  effectiveOverlapSeconds,
+} from "../auth/key-sets.js";
+import { findProjectKeyByHash } from "./key-lookup.js";
+import {
+  generateProjectKeySet,
+  hashProjectKey,
+  type GeneratedProjectKey,
+} from "./keys.js";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ENGINES = new Set<JordProjectEngine>([
@@ -227,13 +236,14 @@ async function insertKeys(
     barrier: GeneratedProjectKey;
   },
   now: number,
+  rotatedAt: number | null = null,
 ): Promise<void> {
   for (const key of [keys.publishable, keys.secret, keys.barrier]) {
     await jord.query(
       `INSERT INTO jord_project_keys
         (id, project_id, kind, key_hash, prefix, last4, created_at, rotated_at)
        VALUES (${ph(jord, 1)}, ${ph(jord, 2)}, ${ph(jord, 3)}, ${ph(jord, 4)},
-               ${ph(jord, 5)}, ${ph(jord, 6)}, ${ph(jord, 7)}, NULL)`,
+               ${ph(jord, 5)}, ${ph(jord, 6)}, ${ph(jord, 7)}, ${ph(jord, 8)})`,
       [
         randomUUID(),
         projectId,
@@ -242,6 +252,7 @@ async function insertKeys(
         key.prefix,
         key.last4,
         now,
+        rotatedAt,
       ],
     );
   }
@@ -453,7 +464,7 @@ export async function createProject(
   const notes = body.notes?.trim() ?? "";
 
   try {
-    await deps.enqueueWrite(async () => {
+    await deps.enqueueWrite(() => deps.jord.transaction(async () => {
       await deps.jord.query(
         `INSERT INTO jord_projects
           (id, slug, engine, target, tls_mode, db_user, db_password_sealed,
@@ -475,7 +486,7 @@ export async function createProject(
         ],
       );
       await insertKeys(deps.jord, projectId, keys, now);
-    });
+    }));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (/unique|UNIQUE|duplicate/i.test(msg)) {
@@ -496,7 +507,8 @@ export async function createProject(
     publishable_key: keys.publishable.plaintext,
     barrier_key: keys.barrier.plaintext,
   };
-  // Create response intentionally includes secret_key once; strip before leak check on project only.
+  // Create (and rotate) are the only responses that carry plaintext keys,
+  // shown once. The leak check covers the stored project shape only.
   publicProjectJson(loaded.project);
   return response;
 }
@@ -552,9 +564,15 @@ export async function archiveProject(
   }
 
   const now = Date.now();
-  await deps.enqueueWrite(async () => {
+  // One transaction: keys, retiring keys and status change together (no
+  // half-archived project with live keys).
+  await deps.enqueueWrite(() => deps.jord.transaction(async () => {
     await deps.jord.query(
       `DELETE FROM jord_project_keys WHERE project_id = ${ph(deps.jord, 1)}`,
+      [id],
+    );
+    await deps.jord.query(
+      `DELETE FROM jord_project_key_previous WHERE project_id = ${ph(deps.jord, 1)}`,
       [id],
     );
     await deps.jord.query(
@@ -564,14 +582,22 @@ export async function archiveProject(
        WHERE id = ${ph(deps.jord, 2)}`,
       [now, id],
     );
-  });
+  }));
 
   return { ok: true };
 }
 
+export type RotateProjectKeysOptions = {
+  /** Old keys keep verifying this long. Omitted = 24 h; explicit 0 = none. */
+  overlapSeconds?: number;
+  /** Compromise path: old keys stop verifying immediately. */
+  revokePrevious?: boolean;
+};
+
 export async function rotateProjectKeys(
   deps: ProjectRegistryDeps,
   id: string,
+  options: RotateProjectKeysOptions = {},
 ): Promise<
   | {
       ok: true;
@@ -579,6 +605,8 @@ export async function rotateProjectKeys(
       secret_key: string;
       publishable_key: string;
       barrier_key: string;
+      /** Epoch ms when the retired keys stop verifying; null when revoked. */
+      previous_expires_at: number | null;
     }
   | { ok: false; status: 404 | 410; error: string; reason?: string }
 > {
@@ -587,20 +615,53 @@ export async function rotateProjectKeys(
 
   const keys = generateProjectKeySet();
   const now = Date.now();
+  const overlapSeconds = effectiveOverlapSeconds({
+    overlapSeconds: options.overlapSeconds,
+    revokePrevious: options.revokePrevious,
+    defaultSeconds: DEFAULT_PROJECT_KEY_OVERLAP_SECONDS,
+  });
+  const expiresAt = overlapSeconds > 0 ? now + overlapSeconds * 1000 : null;
 
-  await deps.enqueueWrite(async () => {
+  // One transaction: retire old hashes + install new ones. Any failure rolls
+  // back to the untouched old key set.
+  await deps.enqueueWrite(() => deps.jord.transaction(async () => {
+    // Any earlier overlap is superseded: one retiring generation at a time.
+    await deps.jord.query(
+      `DELETE FROM jord_project_key_previous WHERE project_id = ${ph(deps.jord, 1)}`,
+      [id],
+    );
+    if (expiresAt !== null) {
+      const old = await deps.jord.query(
+        `SELECT kind, key_hash, prefix, last4 FROM jord_project_keys
+         WHERE project_id = ${ph(deps.jord, 1)}`,
+        [id],
+      );
+      for (const row of old) {
+        await deps.jord.query(
+          `INSERT INTO jord_project_key_previous
+            (id, project_id, kind, key_hash, prefix, last4, retired_at, expires_at)
+           VALUES (${ph(deps.jord, 1)}, ${ph(deps.jord, 2)}, ${ph(deps.jord, 3)},
+                   ${ph(deps.jord, 4)}, ${ph(deps.jord, 5)}, ${ph(deps.jord, 6)},
+                   ${ph(deps.jord, 7)}, ${ph(deps.jord, 8)})`,
+          [
+            randomUUID(),
+            id,
+            String(row.kind),
+            String(row.key_hash),
+            String(row.prefix),
+            String(row.last4),
+            now,
+            expiresAt,
+          ],
+        );
+      }
+    }
     await deps.jord.query(
       `DELETE FROM jord_project_keys WHERE project_id = ${ph(deps.jord, 1)}`,
       [id],
     );
-    await insertKeys(deps.jord, id, keys, now);
-    // Mark rotation time on new rows via a second update for clarity in list.
-    await deps.jord.query(
-      `UPDATE jord_project_keys SET rotated_at = ${ph(deps.jord, 1)}
-       WHERE project_id = ${ph(deps.jord, 2)}`,
-      [now, id],
-    );
-  });
+    await insertKeys(deps.jord, id, keys, now, now);
+  }));
 
   const loaded = await getProject(deps, id);
   if (!loaded.ok) return loaded;
@@ -611,5 +672,65 @@ export async function rotateProjectKeys(
     secret_key: keys.secret.plaintext,
     publishable_key: keys.publishable.plaintext,
     barrier_key: keys.barrier.plaintext,
+    previous_expires_at: expiresAt,
+  };
+}
+
+/** Drop retiring keys at once (emergency). Current keys are untouched. */
+export async function revokePreviousProjectKeys(
+  deps: ProjectRegistryDeps,
+  id: string,
+): Promise<
+  | { ok: true }
+  | { ok: false; status: 404 | 410; error: string; reason?: string }
+> {
+  const existing = await getProject(deps, id);
+  if (!existing.ok) return existing;
+  await deps.enqueueWrite(async () => {
+    await deps.jord.query(
+      `DELETE FROM jord_project_key_previous WHERE project_id = ${ph(deps.jord, 1)}`,
+      [id],
+    );
+  });
+  return { ok: true };
+}
+
+export type VerifiedProjectKey = {
+  projectId: string;
+  kind: string;
+  /** `previous` = a retired key inside its overlap window. */
+  slot: "current" | "previous";
+  expiresAt: number | null;
+};
+
+/**
+ * S0093: resolve a presented project key (publishable / secret / barrier).
+ * Accepts the current key, or a retired key until its overlap expires.
+ * Delegates to `findProjectKeyByHash` (key-lookup.ts) so there is ONE
+ * constant-time verifier; this wrapper only adds the active-project check.
+ * Plaintext is never stored or logged.
+ */
+export async function verifyProjectKey(
+  deps: Pick<ProjectRegistryDeps, "jord">,
+  plaintext: string,
+  nowMs: number = Date.now(),
+): Promise<VerifiedProjectKey | null> {
+  if (!plaintext || plaintext.length > 256) return null;
+  const match = await findProjectKeyByHash(
+    deps.jord,
+    hashProjectKey(plaintext),
+    nowMs,
+  );
+  if (!match) return null;
+  const rows = await deps.jord.query(
+    `SELECT status FROM jord_projects WHERE id = ${ph(deps.jord, 1)} LIMIT 1`,
+    [match.projectId],
+  );
+  if (!rows[0] || String(rows[0].status) !== "active") return null;
+  return {
+    projectId: match.projectId,
+    kind: match.kind,
+    slot: match.previous ? "previous" : "current",
+    expiresAt: match.previous ? (match.expiresAt ?? null) : null,
   };
 }

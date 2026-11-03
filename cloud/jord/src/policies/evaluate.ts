@@ -22,6 +22,11 @@ export type PolicyDecision =
        * `owner_eq` / `claim_eq`. Absent means no row restriction.
        */
       scope?: RowScope;
+      /**
+       * The allow that decided it (S0077 tester explanation only): the
+       * unrestricted allow when one matched, else the highest-priority allow.
+       */
+      matched?: JordPolicy;
     }
   | {
       allowed: false;
@@ -207,10 +212,10 @@ export async function evaluatePolicies(
     const anyOf: RowPredicate[] = [];
     for (const policy of allows) {
       const predicate = rowPredicateFrom(parseRulesJson(policy.rules), ctx);
-      if (!predicate) return { allowed: true };
+      if (!predicate) return { allowed: true, matched: policy };
       anyOf.push(predicate);
     }
-    return { allowed: true, scope: { anyOf } };
+    return { allowed: true, scope: { anyOf }, matched: highestPriority(allows) };
   }
 
   if (input.subject === "user" || input.subject === "anon") {
@@ -218,6 +223,41 @@ export async function evaluatePolicies(
   }
 
   return { allowed: true };
+}
+
+/** The auth subject fields the decision reads. */
+export type DecisionPrincipal = {
+  kind: PrincipalKind;
+  role: string;
+  uid?: string;
+  claims: Record<string, unknown>;
+};
+
+/**
+ * The table-API decision for one principal (`/api/v1/:table` and its embeds).
+ * The S0077 policy tester calls this same function with a simulated principal,
+ * so the tester and the request path cannot drift.
+ */
+export function decideForPrincipal(input: {
+  jord: JordDriverPort;
+  principal: DecisionPrincipal;
+  tableName: string;
+  schema?: string;
+  operation: JordPolicyOperation;
+  env?: NodeJS.ProcessEnv;
+}): Promise<PolicyDecision> {
+  const { principal } = input;
+  return evaluatePolicies({
+    jord: input.jord,
+    tableName: input.tableName,
+    schema: input.schema,
+    operation: input.operation,
+    role: principal.role,
+    subject: principal.kind,
+    uid: principal.uid ?? null,
+    claims: principal.claims,
+    bypass: principal.kind === "service" || policiesDisabledFromEnv(input.env),
+  });
 }
 
 export function policiesDisabledFromEnv(

@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-03):** **S0034–S0076 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Wave G closed ([[done/S0063-monaco-sql-editor|S0063]]–[[done/S0065-results-explain-cancel|S0065]] / [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]]). Wave H closed ([[done/S0066-bucket-registry|S0066]]–[[done/S0068-storage-studio-ui|S0068]] / [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]]). Archived under [[done/README|done/]]. Wave I in progress ([[done/S0069-auth-settings-store|S0069]]–[[done/S0076-sessions-claims|S0076]] / [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] + [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]]); next open card: [[S0077-policy-tester|S0077]] (wave I). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0030). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-03):** **S0034–S0089 + S0093–S0096 done (S0090–S0091 gated, S0092 needs an authorized target)** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Wave G closed ([[done/S0063-monaco-sql-editor|S0063]]–[[done/S0065-results-explain-cancel|S0065]] / [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]]). Wave H closed ([[done/S0066-bucket-registry|S0066]]–[[done/S0068-storage-studio-ui|S0068]] / [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]]). Archived under [[done/README|done/]]. Wave I in progress ([[done/S0069-auth-settings-store|S0069]]–[[done/S0076-sessions-claims|S0076]] / [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] + [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]]); next open card: [[S0077-policy-tester|S0077]] (wave I). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0030). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -147,39 +147,39 @@ flowchart LR
 | I6 | [[done/S0074-magic-link\|S0074]] | Magic-link sign-in | F0016 | **done** 2026-11-03 |
 | I7 | [[done/S0075-oauth-provider\|S0075]] | One OAuth provider (state + PKCE) | F0016 | **done** 2026-11-03 |
 | I8 | [[done/S0076-sessions-claims\|S0076]] | Sessions list/revoke + custom claims | F0016 | **done** 2026-11-03 |
-| I9 | [[S0077-policy-tester\|S0077]] | "Run as user" policy tester | F0016 | 2–3 h |
+| I9 | [[done/S0077-policy-tester\|S0077]] | "Run as user" policy tester | F0016 | **done** 2026-11-03 |
 
 ### Wave J — table API v2 ([[../../../feature_list/Jord/todo/jord-F0017-table-api-v2|jord-F0017]])
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| J1 | [[S0078-fk-embeds\|S0078]] | FK embeds with per-table policies | 3 h |
-| J2 | [[S0079-keyset-pagination\|S0079]] | Keyset pagination | 2–3 h |
-| J3 | [[S0080-bulk-upsert-rpc\|S0080]] | Bulk upsert + RPC | 3 h |
+| J1 | [[done/S0078-fk-embeds\|S0078]] | FK embeds with per-table policies | **done** 2026-11-03 |
+| J2 | [[done/S0079-keyset-pagination\|S0079]] | Keyset pagination | **done** 2026-11-03 |
+| J3 | [[done/S0080-bulk-upsert-rpc\|S0080]] | Bulk upsert + RPC | **done** 2026-11-03 |
 
 ### Wave K — storage & realtime v2 ([[../../../feature_list/Jord/todo/jord-F0018-storage-realtime-v2|jord-F0018]])
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| K1 | [[S0081-multipart-uploads\|S0081]] | Multipart + resumable uploads | 3 h |
-| K2 | [[S0082-image-transforms\|S0082]] | Image transforms (non-native) | 2–3 h |
-| K3 | [[S0083-presence-broadcast\|S0083]] | Presence + broadcast with policy-gated join | 3 h |
+| K1 | [[done/S0081-multipart-uploads\|S0081]] | Multipart + resumable uploads | **done** 2026-11-03 (1 GiB / MinIO proof gated) |
+| K2 | [[done/S0082-image-transforms\|S0082]] | Image transforms (non-native) | **done** 2026-11-03 |
+| K3 | [[done/S0083-presence-broadcast\|S0083]] | Presence + broadcast with policy-gated join | **done** 2026-11-03 (two-instance proof gated) |
 
 ### Wave L — live data for apps ([[../../../feature_list/Jord/todo/jord-F0026-live-data-client|jord-F0026]])
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| L1 | [[S0084-realtime-app-endpoint\|S0084]] | App endpoint: publishable key, snapshot + deltas | 3 h |
-| L2 | [[S0085-realtime-reconnect\|S0085]] | Reconnect, resume, ordering, resync | 2–3 h |
-| L3 | [[S0086-live-toggle-snippet\|S0086]] | Live toggle, counters, client snippet | 2–3 h |
+| L1 | [[done/S0084-realtime-app-endpoint\|S0084]] | App endpoint: publishable key, snapshot + deltas | **done** 2026-11-03 |
+| L2 | [[done/S0085-realtime-reconnect\|S0085]] | Reconnect, resume, ordering, resync | **done** 2026-11-03 |
+| L3 | [[done/S0086-live-toggle-snippet\|S0086]] | Live toggle, counters, client snippet | **done** 2026-11-03 (UI not viewed) |
 
 ### Wave M — typed DX ([[../../../feature_list/Jord/todo/jord-F0014-typed-dx|jord-F0014]])
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| M1 | [[S0087-gen-types-cli\|S0087]] | `jord gen types` | 2–3 h |
-| M2 | [[S0088-typed-client-builder\|S0088]] | Typed table builder in `@altr/jord-client` | 3 h |
-| M3 | [[S0089-react-bindings\|S0089]] | React bindings package | 3 h |
+| M1 | [[done/S0087-gen-types-cli\|S0087]] | `jord gen types` | **done** 2026-11-03 |
+| M2 | [[done/S0088-typed-client-builder\|S0088]] | Typed table builder in `@altr/jord-client` | **done** 2026-11-03 |
+| M3 | [[done/S0089-react-bindings\|S0089]] | React bindings package | **done** 2026-11-03 (no consumer screen yet) |
 
 ### Wave N — Functions runtime (**GATED**)
 
@@ -195,15 +195,15 @@ Gate: parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord
 | # | Id | Task | Est. |
 |--:|----|------|------|
 | O1 | [[S0092-strix-pentest\|S0092]] | Authorized Strix pentest + triage | 2–3 h |
-| O2 | [[S0093-key-rotation-runbook\|S0093]] | Key-rotation runbook + drill | 2–3 h |
-| O3 | [[S0094-dependency-audit-ci\|S0094]] | Dependency audit in CI | 45–75 min |
+| O2 | [[done/S0093-key-rotation-runbook\|S0093]] | Key-rotation runbook + drill | **done** 2026-11-03 |
+| O3 | [[done/S0094-dependency-audit-ci\|S0094]] | Dependency audit in CI | **done** 2026-11-03 (9 open findings fail the job) |
 
 ### Wave P — project dashboard ([[../../../feature_list/Jord/todo/jord-F0022-project-dashboard|jord-F0022]])
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| P1 | [[S0095-project-stats-endpoint\|S0095]] | `GET /admin/projects/:id/stats` | 2.5–3 h |
-| P2 | [[S0096-dashboard-ui\|S0096]] | Dashboard UI: charts, counters, connect card | 3 h |
+| P1 | [[done/S0095-project-stats-endpoint\|S0095]] | `GET /admin/projects/:id/stats` | **done** 2026-11-03 |
+| P2 | [[done/S0096-dashboard-ui\|S0096]] | Dashboard UI: charts, counters, connect card | **done** 2026-11-03 (not viewed authenticated) |
 
 ## Cross-wave dependencies
 

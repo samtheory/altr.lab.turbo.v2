@@ -8,6 +8,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "jord": "tsx src/cli/bin.ts",
     "test": "vitest run",
     "lint": "echo \"No lint configured for @altr/jord-client yet\"",
     "clean": "rimraf dist .turbo"

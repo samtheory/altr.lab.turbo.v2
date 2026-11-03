@@ -38,8 +38,8 @@ A column rename breaks the consumer app's typecheck; live hook resyncs on 410.
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0087-gen-types-cli\|S0087]] — jord gen types | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0088-typed-client-builder\|S0088]] — typed table builder | 3 h | todo |
-| [[../../../plan/Jord/phase-03/S0089-react-bindings\|S0089]] — React bindings package | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0087-gen-types-cli\|S0087]] — jord gen types | 2–3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0088-typed-client-builder\|S0088]] — typed table builder | 3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0089-react-bindings\|S0089]] — React bindings package | 3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

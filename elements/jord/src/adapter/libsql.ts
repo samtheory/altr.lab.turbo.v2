@@ -317,6 +317,8 @@ function mapBlob(row: typeof jordBlobs.$inferSelect): JordBlob {
     status,
     pendingExpiresAt: row.pendingExpiresAt ?? null,
     uploadId: row.uploadId ?? null,
+    derivedFrom: row.derivedFrom ?? null,
+    derivedSrcEtag: row.derivedSrcEtag ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -2106,6 +2108,14 @@ export class LibSqlAdapter implements JordDriverPort {
       input.uploadId !== undefined
         ? input.uploadId
         : (existing?.uploadId ?? null);
+    const derivedFrom =
+      input.derivedFrom !== undefined
+        ? input.derivedFrom
+        : (existing?.derivedFrom ?? null);
+    const derivedSrcEtag =
+      input.derivedSrcEtag !== undefined
+        ? input.derivedSrcEtag
+        : (existing?.derivedSrcEtag ?? null);
     if (existing) {
       await this.db
         .update(jordBlobs)
@@ -2116,6 +2126,8 @@ export class LibSqlAdapter implements JordDriverPort {
           status,
           pendingExpiresAt,
           uploadId,
+          derivedFrom,
+          derivedSrcEtag,
           updatedAt: now,
         })
         .where(eq(jordBlobs.id, existing.id));
@@ -2127,6 +2139,8 @@ export class LibSqlAdapter implements JordDriverPort {
         status,
         pendingExpiresAt,
         uploadId,
+        derivedFrom,
+        derivedSrcEtag,
         updatedAt: now,
       };
     }
@@ -2140,6 +2154,8 @@ export class LibSqlAdapter implements JordDriverPort {
       status,
       pendingExpiresAt,
       uploadId,
+      derivedFrom,
+      derivedSrcEtag,
       createdAt: now,
       updatedAt: now,
     };

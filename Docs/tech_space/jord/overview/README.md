@@ -170,6 +170,10 @@ pnpm --filter @altr/jord-server test
 
 Branch protection requiring **`jord`** and **`jord-postgres`** is a **manual admin** step — commands on [[../../../plan/Jord/phase-02/Jord-S0027/README#branch-protection]].
 
+### Dependency audit (S0094)
+
+`pnpm audit:ci` (script `scripts/audit-ci.mjs`) fails on any high/critical **production** advisory not covered by an unexpired entry in `security/audit-allowlist.json` (package, advisory, reason, expiry, max 90 days) and on any expired entry; a registry/network failure is reported separately. `.github/workflows/audit.yml` runs it on every PR and push to main (blocking) and runs a weekly non-blocking audit of all dependencies with a summary artifact. Triage guide: `security/README.md`. **State on 2026-11-03: 9 high/critical production findings are open (drizzle-orm, postcss x2, source-map-js, sharp, next x2, dompurify x2) and nothing is allowlisted, so the blocking job fails until they are upgraded or excepted.** The workflow itself has not yet run on GitHub.
+
 ## HTTP edge (S0028)
 
 Before `/api/v1` exists, the server hardens the edge:

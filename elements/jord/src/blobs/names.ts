@@ -16,7 +16,10 @@ export function isValidBlobBucket(name: string): boolean {
 export function isValidBlobKey(key: string): boolean {
   if (key.length === 0 || key.length > MAX_BLOB_KEY_LENGTH) return false;
   if (key.startsWith("/") || key.includes("\\")) return false;
-  if (key.includes("\0")) return false;
+  // Control chars (incl. NUL and newline) are rejected so they can never shift
+  // the HMAC canonical string (fields are newline-joined).
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(key)) return false;
   const parts = key.split("/");
   for (const part of parts) {
     if (part.length === 0 || part === "." || part === "..") return false;

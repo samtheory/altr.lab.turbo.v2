@@ -1,25 +1,29 @@
-import type { JordDriverPort } from "@altr/jord";
-import { validateColumnValue } from "@altr/jord";
+import type { JordDriverPort, JordTableInfo } from "@altr/jord";
 import { Hono } from "hono";
 
 import type { JordAuthVariables } from "../auth/middleware.js";
+import type { JordRole } from "../auth/roles.js";
 import type { Principal } from "../auth/principal.js";
+import { DEFAULT_MAX_JSON_BYTES } from "../http/body-limit.js";
+import type { LogSink } from "../logs/sink.js";
 import {
-  evaluatePolicies,
+  decideForPrincipal,
   patchKeepsScope,
-  policiesDisabledFromEnv,
   stampInsertScope,
 } from "../policies/evaluate.js";
 import type { JordChangeDraft, WriteWithChange } from "../realtime/types.js";
+import {
+  fetchEmbeds,
+  relationCatalog,
+  resolveEmbeds,
+  type ResolvedEmbed,
+} from "./embeds.js";
+import { coerceBody, rowId } from "./body.js";
+import { handleBulk } from "./bulk.js";
 import { decodeCursor, encodeCursor, keysetOrder } from "./keyset.js";
 import { buildOpenApi } from "./openapi.js";
-import {
-  coerceColumnValue,
-  parseTableQuery,
-  pkColumns,
-  TableApiError,
-  type SqlValue,
-} from "./query.js";
+import { parseTableQuery, pkColumns, TableApiError } from "./query.js";
+import { handleRpc } from "./rpc.js";
 import {
   compileCount,
   compileDelete,
@@ -31,9 +35,11 @@ import {
   filtersForWrite,
   scopeFor,
   type CompiledSql,
+  type ScopeFor,
 } from "./sql.js";
 
-const RESERVED = /^(jord_|sqlite_|pg_)/i;
+/** Tables the table API never exposes (also the S0077 tester's `table_not_exposed`). */
+export const RESERVED = /^(jord_|sqlite_|pg_)/i;
 
 function dialectOf(jord: JordDriverPort): "libsql" | "postgres" {
   return jord.dialect === "postgres" ? "postgres" : "libsql";
@@ -43,7 +49,7 @@ function jsonError(
   status: number,
   error: string,
   message: string,
-  extra?: { field?: string; reason?: string },
+  extra?: { field?: string; reason?: string; available?: string[] },
 ): Response {
   return new Response(
     JSON.stringify({
@@ -52,6 +58,7 @@ function jsonError(
       ...(extra?.field
         ? { field: extra.field, reason: extra.reason ?? message }
         : {}),
+      ...(extra?.available ? { available: extra.available } : {}),
     }),
     {
       status,
@@ -64,8 +71,19 @@ export function createTableApiRoutes(deps: {
   jord: JordDriverPort;
   writeChangeAs: (principal: Principal) => WriteWithChange;
   generatedRecordsEnabled: () => boolean;
+  /** Global JSON body cap (bulk + RPC re-check it on the streamed body). */
+  maxJsonBytes?: number;
+  /** S0080 RPC wiring (same runner deps as `/x/:slug`). Absent → `/rpc/:fn` is 404. */
+  rpc?: {
+    enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
+    logs?: LogSink;
+    stepRole: (principal: Principal) => JordRole;
+    /** `JORD_CUSTOM_API_DISABLED` set shared with `/x/:slug`. */
+    customApiDisabled?: Set<string>;
+  };
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
+  const maxJsonBytes = deps.maxJsonBytes ?? DEFAULT_MAX_JSON_BYTES;
 
   /** `?schema=` → validated schema, or a 400 Response. */
   async function resolveSchema(
@@ -79,6 +97,35 @@ export function createTableApiRoutes(deps: {
     return { ok: true, schema: resolved.schema };
   }
 
+  /** Tables the API exposes by name (same gate as `/:table`). */
+  function exposed(name: string): boolean {
+    if (RESERVED.test(name) || name === "openapi.json") return false;
+    return name !== "records" || deps.generatedRecordsEnabled();
+  }
+
+  /**
+   * Embed candidates for `root` (S0078): exposed tables of the root schema plus cross-schema FK
+   * targets in schemas the API would accept as `?schema=`.
+   */
+  async function embedCandidates(root: JordTableInfo, schema: string): Promise<JordTableInfo[]> {
+    const tables: JordTableInfo[] = [root];
+    for (const name of await deps.jord.listTables(schema)) {
+      if (name === root.name || !exposed(name)) continue;
+      const info = await deps.jord.describeTable(name, schema);
+      if (info) tables.push(info);
+    }
+    for (const fk of root.foreignKeys ?? []) {
+      const refSchema = fk.references.schema || schema;
+      if (refSchema === schema || !exposed(fk.references.table)) continue;
+      if (tables.some((t) => t.name === fk.references.table && t.schema === refSchema)) continue;
+      const resolved = await deps.jord.resolveSchema(refSchema);
+      if (!resolved.ok) continue;
+      const info = await deps.jord.describeTable(fk.references.table, resolved.schema);
+      if (info) tables.push(info);
+    }
+    return tables;
+  }
+
   routes.get("/openapi.json", async (c) => {
     const scoped = await resolveSchema(c);
     if (!scoped.ok) return scoped.response;
@@ -88,7 +135,56 @@ export function createTableApiRoutes(deps: {
       const info = await deps.jord.describeTable(name, scoped.schema);
       if (info) tables.push(info);
     }
-    return c.json(buildOpenApi(tables));
+    const dialect = dialectOf(deps.jord);
+    const exposedTables = tables.filter((t) => exposed(t.name));
+    return c.json(
+      buildOpenApi(
+        tables.map((t) => ({ ...t, relations: relationCatalog(t, exposedTables, dialect) })),
+      ),
+    );
+  });
+
+  // S0080: registered before `/:table/bulk` so `/rpc/bulk` is the RPC `bulk`, never table `rpc`.
+  routes.post("/rpc/:fn", (c) =>
+    handleRpc(c, {
+      jord: deps.jord,
+      writeChangeAs: deps.writeChangeAs,
+      maxJsonBytes,
+      runner: deps.rpc ?? null,
+    }),
+  );
+
+  routes.post("/:table/bulk", async (c) => {
+    try {
+      const table = c.req.param("table");
+      if (!table || RESERVED.test(table) || table === "openapi.json") {
+        return jsonError(404, "not_found", "table not found");
+      }
+      if (table === "records" && !deps.generatedRecordsEnabled()) {
+        return c.json({ error: "api_disabled", resource: "records" }, 503);
+      }
+      const scoped = await resolveSchema(c);
+      if (!scoped.ok) return scoped.response;
+      const info = await deps.jord.describeTable(table, scoped.schema);
+      if (!info) return jsonError(404, "not_found", "table not found");
+      return await handleBulk(c, {
+        jord: deps.jord,
+        writeChangeAs: deps.writeChangeAs,
+        maxJsonBytes,
+        info,
+        schema: scoped.schema,
+        dialect: dialectOf(deps.jord),
+      });
+    } catch (err) {
+      if (err instanceof TableApiError) {
+        return jsonError(err.status, err.code, err.message, {
+          field: err.field,
+          reason: err.reason,
+          available: err.available,
+        });
+      }
+      throw err;
+    }
   });
 
   routes.all("/:table", async (c) => {
@@ -129,21 +225,57 @@ export function createTableApiRoutes(deps: {
 
       const operation =
         method === "GET" ? "select" : method === "POST" ? "insert" : method === "PATCH" ? "update" : "delete";
-      const decision = await evaluatePolicies({
-        jord: deps.jord,
-        tableName: table,
-        schema: scoped.schema,
-        operation,
-        role: principal.role,
-        subject: principal.kind,
-        uid: principal.uid ?? null,
-        claims: principal.claims,
-        bypass: principal.kind === "service" || policiesDisabledFromEnv(),
-      });
+      /** The one policy call for this principal; embeds reuse it for their own table (S0078). */
+      const decide = (tableName: string, schema: string, op: typeof operation) =>
+        decideForPrincipal({ jord: deps.jord, principal, tableName, schema, operation: op });
+      const decision = await decide(table, scoped.schema, operation);
       if (!decision.allowed) {
         return jsonError(403, "policy_denied", "policy denied");
       }
       const scope = principal.kind === "service" ? undefined : scopeFor(info, decision.scope);
+
+      const embedSpecs = parsed.embeds ?? [];
+      if (embedSpecs.length > 0 && method !== "GET") {
+        return jsonError(400, "bad_select", "embeds are only supported on GET");
+      }
+      const embeds: Array<ResolvedEmbed & { scope?: ScopeFor }> = [];
+      if (embedSpecs.length > 0) {
+        const rels = relationCatalog(info, await embedCandidates(info, scoped.schema), dialect);
+        const rootOutput = parsed.select ?? info.columns.map((col) => col.name);
+        const resolved = resolveEmbeds(info, embedSpecs, rels, rootOutput);
+        // Each embedded table is authorized exactly like a direct GET of it: deny => 403.
+        for (const embed of resolved) {
+          const target = embed.relation.target;
+          const embedDecision = await decide(target.name, target.schema ?? scoped.schema, "select");
+          if (!embedDecision.allowed) {
+            return jsonError(403, "policy_denied", `policy denied on embedded ${embed.key}`);
+          }
+          embeds.push({
+            ...embed,
+            scope: principal.kind === "service" ? undefined : scopeFor(target, embedDecision.scope),
+          });
+        }
+      }
+      const embedLocal = embeds.flatMap((embed) => embed.relation.localColumns);
+      /** Attach embeds (one batched statement each) to fetched root rows, then project. */
+      const shape = async (
+        fetched: Array<Record<string, unknown>>,
+        wanted: string[] | null,
+      ): Promise<Array<Record<string, unknown>>> => {
+        const project = (row: Record<string, unknown>) =>
+          wanted ? Object.fromEntries(wanted.map((name) => [name, row[name]])) : row;
+        if (embeds.length === 0) return wanted ? fetched.map(project) : fetched;
+        const attached = await fetchEmbeds({
+          query: (sql, args) => deps.jord.query(sql, args),
+          dialect,
+          rows: fetched,
+          embeds,
+        });
+        if (attached.truncated.length > 0) {
+          c.header("Jord-Embed-Truncated", attached.truncated.join(","));
+        }
+        return fetched.map((row, i) => ({ ...project(row), ...attached.values[i] }));
+      };
 
       if (method === "GET" && parsed.cursor != null) {
         if (parsed.offset > 0) {
@@ -154,16 +286,14 @@ export function createTableApiRoutes(deps: {
         // Fetch the order columns even when `select` omits them, then strip them again.
         const wanted = parsed.select;
         const fetchParsed = wanted
-          ? { ...parsed, select: [...new Set([...wanted, ...order.map((o) => o.column)])] }
+          ? { ...parsed, select: [...new Set([...wanted, ...order.map((o) => o.column), ...embedLocal])] }
           : parsed;
         const compiled = compileKeysetSelect(info, fetchParsed, dialect, order, after, scope);
         const fetched = await deps.jord.query(compiled.sql, compiled.args);
         const hasMore = fetched.length > parsed.limit;
         const page = hasMore ? fetched.slice(0, parsed.limit) : fetched;
         const next = hasMore ? encodeCursor(info, order, page[page.length - 1]!) : null;
-        const rows = wanted
-          ? page.map((row) => Object.fromEntries(wanted.map((name) => [name, row[name]])))
-          : page;
+        const rows = await shape(page, wanted);
         let count: number | null = null;
         if (parsed.count === "exact") {
           const counted = compileCount(info, parsed.filters, dialect, scope);
@@ -177,8 +307,14 @@ export function createTableApiRoutes(deps: {
       }
 
       if (method === "GET") {
-        const compiled = compileSelect(info, parsed, dialect, scope);
-        const rows = await deps.jord.query(compiled.sql, compiled.args);
+        const wanted = parsed.select;
+        const fetchParsed =
+          wanted && embeds.length > 0
+            ? { ...parsed, select: [...new Set([...wanted, ...embedLocal])] }
+            : parsed;
+        const compiled = compileSelect(info, fetchParsed, dialect, scope);
+        const fetched = await deps.jord.query(compiled.sql, compiled.args);
+        const rows = embeds.length > 0 ? await shape(fetched, wanted) : fetched;
         let count: number | null = null;
         if (parsed.count === "exact") {
           const counted = compileCount(info, parsed.filters, dialect, scope);
@@ -290,6 +426,7 @@ export function createTableApiRoutes(deps: {
         return jsonError(err.status, err.code, err.message, {
           field: err.field,
           reason: err.reason,
+          available: err.available,
         });
       }
       throw err;
@@ -307,47 +444,3 @@ async function readBody(c: { req: { json: () => Promise<unknown> } }): Promise<R
   return raw as Record<string, unknown>;
 }
 
-function rowId(keys: string[], row: Record<string, unknown>): string {
-  return keys.map((key) => String(row[key] ?? "")).join(",");
-}
-
-function coerceBody(
-  info: {
-    columns: Array<{
-      name: string;
-      type: string;
-      notnull: boolean;
-      pk: boolean;
-      dflt_value: string | null;
-      settings?: Parameters<typeof validateColumnValue>[2];
-    }>;
-  },
-  body: Record<string, unknown>,
-): Record<string, SqlValue> {
-  const out: Record<string, SqlValue> = {};
-  for (const [key, value] of Object.entries(body)) {
-    const col = info.columns.find((item) => item.name === key);
-    if (!col) throw new TableApiError(400, "bad_column", `unknown column ${key}`);
-    const ruled = validateColumnValue(key, value, col.settings);
-    if (!ruled.ok) {
-      throw new TableApiError(422, "validation", ruled.reason, {
-        field: ruled.field,
-        reason: ruled.reason,
-      });
-    }
-    if (value == null) {
-      out[key] = null;
-      continue;
-    }
-    if (typeof value === "number") {
-      out[key] = coerceColumnValue(col, String(value));
-      continue;
-    }
-    if (typeof value === "string") {
-      out[key] = coerceColumnValue(col, value);
-      continue;
-    }
-    throw new TableApiError(400, "bad_value", `${key} must be a scalar`);
-  }
-  return out;
-}

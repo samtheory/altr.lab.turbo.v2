@@ -205,7 +205,7 @@ describe("presence channel join is policy-gated (S0083)", () => {
     a.ws.send(JSON.stringify({ type: "broadcast", event: "cursor", payload: { x: 3 } }));
     await settle();
     expect(b.msgs.filter((m) => m.type === "broadcast")).toEqual([
-      { type: "broadcast", channel: "lab_notes:n1", event: "cursor", payload: { x: 3 }, from: a.key },
+      { type: "broadcast", channel: "lab_notes:n1", event: "cursor", payload: { x: 3 }, from: a.key, kind: "user" },
     ]);
     expect(a.msgs.filter((m) => m.type === "broadcast")).toEqual([]);
     expect(c.msgs.filter((m) => m.type === "broadcast" || (m.type === "presence" && m.event !== "sync"))).toEqual([]);
@@ -295,5 +295,36 @@ describe("revoked sessions drop open realtime streams (S0076 follow-up)", () => 
     expect(hub.size).toBe(0);
     // New connections are refused by the auth middleware.
     expect(await join(port, "lab_notes", headers)).toEqual({ status: 401 });
+  });
+});
+
+describe("presence socket abuse caps (S0083 security)", () => {
+  it("per-principal cap: excess upgrade gets 429, other principals unaffected", async () => {
+    const { port, hub } = await boot({ policy: "open", limits: { maxSocketsPerPrincipal: 2 } });
+    asClient(await join(port, "lab_notes", userAuth("user-1")));
+    asClient(await join(port, "lab_notes", userAuth("user-1")));
+    expect(await join(port, "lab_notes", userAuth("user-1"))).toEqual({ status: 429 });
+    asClient(await join(port, "lab_notes", userAuth("user-2")));
+    expect(hub.size).toBe(3);
+  });
+
+  it("presence/broadcast carry server-stamped kind, never the uid", async () => {
+    const { port } = await boot({ policy: "open" });
+    const a = asClient(await join(port, "lab_notes", userAuth("user-1")));
+    const b = asClient(await join(port, "lab_notes", adminAuth()));
+    a.ws.send(JSON.stringify({ type: "join", state: {} }));
+    await settle();
+    expect(b.msgs.find((m) => m.type === "presence" && m.event === "join")).toMatchObject({ key: a.key, kind: "user" });
+    expect(JSON.stringify(b.msgs)).not.toContain("user-1");
+  });
+
+  it("frames above the 64 KiB ws maxPayload close the socket with 1009", async () => {
+    const { port, hub } = await boot({ policy: "open" });
+    const a = asClient(await join(port, "lab_notes", userAuth("user-1")));
+    expect(hub.size).toBe(1);
+    a.ws.send("x".repeat(70 * 1024));
+    expect((await a.closed).code).toBe(1009);
+    await settle(50);
+    expect(hub.size).toBe(0);
   });
 });

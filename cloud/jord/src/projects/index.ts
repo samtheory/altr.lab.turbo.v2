@@ -21,7 +21,9 @@ export {
   parseTlsMode,
   patchProject,
   publicProjectJson,
+  revokePreviousProjectKeys,
   rotateProjectKeys,
+  verifyProjectKey,
   testProjectConnect,
   validateSlug,
   type CreateProjectBody,
@@ -29,6 +31,8 @@ export {
   type ProjectKeyPublic,
   type ProjectPublic,
   type ProjectRegistryDeps,
+  type RotateProjectKeysOptions,
+  type VerifiedProjectKey,
 } from "./registry.js";
 export {
   getErdLayout,

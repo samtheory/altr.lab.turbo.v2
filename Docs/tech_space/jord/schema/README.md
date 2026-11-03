@@ -186,4 +186,4 @@ Default omit/`public`/`main` keeps prior behavior for existing clients.
 
 ## Not in Jord yet
 
-Schema create/drop UI · cross-schema FK embeds ([[../../../plan/Jord/phase-03/S0078-fk-embeds|S0078]]) · schema on `jord_policies` / `jord_triggers` / `jord_changes` · arbitrary SQL · column-level policies. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].
+Schema create/drop UI · cross-schema FK embeds ([[../../../plan/Jord/phase-03/done/S0078-fk-embeds|S0078]]) · schema on `jord_policies` / `jord_triggers` / `jord_changes` · arbitrary SQL · column-level policies. Boot history is `jord_migrations` — [[../overview/README#boot-migrations]].

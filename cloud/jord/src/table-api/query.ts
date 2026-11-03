@@ -42,19 +42,33 @@ export type ParsedTableQuery = {
   representation: boolean;
   /** Keyset mode when non-null; "" = first page (S0079). */
   cursor?: string | null;
+  /** One-level FK embeds from `select=*,author(*)` (S0078). Empty when none. */
+  embeds?: EmbedSpec[];
 };
+
+/** `[alias:]relation(cols)` inside `select` (S0078). `columns` null = all. */
+export type EmbedSpec = {
+  /** Response key: the alias, else the relation name. */
+  key: string;
+  relation: string;
+  columns: string[] | null;
+};
+
+export const MAX_EMBEDS = 8;
 
 export class TableApiError extends Error {
   readonly status: number;
   readonly code: string;
   readonly field?: string;
   readonly reason?: string;
+  /** Valid alternatives (e.g. relation names for `unknown_relation`). */
+  readonly available?: string[];
 
   constructor(
     status: number,
     code: string,
     message: string,
-    extra?: { field?: string; reason?: string },
+    extra?: { field?: string; reason?: string; available?: string[] },
   ) {
     super(message);
     this.name = "TableApiError";
@@ -62,6 +76,7 @@ export class TableApiError extends Error {
     this.code = code;
     this.field = extra?.field;
     this.reason = extra?.reason;
+    this.available = extra?.available;
   }
 }
 
@@ -198,9 +213,12 @@ export function parseTableQuery(
   }
 
   let select: string[] | null = null;
+  let embeds: EmbedSpec[] = [];
   const selectRaw = search.get("select");
   if (selectRaw != null && selectRaw !== "" && selectRaw !== "*") {
-    select = selectRaw.split(",").map((name) => requireColumn(info, name.trim()).name);
+    const parsedSelect = parseSelect(info, selectRaw);
+    select = parsedSelect.select;
+    embeds = parsedSelect.embeds;
   }
 
   const order: ParsedTableQuery["order"] = [];
@@ -234,7 +252,94 @@ export function parseTableQuery(
     count: pref.count,
     representation: pref.representation,
     cursor: search.get("cursor"),
+    embeds,
   };
+}
+
+/** Split on commas that are not inside parentheses. */
+function splitTopLevel(raw: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (ch === "(") depth += 1;
+    else if (ch === ")") {
+      depth -= 1;
+      if (depth < 0) throw new TableApiError(400, "bad_select", "unbalanced parentheses in select");
+    } else if (ch === "," && depth === 0) {
+      parts.push(raw.slice(start, i));
+      start = i + 1;
+    }
+  }
+  if (depth !== 0) throw new TableApiError(400, "bad_select", "unbalanced parentheses in select");
+  parts.push(raw.slice(start));
+  return parts.map((part) => part.trim());
+}
+
+const EMBED_RE = /^(?:([A-Za-z_][A-Za-z0-9_]*)\s*:\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*\((.*)\)$/s;
+
+/**
+ * `select` grammar (S0078):
+ *   select := item ("," item)*
+ *   item   := "*" | column | [alias ":"] relation "(" inner ")"
+ *   inner  := "*" | column ("," column)*        -- one level only, no nested embeds
+ * Root columns are validated here; embed columns are validated against the related table later.
+ */
+function parseSelect(
+  info: JordTableInfo,
+  raw: string,
+): { select: string[] | null; embeds: EmbedSpec[] } {
+  let star = false;
+  const columns: string[] = [];
+  const embeds: EmbedSpec[] = [];
+  for (const item of splitTopLevel(raw)) {
+    if (item === "*") {
+      star = true;
+      continue;
+    }
+    if (!item.includes("(")) {
+      columns.push(requireColumn(info, item).name);
+      continue;
+    }
+    const match = EMBED_RE.exec(item);
+    if (!match) throw new TableApiError(400, "bad_select", `cannot parse select item ${item}`);
+    const relation = match[2]!;
+    const key = match[1] ?? relation;
+    if (["__proto__", "constructor", "prototype"].includes(key)) {
+      throw new TableApiError(400, "bad_select", `embed alias ${key} is not allowed`);
+    }
+    const innerRaw = match[3]!.trim();
+    if (innerRaw.includes("(")) {
+      throw new TableApiError(400, "nested_embed", "embeds are one level deep");
+    }
+    if (innerRaw === "") {
+      throw new TableApiError(400, "bad_select", `embed ${key} needs * or a column list`);
+    }
+    let inner: string[] | null = [];
+    for (const name of innerRaw.split(",").map((part) => part.trim())) {
+      if (name === "*") {
+        inner = null;
+        break;
+      }
+      if (!isValidSqlIdent(name)) {
+        throw new TableApiError(400, "bad_column", `column ${name} is not allowed`);
+      }
+      inner.push(name);
+    }
+    if (embeds.some((embed) => embed.key === key)) {
+      throw new TableApiError(400, "bad_select", `duplicate embed ${key}`);
+    }
+    embeds.push({ key, relation, columns: inner });
+  }
+  if (embeds.length > MAX_EMBEDS) {
+    throw new TableApiError(400, "cap_exceeded", `select allows at most ${MAX_EMBEDS} embeds`);
+  }
+  const select = star ? null : columns;
+  if (select && embeds.length === 0 && select.length === 0) {
+    throw new TableApiError(400, "bad_select", "select is empty");
+  }
+  return { select, embeds };
 }
 
 export function pkColumns(info: JordTableInfo): JordColumnInfo[] {

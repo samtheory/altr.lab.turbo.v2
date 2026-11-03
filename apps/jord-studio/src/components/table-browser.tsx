@@ -5,10 +5,16 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
   useTransition,
 } from "react";
+import {
+  LIVE_TOGGLE_INITIAL,
+  liveBadge,
+  liveToggleReducer,
+} from "@/lib/studio-live-toggle";
 import { useSearchParams } from "next/navigation";
 import {
   Alert,
@@ -161,10 +167,12 @@ export function TableBrowser({ table, role }: Props) {
   const [missing, setMissing] = useState(false);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [editingPk, setEditingPk] = useState<string | null>(null);
-  const [live, setLive] = useState(false);
-  const [liveState, setLiveState] = useState<
-    "off" | "connecting" | "live" | "reconnecting"
-  >("off");
+  const [liveToggle, dispatchLive] = useReducer(
+    liveToggleReducer,
+    LIVE_TOGGLE_INITIAL,
+  );
+  const live = liveToggle.on;
+  const liveBadgeInfo = liveBadge(liveToggle.conn);
   const [isPending, startTransition] = useTransition();
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
   const [confirm, setConfirm] = useState<
@@ -358,18 +366,15 @@ export function TableBrowser({ table, role }: Props) {
   }, [loadWindow, table, schema]);
 
   useEffect(() => {
-    if (!live) {
-      setLiveState("off");
-      return;
-    }
+    if (!live) return;
 
     const source = new EventSource(
       `/api/realtime?table=${encodeURIComponent(table)}`,
     );
-    setLiveState("connecting");
+    dispatchLive({ type: "connecting" });
 
     source.addEventListener("jord.change", (evt) => {
-      setLiveState("live");
+      dispatchLive({ type: "open" });
       const message = (evt as MessageEvent).data;
       const event =
         typeof message === "string" ? parseLiveChangeEvent(message) : null;
@@ -377,6 +382,8 @@ export function TableBrowser({ table, role }: Props) {
         loadWindow({ offset: 0, mode: "replace" });
         return;
       }
+      // Defensive: the stream is already filtered by ?table=, but never merge another table's delta.
+      if (event.table && event.table !== table) return;
       const editing = editingCellRef.current;
       const pkCol = columnsRef.current.find((col) => col.pk)?.name ?? "id";
       setRows((prev) => {
@@ -411,15 +418,13 @@ export function TableBrowser({ table, role }: Props) {
         return merged.rows;
       });
     });
-    source.onopen = () => setLiveState("live");
+    source.onopen = () => dispatchLive({ type: "open" });
     source.onerror = () => {
       if (source.readyState === EventSource.CLOSED) {
-        setLive(false);
-        setLiveState("off");
-        setError("Live updates closed.");
+        dispatchLive({ type: "closed", message: "Live updates closed." });
         return;
       }
-      setLiveState("reconnecting");
+      dispatchLive({ type: "reconnecting" });
     };
 
     return () => {
@@ -727,13 +732,18 @@ export function TableBrowser({ table, role }: Props) {
           <div className="flex items-center gap-2">
             <Switch
               checked={live}
-              onCheckedChange={setLive}
+              onCheckedChange={(on) => dispatchLive({ type: "toggle", on })}
               aria-label="Live updates"
               size="sm"
             />
             <span className="text-sm text-muted-foreground">Live</span>
-            <Badge variant="secondary" className="font-mono text-[10px] uppercase">
-              {liveState}
+            <Badge
+              variant={liveBadgeInfo.tone}
+              className="font-mono text-[10px] uppercase"
+              role="status"
+              aria-live="polite"
+            >
+              {liveBadgeInfo.label}
             </Badge>
           </div>
           {canWrite ? (
@@ -784,6 +794,25 @@ export function TableBrowser({ table, role }: Props) {
         <Alert variant="destructive">
           <AlertTitle>Rows unavailable</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {liveToggle.error ? (
+        <Alert variant="warning">
+          <AlertTitle>Live updates</AlertTitle>
+          <AlertDescription>
+            <p>{liveToggle.error}</p>
+            <div className="mt-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => dispatchLive({ type: "dismiss" })}
+              >
+                Dismiss
+              </Button>
+            </div>
+          </AlertDescription>
         </Alert>
       ) : null}
 

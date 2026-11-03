@@ -57,7 +57,7 @@ Long-term metrics retention (Prometheus/Grafana) · alerting · billing/quota da
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0095-project-stats-endpoint\|S0095]] — stats endpoint | 2.5–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0096-dashboard-ui\|S0096]] — dashboard UI | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0095-project-stats-endpoint\|S0095]] — stats endpoint | 2.5–3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0096-dashboard-ui\|S0096]] — dashboard UI | 3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

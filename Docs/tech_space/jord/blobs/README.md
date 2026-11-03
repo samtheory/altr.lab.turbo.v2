@@ -143,6 +143,14 @@ Admin `POST /blobs/buckets` `{ "name":"lab" }` creates the disk/prefix **and** a
 
 Admin `POST /admin/buckets/:name/test` with provider + keys probes without saving; `POST /admin/buckets` probes then seals credentials. `POST …/rotate` rejects the previous sealed envelopes in-process immediately.
 
+## Multipart + resumable uploads (S0081)
+
+Routes under `/blobs/:bucket/uploads` (editor+): `POST` create `{key, content_type?, size, part_size?}`, `GET /:id` (parts, missing parts), `POST /:id/parts/sign` (up to 100 part URLs), `POST /:id/complete` (idempotent; missing parts = 409 `incomplete_upload`), `DELETE /:id` abort. Sessions live in `jord_uploads` (migration 0023); `open -> completing / aborting` are conditional UPDATEs. The local adapter keeps part files on disk (resume survives a restart) and assembles by streaming; the S3 adapter presigns `UploadPart` with the exact `content-length` and verifies with `ListParts`. A part is rejected while writing if it exceeds its declared size (streamed, never buffered); complete re-checks sizes/ETags and the bucket MIME/size policy. At most 50 open sessions per principal. `blobs_gc` sweeps expired sessions (and rescues ones stuck in `completing` for over an hour). Open: 1 GiB drill and live MinIO are env-gated; the object can be orphaned if the metadata write fails after local assembly.
+
+## Image transforms (S0082)
+
+Sign with `POST /blobs/:b/objects/:k/sign` `{intent:"download", transform:{w,h,fit,q,fm}}`; the URL is `/blobs/signed/:bucket/transform/:key?w&h&fit&q&fm&X-Jord-*` and the signature covers the transform, so changing any param is a 403. Pure-JS renderer (`jpeg-js`, `pngjs`; jpeg/png out, no WebP/AVIF) in a `worker_thread` (15 s, 2 concurrent, queue 8 then 503). Source limits are checked from the header before decode: 20 MiB, 16 MP (8 MP for 16-bit/interlaced PNG); output up to 4096 px; magic bytes sniffed (415/413). A miss renders inline and stores a derivative `<original>.<sha256(params + etag)[:16]>.<ext>`. Derivatives are identified by `jord_blobs.derived_from` (migration 0027), never by key shape: writes onto a derivative row are 409, a user file named like a derivative is left alone, and originals that are deleted or overwritten take their derivatives with them (best effort; `blobs_gc` sweeps the rest). Served with the output format's content type and `nosniff`. Open: derivatives show in bucket listings; no bucket quota; limits are per process.
+
 ## Not in Jord yet
 
-Automatic cutover without an operator flag · multipart/resumable ([[../../../plan/Jord/phase-03/S0081-multipart-uploads\|S0081]])
+Automatic cutover without an operator flag · image transforms ([[../../../plan/Jord/phase-03/done/S0082-image-transforms|S0082]]); multipart/resumable shipped in S0081 (above)

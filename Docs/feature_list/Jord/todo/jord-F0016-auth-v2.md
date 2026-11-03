@@ -39,6 +39,6 @@ Enumeration tests still pass; OAuth state/PKCE tested; policy tester matches ser
 | [[../../../plan/Jord/phase-03/done/S0074-magic-link\|S0074]] — magic-link sign-in | 2–3 h | **done** 2026-11-03 |
 | [[../../../plan/Jord/phase-03/done/S0075-oauth-provider\|S0075]] — one OAuth provider (state + PKCE) | 3 h | **done** 2026-11-03 |
 | [[../../../plan/Jord/phase-03/done/S0076-sessions-claims\|S0076]] — sessions + custom JWT claims | 2.5–3 h | **done** 2026-11-03 |
-| [[../../../plan/Jord/phase-03/S0077-policy-tester\|S0077]] — "run as user" policy tester | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0077-policy-tester\|S0077]] — "run as user" policy tester | 2–3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

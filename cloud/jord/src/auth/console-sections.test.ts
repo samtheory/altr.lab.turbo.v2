@@ -209,7 +209,7 @@ describe("auth console sections S0071", () => {
       };
       expect(rotatedBody.key.source).toBe("database");
       expect(rotatedBody.key.configured).toBe(true);
-      expect(rotatedBody.key.fingerprint).toMatch(/^[0-9a-f]{16}$/);
+      expect(rotatedBody.key.fingerprint).toMatch(/^[0-9a-f]{12}$/); // keyed fingerprint (S0093)
       expect(rotatedBody.invalidated).toContain("access tokens");
 
       // The old access token was signed with the env key: rotation invalidates it.

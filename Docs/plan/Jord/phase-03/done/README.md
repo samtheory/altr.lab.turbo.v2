@@ -59,3 +59,20 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0074-magic-link\|S0074]] | Magic-link sign-in (single-use, rate-limited, allowlisted) | 2026-11-03 |
 | [[S0075-oauth-provider\|S0075]] | One OAuth provider (Google, state + PKCE, linking policy) | 2026-11-03 |
 | [[S0076-sessions-claims\|S0076]] | Sessions list/revoke + `sid` enforcement + cleanup job | 2026-11-03 |
+| [[S0079-keyset-pagination\|S0079]] | Keyset pagination (HMAC cursor, total order) | 2026-11-03 |
+| [[S0081-multipart-uploads\|S0081]] | Multipart + resumable uploads (local + S3 presign) | 2026-11-03 |
+| [[S0083-presence-broadcast\|S0083]] | Presence + broadcast, policy-gated join | 2026-11-03 |
+| [[S0078-fk-embeds\|S0078]] | FK embeds with per-table policy parity | 2026-11-03 |
+| [[S0082-image-transforms\|S0082]] | Image transforms (pure JS, worker thread, DB-marked derivatives) | 2026-11-03 |
+| [[S0087-gen-types-cli\|S0087]] | `jord gen types` (in `@altr/jord-client`) | 2026-11-03 |
+| [[S0094-dependency-audit-ci\|S0094]] | Dependency audit in CI (9 open findings) | 2026-11-03 |
+| [[S0080-bulk-upsert-rpc\|S0080]] | Bulk upsert (per-row savepoints) + RPC (exposure-gated) | 2026-11-03 |
+| [[S0084-realtime-app-endpoint\|S0084]] | Realtime app endpoint (publishable key, snapshot + deltas) | 2026-11-03 |
+| [[S0088-typed-client-builder\|S0088]] | Typed table builder in `@altr/jord-client` | 2026-11-03 |
+| [[S0093-key-rotation-runbook\|S0093]] | Key rotation (JWT, blob HMAC, project keys) + runbook | 2026-11-03 |
+| [[S0095-project-stats-endpoint\|S0095]] | Project stats endpoint | 2026-11-03 |
+| [[S0077-policy-tester\|S0077]] | Policy tester ("run as user"): endpoint + Studio panel | 2026-11-03 |
+| [[S0085-realtime-reconnect\|S0085]] | Realtime client: reconnect, resume, resync | 2026-11-03 |
+| [[S0086-live-toggle-snippet\|S0086]] | Live toggle, realtime stats, client snippets | 2026-11-03 |
+| [[S0089-react-bindings\|S0089]] | `@altr/jord-react` (provider, query, live hooks) | 2026-11-03 |
+| [[S0096-dashboard-ui\|S0096]] | Project dashboard UI | 2026-11-03 |

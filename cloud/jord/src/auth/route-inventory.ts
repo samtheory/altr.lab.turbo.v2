@@ -30,6 +30,8 @@ export function surfaceFor(method: string, path: string): string | null {
   if (normalized === "/realtime" || normalized.startsWith("/realtime/")) {
     return "realtime";
   }
+  // S0084: publishable-key app realtime (own handshake, not operator auth).
+  if (/^\/p\/[^/]+\/realtime$/.test(normalized)) return "p/:project/realtime";
   if (normalized === "/records" || normalized.startsWith("/records/")) {
     return "records";
   }

@@ -243,15 +243,18 @@ export function compilePriorSelect(
   dialect: "libsql" | "postgres",
   allowUnfiltered = false,
   scope?: ScopeFor,
+  /** `lock: false` = plain probe (no FOR UPDATE); `columns` limits the select list. */
+  probe?: { lock?: boolean; columns?: string[] },
 ): CompiledSql {
   const args: SqlValue[] = [];
   const where = whereSql(filters, args, scope);
   if (!where && !allowUnfiltered) {
     throw new TableApiError(400, "filter_required", "PATCH requires a filter");
   }
-  const lock = dialect === "postgres" ? " FOR UPDATE" : "";
+  const lock = dialect === "postgres" && probe?.lock !== false ? " FOR UPDATE" : "";
+  const list = probe?.columns?.length ? probe.columns.map((name) => quoteIdent(name)).join(", ") : "*";
   return {
-    sql: placeholders(`SELECT * FROM ${tableSql(info, dialect)}${where}${lock}`, dialect),
+    sql: placeholders(`SELECT ${list} FROM ${tableSql(info, dialect)}${where}${lock}`, dialect),
     args,
   };
 }
@@ -300,4 +303,67 @@ export function compileDelete(
     ),
     args,
   };
+}
+
+/**
+ * Batched embed fetch (S0078): every related row for a set of parent keys in ONE statement.
+ *
+ * Policy parity: the WHERE is built by the same `whereSql` + row scope as a direct
+ * `GET /api/v1/<target>` (the scope is the embedded table's own decision for the same principal),
+ * ANDed with the key set. So an embed can only return a subset of what a direct read returns.
+ *
+ * `perParent` (one-to-many) caps rows per parent with ROW_NUMBER() OVER (PARTITION BY fk), applied
+ * after the scope filter, so hidden rows never take a slot. `perParent + 1` rows are fetched so the
+ * caller can tell a truncated list. `LIMIT total + 1` bounds the whole statement.
+ */
+export function compileEmbedSelect(
+  target: JordTableInfo,
+  columns: string[],
+  matchColumns: string[],
+  keys: SqlValue[][],
+  dialect: "libsql" | "postgres",
+  caps: { perParent: number | null; total: number },
+  scope?: ScopeFor,
+): CompiledSql {
+  if (matchColumns.length === 0 || keys.length === 0) {
+    throw new Error("compileEmbedSelect needs match columns and keys");
+  }
+  const args: SqlValue[] = [];
+  const keyFilters: Filter[] =
+    matchColumns.length === 1
+      ? [{ column: matchColumns[0]!, op: "in", values: keys.map((key) => key[0] ?? null) }]
+      : [];
+  let where = whereSql(keyFilters, args, scope);
+  if (matchColumns.length > 1) {
+    // Composite key: ((a = ? AND b = ?) OR ...). Appended after the scope args, in text order.
+    const groups = keys.map((key) => {
+      const parts = matchColumns.map((column, i) => {
+        args.push(key[i] ?? null);
+        return `${quoteIdent(column)} = ?`;
+      });
+      return `(${parts.join(" AND ")})`;
+    });
+    const clause = `(${groups.join(" OR ")})`;
+    where = where ? `${where} AND ${clause}` : ` WHERE ${clause}`;
+  }
+  const pk = pkColumns(target).map((col) => col.name);
+  const tiebreak = pk.length > 0 ? pk : matchColumns;
+  // The outer ORDER BY reads match + tiebreak columns, so they are always fetched.
+  const fetched = [...new Set([...columns, ...matchColumns, ...tiebreak])];
+  const list = fetched.map((name) => quoteIdent(name)).join(", ");
+  const from = tableSql(target, dialect);
+  let sql: string;
+  if (caps.perParent != null) {
+    const partition = matchColumns.map((name) => quoteIdent(name)).join(", ");
+    const within = tiebreak.map((name) => `${quoteIdent(name)} ASC`).join(", ");
+    args.push(caps.perParent + 1, caps.total + 1);
+    sql =
+      `SELECT ${list} FROM (SELECT ${list}, ROW_NUMBER() OVER (PARTITION BY ${partition} ORDER BY ${within}) AS "__jord_rn"` +
+      ` FROM ${from}${where}) AS "__jord_embed" WHERE "__jord_rn" <= ?` +
+      ` ORDER BY ${partition}, ${within} LIMIT ?`;
+  } else {
+    args.push(caps.total + 1);
+    sql = `SELECT ${list} FROM ${from}${where} ORDER BY ${tiebreak.map((name) => `${quoteIdent(name)} ASC`).join(", ")} LIMIT ?`;
+  }
+  return { sql: placeholders(sql, dialect), args };
 }

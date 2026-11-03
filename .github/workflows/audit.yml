@@ -1,0 +1,103 @@
+# Dependency audit (S0094, jord-F0019).
+#   - job `audit`: blocking on PRs and pushes to main. Production deps only,
+#     high/critical. Allowlist in security/audit-allowlist.json (expiry enforced).
+#   - job `audit-full`: weekly (Mondays) report over all dependencies.
+#     Non-blocking; uploads the JSON and a summary as an artifact.
+# No secrets are used by either job.
+name: audit
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    # Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: audit
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      # The gate reads pnpm-lock.yaml; node_modules is not needed.
+      - name: Unit tests for the audit gate
+        run: node --test scripts/audit-ci.test.mjs
+
+      - name: Audit production dependencies (blocking)
+        run: pnpm audit:ci
+
+  audit-full:
+    name: audit-full (weekly, non-blocking)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Full dependency audit (all deps, report only)
+        continue-on-error: true
+        run: |
+          mkdir -p audit-report
+          pnpm audit --json > audit-report/audit-full.json 2> audit-report/audit-full.stderr || true
+
+      - name: Build summary
+        if: always()
+        run: |
+          mkdir -p audit-report
+          node -e "
+            const fs = require('fs');
+            const p = 'audit-report/audit-full.json';
+            let s = 'pnpm audit (all dependencies): no parseable report.\n';
+            try {
+              const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+              const v = (j.metadata && j.metadata.vulnerabilities) || {};
+              s = 'pnpm audit (all dependencies) counts: ' + JSON.stringify(v) + '\n';
+              for (const a of Object.values(j.advisories || {})) {
+                s += '- [' + a.severity + '] ' + a.module_name + ' ' + (a.github_advisory_id || a.id) + ' ' + (a.title || '') + '\n';
+              }
+            } catch (e) {
+              s += String(e.message) + '\n';
+              try { s += fs.readFileSync('audit-report/audit-full.stderr', 'utf8'); } catch (_) {}
+            }
+            fs.writeFileSync('audit-report/summary.txt', s);
+            process.stdout.write(s);
+          "
+          cat audit-report/summary.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-full-report
+          path: audit-report/
+          if-no-files-found: warn
+          retention-days: 30

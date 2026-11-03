@@ -298,6 +298,10 @@ export type JordBlob = {
   status: JordBlobStatus;
   pendingExpiresAt: number | null;
   uploadId: string | null;
+  /** Original key when this row is a transform derivative (S0082), else null. */
+  derivedFrom: string | null;
+  /** Original etag the derivative was rendered from. */
+  derivedSrcEtag: string | null;
   createdAt: number;
   updatedAt: number;
 };
@@ -311,6 +315,9 @@ export type UpsertBlobMetaInput = {
   status?: JordBlobStatus;
   pendingExpiresAt?: number | null;
   uploadId?: string | null;
+  /** Set ONLY by the transform service; omitted = keep existing value. */
+  derivedFrom?: string | null;
+  derivedSrcEtag?: string | null;
 };
 
 /** Embedding metadata without the raw float buffer (list/search). */

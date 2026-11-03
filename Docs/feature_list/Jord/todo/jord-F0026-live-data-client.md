@@ -59,8 +59,8 @@ Offline-first local replica / conflict resolution · client-side query subscript
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0084-realtime-app-endpoint\|S0084]] — app realtime endpoint | 3 h | todo |
-| [[../../../plan/Jord/phase-03/S0085-realtime-reconnect\|S0085]] — reconnect + resume | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0086-live-toggle-snippet\|S0086]] — Studio live toggle + snippet | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0084-realtime-app-endpoint\|S0084]] — app realtime endpoint | 3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0085-realtime-reconnect\|S0085]] — reconnect + resume | 2–3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0086-live-toggle-snippet\|S0086]] — Studio live toggle + snippet | 2–3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

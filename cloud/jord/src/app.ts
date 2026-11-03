@@ -55,9 +55,9 @@ import {
   isGeneratedApiResourceId,
   type GeneratedApiRegistry,
 } from "./generated-api/index.js";
+import { isCustomApiExposed } from "./functions/exposure.js";
 import {
   isBuiltinStepKind,
-  isCustomApiEnvDisabled,
   isCustomHttpMethod,
   isValidApiSlug,
   parseCustomApiDisabledEnv,
@@ -93,6 +93,9 @@ import {
   type ProjectConnectTester,
   type ProjectConnectInput,
 } from "./projects/index.js";
+import { createProjectStatsRoutes } from "./projects/stats.js";
+import { attachRealtimeCounters } from "./projects/stats-counters.js";
+import { createPolicyEvaluateRoutes } from "./policies/evaluate-routes.js";
 import {
   evaluatePolicies,
   isBuiltinPolicyRuleKind,
@@ -108,6 +111,8 @@ import {
   resolveBlobsRoot,
 } from "./blobs/index.js";
 import {
+  createBlobKeyRoutes,
+  createBlobKeySet,
   createBucketAdminRoutes,
   createBucketResolver,
   createStorageFromEnv,
@@ -146,6 +151,8 @@ import {
 import { createPostgresIdempotencyStore } from "./idempotency/pg-store.js";
 import {
   hashBodyText,
+  idempotencyPrincipalKey,
+  readBodyTextCapped,
   isIdempotencyKeyBadRequest,
   isIdempotentWriteMethod,
   isIdempotentWritePath,
@@ -165,14 +172,19 @@ import {
   type OutboxListenBridge,
 } from "./realtime/index.js";
 import { liveDeliveryAllowed } from "./realtime/deliver.js";
-import { PresenceHub } from "./realtime/channels.js";
+import { PresenceHub, WS_MAX_PAYLOAD_BYTES } from "./realtime/channels.js";
 import {
   authorizeChannel,
+  channelPrincipalKey,
   deniedChannelBody,
   parseChannelRef,
+  presencePerPrincipalFromEnv,
   type ChannelRef,
 } from "./realtime/channel-auth.js";
-import { channelSocketHandlers } from "./realtime/channel-socket.js";
+import {
+  channelSocketHandlers,
+  setDeadline,
+} from "./realtime/channel-socket.js";
 import {
   principalSessionLive,
   REALTIME_RECHECK_MS,
@@ -183,6 +195,10 @@ import {
 } from "./realtime/presence-pg.js";
 import type { OutboxRow } from "./realtime/outbox.js";
 import type { WriteWithChange } from "./realtime/types.js";
+import {
+  appRealtimeLimitsFromEnv,
+  createAppRealtime,
+} from "./realtime/app-endpoint.js";
 import {
   isBuiltinTriggerActionKind,
   parseActionsJson,
@@ -520,7 +536,14 @@ async function assertPolicyTable(
 
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
-  const { upgradeWebSocket, injectWebSocket } = createNodeWebSocket({ app });
+  const { upgradeWebSocket, injectWebSocket, wss } = createNodeWebSocket({
+    app,
+  });
+  // @hono/node-ws builds its WebSocketServer with ws defaults (100 MiB
+  // maxPayload). ws reads `options.maxPayload` at each handleUpgrade, so this
+  // caps every socket: oversized frames close 1009 before being buffered.
+  // /realtime/ws clients only send tiny pongs; channel frames cap at 6 KiB.
+  wss.options.maxPayload = WS_MAX_PAYLOAD_BYTES;
 
   const env = deps.env ?? process.env;
   const mailer = deps.mailer ?? createMailerFromEnv({ env });
@@ -539,8 +562,24 @@ export function createJordApp(deps: JordAppDeps) {
   const dataRate = resolveDataRateLimit(env);
   const blobsRoot = resolveBlobsRoot(env, deps.blobsRoot);
   const maxBlobBytes = resolveMaxBlobBytes(env, deps.maxBlobBytes);
-  const hmacSecret =
-    deps.blobSigningSecret ?? resolveHmacSecret(env, deps.auth.secret);
+  // S0042/S0043: inject secret port when a master key is configured.
+  const secrets: SecretPort | null =
+    deps.secrets === undefined
+      ? hasUsableMasterKey(env)
+        ? createSecretPortFromEnv(env)
+        : null
+      : deps.secrets;
+  // S0093: blob signing key set (current + previous with expiry). Env secret
+  // until the first rotation; sealed in jord_key_sets afterwards.
+  const blobKeys = createBlobKeySet({
+    jord: deps.jord,
+    secrets,
+    enqueueWrite: deps.enqueueWrite,
+    baseSecret:
+      deps.blobSigningSecret ?? resolveHmacSecret(env, deps.auth.secret),
+    fingerprintKey: deps.auth.secret,
+  });
+  const hmacSecret = blobKeys;
   const publicBaseUrl = resolvePublicBaseUrl(env);
   const storageFactory = {
     env,
@@ -551,13 +590,6 @@ export function createJordApp(deps: JordAppDeps) {
   const storage = instrumentStorage(
     deps.storage ?? createStorageFromEnv(storageFactory),
   );
-  // S0042/S0043: inject secret port when a master key is configured.
-  const secrets: SecretPort | null =
-    deps.secrets === undefined
-      ? hasUsableMasterKey(env)
-        ? createSecretPortFromEnv(env)
-        : null
-      : deps.secrets;
   const bucketResolver = createBucketResolver({
     jord: deps.jord,
     envPort: storage,
@@ -606,11 +638,19 @@ export function createJordApp(deps: JordAppDeps) {
   app.use("*", createOtelHttpMiddleware());
   app.use("*", createJsonBodyLimitMiddleware(resolveMaxJsonBytes(env)));
 
+  // S0093: refresh the blob key set (cached ~5 s) before any signing/verify.
+  app.use("/blobs/*", async (_c, next) => {
+    await blobKeys.ready();
+    await next();
+  });
+
   registerSignedBlobRoutes(app, {
     storage,
     resolveBucket: (name) => bucketResolver.resolveBucket(name),
     hmacSecret,
     maxBytes: maxBlobBytes,
+    jord: deps.jord,
+    enqueueWrite,
   });
 
   function stepRole(principal: Principal): JordRole {
@@ -671,8 +711,15 @@ export function createJordApp(deps: JordAppDeps) {
       console.error("[@altr/jord-server] presence LISTEN start failed", err);
     });
   }
+  const presencePerPrincipal = presencePerPrincipalFromEnv(env);
   const presence =
-    deps.presence ?? new PresenceHub({ transport: presenceTransport });
+    deps.presence ??
+    new PresenceHub({
+      transport: presenceTransport,
+      limits: presencePerPrincipal
+        ? { maxSocketsPerPrincipal: presencePerPrincipal }
+        : undefined,
+    });
 
   /**
    * Single emit path. The data write and its jord_changes rows (tracked
@@ -817,6 +864,23 @@ export function createJordApp(deps: JordAppDeps) {
     enqueueWrite: enqueueWrite,
   });
 
+  // S0084 — app realtime (publishable key); registered before the
+  // operator-auth protected routes so their Bearer gate never runs here.
+  createAppRealtime({
+    jord: deps.jord,
+    auth: deps.auth,
+    keyring: jwtKeyring,
+    outbox,
+    bus: realtime,
+    decide: (principal, table, operation, extra) =>
+      decide(principal, table, operation, extra),
+    bindRls: (principal) => deps.jord.bindRlsSession?.(rlsSessionFor(principal)),
+    upgradeWebSocket,
+    rateLimit: rateLimitStore,
+    recheckMs: realtimeRecheckMs,
+    limits: appRealtimeLimitsFromEnv(env),
+  }).register(app);
+
   const protectedRoutes = new Hono<{ Variables: JordAuthVariables }>();
   protectedRoutes.use("*", requireAuth);
   protectedRoutes.use(
@@ -845,8 +909,18 @@ export function createJordApp(deps: JordAppDeps) {
       return;
     }
     const principal = c.get("principal");
-    const principalKey = `${principal.kind}:${principal.uid ?? principal.role}`;
-    const bodyText = await c.req.raw.clone().text();
+    const principalKey = idempotencyPrincipalKey(
+      principal,
+      c.req.header("x-forwarded-for"),
+    );
+    // Bounded read: chunked bodies cannot bypass the Content-Length body cap.
+    const bodyText = await readBodyTextCapped(
+      c.req.raw.clone(),
+      path.startsWith("/blobs/") ? null : resolveMaxJsonBytes(env),
+    );
+    if (bodyText === null) {
+      return c.json({ error: "payload_too_large" }, 413);
+    }
     const bodyHash = hashBodyText(bodyText);
     const looked = await idempotency.lookup(key, principalKey, bodyHash);
     if (looked.kind === "hit") {
@@ -2024,7 +2098,7 @@ export function createJordApp(deps: JordAppDeps) {
       const idFilter = c.req.query("id")?.trim() || null;
       let unsubscribe: (() => void) | null = null;
       let pingTimer: ReturnType<typeof setInterval> | null = null;
-      let expTimer: ReturnType<typeof setTimeout> | null = null;
+      let expTimer: { clear(): void } | null = null;
       let sessionTimer: ReturnType<typeof setInterval> | null = null;
       const accessExp = c.get("accessExp");
       const principal = c.get("principal");
@@ -2033,13 +2107,14 @@ export function createJordApp(deps: JordAppDeps) {
       return {
         onOpen(_evt, ws) {
           if (accessExp != null) {
-            expTimer = setTimeout(() => {
+            // Clamped + re-armed: a far-future exp must not fire at once.
+            expTimer = setDeadline(accessExp, () => {
               try {
                 ws.close(4401, "token_expired");
               } catch {
                 /* already closed */
               }
-            }, Math.max(0, accessExp - Date.now()));
+            });
           }
           unsubscribe = realtime.trySubscribeFiltered(
             { table, id: idFilter },
@@ -2086,13 +2161,13 @@ export function createJordApp(deps: JordAppDeps) {
         },
         onClose() {
           if (pingTimer) clearInterval(pingTimer);
-          if (expTimer) clearTimeout(expTimer);
+          expTimer?.clear();
           if (sessionTimer) clearInterval(sessionTimer);
           unsubscribe?.();
         },
         onError() {
           if (pingTimer) clearInterval(pingTimer);
-          if (expTimer) clearTimeout(expTimer);
+          expTimer?.clear();
           if (sessionTimer) clearInterval(sessionTimer);
           unsubscribe?.();
         },
@@ -2120,6 +2195,20 @@ export function createJordApp(deps: JordAppDeps) {
     const row = await readUserTableRow(table, id);
     return row ? { row } : null;
   }
+  function channelPrincipalKeyFor(c: {
+    get(key: "principal"): Principal;
+    req: { header(name: string): string | undefined };
+    env?: unknown;
+  }): string {
+    const incoming = (
+      c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined
+    )?.incoming;
+    return channelPrincipalKey(
+      c.get("principal"),
+      c.req.header("x-forwarded-for"),
+      incoming?.socket?.remoteAddress ?? null,
+    );
+  }
   function authorizeChannelFor(principal: Principal, ref: ChannelRef) {
     return authorizeChannel({
       principal,
@@ -2141,7 +2230,19 @@ export function createJordApp(deps: JordAppDeps) {
       if (!verdict.allowed) {
         return c.json(deniedChannelBody(ref.channel), 403);
       }
-      const full = presence.canAdmit(ref.channel);
+      const full = presence.canAdmit(
+        ref.channel,
+        channelPrincipalKeyFor(c),
+      );
+      if (full === "principal_full") {
+        return c.json(
+          {
+            error: "too_many_connections",
+            message: "too many presence sockets for this principal",
+          },
+          429,
+        );
+      }
       if (full) {
         return c.json(
           { error: "realtime_full", message: `presence ${full}` },
@@ -2156,6 +2257,11 @@ export function createJordApp(deps: JordAppDeps) {
       return channelSocketHandlers({
         hub: presence,
         channel: ref.channel,
+        // Cap re-checked inside hub.connect (concurrent upgrades race here).
+        identity: {
+          principalKey: channelPrincipalKeyFor(c),
+          kind: principal.kind,
+        },
         accessExp: c.get("accessExp"),
         recheckMs: realtimeRecheckMs,
         recheck: async () => {
@@ -2678,7 +2784,7 @@ export function createJordApp(deps: JordAppDeps) {
       throw new HTTPException(404, { message: "custom API not found" });
     }
 
-    if (!api.enabled || isCustomApiEnvDisabled(api, customApiDisabled)) {
+    if (!isCustomApiExposed(api, customApiDisabled)) {
       return c.json(
         {
           error: "api_disabled",
@@ -3049,6 +3155,9 @@ export function createJordApp(deps: JordAppDeps) {
       jord: deps.jord,
       writeChangeAs,
       generatedRecordsEnabled: () => generatedApi.isEnabled("records"),
+      // S0080: bulk/RPC body cap + RPC runner deps (same as /x/:slug).
+      maxJsonBytes: resolveMaxJsonBytes(env),
+      rpc: { enqueueWrite, logs, stepRole, customApiDisabled },
     }),
   );
 
@@ -3184,8 +3293,33 @@ export function createJordApp(deps: JordAppDeps) {
   );
   // S0043 — project registry (admin-only; secrets required for mutate/list).
   protectedRoutes.route("/admin", createProjectRoutes(projectRegistry));
+  // S0095 — per-project stats (admin-only, read-only, partial-tolerant).
+  protectedRoutes.route(
+    "/admin",
+    createProjectStatsRoutes(projectRegistry, {
+      queuePending: () => deps.enqueueWrite.pending(),
+      realtime: attachRealtimeCounters(realtime),
+    }),
+  );
   // S0067 — bucket config API (admin-only; secrets for s3-family credentials).
   protectedRoutes.route("/admin", createBucketAdminRoutes(bucketAdmin));
+  // S0077 — policy tester "run as user" (admin-only, read-only, audited).
+  protectedRoutes.route(
+    "/admin",
+    createPolicyEvaluateRoutes({
+      jord: deps.jord,
+      enqueueWrite,
+      rateLimit: rateLimitStore,
+      jwt: { iss: deps.auth.jwtIss, aud: deps.auth.jwtAud },
+      // Same `records` 503 gate as the table API; policy env is process.env on both sides.
+      generatedRecordsEnabled: () => generatedApi.isEnabled("records"),
+    }),
+  );
+  // S0093 — blob signing key set: rotate / revoke-previous (admin-only).
+  protectedRoutes.route(
+    "/admin/storage/keys",
+    createBlobKeyRoutes({ jord: deps.jord, keys: blobKeys }),
+  );
   // S0045 — Studio project catalog / resolve (any authenticated principal).
   protectedRoutes.route("/studio", createStudioProjectRoutes(projectRegistry));
 

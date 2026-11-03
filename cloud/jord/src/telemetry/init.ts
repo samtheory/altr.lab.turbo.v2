@@ -21,6 +21,7 @@ import {
 } from "./env.js";
 import { initJordMetrics, resetJordMetricsForTests } from "./metrics.js";
 import { NoopSpanExporter } from "./noop-exporter.js";
+import { redactingHttpInstrumentationConfig } from "./redact.js";
 
 export type TelemetryHandle = {
   shutdown: () => Promise<void>;
@@ -104,7 +105,11 @@ export function initTelemetry(
     }),
     spanProcessors: [new SimpleSpanProcessor(exporter)],
     metricReaders,
-    instrumentations: httpAuto ? [new HttpInstrumentation()] : [],
+    // Query strings may carry `?apikey=` (WS upgrade) or a mistakenly sent
+    // secret: never record credential values in url.query / url.full.
+    instrumentations: httpAuto
+      ? [new HttpInstrumentation(redactingHttpInstrumentationConfig())]
+      : [],
     autoDetectResources: false,
   });
 

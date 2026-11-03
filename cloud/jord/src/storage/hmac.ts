@@ -14,6 +14,11 @@ export type LocalSignParams = {
   contentType?: string;
   uploadId?: string;
   partNumber?: number;
+  /**
+   * S0082: canonical transform string (see `canonicalTransform`). Part of the
+   * signed material, so any change to w/h/fit/q/fm invalidates the signature.
+   */
+  transform?: string;
 };
 
 function canonicalString(params: LocalSignParams): string {
@@ -27,6 +32,8 @@ function canonicalString(params: LocalSignParams): string {
     params.uploadId ?? "",
     params.partNumber != null ? String(params.partNumber) : "",
   ];
+  // Appended only when present so non-transform signatures are unchanged.
+  if (params.transform !== undefined) parts.push(`transform:${params.transform}`);
   return parts.join("\n");
 }
 
@@ -39,31 +46,56 @@ export function signLocalParams(
     .digest("hex");
 }
 
+/**
+ * S0093 key set. A plain string is a single static key. A source exposes the
+ * signing key (`current`, always used for issuance) and every key that may
+ * still verify right now (`verifying`, current first, previous only while its
+ * overlap window is open).
+ */
+export type HmacSecretSource = {
+  current(): string;
+  verifying(nowMs: number): string[];
+};
+export type HmacSecret = string | HmacSecretSource;
+
+export function currentHmacSecret(secret: HmacSecret): string {
+  return typeof secret === "string" ? secret : secret.current();
+}
+
+export function verifyingHmacSecrets(
+  secret: HmacSecret,
+  nowMs: number,
+): string[] {
+  return typeof secret === "string" ? [secret] : secret.verifying(nowMs);
+}
+
 export function verifyLocalSignature(
-  secret: string,
+  secret: HmacSecret,
   params: LocalSignParams,
   signature: string,
   nowMs: number = Date.now(),
 ): boolean {
   if (nowMs > params.expiresAt) return false;
   if (!/^[0-9a-f]{64}$/i.test(signature)) return false;
-  const expected = signLocalParams(secret, params);
-  try {
-    return timingSafeEqual(
-      Buffer.from(expected, "utf8"),
-      Buffer.from(signature.toLowerCase(), "utf8"),
-    );
-  } catch {
-    return false;
+  const given = Buffer.from(signature.toLowerCase(), "utf8");
+  let ok = false;
+  for (const candidate of verifyingHmacSecrets(secret, nowMs)) {
+    const expected = Buffer.from(signLocalParams(candidate, params), "utf8");
+    if (expected.length === given.length && timingSafeEqual(expected, given)) {
+      ok = true;
+    }
   }
+  return ok;
 }
 
 export function buildLocalSignedUrl(input: {
   baseUrl: string;
-  secret: string;
+  secret: HmacSecret;
   params: LocalSignParams;
+  /** Query pairs for the transform (must correspond to params.transform). */
+  transformQuery?: Record<string, string>;
 }): string {
-  const signature = signLocalParams(input.secret, input.params);
+  const signature = signLocalParams(currentHmacSecret(input.secret), input.params);
   const qs = new URLSearchParams({
     "X-Jord-Algorithm": JORD_SIGN_ALGORITHM,
     "X-Jord-Expires": String(input.params.expiresAt),
@@ -79,7 +111,9 @@ export function buildLocalSignedUrl(input: {
   if (input.params.partNumber != null) {
     qs.set("X-Jord-Part-Number", String(input.params.partNumber));
   }
-  const path = `/blobs/signed/${encodeURIComponent(input.params.bucket)}/objects/${encodeURIComponent(input.params.key)}`;
+  for (const [k, v] of Object.entries(input.transformQuery ?? {})) qs.set(k, v);
+  const segment = input.params.transform !== undefined ? "transform" : "objects";
+  const path = `/blobs/signed/${encodeURIComponent(input.params.bucket)}/${segment}/${encodeURIComponent(input.params.key)}`;
   const base = input.baseUrl.replace(/\/$/, "");
   return `${base}${path}?${qs.toString()}`;
 }

@@ -2,6 +2,7 @@ import {
   createLocalStorageAdapter,
   type LocalStorageAdapterOptions,
 } from "./local.js";
+import type { HmacSecret } from "./hmac.js";
 import type { JordStoragePort, StorageBackendKind } from "./port.js";
 import {
   createS3StorageAdapter,
@@ -11,7 +12,7 @@ import {
 export type StorageFactoryInput = {
   env?: NodeJS.ProcessEnv;
   blobsRoot: string;
-  hmacSecret: string;
+  hmacSecret: HmacSecret;
   publicBaseUrl: string;
   /** Test override. */
   kind?: StorageBackendKind;

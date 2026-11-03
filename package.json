@@ -15,7 +15,9 @@
     "dev:jord-studio": "pnpm --filter @altr/jord-studio dev",
     "db:snapshot": "pnpm --filter @altr/jord snapshot",
     "cli:apolyx": "pnpm --filter apolyx",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "audit:ci": "node scripts/audit-ci.mjs",
+    "audit:all": "pnpm audit --audit-level=high"
   },
   "devDependencies": {
     "turbo": "^2.5.4",

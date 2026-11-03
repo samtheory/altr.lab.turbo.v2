@@ -19,6 +19,8 @@ export const jordBlobs = sqliteTable(
     status: text("status").notNull().default("ready"),
     pendingExpiresAt: integer("pending_expires_at", { mode: "number" }),
     uploadId: text("upload_id"),
+    derivedFrom: text("derived_from"),
+    derivedSrcEtag: text("derived_src_etag"),
     createdAt: integer("created_at", { mode: "number" }).notNull(),
     updatedAt: integer("updated_at", { mode: "number" }).notNull(),
   },

@@ -27,6 +27,7 @@ import {
 } from "@altr/apolyx";
 
 import { InspectorFooter } from "@/components/inspector-chrome";
+import { PolicyTester } from "@/components/policy-tester";
 import { useInspectorOptional } from "@/components/inspector-host";
 import { useProjectHref } from "@/hooks/use-project-path";
 import { canAlterSchema, type JordRole } from "@/lib/auth/roles";
@@ -74,7 +75,7 @@ export function TablePoliciesDrawer({
   const [rows, setRows] = useState<PublicPolicy[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [mode, setMode] = useState<"list" | "create" | "edit">("list");
+  const [mode, setMode] = useState<"list" | "create" | "edit" | "test">("list");
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [preview, setPreview] = useState<PreviewState | null>(null);
@@ -304,6 +305,29 @@ export function TablePoliciesDrawer({
           </Alert>
         ) : null}
 
+        {mode === "test" ? (
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="self-start"
+              onClick={() => setMode("list")}
+            >
+              Back to policies
+            </Button>
+            <PolicyTester
+              table={table}
+              schema={schema}
+              onEditPolicy={(id) => {
+                const row = rows?.find((r) => r.id === id);
+                if (row) beginEdit(row);
+                else setMode("list");
+              }}
+            />
+          </>
+        ) : null}
+
         {mode === "list" ? (
           <>
             <div className="flex flex-wrap gap-2">
@@ -322,6 +346,16 @@ export function TablePoliciesDrawer({
               >
                 Open APIs
               </Button>
+              {canManage ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setMode("test")}
+                >
+                  Test policy
+                </Button>
+              ) : null}
             </div>
 
             {rows === null && !error ? (
@@ -407,7 +441,7 @@ export function TablePoliciesDrawer({
               })}
             </ul>
           </>
-        ) : (
+        ) : mode !== "test" ? (
           <div className="flex flex-col gap-3">
             <Button
               type="button"
@@ -705,10 +739,10 @@ export function TablePoliciesDrawer({
               ) : null}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
-      {mode !== "list" && canManage ? (
+      {mode !== "list" && mode !== "test" && canManage ? (
         <InspectorFooter>
           <Button type="button" disabled={isPending} onClick={save}>
             Save

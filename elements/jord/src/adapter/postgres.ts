@@ -260,6 +260,9 @@ function mapBlob(row: QueryResultRow): JordBlob {
     pendingExpiresAt:
       row.pending_expires_at == null ? null : num(row.pending_expires_at),
     uploadId: row.upload_id == null ? null : String(row.upload_id),
+    derivedFrom: row.derived_from == null ? null : String(row.derived_from),
+    derivedSrcEtag:
+      row.derived_src_etag == null ? null : String(row.derived_src_etag),
     createdAt: num(row.created_at),
     updatedAt: num(row.updated_at),
   };
@@ -2335,11 +2338,20 @@ export class PostgresAdapter implements JordDriverPort {
       input.uploadId !== undefined
         ? input.uploadId
         : (existing?.uploadId ?? null);
+    const derivedFrom =
+      input.derivedFrom !== undefined
+        ? input.derivedFrom
+        : (existing?.derivedFrom ?? null);
+    const derivedSrcEtag =
+      input.derivedSrcEtag !== undefined
+        ? input.derivedSrcEtag
+        : (existing?.derivedSrcEtag ?? null);
     if (existing) {
       const result = await this.exec(
         `UPDATE jord_blobs SET
            content_type = $1, size = $2, etag = $3, status = $4,
-           pending_expires_at = $5, upload_id = $6, updated_at = $7
+           pending_expires_at = $5, upload_id = $6, updated_at = $7,
+           derived_from = $9, derived_src_etag = $10
          WHERE id = $8
          RETURNING *`,
         [
@@ -2351,6 +2363,8 @@ export class PostgresAdapter implements JordDriverPort {
           uploadId,
           now,
           existing.id,
+          derivedFrom,
+          derivedSrcEtag,
         ],
       );
       return mapBlob(result.rows[0]!);
@@ -2359,8 +2373,9 @@ export class PostgresAdapter implements JordDriverPort {
     const result = await this.exec(
       `INSERT INTO jord_blobs (
          id, bucket, key, content_type, size, etag, status,
-         pending_expires_at, upload_id, created_at, updated_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+         pending_expires_at, upload_id, created_at, updated_at,
+         derived_from, derived_src_etag
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        RETURNING *`,
       [
         id,
@@ -2374,6 +2389,8 @@ export class PostgresAdapter implements JordDriverPort {
         uploadId,
         now,
         now,
+        derivedFrom,
+        derivedSrcEtag,
       ],
     );
     return mapBlob(result.rows[0]!);

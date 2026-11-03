@@ -98,5 +98,7 @@ export async function forwardUpstream(upstream: Response): Promise<Response> {
   const headersOut = new Headers();
   const contentType = upstream.headers.get("Content-Type");
   if (contentType) headersOut.set("Content-Type", contentType);
+  // Admin data: never cached by the browser or a shared proxy.
+  headersOut.set("Cache-Control", "no-store");
   return new Response(body, { status: upstream.status, headers: headersOut });
 }

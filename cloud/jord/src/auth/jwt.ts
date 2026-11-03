@@ -129,13 +129,24 @@ export function verifyJwt(
   const kid = (header as { kid?: unknown }).kid;
   if (alg !== JWT_ALG) return null;
   if (typeof kid !== "string") return null;
-  const key = input.keys.find((item) => item.kid === kid);
-  if (!key) return null;
+  // S0093: tokens minted before a rotation still carry kid=current, so a
+  // `current` header also tries the retiring `previous` key (callers only
+  // list `previous` while its overlap window is open).
+  const candidates = input.keys.filter(
+    (item) =>
+      item.kid === kid || (kid === CURRENT_KID && item.kid === PREVIOUS_KID),
+  );
+  if (candidates.length === 0) return null;
 
-  const expected = createHmac("sha256", key.secret)
-    .update(`${headerPart}.${payloadPart}`)
-    .digest("base64url");
-  if (!safeEqual(sig, expected)) return null;
+  const signingInput = `${headerPart}.${payloadPart}`;
+  let verified = false;
+  for (const key of candidates) {
+    const expected = createHmac("sha256", key.secret)
+      .update(signingInput)
+      .digest("base64url");
+    if (safeEqual(sig, expected)) verified = true;
+  }
+  if (!verified) return null;
 
   let payload: unknown;
   try {

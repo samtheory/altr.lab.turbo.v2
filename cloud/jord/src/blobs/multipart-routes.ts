@@ -35,6 +35,11 @@ import {
   expectedPartSize,
   type UploadRow,
 } from "../storage/multipart.js";
+import {
+  createTransformService,
+  DERIVATIVE_RESERVED_MESSAGE,
+  isDerivativeRow,
+} from "../storage/transform.js";
 import type { BlobRouteDeps } from "./routes.js";
 
 function publicUpload(row: UploadRow) {
@@ -153,6 +158,9 @@ export function registerMultipartRoutes(
     const resolved = await deps.resolveBucket(bucket);
     assertActive(resolved);
     await gateWrite(c, bucket);
+    if (await isDerivativeRow(deps.jord, bucket, key)) {
+      throw new HTTPException(409, { message: DERIVATIVE_RESERVED_MESSAGE });
+    }
 
     const plan = planParts({
       totalSize: body?.size,
@@ -456,6 +464,11 @@ export function registerMultipartRoutes(
           throw new HTTPException(400, { message: check.message });
         }
 
+        // A derivative may have claimed the key since create: never assemble over it.
+        if (await isDerivativeRow(deps.jord, row.bucket, row.objectKey)) {
+          await reopen();
+          throw new HTTPException(409, { message: DERIVATIVE_RESERVED_MESSAGE });
+        }
         const written = await port.completeMultipartUpload({
           bucket: row.bucket,
           key: row.objectKey,
@@ -494,6 +507,23 @@ export function registerMultipartRoutes(
           );
           return saved;
         });
+        // Overwrite invalidates derivatives rendered from the previous bytes.
+        await createTransformService({
+          jord: deps.jord,
+          enqueueWrite: deps.enqueueWrite,
+        })
+          .deleteDerivatives({
+            bucket: row.bucket,
+            key: row.objectKey,
+            port,
+            keepEtag: meta.etag,
+          })
+          .catch((err) =>
+            console.error(
+              `[@altr/jord-server] stale derivative cleanup failed ${row.bucket}/${row.objectKey}`,
+              err,
+            ),
+          );
         return c.json({ ...publicBlob(meta), upload_id: row.id });
       } catch (err) {
         if (err instanceof HTTPException) throw err;

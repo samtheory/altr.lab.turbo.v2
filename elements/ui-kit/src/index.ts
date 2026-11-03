@@ -406,8 +406,23 @@ export {
   ChartTooltip,
   LineChart,
   BarChart,
+  TimeSeriesChart,
   type ChartConfig,
+  type TimeSeriesChartProps,
+  type TimeSeriesPoint,
+  type TimeSeriesSeries,
 } from "./charts";
+export {
+  StatTile,
+  type StatTileProps,
+  type StatTileStatus,
+} from "./components/ui/stat-tile";
+export { CopyButton, type CopyButtonProps } from "./components/ui/copy-button";
+export {
+  SegmentedControl,
+  type SegmentedControlProps,
+  type SegmentedOption,
+} from "./components/ui/segmented-control";
 export {
   themeFamilies,
   themeModes,

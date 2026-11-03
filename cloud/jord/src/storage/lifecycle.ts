@@ -22,6 +22,14 @@ export type CreatePendingInput = {
 export async function createPendingBlobMeta(
   input: CreatePendingInput,
 ): Promise<JordBlob> {
+  const existing = await input.jord.getBlobMeta(input.bucket, input.key);
+  if (existing?.derivedFrom != null) {
+    // Derivative rows are owned by the transform service (S0082).
+    throw new FinalizeError(
+      "reserved_key",
+      "key is reserved for a generated image derivative",
+    );
+  }
   return input.jord.upsertBlobMeta({
     bucket: input.bucket,
     key: input.key,

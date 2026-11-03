@@ -20,7 +20,7 @@ import {
   sha256Hex,
   type BlobDiskStore,
 } from "../blobs/disk.js";
-import { buildLocalSignedUrl } from "./hmac.js";
+import { buildLocalSignedUrl, type HmacSecret } from "./hmac.js";
 import type {
   HeadObjectResult,
   JordStoragePort,
@@ -32,7 +32,7 @@ import type {
 export type LocalStorageAdapterOptions = {
   root: string;
   /** HMAC secret for signed URLs (defaults to JORD_SERVER_TOKEN / dedicated env). */
-  hmacSecret: string;
+  hmacSecret: HmacSecret;
   /** Public base URL embedded in signed URLs (e.g. http://127.0.0.1:8787). */
   publicBaseUrl: string;
   disk?: BlobDiskStore;

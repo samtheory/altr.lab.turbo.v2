@@ -190,6 +190,10 @@ Signup confirm, admin invite and password recover all call `sendAuthEmail` so th
 
 Tokens live in `jord_auth_tokens` (`purpose='magic'`, sha256, `created_ip` from migration 0020). `redirect_to` must pass the allowlist on both calls; a refused redirect does not consume the token. Prefer POST verify from a front end so mail scanners cannot burn the link. Open: `consumeOneTime` (confirm/reset) still uses select-then-update; `x-forwarded-for` is trusted without a proxy setting.
 
+### Key rotation (S0093)
+
+Runbook: `security/key-rotation-runbook.md`. JWT: `POST /admin/auth/jwt/rotate {overlap_seconds?, revoke_previous?}` and `.../revoke-previous` (previous key sealed in `jord_key_sets` with an expiry, max 7 days; a bare rotate invalidates old tokens at once). Blob HMAC: `/admin/storage/keys` (`GET`, `rotate`, `revoke-previous`; 2 h default overlap). Project keys: `rotate-keys` (24 h default overlap) and `revoke-previous-keys`. Rotation is one transaction; a stored key that cannot be read or unsealed fails closed (503 on issue, nothing verifies) — the env key is used only when no stored key exists; `overlap_seconds: 0` means no overlap everywhere. Anon keys are signed with the current JWT key, so rotation reports `anon_keys_affected` and they must be reissued before the overlap ends. Peers see changes within about 5 s; open realtime sockets drop at the next recheck. Every action writes an audit row without key material; fingerprints are keyed HMACs. Open: jobs still build storage from the env blob secret; env fallback keys never expire.
+
 ### Sessions (S0076)
 
 | Route | Behaviour |

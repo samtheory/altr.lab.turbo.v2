@@ -46,6 +46,34 @@ export type ChannelVerdict =
   | { allowed: true }
   | { allowed: false; reason: "policy" | "row_scoped" | "row_unavailable" | "check_failed" };
 
+/**
+ * Per-principal cap key for presence sockets: the uid when present, else
+ * kind + role + client IP (x-forwarded-for first hop, else socket address).
+ * Server-side only; never sent to clients.
+ */
+export function channelPrincipalKey(
+  principal: Principal,
+  forwardedFor: string | undefined,
+  remoteAddress?: string | null,
+): string {
+  if (principal.uid) return `uid:${principal.uid}`;
+  const ip =
+    forwardedFor?.split(",")[0]?.trim().slice(0, 64) ||
+    remoteAddress?.slice(0, 64) ||
+    "unknown";
+  return `${principal.kind}:${principal.role}@${ip}`;
+}
+
+/** `JORD_PRESENCE_MAX_PER_PRINCIPAL` override (positive integer), else null. */
+export function presencePerPrincipalFromEnv(
+  env: Record<string, string | undefined>,
+): number | null {
+  const raw = env.JORD_PRESENCE_MAX_PER_PRINCIPAL?.trim();
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
 export function deniedChannelBody(channel: string) {
   return { error: "policy_denied" as const, operation: "select" as const, channel };
 }
@@ -73,13 +101,18 @@ export async function authorizeChannel(input: {
       if (decision.scope) return { allowed: false, reason: "row_scoped" };
       return { allowed: true };
     }
+    // Policy first: a caller with no select on the table is denied before any
+    // row read, so missing vs existing rows cost the same for it.
+    const tableDecision = await input.decide(principal, ref.table, "select");
+    if (!tableDecision.allowed) return { allowed: false, reason: "policy" };
     const found = await input.readRow(ref.table, ref.id);
-    // Same 403 as a policy deny: no row-existence oracle.
-    if (!found) return { allowed: false, reason: "row_unavailable" };
+    // A missing row still runs the row decision (empty row) so the missing
+    // and denied paths do the same work. Same 403 body either way.
     const decision = await input.decide(principal, ref.table, "select", {
-      row: found.row,
-      bucket: found.bucket,
+      row: found?.row ?? {},
+      bucket: found?.bucket ?? null,
     });
+    if (!found) return { allowed: false, reason: "row_unavailable" };
     if (!decision.allowed) return { allowed: false, reason: "policy" };
     return { allowed: true };
   } catch (err) {

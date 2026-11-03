@@ -8,6 +8,7 @@ import {
   AlertTitle,
   Badge,
   Button,
+  CopyButton,
   Field,
   FieldInput,
   Tabs,
@@ -17,19 +18,20 @@ import {
 } from "@altr/apolyx";
 
 import { useInspectorOptional } from "@/components/inspector-host";
-import { useProjectHref } from "@/hooks/use-project-path";
+import { useProjectHref, useProjectSlug } from "@/hooks/use-project-path";
 import type { JordRole } from "@/lib/auth/roles";
 import type { PublicPolicy } from "@/lib/database-api";
 import type { GeneratedApiCatalog } from "@/lib/generated-api";
 import type { PublicCustomApi } from "@/lib/functions-api";
+import { RealtimeSnippetPanel } from "@/components/realtime-snippet-panel";
 import { isRealtimeSubscribeTable } from "@/lib/realtime-table";
+import { projectChannelName } from "@/lib/studio-snippets";
 import {
   POLICIES_CHANGED_EVENT,
   buildExampleCurl,
   buildExampleFetch,
   buildTableApiEndpoints,
   qualifyTable,
-  realtimeChannelName,
   tryItBffPath,
   type TableApiEndpoint,
 } from "@/lib/studio-table-apis";
@@ -191,7 +193,8 @@ export function TableApisDrawer({ role, table, schema }: Props) {
   }
 
   const qualified = qualifyTable(schema, table);
-  const channel = realtimeChannelName(table);
+  const projectSlug = useProjectSlug();
+  const channel = projectChannelName(projectSlug, schema, table);
   const canRealtime = isRealtimeSubscribeTable(table);
 
   return (
@@ -247,10 +250,21 @@ export function TableApisDrawer({ role, table, schema }: Props) {
       <div className="rounded-md border border-border px-3 py-2 text-xs">
         <p className="font-medium">Realtime channel</p>
         {canRealtime ? (
-          <p className="mt-1 font-mono text-muted-foreground">
-            GET /realtime?table={table} · channel{" "}
-            <code>{channel}</code>
-          </p>
+          <>
+            <p className="mt-1 font-mono text-muted-foreground">
+              GET /p/{projectSlug}/realtime · table {table}
+            </p>
+            <div className="mt-1 flex items-center gap-2">
+              <code className="min-w-0 flex-1 truncate font-mono">{channel}</code>
+              <CopyButton value={channel} label="channel name" />
+            </div>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-muted-foreground">Client snippets</summary>
+              <div className="mt-2">
+                <RealtimeSnippetPanel slug={projectSlug} table={table} />
+              </div>
+            </details>
+          </>
         ) : (
           <p className="mt-1 text-muted-foreground">
             Reserved / system table — no subscribe channel.

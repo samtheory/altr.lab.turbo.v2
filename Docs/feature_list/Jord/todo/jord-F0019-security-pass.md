@@ -36,7 +36,7 @@ Findings triaged into cards; no open high/critical.
 | Task | Est. | Status |
 |------|------|--------|
 | [[../../../plan/Jord/phase-03/S0092-strix-pentest\|S0092]] — authorized Strix pentest + triage | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0093-key-rotation-runbook\|S0093]] — key-rotation runbook | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0094-dependency-audit-ci\|S0094]] — dependency audit in CI | 45–75 min | todo |
+| [[../../../plan/Jord/phase-03/done/S0093-key-rotation-runbook\|S0093]] — key-rotation runbook | 2–3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0094-dependency-audit-ci\|S0094]] — dependency audit in CI | 45–75 min | **done** 2026-11-03 (9 findings open) |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

@@ -23,6 +23,12 @@ export {
 } from "./middleware.js";
 export { NoopSpanExporter } from "./noop-exporter.js";
 export {
+  redactingHttpInstrumentationConfig,
+  redactQueryString,
+  redactUrl,
+  redactUrlAttributes,
+} from "./redact.js";
+export {
   activeTraceId,
   withSqlSpan,
   withStorageSpan,

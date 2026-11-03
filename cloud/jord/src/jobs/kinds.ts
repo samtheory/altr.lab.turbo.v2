@@ -120,7 +120,17 @@ export const JOB_KIND_HANDLERS: Record<BuiltinJobKind, JobKindHandler> = {
     // S0081: abandoned multipart sessions (abort store parts, drop the row).
     const { gcExpiredUploads } = await import("../storage/multipart.js");
     const uploads = await gcExpiredUploads({ jord, resolveStorage });
-    return { result: { ...result, ...uploads, errors: [...result.errors, ...uploads.errors] } };
+    // S0082: derivatives whose original row is gone.
+    const { gcOrphanDerivatives } = await import("../storage/transform.js");
+    const derivs = await gcOrphanDerivatives({ jord, resolveStorage });
+    return {
+      result: {
+        ...result,
+        ...uploads,
+        orphanDerivatives: derivs.orphanDerivatives,
+        errors: [...result.errors, ...uploads.errors, ...derivs.errors],
+      },
+    };
   },
 
   async sessions_gc({ jord }) {

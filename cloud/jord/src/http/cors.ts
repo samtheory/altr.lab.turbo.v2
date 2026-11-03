@@ -31,7 +31,8 @@ export function createCorsMiddleware(origins: string[]): MiddlewareHandler {
     c.header("Access-Control-Allow-Credentials", "true");
     c.header(
       "Access-Control-Allow-Headers",
-      "Authorization, Content-Type, Idempotency-Key",
+      // X-Jord-Key / apikey: S0084 publishable key on /p/:project/realtime.
+      "Authorization, Content-Type, Idempotency-Key, X-Jord-Key, apikey",
     );
     c.header(
       "Access-Control-Allow-Methods",

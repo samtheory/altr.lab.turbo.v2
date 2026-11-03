@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
+import { auditKeyEvent, parseOverlapSeconds } from "../auth/key-sets.js";
 import type { JordAuthVariables } from "../auth/middleware.js";
 import {
   getErdLayout,
@@ -19,6 +20,7 @@ import {
   parseEngine,
   parseTlsMode,
   patchProject,
+  revokePreviousProjectKeys,
   rotateProjectKeys,
   testProjectConnect,
   type ProjectRegistryDeps,
@@ -193,10 +195,23 @@ export function createProjectRoutes(
     return c.json({ ok: true as const, status: "archived" as const });
   });
 
+  // S0093: body `{ overlap_seconds?, revoke_previous? }`. Omitted overlap =
+  // 24 h, explicit 0 = none; `revoke_previous: true` is the compromise path.
   routes.post("/projects/:id/rotate-keys", async (c) => {
     requireAdmin(c);
     requireSecrets(deps);
-    const result = await rotateProjectKeys(deps, c.req.param("id"));
+    const principal = c.get("principal");
+    const body = await readJson(c.req.raw);
+    const overlap = parseOverlapSeconds(body.overlap_seconds);
+    if (!overlap.ok) {
+      return c.json({ error: "invalid_overlap", message: overlap.error }, 400);
+    }
+    const revokePrevious = body.revoke_previous === true;
+    const projectId = c.req.param("id");
+    const result = await rotateProjectKeys(deps, projectId, {
+      overlapSeconds: overlap.seconds,
+      revokePrevious,
+    });
     if (!result.ok) {
       return c.json(
         {
@@ -206,12 +221,50 @@ export function createProjectRoutes(
         result.status,
       );
     }
+    await auditKeyEvent(deps.jord, {
+      source: "projects.keys",
+      message: "project keys rotated",
+      actor: principal.uid ?? principal.role,
+      action: "rotated",
+      detail: {
+        project_id: result.project.id,
+        revoke_previous: revokePrevious,
+        previous_expires_at: result.previous_expires_at,
+      },
+    });
+    // Plaintext keys are returned only here and by POST /projects (create),
+    // shown once each; no read route ever returns them.
     return c.json({
       project: result.project,
       secret_key: result.secret_key,
       publishable_key: result.publishable_key,
       barrier_key: result.barrier_key,
+      previous_expires_at: result.previous_expires_at,
     });
+  });
+
+  routes.post("/projects/:id/revoke-previous-keys", async (c) => {
+    requireAdmin(c);
+    requireSecrets(deps);
+    const principal = c.get("principal");
+    const result = await revokePreviousProjectKeys(deps, c.req.param("id"));
+    if (!result.ok) {
+      return c.json(
+        {
+          error: result.error,
+          ...(result.reason ? { reason: result.reason } : {}),
+        },
+        result.status,
+      );
+    }
+    await auditKeyEvent(deps.jord, {
+      source: "projects.keys",
+      message: "project previous keys revoked",
+      actor: principal.uid ?? principal.role,
+      action: "previous_revoked",
+      detail: { project_id: c.req.param("id") },
+    });
+    return c.json({ ok: true as const });
   });
 
   // S0062 — ERD layout (control plane). :id accepts project UUID or slug.

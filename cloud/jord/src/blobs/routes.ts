@@ -18,6 +18,21 @@ import type { WriteQueue } from "../queue.js";
 import { MAX_LOCAL_PART_BYTES } from "../storage/local.js";
 import { registerMultipartRoutes } from "./multipart-routes.js";
 import {
+  pickTransformInput,
+  registerSignedTransformRoute,
+  toHttp,
+} from "./transform-routes.js";
+import { buildLocalSignedUrl, type HmacSecret } from "../storage/hmac.js";
+import { resolvePublicBaseUrl } from "../storage/factory.js";
+import {
+  canonicalTransform,
+  createTransformService,
+  DERIVATIVE_RESERVED_MESSAGE,
+  isDerivativeRow,
+  parseTransformParams,
+  transformToQuery,
+} from "../storage/transform.js";
+import {
   assertBucketUploadLimits,
   assertSignAllowed,
   buildLocalToRemoteCopyPlan,
@@ -45,7 +60,7 @@ export type BlobRouteDeps = {
   /** Per-bucket resolution (S0066). Required for mixed providers. */
   resolveBucket: BucketResolver["resolveBucket"];
   /** HMAC secret for local signed-URL verification. */
-  hmacSecret: string;
+  hmacSecret: HmacSecret;
   maxBytes?: number;
   env?: NodeJS.ProcessEnv;
   /** Local disk root — used only by the copy-plan dry-run. */
@@ -121,6 +136,11 @@ export function registerBlobRoutes(
   deps: BlobRouteDeps,
 ): void {
   const env = deps.env ?? process.env;
+  // S0082: derivative cleanup on delete (render path lives on the signed route).
+  const transforms = createTransformService({
+    jord: deps.jord,
+    enqueueWrite: deps.enqueueWrite,
+  });
 
   // S0081 — multipart / resumable upload sessions.
   registerMultipartRoutes(protectedRoutes, deps, publicBlob);
@@ -212,6 +232,11 @@ export function registerBlobRoutes(
         throw new HTTPException(gate.status, { message: gate.message });
       }
 
+      // Derivative rows are owned by the transform service; refuse to overwrite.
+      if (await isDerivativeRow(deps.jord, bucket, key)) {
+        throw new HTTPException(409, { message: DERIVATIVE_RESERVED_MESSAGE });
+      }
+
       // Byte I/O is outside the serial SQL write queue.
       await resolved.port.ensureBucket(bucket);
       const written = await resolved.port.putObject(
@@ -220,8 +245,12 @@ export function registerBlobRoutes(
         bytes,
         contentType,
       );
-      const meta = await deps.enqueueWrite(() =>
-        deps.jord.upsertBlobMeta({
+      const meta = await deps.enqueueWrite(async () => {
+        // Re-check on the serial queue (a derivative may have claimed the key).
+        if (await isDerivativeRow(deps.jord, bucket, key)) {
+          throw new HTTPException(409, { message: DERIVATIVE_RESERVED_MESSAGE });
+        }
+        return deps.jord.upsertBlobMeta({
           bucket,
           key,
           contentType,
@@ -230,8 +259,22 @@ export function registerBlobRoutes(
           status: "ready",
           pendingExpiresAt: null,
           uploadId: null,
-        }),
-      );
+        });
+      });
+      // Overwrite invalidates derivatives rendered from the previous bytes.
+      await transforms
+        .deleteDerivatives({
+          bucket,
+          key,
+          port: resolved.port,
+          keepEtag: meta.etag,
+        })
+        .catch((err) =>
+          console.error(
+            `[@altr/jord-server] stale derivative cleanup failed ${bucket}/${key}`,
+            err,
+          ),
+        );
 
       return c.json(publicBlob(meta));
     },
@@ -255,6 +298,7 @@ export function registerBlobRoutes(
         content_type?: unknown;
         ttl_seconds?: unknown;
         multipart?: unknown;
+        transform?: unknown;
       };
       const intent =
         body.intent === "download" || body.intent === "upload"
@@ -288,6 +332,52 @@ export function registerBlobRoutes(
         if (!meta || meta.status !== "ready") {
           throw new HTTPException(404, { message: "object not found" });
         }
+        if (body.transform !== undefined) {
+          // S0082: transform params are inside the HMAC, served by the
+          // server (any bucket kind) at /blobs/signed/:bucket/transform/:key.
+          if (
+            typeof body.transform !== "object" ||
+            body.transform === null ||
+            Array.isArray(body.transform)
+          ) {
+            throw new HTTPException(400, { message: "invalid transform" });
+          }
+          if (meta.derivedFrom != null) {
+            throw new HTTPException(400, {
+              message: "cannot transform a derivative",
+            });
+          }
+          let params;
+          try {
+            params = parseTransformParams(
+              pickTransformInput(body.transform as Record<string, unknown>),
+            );
+          } catch (err) {
+            return toHttp(err);
+          }
+          const expiresAt = Date.now() + ttl * 1000;
+          const url = buildLocalSignedUrl({
+            baseUrl: resolvePublicBaseUrl(env),
+            secret: deps.hmacSecret,
+            params: {
+              bucket,
+              key,
+              method: "GET",
+              expiresAt,
+              transform: canonicalTransform(params),
+            },
+            transformQuery: transformToQuery(params),
+          });
+          return c.json({
+            url,
+            method: "GET" as const,
+            headers: {},
+            expires_at: expiresAt,
+            object: publicBlob(meta),
+            storage: resolved.port.kind,
+            transform: transformToQuery(params),
+          });
+        }
         const signed = await resolved.port.presign({
           bucket,
           key,
@@ -302,6 +392,10 @@ export function registerBlobRoutes(
           object: publicBlob(meta),
           storage: resolved.port.kind,
         });
+      }
+
+      if (await isDerivativeRow(deps.jord, bucket, key)) {
+        throw new HTTPException(409, { message: DERIVATIVE_RESERVED_MESSAGE });
       }
 
       const uploadGate = assertBucketUploadLimits({
@@ -390,6 +484,19 @@ export function registerBlobRoutes(
             uploadId,
           }),
         );
+        await transforms
+          .deleteDerivatives({
+            bucket,
+            key,
+            port: resolved.port,
+            keepEtag: meta.etag,
+          })
+          .catch((err) =>
+            console.error(
+              `[@altr/jord-server] stale derivative cleanup failed ${bucket}/${key}`,
+              err,
+            ),
+          );
         return c.json(publicBlob(meta));
       } catch (err) {
         if (err instanceof FinalizeError) {
@@ -445,6 +552,7 @@ export function registerBlobRoutes(
         "Content-Type": meta.contentType,
         "Content-Length": String(meta.size),
         ETag: `"${meta.etag}"`,
+        "X-Content-Type-Options": "nosniff",
       },
     });
   });
@@ -481,6 +589,16 @@ export function registerBlobRoutes(
       if (!deleted) {
         throw new HTTPException(404, { message: "object not found" });
       }
+      // S0082: derivatives go with the original. A failure here is not fatal:
+      // blobs_gc sweeps orphans (original row gone).
+      await transforms
+        .deleteDerivatives({ bucket, key, port: resolved.port })
+        .catch((err) =>
+          console.error(
+            `[@altr/jord-server] derivative cleanup failed ${bucket}/${key}`,
+            err,
+          ),
+        );
       return c.json({ ok: true as const, bucket, key });
     },
   );
@@ -496,11 +614,22 @@ export function registerSignedBlobRoutes(
   deps: {
     storage: JordStoragePort;
     resolveBucket?: BucketResolver["resolveBucket"];
-    hmacSecret: string;
+    hmacSecret: HmacSecret;
     maxBytes?: number;
+    /** S0082: enables the signed transform route when both are provided. */
+    jord?: JordDriverPort;
+    enqueueWrite?: WriteQueue;
   },
 ): void {
   const envMaxBytes = deps.maxBytes ?? DEFAULT_MAX_BLOB_BYTES;
+  if (deps.jord && deps.enqueueWrite && deps.resolveBucket) {
+    registerSignedTransformRoute(app, {
+      jord: deps.jord,
+      enqueueWrite: deps.enqueueWrite,
+      resolveBucket: deps.resolveBucket,
+      hmacSecret: deps.hmacSecret,
+    });
+  }
 
   app.all("/blobs/signed/:bucket/objects/:key", async (c) => {
     const bucket = c.req.param("bucket");
@@ -619,6 +748,9 @@ export function registerSignedBlobRoutes(
         throw new HTTPException(500, { message: "storage_error" });
       }
       return c.json({ ok: true as const, etag: written.etag, size: written.size });
+    }
+    if (deps.jord && (await isDerivativeRow(deps.jord, bucket, key))) {
+      throw new HTTPException(409, { message: DERIVATIVE_RESERVED_MESSAGE });
     }
     const body = new Uint8Array(await c.req.arrayBuffer());
     const contentType = normalizeContentType(

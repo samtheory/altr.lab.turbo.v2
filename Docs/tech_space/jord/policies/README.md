@@ -67,6 +67,10 @@ An allow `role_in` for `user` on `records` does nothing until `PUT /schema/table
 
 A `lab_notes` table with allow `claim_eq { claim: "email", column: "owner_email" }`: a user whose token carries `email: a@x.test` sees only rows with that `owner_email`, on `/api/v1`, Studio rows, and realtime.
 
+## Policy tester (S0077)
+
+`POST /admin/policies/evaluate` (operator admin, 30/min per actor, fails closed) `{principalId?, claims?, role?, operation, table, schema?, row?, values?}` answers with the same `decideForPrincipal` the table API uses (the table API `decide()` closure delegates to it), plus the table API own scope, count and write-scope helpers; it never writes data and never mints a token or session. The headline `allowed` / `matchedPolicy` / `rowCount` / `rowAllowed` / `reason` are for the principal as a real token builds it (user: iss / aud / sub / email from `jord_users`; anon: iss / aud). Operator-typed `claims` are returned in `ignoredClaims` and replayed only in an advisory `hypothetical` block, because production token verification drops custom claims. A disabled user is `user_disabled`; `principal.userStatus` flags disabled, unconfirmed email and no live session. `rowScope` lists every term (`anyOf`, `lossy`). On Postgres counts run under the simulated user RLS session (`countsIgnoreNativeRls` when they cannot). Every call writes a `jord_logs` row (`policies.evaluate`) without row or claim values. Studio: "Test policy" in the table policies drawer. Open: Postgres runtime untested; the panel was not viewed in a browser.
+
 ## Not in Jord yet
 
 Custom JWT claims (tokens carry `iss`, `aud`, `sub`, `email` only) — phase-03 P4. Dropping the middleware once RLS is present. Native SQL triggers, column-level policies, BEFORE triggers.

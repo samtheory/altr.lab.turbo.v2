@@ -35,8 +35,8 @@ Multipart + resumable uploads · image transforms (prefer non-native; invariant 
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0081-multipart-uploads\|S0081]] — multipart + resumable uploads | 3 h | todo |
-| [[../../../plan/Jord/phase-03/S0082-image-transforms\|S0082]] — image transforms | 2–3 h | todo |
-| [[../../../plan/Jord/phase-03/S0083-presence-broadcast\|S0083]] — presence + broadcast | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0081-multipart-uploads\|S0081]] — multipart + resumable uploads | 3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0082-image-transforms\|S0082]] — image transforms | 2–3 h | **done** 2026-11-03 |
+| [[../../../plan/Jord/phase-03/done/S0083-presence-broadcast\|S0083]] — presence + broadcast | 3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].
