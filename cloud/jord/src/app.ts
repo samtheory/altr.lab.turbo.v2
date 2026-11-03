@@ -32,6 +32,7 @@ import { streamSSE } from "hono/streaming";
 import {
   createAuthMiddleware,
   createAuthRoutes,
+  createOAuthAdminRoutes,
   createAuthSettingsRoutes,
   createMailerFromEnv,
   requireAlterSchema,
@@ -164,6 +165,22 @@ import {
   type OutboxListenBridge,
 } from "./realtime/index.js";
 import { liveDeliveryAllowed } from "./realtime/deliver.js";
+import { PresenceHub } from "./realtime/channels.js";
+import {
+  authorizeChannel,
+  deniedChannelBody,
+  parseChannelRef,
+  type ChannelRef,
+} from "./realtime/channel-auth.js";
+import { channelSocketHandlers } from "./realtime/channel-socket.js";
+import {
+  principalSessionLive,
+  REALTIME_RECHECK_MS,
+} from "./realtime/liveness.js";
+import {
+  createPgPeerTransport,
+  type PgPeerTransport,
+} from "./realtime/presence-pg.js";
 import type { OutboxRow } from "./realtime/outbox.js";
 import type { WriteWithChange } from "./realtime/types.js";
 import {
@@ -211,6 +228,13 @@ export type JordAppDeps = {
    * `stopRealtimeListen`. Omit in unit tests that do not need cross-instance fan-out.
    */
   realtimeListenUrl?: string;
+  /**
+   * S0083 presence/broadcast hub. Created when omitted; on postgres with
+   * `realtimeListenUrl` it gets a NOTIFY peer transport for multi-instance.
+   */
+  presence?: PresenceHub;
+  /** S0083: open-stream session/policy re-check cadence (default 30s). */
+  realtimeRecheckMs?: number;
   /** Absolute or relative blob disk root. Defaults to data/blobs or JORD_BLOBS_ROOT. */
   blobsRoot?: string;
   /** Max upload bytes (default 10 MiB). */
@@ -248,6 +272,8 @@ export type JordAppDeps = {
    * zero-project boots keep working; `/admin/projects` returns 503.
    */
   secrets?: SecretPort | null;
+  /** S0075: provider HTTP for the OAuth token exchange (tests). */
+  oauthFetch?: typeof fetch;
   /** Override project connect test (S0043 tests). */
   projectConnectTest?: ProjectConnectTester;
   /** Override project target baseline / migrate open (S0043 tests). */
@@ -549,7 +575,7 @@ export function createJordApp(deps: JordAppDeps) {
     secrets,
     enqueueWrite,
   });
-  const requireAuth = createAuthMiddleware(deps.auth, jwtKeyring);
+  const requireAuth = createAuthMiddleware(deps.auth, jwtKeyring, deps.jord);
   // Prefer `enqueueWrite` below so jobs get `jord.write` spans (S0039).
   const projectRegistry = {
     jord: deps.jord,
@@ -636,6 +662,17 @@ export function createJordApp(deps: JordAppDeps) {
       console.error("[@altr/jord-server] realtime LISTEN start failed", err);
     });
   }
+  // S0083: presence/broadcast hub; NOTIFY peer transport on postgres.
+  const realtimeRecheckMs = deps.realtimeRecheckMs ?? REALTIME_RECHECK_MS;
+  let presenceTransport: PgPeerTransport | null = null;
+  if (!deps.presence && deps.jord.dialect === "postgres" && listenUrl) {
+    presenceTransport = createPgPeerTransport({ connectionString: listenUrl });
+    void presenceTransport.start().catch((err) => {
+      console.error("[@altr/jord-server] presence LISTEN start failed", err);
+    });
+  }
+  const presence =
+    deps.presence ?? new PresenceHub({ transport: presenceTransport });
 
   /**
    * Single emit path. The data write and its jord_changes rows (tracked
@@ -770,6 +807,8 @@ export function createJordApp(deps: JordAppDeps) {
       enqueueWrite: enqueueWrite,
       rateLimit: rateLimitStore,
       keyring: jwtKeyring,
+      secrets,
+      oauthFetch: deps.oauthFetch,
     }),
   );
 
@@ -1916,6 +1955,8 @@ export function createJordApp(deps: JordAppDeps) {
           void stream.writeSSE({ event: "ping", data: "ping" });
         }, 15_000);
 
+        // S0083: a revoked/expired session (S0076) drops the stream.
+        let nextSessionCheck = Date.now() + realtimeRecheckMs;
         try {
           while (!stream.aborted) {
             if (accessExp != null && Date.now() >= accessExp) {
@@ -1925,7 +1966,17 @@ export function createJordApp(deps: JordAppDeps) {
               });
               break;
             }
-            await stream.sleep(1000);
+            if (Date.now() >= nextSessionCheck) {
+              nextSessionCheck = Date.now() + realtimeRecheckMs;
+              if (!(await principalSessionLive(deps.jord, principal))) {
+                await stream.writeSSE({
+                  event: "expired",
+                  data: "session_revoked",
+                });
+                break;
+              }
+            }
+            await stream.sleep(Math.min(1000, realtimeRecheckMs));
           }
         } finally {
           clearInterval(timer);
@@ -1974,6 +2025,7 @@ export function createJordApp(deps: JordAppDeps) {
       let unsubscribe: (() => void) | null = null;
       let pingTimer: ReturnType<typeof setInterval> | null = null;
       let expTimer: ReturnType<typeof setTimeout> | null = null;
+      let sessionTimer: ReturnType<typeof setInterval> | null = null;
       const accessExp = c.get("accessExp");
       const principal = c.get("principal");
       let sendChain: Promise<void> = Promise.resolve();
@@ -2014,6 +2066,17 @@ export function createJordApp(deps: JordAppDeps) {
               /* closed */
             }
           }, 15_000);
+          // S0083: a revoked/expired session (S0076) drops the socket.
+          sessionTimer = setInterval(() => {
+            void principalSessionLive(deps.jord, principal).then((live) => {
+              if (live) return;
+              try {
+                ws.close(4401, "session_revoked");
+              } catch {
+                /* already closed */
+              }
+            });
+          }, realtimeRecheckMs);
         },
         onMessage(evt, ws) {
           const raw = typeof evt.data === "string" ? evt.data : "";
@@ -2024,14 +2087,87 @@ export function createJordApp(deps: JordAppDeps) {
         onClose() {
           if (pingTimer) clearInterval(pingTimer);
           if (expTimer) clearTimeout(expTimer);
+          if (sessionTimer) clearInterval(sessionTimer);
           unsubscribe?.();
         },
         onError() {
           if (pingTimer) clearInterval(pingTimer);
           if (expTimer) clearTimeout(expTimer);
+          if (sessionTimer) clearInterval(sessionTimer);
           unsubscribe?.();
         },
       };
+    }),
+  );
+
+  // S0083 — presence + broadcast. Policy check runs before upgrade: a
+  // denied caller gets HTTP 403 and never becomes a hub member.
+  async function readChannelRow(table: string, id: string) {
+    if (table === REALTIME_V1_TABLE) {
+      const rec = await deps.jord.getRecord(id);
+      if (!rec) return null;
+      return {
+        row: {
+          id: rec.id,
+          bucket: rec.bucket,
+          body: rec.body,
+          metadata: rec.metadata,
+          version: rec.version,
+        },
+        bucket: rec.bucket,
+      };
+    }
+    const row = await readUserTableRow(table, id);
+    return row ? { row } : null;
+  }
+  function authorizeChannelFor(principal: Principal, ref: ChannelRef) {
+    return authorizeChannel({
+      principal,
+      ref,
+      decide: (p, table, op, extra) => decide(p, table, op, extra),
+      readRow: readChannelRow,
+    });
+  }
+
+  protectedRoutes.get(
+    "/realtime/channel",
+    requireSubscribeRealtime(),
+    async (c, next) => {
+      const ref = parseChannelRef(c.req.query("channel"));
+      if ("error" in ref) {
+        throw new HTTPException(400, { message: ref.error });
+      }
+      const verdict = await authorizeChannelFor(c.get("principal"), ref);
+      if (!verdict.allowed) {
+        return c.json(deniedChannelBody(ref.channel), 403);
+      }
+      const full = presence.canAdmit(ref.channel);
+      if (full) {
+        return c.json(
+          { error: "realtime_full", message: `presence ${full}` },
+          503,
+        );
+      }
+      await next();
+    },
+    upgradeWebSocket((c) => {
+      const ref = parseChannelRef(c.req.query("channel")) as ChannelRef;
+      const principal = c.get("principal");
+      return channelSocketHandlers({
+        hub: presence,
+        channel: ref.channel,
+        accessExp: c.get("accessExp"),
+        recheckMs: realtimeRecheckMs,
+        recheck: async () => {
+          if (!(await principalSessionLive(deps.jord, principal))) {
+            return { ok: false, code: 4401, reason: "session_revoked" };
+          }
+          const again = await authorizeChannelFor(principal, ref);
+          return again.allowed
+            ? { ok: true }
+            : { ok: false, code: 4403, reason: "access_revoked" };
+        },
+      });
     }),
   );
 
@@ -3032,6 +3168,11 @@ export function createJordApp(deps: JordAppDeps) {
       rateLimit: rateLimitStore,
     }),
   );
+  // S0075 — OAuth provider config (client secret is write-only).
+  protectedRoutes.route(
+    "/admin/auth",
+    createOAuthAdminRoutes({ jord: deps.jord, enqueueWrite, secrets }),
+  );
   // S0070 — admin user CRUD (create/invite, metadata, ban, delete, revoke).
   protectedRoutes.route(
     "/admin/auth",
@@ -3054,6 +3195,10 @@ export function createJordApp(deps: JordAppDeps) {
     await listenStarted?.catch(() => undefined);
     await listenBridge?.stop();
     listenBridge = null;
+    // S0083: close presence sockets and the NOTIFY peer connection.
+    if (!deps.presence) presence.close();
+    await presenceTransport?.stop();
+    presenceTransport = null;
   }
 
   return Object.assign(app, { injectWebSocket, stopRealtimeListen, secrets });

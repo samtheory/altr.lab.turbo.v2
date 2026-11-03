@@ -7,6 +7,7 @@ export const BUILTIN_JOB_KINDS = [
   "changes_prune",
   "blobs_gc",
   "shared_state_sweep",
+  "sessions_gc",
 ] as const;
 
 export type BuiltinJobKind = (typeof BUILTIN_JOB_KINDS)[number];
@@ -109,13 +110,22 @@ export const JOB_KIND_HANDLERS: Record<BuiltinJobKind, JobKindHandler> = {
       env,
       factory,
     });
+    const resolveStorage = async (bucket: string) =>
+      (await resolver.resolveBucket(bucket)).port;
     const result = await gcExpiredPendingBlobs({
       jord,
       storage,
-      resolveStorage: async (bucket) =>
-        (await resolver.resolveBucket(bucket)).port,
+      resolveStorage,
     });
-    return { result };
+    // S0081: abandoned multipart sessions (abort store parts, drop the row).
+    const { gcExpiredUploads } = await import("../storage/multipart.js");
+    const uploads = await gcExpiredUploads({ jord, resolveStorage });
+    return { result: { ...result, ...uploads, errors: [...result.errors, ...uploads.errors] } };
+  },
+
+  async sessions_gc({ jord }) {
+    const { gcSessions } = await import("../auth/sessions.js");
+    return { result: await gcSessions(jord) };
   },
 
   async shared_state_sweep({ jord, job }) {

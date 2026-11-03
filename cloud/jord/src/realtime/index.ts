@@ -18,6 +18,17 @@ export {
 } from "./listen.js";
 export { CommitWatermark } from "./watermark.js";
 export {
+  createMemoryPeerNetwork,
+  DEFAULT_PRESENCE_LIMITS,
+  PresenceHub,
+  PRESENCE_CLOSE,
+  type PeerMessage,
+  type PeerTransport,
+  type PresenceLimits,
+} from "./channels.js";
+export { parseChannelRef, type ChannelRef } from "./channel-auth.js";
+export { createPgPeerTransport, JORD_PRESENCE_CHANNEL } from "./presence-pg.js";
+export {
   isRealtimeSubscribeTable,
   MAX_REALTIME_SUBSCRIBERS,
   REALTIME_V1_TABLE,

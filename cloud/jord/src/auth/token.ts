@@ -197,6 +197,7 @@ export function resolvePrincipalWithKeys(
           aud: claims.aud,
           sub: claims.sub,
           ...(claims.email ? { email: claims.email } : {}),
+          ...(typeof claims.sid === "string" ? { sid: claims.sid } : {}),
         },
       },
       accessExp: claims.exp * 1000,

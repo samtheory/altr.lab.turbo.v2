@@ -2,18 +2,19 @@
 title: "S0076 — sessions list/revoke + custom JWT claims"
 description: "Server-side session records with device/IP/last-seen, single and bulk revoke, plus custom claims injected into issued tokens"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-03
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0076
+  - done
 ---
 
 # S0076 — sessions list/revoke + custom JWT claims
 
-> **Status:** todo · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/auth/README]]
+> **Status:** **done** 2026-11-03 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../../tech_space/jord/auth/README]]
 
 ## Routing (who / how long / which model)
 
@@ -37,7 +38,7 @@ Leftover **B7** from phase-02.75, and the Auth console's Sessions section (`S007
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] (Sessions, JWT) |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · [[../../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] (Sessions, JWT) |
 | Code today | `cloud/jord/src/auth/{jwt,token,identity,middleware,admin}.ts` |
 | Settings | custom claims come from [[S0069-auth-settings-store|S0069]] |
 | Tests | `cloud/jord/src/auth/token.test.ts` |
@@ -82,21 +83,40 @@ flowchart LR
 
 ## Done when
 
-- [ ] Session rows created on login with device/IP/last-seen
-- [ ] Revoked session fails on the next request (tested)
-- [ ] Custom claims present in new tokens; reserved keys rejected
-- [ ] Expired sessions cleaned up
-- [ ] Proof pasted
+- [x] Session rows created on login with device/IP/last-seen
+- [x] Revoked session fails on the next request (tested)
+- [x] Custom claims present in new tokens; reserved keys rejected
+- [x] Expired sessions cleaned up
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-11-03 | `pnpm --filter @altr/jord-server test` | **252 passed** \| 20 skipped (was 238; +14 sessions) — before review fixes |
+| 2026-11-03 | `pnpm --filter @altr/jord-server exec tsc --noEmit` | clean |
+| 2026-11-03 | `vitest run src/auth` (after heimdall fixes) | **81 passed** (16 in `sessions.test.ts`) |
+
+## What shipped
+
+| Piece | Fact |
+|-------|------|
+| Model | `jord_sessions` (migration `0022_sessions`): id, user_id, device label, ip, created, last_seen, revoked, expires. **Session id = refresh-token family id**, so revoking a session also revokes its refresh tokens |
+| Issue | password sign-in, magic link and OAuth all go through `issueUserSession`; access token carries `sid` (reserved claim) |
+| Enforce | `createAuthMiddleware` (only resolver of user JWTs) checks the session on every request: unknown, revoked, expired, wrong-user, banned or deleted user = 401; fails closed if the store errors. `last_seen_at` written at most once a minute |
+| Self | `GET /auth/sessions` (current flagged) · `DELETE /auth/sessions/:id` (404 for foreign ids) · `DELETE /auth/sessions[?others=true]` |
+| Admin | `GET`/`DELETE /admin/auth/users/:id/sessions` · `DELETE /admin/auth/sessions/:id`; legacy `/admin/users/:id/revoke`, ban and delete also close sessions |
+| Refresh | keeps the same `sid`, slides expiry 30 d; a revoked or expired session is never resurrected |
+| Cleanup | job kind `sessions_gc` (seeded, hourly) deletes sessions dead for 7 d |
+| Claims | custom claims already shipped in S0069/S0071; this card adds `sid` to the reserved list (setting it is a 400, and it cannot be overridden at signing) |
+
+**Legacy policy (chosen):** tokens minted before this card have no `sid` and keep working until their short access expiry; their refresh tokens adopt a session row on first refresh.
+
+**Known / follow-up (heimdall review, not fixed):** open SSE/WebSocket streams only check access-token expiry, so a stream opened before a revoke keeps delivering until that token expires; no absolute session lifetime cap (refresh slides it indefinitely); sid-less tokens cannot be revoked until expiry; admin `revoke` returns a refresh-token count, not a session count; IP comes from `x-forwarded-for` (display only, spoofable without a trusted proxy).
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/auth/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

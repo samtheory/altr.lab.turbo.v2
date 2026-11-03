@@ -42,7 +42,7 @@ Every signing secret can be rotated without an outage: JWT signing key, local bl
 | As-built | [[../../../tech_space/jord/auth/README]] · [[../../../tech_space/jord/blobs/README]] |
 | Tests | `cloud/jord/src/auth/token.test.ts` |
 
-**Do not break:** existing tokens during rotation; the signed-URL 1 h TTL clamp; revoke semantics from [[S0076-sessions-claims|S0076]].
+**Do not break:** existing tokens during rotation; the signed-URL 1 h TTL clamp; revoke semantics from [[done/S0076-sessions-claims|S0076]].
 
 ## In scope
 

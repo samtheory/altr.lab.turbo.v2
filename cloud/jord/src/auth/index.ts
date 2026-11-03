@@ -131,3 +131,4 @@ export {
   type JordSessionClaims,
   type ResolvedAccess,
 } from "./token.js";
+export { createOAuthAdminRoutes, createOAuthRoutes } from "./oauth.js";

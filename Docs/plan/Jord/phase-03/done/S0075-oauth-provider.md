@@ -2,18 +2,19 @@
 title: "S0075 — one OAuth provider (state + PKCE)"
 description: "OAuth 2.0 authorization-code with PKCE and state: authorize, callback, account link, and errors that cannot be used for enumeration"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-03
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0075
+  - done
 ---
 
 # S0075 — one OAuth provider (state + PKCE)
 
-> **Status:** todo · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/auth/README]]
+> **Status:** **done** 2026-11-03 · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../../tech_space/jord/auth/README]]
 
 ## Routing (who / how long / which model)
 
@@ -37,7 +38,7 @@ One OAuth 2.0 provider (Google first, generic OIDC if cheap) end to end: `GET /a
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] (Providers) |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · [[../../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] (Providers) |
 | Depends on | [[S0069-auth-settings-store|S0069]] (provider settings + allowlist) · [[S0071-auth-console-sections|S0071]] (secret storage) |
 | Code today | `cloud/jord/src/auth/{identity,routes,jwt,admin}.ts` |
 | Tests | `cloud/jord/src/auth/principals.test.ts` (add oauth cases) |
@@ -85,21 +86,39 @@ sequenceDiagram
 
 ## Done when
 
-- [ ] Happy path signs in with a stubbed provider
-- [ ] State mismatch/replay and PKCE mismatch rejected (tested)
-- [ ] Disabled provider refuses immediately
-- [ ] No account-existence leakage on errors
-- [ ] Proof pasted
+- [x] Happy path signs in with a stubbed provider
+- [x] State mismatch/replay and PKCE mismatch rejected (tested)
+- [x] Disabled provider refuses immediately
+- [x] No account-existence leakage on errors
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-11-03 | `pnpm --filter @altr/jord-server test` | **238 passed** \| 20 skipped (was 225; +13 oauth) |
+| 2026-11-03 | `pnpm --filter @altr/jord-server exec tsc --noEmit` | clean |
+| 2026-11-03 | `vitest run src/auth` (after heimdall fixes) | **65 passed** |
+
+## What shipped
+
+| Piece | Fact |
+|-------|------|
+| Routes | `GET /auth/oauth/:provider` (302 with `state` + S256 PKCE) · `GET /auth/oauth/:provider/callback` · admin `GET`/`PUT /admin/auth/oauth/:provider` |
+| Provider | `google` only; endpoints constant, `fetch` injectable for tests. `redirect_uri` = `site_url` + `/auth/oauth/google/callback` (site URL required, else 503) |
+| Storage | migration `0021_oauth`: `jord_oauth_providers` (client secret sealed with the master key, write-only), `jord_oauth_states` (sha256, single use, 10 min), `jord_identities` (unique provider + subject) |
+| State | claimed by `UPDATE … RETURNING` (Postgres-safe); bound to the browser by an HttpOnly `SameSite=Lax` cookie (login-CSRF guard); expired rows swept on each authorize |
+| id_token | `iss` / `aud` / `exp` / `sub` / `email_verified` checked; signature skipped because it arrives straight from the TLS token endpoint (OIDC Core 3.1.3.7) |
+| Errors | every callback failure is the same `400 {error:"oauth_failed"}`; disabled users and closed sign-ups are indistinguishable |
+| Session | JSON session, or 302 to the allowlisted `redirect_to` with tokens in the URL **fragment** |
+
+**Linking policy (decided before coding):** match by (provider, subject). With no identity yet, a **verified** email that matches an existing user links to it; with no such user a confirmed user is created while sign-ups are enabled. An unverified email never links or creates. Linking an account that was **unconfirmed** strips its password and revokes its refresh tokens (pre-registration takeover guard).
+
+**Known / follow-up (heimdall review, not fixed):** secret write and DB upsert are not atomic and the port's sealed map is in-memory, so after a restart a stored secret may not unseal (callback fails generically; re-enter the secret); token response has no size cap or `redirect:"error"`; a second Google `sub` with the same verified email links as another identity on one user (recycled-address risk); per-IP limits trust `x-forwarded-for`.
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/auth/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

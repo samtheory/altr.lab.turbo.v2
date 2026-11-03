@@ -18,6 +18,7 @@ import {
   requireOperatorAdmin,
   type JordAuthVariables,
 } from "./middleware.js";
+import { listSessions, revokeAllSessions, revokeSession } from "./sessions.js";
 import { loadAuthSettings } from "./settings.js";
 
 const MAX_METADATA_CHARS = 16_384;
@@ -70,6 +71,26 @@ export function createAdminAuthUserRoutes(input: {
 
   routes.get("/users", async (c) => {
     return c.json({ users: await listUsers(input.jord) });
+  });
+
+  // S0076 — sessions per user.
+  routes.get("/users/:id/sessions", async (c) => {
+    return c.json({ sessions: await listSessions(input.jord, c.req.param("id")) });
+  });
+
+  routes.delete("/users/:id/sessions", async (c) => {
+    const result = await input.enqueueWrite(() =>
+      revokeAllSessions({ jord: input.jord, userId: c.req.param("id") }),
+    );
+    return c.json({ ok: true as const, ...result });
+  });
+
+  routes.delete("/sessions/:id", async (c) => {
+    const ok = await input.enqueueWrite(() =>
+      revokeSession({ jord: input.jord, id: c.req.param("id") }),
+    );
+    if (!ok) return c.json({ error: "session_not_found" }, 404);
+    return c.json({ ok: true as const });
   });
 
   routes.get("/users/:id", async (c) => {

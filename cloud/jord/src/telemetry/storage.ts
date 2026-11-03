@@ -62,5 +62,16 @@ export function instrumentStorage(port: JordStoragePort): JordStoragePort {
             () => port.abortMultipartUpload!(input),
           )
       : undefined,
+    listMultipartParts: port.listMultipartParts
+      ? (input) =>
+          withStorageSpan(
+            { op: "listMultipartParts", bucket: input.bucket },
+            () => port.listMultipartParts!(input),
+          )
+      : undefined,
+    writeMultipartPart: port.writeMultipartPart
+      ? (uploadId, partNumber, bytes) =>
+          port.writeMultipartPart!(uploadId, partNumber, bytes)
+      : undefined,
   };
 }

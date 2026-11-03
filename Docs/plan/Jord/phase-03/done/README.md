@@ -56,3 +56,6 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0071-auth-console-sections\|S0071]] | Providers, URL config, JWT key/claims, rate limits | 2026-11-03 |
 | [[S0072-email-templates\|S0072]] | Email templates + test send (console mailer until S0073) | 2026-11-03 |
 | [[S0073-mailer-port\|S0073]] | Real `MailerPort` (console \| Resend \| SES) | 2026-11-03 |
+| [[S0074-magic-link\|S0074]] | Magic-link sign-in (single-use, rate-limited, allowlisted) | 2026-11-03 |
+| [[S0075-oauth-provider\|S0075]] | One OAuth provider (Google, state + PKCE, linking policy) | 2026-11-03 |
+| [[S0076-sessions-claims\|S0076]] | Sessions list/revoke + `sid` enforcement + cleanup job | 2026-11-03 |

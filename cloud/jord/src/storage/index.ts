@@ -1,6 +1,7 @@
 export type {
   HeadObjectResult,
   JordStoragePort,
+  MultipartPartInfo,
   PresignRequest,
   PresignResult,
   PutObjectResult,
@@ -104,4 +105,9 @@ export {
   type BucketProbeInput,
   type BucketPublic,
 } from "./bucket-admin.js";
+export {
+  gcExpiredUploads,
+  resolveMultipartLimits,
+  type UploadGcResult,
+} from "./multipart.js";
 export { createBucketAdminRoutes } from "./bucket-admin-routes.js";

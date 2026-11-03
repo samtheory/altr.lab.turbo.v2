@@ -105,7 +105,7 @@ One row per project database in `jord_auth_settings` (`id = default`). A **missi
 | `anonymous_enabled` | `true` | `POST /auth/anon-key` → **403** `provider_disabled` |
 | `custom_claims` | `{}` | Merged into user access tokens on sign-in/refresh; reserved claims refused |
 
-`redirect_to` is accepted by signup, recover, reset and confirm. Validation rejects non-http(s) schemes, protocol-relative `//host` values, embedded credentials and off-list hosts; wildcard patterns may not appear in the scheme. Redirect targets are validated; rendered mail uses templates (S0072) and the env-selected mailer (S0073). Magic-link auth is [[../../../plan/Jord/phase-03/S0074-magic-link|S0074]].
+`redirect_to` is accepted by signup, recover, reset and confirm. Validation rejects non-http(s) schemes, protocol-relative `//host` values, embedded credentials and off-list hosts; wildcard patterns may not appear in the scheme. Redirect targets are validated; rendered mail uses templates (S0072) and the env-selected mailer (S0073). Magic-link auth shipped in [[../../../plan/Jord/phase-03/done/S0074-magic-link|S0074]] (see Magic link below).
 
 | Piece | Path |
 |-------|------|
@@ -181,6 +181,36 @@ Signup confirm, admin invite and password recover all call `sendAuthEmail` so th
 | Studio | `AuthEmailSection` · BFF `apps/jord-studio/src/app/api/admin/auth/email/send-test` |
 | Tests | `email-templates.test.ts` · `studio-auth-email.test.ts` · principals recover path |
 
+### Magic link (S0074)
+
+| Route | Behaviour |
+|-------|-----------|
+| `POST /auth/magic-link` `{email, redirect_to?}` | Always `200 {ok:true}`. Token only for an existing, non-disabled user. Per-email 3 / 15 min (silent), per-IP uses the `recover` limit (429) |
+| `GET`/`POST /auth/magic-link/verify` | `token` (+ optional `redirect_to`) → `access_token` + `refresh_token`. Single use via `UPDATE … RETURNING`, 15 min TTL, disabled user refused; `no-store` + `no-referrer` |
+
+Tokens live in `jord_auth_tokens` (`purpose='magic'`, sha256, `created_ip` from migration 0020). `redirect_to` must pass the allowlist on both calls; a refused redirect does not consume the token. Prefer POST verify from a front end so mail scanners cannot burn the link. Open: `consumeOneTime` (confirm/reset) still uses select-then-update; `x-forwarded-for` is trusted without a proxy setting.
+
+### Sessions (S0076)
+
+| Route | Behaviour |
+|-------|-----------|
+| `GET /auth/sessions` | my live sessions: `id`, `device` ("Chrome on Windows"), `ip`, `created_at`, `last_seen_at`, `expires_at`, `current` |
+| `DELETE /auth/sessions/:id` | revoke one of mine (404 for anyone else's) |
+| `DELETE /auth/sessions[?others=true]` | revoke all mine, or all but the caller's |
+| `GET`/`DELETE /admin/auth/users/:id/sessions` · `DELETE /admin/auth/sessions/:id` | operator admin |
+
+A session id is the refresh-token family id; access tokens carry it as `sid` (a reserved claim). Every request through `createAuthMiddleware` checks the row: unknown, revoked, expired, wrong user, banned or deleted user is `401`, and a store error also denies. `last_seen_at` is written at most once a minute. Refresh keeps the `sid` and slides the 30-day expiry; revoked or expired sessions are never revived. Ban, delete and the legacy `/admin/users/:id/revoke` also close sessions. Job `sessions_gc` (hourly) removes sessions dead for 7 days. Tokens minted before S0076 have no `sid` and live until their access expiry. Open: SSE/WebSocket streams check only token expiry; no absolute session cap.
+
+### OAuth — Google (S0075)
+
+| Route | Behaviour |
+|-------|-----------|
+| `GET /auth/oauth/google[?redirect_to=]` | 403 if disabled, 503 without `site_url`; sets an HttpOnly `SameSite=Lax` `jord_oauth_state` cookie and 302s to Google with `state` + S256 PKCE. `redirect_to` must pass the allowlist |
+| `GET /auth/oauth/google/callback` | cookie must equal `state`; state claimed once by `UPDATE … RETURNING` (10 min); code exchange (5 s timeout); id_token `iss`/`aud`/`exp`/`email_verified` checked. Any failure = `400 {error:"oauth_failed"}`. Success = JSON session, or 302 to `redirect_to` with tokens in the fragment |
+| `GET`/`PUT /admin/auth/oauth/google` | operator admin. `{enabled, client_id, client_secret?}`; secret sealed with `JORD_MASTER_KEY`, never returned (`client_secret_configured` only). Enabling needs both |
+
+`redirect_uri` is `site_url` + `/auth/oauth/google/callback` (register exactly this in the Google console). Identity match is by (provider, subject) in `jord_identities`; a verified email links to the existing user, or creates a confirmed one while sign-ups are open; an unverified email never links. Linking an unconfirmed account clears its password and revokes its refresh tokens. OAuth-created users carry `password_hash = 'oauth$none'`, which no password can match. Open: sealed secret does not survive a restart (in-memory port map); `x-forwarded-for` trusted for limits.
+
 ### MailerPort (S0073)
 
 Process-wide mail adapter selected at boot. Keys stay in env / secret store — never the database or Studio UI.
@@ -232,4 +262,4 @@ A raw `Authorization: Bearer $JORD_SERVER_TOKEN` is `service` / `service_role` u
 
 ## Not in Jord yet
 
-OAuth and magic link ([[../../../plan/Jord/phase-03/S0074-magic-link|S0074]]–[[../../../plan/Jord/phase-03/S0075-oauth-provider|S0075]]); Sessions console [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]]. Shipped: Users [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]] · providers/URL/JWT/rate limits [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]] · email templates [[../../../plan/Jord/phase-03/done/S0072-email-templates|S0072]] · MailerPort [[../../../plan/Jord/phase-03/done/S0073-mailer-port|S0073]].
+Sessions console UI. Shipped: sessions API [[../../../plan/Jord/phase-03/done/S0076-sessions-claims|S0076]] · Users [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]] · providers/URL/JWT/rate limits [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]] · email templates [[../../../plan/Jord/phase-03/done/S0072-email-templates|S0072]] · MailerPort [[../../../plan/Jord/phase-03/done/S0073-mailer-port|S0073]].

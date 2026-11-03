@@ -13,6 +13,8 @@ export type PresignRequest = {
   expiresInSeconds: number;
   uploadId?: string;
   partNumber?: number;
+  /** Exact byte length of this part; S3 signs it as content-length. */
+  partBytes?: number;
 };
 
 /**
@@ -60,6 +62,9 @@ export type JordStoragePort = {
     bucket: string;
     key: string;
     contentType: string;
+    /** Declared sizes, enforced per part by the local adapter. */
+    totalSize?: number;
+    partSize?: number;
   }): Promise<{ uploadId: string }>;
   completeMultipartUpload?(input: {
     bucket: string;
@@ -72,4 +77,25 @@ export type JordStoragePort = {
     key: string;
     uploadId: string;
   }): Promise<void>;
+  /**
+   * Local adapter only: accept one part body from a signed PUT. The body is
+   * streamed with a hard cap at the part's expected size (recorded at create).
+   */
+  writeMultipartPart?(
+    uploadId: string,
+    partNumber: number,
+    body: Uint8Array | ReadableStream<Uint8Array> | null,
+  ): Promise<PutObjectResult>;
+  /** Parts the store has received so far (S0081 resume / complete verify). */
+  listMultipartParts?(input: {
+    bucket: string;
+    key: string;
+    uploadId: string;
+  }): Promise<MultipartPartInfo[]>;
+};
+
+export type MultipartPartInfo = {
+  partNumber: number;
+  size: number;
+  etag: string;
 };

@@ -11,6 +11,7 @@ import {
   stampInsertScope,
 } from "../policies/evaluate.js";
 import type { JordChangeDraft, WriteWithChange } from "../realtime/types.js";
+import { decodeCursor, encodeCursor, keysetOrder } from "./keyset.js";
 import { buildOpenApi } from "./openapi.js";
 import {
   coerceColumnValue,
@@ -23,6 +24,7 @@ import {
   compileCount,
   compileDelete,
   compileInsert,
+  compileKeysetSelect,
   compilePriorSelect,
   compileSelect,
   compileUpdate,
@@ -142,6 +144,37 @@ export function createTableApiRoutes(deps: {
         return jsonError(403, "policy_denied", "policy denied");
       }
       const scope = principal.kind === "service" ? undefined : scopeFor(info, decision.scope);
+
+      if (method === "GET" && parsed.cursor != null) {
+        if (parsed.offset > 0) {
+          return jsonError(400, "bad_offset", "offset cannot be combined with cursor");
+        }
+        const order = keysetOrder(info, parsed);
+        const after = parsed.cursor === "" ? null : decodeCursor(info, order, parsed.cursor);
+        // Fetch the order columns even when `select` omits them, then strip them again.
+        const wanted = parsed.select;
+        const fetchParsed = wanted
+          ? { ...parsed, select: [...new Set([...wanted, ...order.map((o) => o.column)])] }
+          : parsed;
+        const compiled = compileKeysetSelect(info, fetchParsed, dialect, order, after, scope);
+        const fetched = await deps.jord.query(compiled.sql, compiled.args);
+        const hasMore = fetched.length > parsed.limit;
+        const page = hasMore ? fetched.slice(0, parsed.limit) : fetched;
+        const next = hasMore ? encodeCursor(info, order, page[page.length - 1]!) : null;
+        const rows = wanted
+          ? page.map((row) => Object.fromEntries(wanted.map((name) => [name, row[name]])))
+          : page;
+        let count: number | null = null;
+        if (parsed.count === "exact") {
+          const counted = compileCount(info, parsed.filters, dialect, scope);
+          const countRows = await deps.jord.query(counted.sql, counted.args);
+          count = Number(countRows[0]?.n ?? 0);
+        }
+        if (parsed.count !== "none") {
+          c.header("Preference-Applied", parsed.count === "exact" ? "count=exact" : "count=planned");
+        }
+        return c.json({ data: rows, count, next_cursor: next, has_more: hasMore });
+      }
 
       if (method === "GET") {
         const compiled = compileSelect(info, parsed, dialect, scope);

@@ -15,6 +15,8 @@ import {
   requireWriteBlobs,
 } from "../auth/middleware.js";
 import type { WriteQueue } from "../queue.js";
+import { MAX_LOCAL_PART_BYTES } from "../storage/local.js";
+import { registerMultipartRoutes } from "./multipart-routes.js";
 import {
   assertBucketUploadLimits,
   assertSignAllowed,
@@ -119,6 +121,9 @@ export function registerBlobRoutes(
   deps: BlobRouteDeps,
 ): void {
   const env = deps.env ?? process.env;
+
+  // S0081 — multipart / resumable upload sessions.
+  registerMultipartRoutes(protectedRoutes, deps, publicBlob);
 
   protectedRoutes.get("/blobs/buckets", async (c) => {
     const fromMeta = await deps.jord.listBlobBuckets();
@@ -574,6 +579,47 @@ export function registerSignedBlobRoutes(
       });
     }
 
+    if (parsed.uploadId && parsed.partNumber != null) {
+      // S0081: stream the part with a hard byte cap enforced by the adapter;
+      // never buffer the body. Content-Length (when sent) is only an early
+      // reject, the streamed byte count is authoritative.
+      const declared = c.req.header("content-length");
+      if (declared !== undefined) {
+        const n = Number(declared);
+        if (!Number.isFinite(n) || n > MAX_LOCAL_PART_BYTES) {
+          throw new HTTPException(413, { message: "part too large" });
+        }
+      }
+      const local = resolved.port as JordStoragePort;
+      if (!local.writeMultipartPart) {
+        throw new HTTPException(501, { message: "multipart part unsupported" });
+      }
+      let written: { size: number; etag: string };
+      try {
+        written = await local.writeMultipartPart(
+          parsed.uploadId,
+          parsed.partNumber,
+          c.req.raw.body,
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        if (msg === "multipart upload not found") {
+          throw new HTTPException(404, { message: "upload not found" });
+        }
+        if (msg === "part too large") {
+          throw new HTTPException(413, { message: "part too large" });
+        }
+        if (msg === "part size mismatch") {
+          throw new HTTPException(400, { message: "part size mismatch" });
+        }
+        if (msg === "invalid part number" || msg === "invalid upload id") {
+          throw new HTTPException(400, { message: "invalid part number" });
+        }
+        console.error("[@altr/jord-server] multipart part write failed", err);
+        throw new HTTPException(500, { message: "storage_error" });
+      }
+      return c.json({ ok: true as const, etag: written.etag, size: written.size });
+    }
     const body = new Uint8Array(await c.req.arrayBuffer());
     const contentType = normalizeContentType(
       parsed.contentType ?? c.req.header("content-type") ?? undefined,
@@ -586,25 +632,6 @@ export function registerSignedBlobRoutes(
     });
     if (!gate.ok) {
       throw new HTTPException(gate.status, { message: gate.message });
-    }
-
-    if (parsed.uploadId && parsed.partNumber != null) {
-      const local = resolved.port as JordStoragePort & {
-        writeMultipartPart?: (
-          uploadId: string,
-          partNumber: number,
-          bytes: Uint8Array,
-        ) => Promise<{ size: number; etag: string }>;
-      };
-      if (!local.writeMultipartPart) {
-        throw new HTTPException(501, { message: "multipart part unsupported" });
-      }
-      const written = await local.writeMultipartPart(
-        parsed.uploadId,
-        parsed.partNumber,
-        body,
-      );
-      return c.json({ ok: true as const, etag: written.etag, size: written.size });
     }
 
     const written = await resolved.port.putObject(

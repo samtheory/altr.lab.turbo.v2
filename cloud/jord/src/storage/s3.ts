@@ -5,8 +5,10 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  ListPartsCommand,
   PutObjectCommand,
   S3Client,
+  UploadPartCommand,
   type S3ClientConfig,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -175,6 +177,24 @@ export function createS3StorageAdapter(
         });
         return { url, method: "GET", headers: {}, expiresAt };
       }
+      if (request.uploadId && request.partNumber != null) {
+        const partCommand = new UploadPartCommand({
+          Bucket: physicalBucket,
+          Key: key,
+          UploadId: request.uploadId,
+          PartNumber: request.partNumber,
+          ...(request.partBytes != null
+            ? { ContentLength: request.partBytes }
+            : {}),
+        });
+        const partUrl = await getSignedUrl(client, partCommand, {
+          expiresIn: request.expiresInSeconds,
+          ...(request.partBytes != null
+            ? { signableHeaders: new Set(["content-length"]) }
+            : {}),
+        });
+        return { url: partUrl, method: "PUT", headers: {}, expiresAt };
+      }
       const command = new PutObjectCommand({
         Bucket: physicalBucket,
         Key: key,
@@ -219,6 +239,33 @@ export function createS3StorageAdapter(
       const etag = (result.ETag ?? "").replace(/"/g, "");
       const head = await this.headObject(bucket, key);
       return { etag, size: head?.size ?? 0 };
+    },
+
+    async listMultipartParts({ bucket, key, uploadId }) {
+      const out: Array<{ partNumber: number; size: number; etag: string }> = [];
+      let marker: string | undefined;
+      for (let page = 0; page < 20; page += 1) {
+        const result = await client.send(
+          new ListPartsCommand({
+            Bucket: physicalBucket,
+            Key: objectKey(bucket, key, prefix),
+            UploadId: uploadId,
+            PartNumberMarker: marker,
+            MaxParts: 1000,
+          }),
+        );
+        for (const part of result.Parts ?? []) {
+          if (part.PartNumber == null) continue;
+          out.push({
+            partNumber: part.PartNumber,
+            size: part.Size ?? 0,
+            etag: (part.ETag ?? "").replace(/"/g, ""),
+          });
+        }
+        if (!result.IsTruncated || !result.NextPartNumberMarker) break;
+        marker = result.NextPartNumberMarker;
+      }
+      return out;
     },
 
     async abortMultipartUpload({ bucket, key, uploadId }) {

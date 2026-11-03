@@ -18,6 +18,7 @@ export const RESERVED_JWT_CLAIMS = [
   "exp",
   "jti",
   "nbf",
+  "sid",
 ] as const;
 
 export type JwtClaims = {
@@ -72,6 +73,8 @@ export function signAccessToken(input: {
   kid?: string;
   /** Extra claims (settings `custom_claims`); reserved names are ignored. */
   extraClaims?: Record<string, unknown>;
+  /** S0076: session id (the refresh family id). */
+  sid?: string;
 }): { token: string; expMs: number } {
   const nowMs = input.nowMs ?? Date.now();
   const iat = Math.floor(nowMs / 1000);
@@ -86,6 +89,7 @@ export function signAccessToken(input: {
     exp,
   };
   if (input.email) claims.email = input.email;
+  if (input.sid) claims.sid = input.sid;
   for (const [key, value] of Object.entries(input.extraClaims ?? {})) {
     if ((RESERVED_JWT_CLAIMS as readonly string[]).includes(key)) continue;
     if (value !== undefined) claims[key] = value;

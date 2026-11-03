@@ -7,6 +7,7 @@ import {
   type RowScope,
 } from "@altr/jord";
 
+import { keysetWhere, type KeysetOrder } from "./keyset.js";
 import {
   pkColumns,
   type Filter,
@@ -130,6 +131,35 @@ export function compileSelect(
   args.push(parsed.limit, parsed.offset);
   const sql = placeholders(
     `SELECT ${selectList(info, parsed)} FROM ${tableSql(info, dialect)}${where}${order} LIMIT ? OFFSET ?`,
+    dialect,
+  );
+  return { sql, args };
+}
+
+/**
+ * Keyset page (S0079): same filters + row scope as `compileSelect`, plus the cursor predicate,
+ * a total ORDER BY and `LIMIT limit+1` (the extra row signals `has_more`).
+ */
+export function compileKeysetSelect(
+  info: JordTableInfo,
+  parsed: ParsedTableQuery,
+  dialect: "libsql" | "postgres",
+  order: KeysetOrder,
+  after: SqlValue[] | null,
+  scope?: ScopeFor,
+): CompiledSql {
+  const args: SqlValue[] = [];
+  let where = whereSql(parsed.filters, args, scope);
+  if (after) {
+    const clause = keysetWhere(order, after, args);
+    where = where ? `${where} AND ${clause}` : ` WHERE ${clause}`;
+  }
+  const orderSql = ` ORDER BY ${order
+    .map((item) => `${quoteIdent(item.column)} ${item.dir === "desc" ? "DESC" : "ASC"}`)
+    .join(", ")}`;
+  args.push(parsed.limit + 1);
+  const sql = placeholders(
+    `SELECT ${selectList(info, parsed)} FROM ${tableSql(info, dialect)}${where}${orderSql} LIMIT ?`,
     dialect,
   );
   return { sql, args };

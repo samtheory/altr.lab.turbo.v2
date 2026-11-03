@@ -257,6 +257,91 @@ export async function recoverUser(input: {
   return { ok: true };
 }
 
+export const MAGIC_TTL_MS = 15 * 60 * 1000;
+
+/**
+ * S0074: issue a single-use magic-link token. Only existing, enabled users get
+ * one; the caller always answers 200 so the response never leaks existence.
+ */
+export async function requestMagicLink(input: {
+  jord: JordDriverPort;
+  mailer: MailerPort;
+  email: string;
+  ip?: string;
+  nowMs?: number;
+}): Promise<{ ok: true }> {
+  const email = normalizeEmail(input.email);
+  const user =
+    email && email.length <= 254 ? await findUserByEmail(input.jord, email) : null;
+  if (user && user.disabledAt == null) {
+    const now = input.nowMs ?? Date.now();
+    const token = randomBytes(32).toString("base64url");
+    await q(
+      input.jord,
+      "INSERT INTO jord_auth_tokens (id, user_id, purpose, token_hash, expires_at, used_at, created_at, created_ip) VALUES (?, ?, 'magic', ?, ?, NULL, ?, ?)",
+      [
+        randomUUID(),
+        user.id,
+        sha256(token),
+        now + MAGIC_TTL_MS,
+        now,
+        input.ip ? input.ip.slice(0, 64) : null,
+      ],
+    );
+    await sendAuthEmail({
+      jord: input.jord,
+      mailer: input.mailer,
+      kind: "magic_link",
+      to: email,
+      token,
+      expiresInSeconds: Math.round(MAGIC_TTL_MS / 1000),
+    });
+  }
+  return { ok: true };
+}
+
+/** Consume a magic-link token: single use, unexpired, user still enabled. */
+export async function consumeMagicLink(input: {
+  jord: JordDriverPort;
+  token: string;
+  nowMs?: number;
+}): Promise<{ ok: true; user: AuthUser } | { ok: false; error: "invalid_token" }> {
+  const now = input.nowMs ?? Date.now();
+  if (!input.token) return { ok: false, error: "invalid_token" };
+  const rows = await q(
+    input.jord,
+    "SELECT id, user_id, expires_at, used_at FROM jord_auth_tokens WHERE token_hash = ? AND purpose = 'magic'",
+    [sha256(input.token)],
+  );
+  const row = rows[0];
+  if (!row || row.used_at != null) return { ok: false, error: "invalid_token" };
+  const expires = asNumber(row.expires_at);
+  if (expires == null || expires < now) {
+    return { ok: false, error: "invalid_token" };
+  }
+  // The UPDATE is the gate: Postgres may run writes concurrently, so only the
+  // caller whose UPDATE changes a row wins. Burn before checking the user so a
+  // refused account cannot retry.
+  const won = await q(
+    input.jord,
+    "UPDATE jord_auth_tokens SET used_at = ? WHERE id = ? AND used_at IS NULL RETURNING id",
+    [now, asString(row.id)],
+  );
+  if (won.length === 0) return { ok: false, error: "invalid_token" };
+  const user = await findUserById(input.jord, asString(row.user_id));
+  if (!user || user.disabledAt != null) {
+    return { ok: false, error: "invalid_token" };
+  }
+  // Following the emailed link proves control of the address.
+  const confirmed = input.jord.dialect === "postgres" ? "TRUE" : "1";
+  await q(
+    input.jord,
+    `UPDATE jord_users SET email_confirmed = ${confirmed}, last_sign_in_at = ?, updated_at = ? WHERE id = ?`,
+    [now, now, user.id],
+  );
+  return { ok: true, user };
+}
+
 export async function resetUserPassword(input: {
   jord: JordDriverPort;
   token: string;
@@ -319,7 +404,7 @@ export async function issueRefreshToken(input: {
 }
 
 export type RefreshResult =
-  | { ok: true; user: AuthUser; refreshToken: string }
+  | { ok: true; user: AuthUser; refreshToken: string; familyId: string }
   | { ok: false; error: "invalid_refresh" | "refresh_reused" };
 
 export async function rotateRefreshToken(input: {
@@ -362,7 +447,7 @@ export async function rotateRefreshToken(input: {
     "UPDATE jord_refresh_tokens SET revoked_at = ?, replaced_by = ? WHERE id = ?",
     [now, sha256(next.refreshToken), asString(row.id)],
   );
-  return { ok: true, user, refreshToken: next.refreshToken };
+  return { ok: true, user, refreshToken: next.refreshToken, familyId };
 }
 
 export async function revokeRefreshFamily(input: {

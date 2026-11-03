@@ -1,5 +1,16 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import { createReadStream, createWriteStream } from "node:fs";
+import {
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import { once } from "node:events";
+import { finished } from "node:stream/promises";
 import path from "node:path";
 
 import { isValidBlobBucket, isValidBlobKey } from "@altr/jord";
@@ -27,38 +38,156 @@ export type LocalStorageAdapterOptions = {
   disk?: BlobDiskStore;
 };
 
-type MultipartState = {
-  bucket: string;
-  key: string;
-  contentType: string;
-  parts: Map<number, { etag: string; path: string }>;
-};
+/** Hard bounds for one part body (S0081). S3 allows 10 000 parts. */
+export const MAX_MULTIPART_PART_NUMBER = 10_000;
+export const MAX_LOCAL_PART_BYTES = 256 * 1024 * 1024;
+
+const UPLOAD_ID_RE = /^[A-Za-z0-9-]{8,128}$/;
+
+type PartFileInfo = { partNumber: number; size: number; etag: string };
 
 /**
  * Local disk adapter. Presign returns HMAC URLs with the same PresignResult
  * shape as S3 so clients do not branch on backend kind.
+ *
+ * Multipart state lives on disk under `.multipart/<uploadId>/` so an upload
+ * survives a server restart (S0081): `meta.json` binds bucket + key, each part
+ * is `part-N` with an `part-N.etag` sidecar.
  */
 export function createLocalStorageAdapter(
   options: LocalStorageAdapterOptions,
 ): JordStoragePort & { disk: BlobDiskStore; root: string } {
   const disk = options.disk ?? createBlobDiskStore(options.root);
-  const multipart = new Map<string, MultipartState>();
   const multipartRoot = path.join(disk.root, ".multipart");
+
+  function uploadDir(uploadId: string): string {
+    if (!UPLOAD_ID_RE.test(uploadId)) {
+      throw new Error("invalid upload id");
+    }
+    return path.join(multipartRoot, uploadId);
+  }
+
+  type Meta = {
+    bucket: string;
+    key: string;
+    contentType: string;
+    totalSize?: number;
+    partSize?: number;
+  };
+
+  async function readMeta(uploadId: string): Promise<Meta | null> {
+    try {
+      const raw = await readFile(path.join(uploadDir(uploadId), "meta.json"), "utf8");
+      return JSON.parse(raw) as Meta;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
+      throw err;
+    }
+  }
+
+  function expectedFor(meta: Meta, partNumber: number): number | null {
+    const { totalSize, partSize } = meta;
+    if (!totalSize || !partSize) return null;
+    const count = Math.ceil(totalSize / partSize);
+    if (partNumber > count) return null;
+    return partNumber < count ? partSize : totalSize - partSize * (count - 1);
+  }
+
+  async function* chunksOf(
+    body: Uint8Array | ReadableStream<Uint8Array> | null,
+  ): AsyncGenerator<Uint8Array> {
+    if (!body) return;
+    if (body instanceof Uint8Array) {
+      yield body;
+      return;
+    }
+    const reader = body.getReader();
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        if (value) yield value;
+      }
+    } finally {
+      await reader.cancel().catch(() => undefined);
+    }
+  }
 
   async function writePart(
     uploadId: string,
     partNumber: number,
-    bytes: Uint8Array,
+    body: Uint8Array | ReadableStream<Uint8Array> | null,
   ): Promise<PutObjectResult> {
-    const state = multipart.get(uploadId);
-    if (!state) throw new Error("multipart upload not found");
-    const partDir = path.join(multipartRoot, uploadId);
-    await mkdir(partDir, { recursive: true });
-    const partPath = path.join(partDir, `part-${partNumber}`);
-    await writeFile(partPath, bytes);
-    const etag = sha256Hex(bytes);
-    state.parts.set(partNumber, { etag, path: partPath });
-    return { size: bytes.byteLength, etag };
+    if (
+      !Number.isInteger(partNumber) ||
+      partNumber < 1 ||
+      partNumber > MAX_MULTIPART_PART_NUMBER
+    ) {
+      throw new Error("invalid part number");
+    }
+    const dir = uploadDir(uploadId);
+    const meta = await readMeta(uploadId);
+    if (!meta) throw new Error("multipart upload not found");
+    const expected = expectedFor(meta, partNumber);
+    if (expected === null || expected > MAX_LOCAL_PART_BYTES) {
+      throw new Error("invalid part number");
+    }
+    const final = path.join(dir, `part-${partNumber}`);
+    const tmp = `${final}.${randomUUID()}.tmp`;
+    const hash = createHash("sha256");
+    let size = 0;
+    const out = createWriteStream(tmp, { mode: 0o600 });
+    try {
+      for await (const chunk of chunksOf(body)) {
+        size += chunk.byteLength;
+        if (size > expected) {
+          throw new Error("part too large");
+        }
+        hash.update(chunk);
+        if (!out.write(chunk)) await once(out, "drain");
+      }
+      out.end();
+      await finished(out);
+      if (size !== expected) throw new Error("part size mismatch");
+      await rename(tmp, final);
+    } catch (err) {
+      if (!out.closed) {
+        out.destroy();
+        await once(out, "close").catch(() => undefined);
+      }
+      await rm(tmp, { force: true }).catch(() => undefined);
+      throw err;
+    }
+    const etag = hash.digest("hex");
+    await writeFile(`${final}.etag`, etag, { mode: 0o600 });
+    return { size, etag };
+  }
+
+  async function listParts(uploadId: string): Promise<PartFileInfo[]> {
+    const dir = uploadDir(uploadId);
+    let names: string[];
+    try {
+      names = await readdir(dir);
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+      throw err;
+    }
+    const out: PartFileInfo[] = [];
+    for (const name of names) {
+      const m = /^part-(\d+)$/.exec(name);
+      if (!m) continue;
+      const partNumber = Number(m[1]);
+      const file = path.join(dir, name);
+      const st = await stat(file);
+      let etag: string;
+      try {
+        etag = (await readFile(`${file}.etag`, "utf8")).trim();
+      } catch {
+        etag = sha256Hex(await readFile(file));
+      }
+      out.push({ partNumber, size: st.size, etag });
+    }
+    return out.sort((a, b) => a.partNumber - b.partNumber);
   }
 
   const adapter: JordStoragePort & { disk: BlobDiskStore; root: string } = {
@@ -119,57 +248,79 @@ export function createLocalStorageAdapter(
       return { url, method, headers, expiresAt };
     },
 
-    async createMultipartUpload({ bucket, key, contentType }) {
+    async createMultipartUpload({ bucket, key, contentType, totalSize, partSize }) {
       if (!isValidBlobBucket(bucket) || !isValidBlobKey(key)) {
         throw new Error("invalid bucket or key");
       }
       const uploadId = randomUUID();
-      multipart.set(uploadId, {
-        bucket,
-        key,
-        contentType,
-        parts: new Map(),
-      });
-      await mkdir(path.join(multipartRoot, uploadId), { recursive: true });
+      const dir = uploadDir(uploadId);
+      await mkdir(dir, { recursive: true, mode: 0o700 });
+      await writeFile(
+        path.join(dir, "meta.json"),
+        JSON.stringify({ bucket, key, contentType, totalSize, partSize }),
+        { mode: 0o600 },
+      );
       return { uploadId };
     },
 
+    async listMultipartParts({ bucket, key, uploadId }) {
+      const meta = await readMeta(uploadId);
+      if (!meta || meta.bucket !== bucket || meta.key !== key) return [];
+      return listParts(uploadId);
+    },
+
     async completeMultipartUpload({ bucket, key, uploadId, parts }) {
-      const state = multipart.get(uploadId);
-      if (!state || state.bucket !== bucket || state.key !== key) {
+      const meta = await readMeta(uploadId);
+      if (!meta || meta.bucket !== bucket || meta.key !== key) {
         throw new Error("multipart upload not found");
       }
+      const onDisk = new Map(
+        (await listParts(uploadId)).map((p) => [p.partNumber, p]),
+      );
       const ordered = [...parts].sort((a, b) => a.partNumber - b.partNumber);
-      const chunks: Buffer[] = [];
       for (const part of ordered) {
-        const stored = state.parts.get(part.partNumber);
+        const stored = onDisk.get(part.partNumber);
         if (!stored || stored.etag !== part.etag) {
           throw new Error(`missing or mismatched part ${part.partNumber}`);
         }
-        chunks.push(await readFile(stored.path));
       }
-      const bytes = Buffer.concat(chunks);
-      const written = await disk.writeObject(bucket, key, bytes);
-      await rm(path.join(multipartRoot, uploadId), {
-        recursive: true,
-        force: true,
-      });
-      multipart.delete(uploadId);
-      return written;
+      // Stream parts into a temp file so large objects never sit in memory.
+      const dest = disk.objectPath(bucket, key);
+      await mkdir(path.dirname(dest), { recursive: true });
+      const tmp = `${dest}.${randomUUID()}.tmp`;
+      const hash = createHash("sha256");
+      let size = 0;
+      try {
+        const out = createWriteStream(tmp);
+        for (const part of ordered) {
+          const src = createReadStream(
+            path.join(uploadDir(uploadId), `part-${part.partNumber}`),
+          );
+          for await (const chunk of src) {
+            const buf = chunk as Buffer;
+            hash.update(buf);
+            size += buf.byteLength;
+            if (!out.write(buf)) await once(out, "drain");
+          }
+        }
+        out.end();
+        await finished(out);
+        await rename(tmp, dest);
+      } catch (err) {
+        await rm(tmp, { force: true }).catch(() => undefined);
+        throw err;
+      }
+      await rm(uploadDir(uploadId), { recursive: true, force: true });
+      return { size, etag: hash.digest("hex") };
     },
 
     async abortMultipartUpload({ uploadId }) {
-      multipart.delete(uploadId);
-      await rm(path.join(multipartRoot, uploadId), {
-        recursive: true,
-        force: true,
-      });
+      await rm(uploadDir(uploadId), { recursive: true, force: true });
     },
   };
 
   /** Used by the signed-upload route to accept a multipart part body. */
-  (adapter as JordStoragePort & { writeMultipartPart?: typeof writePart }).writeMultipartPart =
-    writePart;
+  adapter.writeMultipartPart = writePart;
 
   return adapter;
 }

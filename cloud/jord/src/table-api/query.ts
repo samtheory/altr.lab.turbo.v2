@@ -40,6 +40,8 @@ export type ParsedTableQuery = {
   pk: string[];
   count: "none" | "planned" | "exact";
   representation: boolean;
+  /** Keyset mode when non-null; "" = first page (S0079). */
+  cursor?: string | null;
 };
 
 export class TableApiError extends Error {
@@ -70,6 +72,7 @@ const RESERVED_PARAMS = new Set([
   "offset",
   "all",
   "pk",
+  "cursor",
   // Schema scope (S0049): a column named `schema` cannot be filtered by name.
   "schema",
 ]);
@@ -230,6 +233,7 @@ export function parseTableQuery(
     pk: search.getAll("pk"),
     count: pref.count,
     representation: pref.representation,
+    cursor: search.get("cursor"),
   };
 }
 

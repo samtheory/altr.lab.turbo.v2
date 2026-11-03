@@ -42,11 +42,18 @@ export function routeAllowed(
   }
 
   if (path === "/auth/me" || path === "/auth/logout") return true;
+  if (path === "/auth/sessions" || path.startsWith("/auth/sessions/")) return true;
   if (path === "/auth/anon-key") {
     return principal.kind === "operator" && principal.role === "admin";
   }
 
-  if (path === "/realtime" || path === "/realtime/ws") return true;
+  if (
+    path === "/realtime" ||
+    path === "/realtime/ws" ||
+    path === "/realtime/channel"
+  ) {
+    return true;
+  }
 
   if (starts(path, "/x")) {
     if (principal.kind === "operator" && principal.role === "readonly") {

@@ -13,7 +13,7 @@ tags:
 
 # S0077 — Studio policy tester
 
-> **Status:** todo · **Depends on** [[S0059-policies-apis-drawers|S0059]] + [[S0076-sessions-claims|S0076]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/policies/README]]
+> **Status:** todo · **Depends on** [[S0059-policies-apis-drawers|S0059]] + [[done/S0076-sessions-claims|S0076]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/policies/README]]
 
 ## Routing (who / how long / which model)
 

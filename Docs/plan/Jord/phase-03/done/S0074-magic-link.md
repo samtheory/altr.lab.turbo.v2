@@ -2,18 +2,19 @@
 title: "S0074 — magic link sign-in"
 description: "Passwordless magic-link request + verify with single-use tokens, expiry, rate limits and redirect allowlist enforcement"
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-03
 tags:
   - plan
   - jord
   - phase-03
   - task
   - S0074
+  - done
 ---
 
 # S0074 — magic link sign-in
 
-> **Status:** todo · **Depends on** [[done/S0073-mailer-port|S0073]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/auth/README]]
+> **Status:** **done** 2026-11-03 · **Depends on** [[S0073-mailer-port|S0073]] · **Phase:** [[../README]] · Parent: [[../../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../../tech_space/jord/auth/README]]
 
 ## Routing (who / how long / which model)
 
@@ -37,8 +38,8 @@ Passwordless is one of the four `jord-F0016` capabilities and the first real con
 
 | Kind | Where |
 |------|-------|
-| Intent | [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] |
-| Depends on | [[done/S0073-mailer-port|S0073]] · [[done/S0069-auth-settings-store|S0069]] (sign-up toggle, allowlist, limits) |
+| Intent | [[../../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] |
+| Depends on | [[S0073-mailer-port|S0073]] · [[S0069-auth-settings-store|S0069]] (sign-up toggle, allowlist, limits) |
 | Code today | `cloud/jord/src/auth/{routes,jwt,identity,password}.ts` + token helpers |
 | Tests | `cloud/jord/src/auth/token.test.ts` · `principals.test.ts` |
 
@@ -85,22 +86,36 @@ sequenceDiagram
 
 ## Done when
 
-- [ ] Request is enumeration-safe (tested)
-- [ ] Token single-use and expiring (tested)
-- [ ] Banned/disabled user cannot sign in
-- [ ] Off-allowlist redirect rejected
-- [ ] Rate limit enforced per email/IP
-- [ ] Proof pasted
+- [x] Request is enumeration-safe (tested)
+- [x] Token single-use and expiring (tested)
+- [x] Banned/disabled user cannot sign in
+- [x] Off-allowlist redirect rejected
+- [x] Rate limit enforced per email/IP
+- [x] Proof pasted
 
 ## Proof
 
 | Date | Command | Result |
 |------|---------|--------|
-| | `pnpm --filter @altr/jord-server test` | |
+| 2026-11-03 | `pnpm --filter @altr/jord-server test` | **225 passed** \| 20 skipped (was 217; +8 magic-link) |
+| 2026-11-03 | `pnpm --filter @altr/jord-server exec tsc --noEmit` | clean |
+| 2026-11-03 | `vitest run src/auth` (after heimdall fixes) | **52 passed** |
+
+## What shipped
+
+| Piece | Fact |
+|-------|------|
+| Routes | `POST /auth/magic-link` (always 200) · `GET`/`POST /auth/magic-link/verify` (POST lets a front end confirm so mail scanners cannot burn the token) |
+| Storage | `jord_auth_tokens` purpose `magic`, sha256 at rest, 15 min TTL; migration `0020_magic_link` adds `created_ip` |
+| Guards | existing + enabled user only; consume gated by `UPDATE … RETURNING` (Postgres-safe single use); disabled user refused at issue and consume; `redirect_to` allowlisted on request and verify, refused redirect does not burn the token |
+| Limits | 3 links / 15 min per email (silent, identical response); per-IP reuses `recover` budget on request and `signin` on verify → 429 |
+| Hardening | verify sends `Cache-Control: no-store` + `Referrer-Policy: no-referrer`; email capped at 254 chars |
+
+**Known / follow-up (heimdall review):** `consumeOneTime` (confirm/reset) has the same select-then-update race on Postgres; `x-forwarded-for` is trusted as everywhere else in auth (needs a trusted-proxy setting); issue path is slightly slower for real users than unknown emails (same as recover); per-email cap lets a third party suppress a victim's link for 15 min. No separate magic-link on/off toggle was added — console provider toggle stays with S0075 work.
 
 ## After ship
 
 | Update | Path |
 |--------|------|
 | tech_space | `Docs/tech_space/jord/auth/README.md` |
-| Queue | [[README]] |
+| Queue | [[../README]] |

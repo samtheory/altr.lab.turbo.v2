@@ -1,3 +1,4 @@
+import { revokeAllSessions } from "./sessions.js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
 import type { JordDriverPort } from "@altr/jord";
@@ -118,6 +119,7 @@ export async function setUserDisabled(input: {
       "UPDATE jord_refresh_tokens SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL",
       [now, input.userId],
     );
+    await revokeAllSessions({ jord: input.jord, userId: input.userId, nowMs: now });
   }
   return getAdminUser(input.jord, input.userId);
 }
@@ -137,6 +139,7 @@ export async function revokeUserSessions(input: {
     "UPDATE jord_refresh_tokens SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL",
     [Date.now(), input.userId],
   );
+  await revokeAllSessions({ jord: input.jord, userId: input.userId });
   return { revoked };
 }
 
@@ -293,6 +296,9 @@ export async function deleteAdminUser(input: {
     input.userId,
   ]);
   await q(input.jord, "DELETE FROM jord_refresh_tokens WHERE user_id = ?", [
+    input.userId,
+  ]);
+  await q(input.jord, "DELETE FROM jord_sessions WHERE user_id = ?", [
     input.userId,
   ]);
   await q(input.jord, "DELETE FROM jord_users WHERE id = ?", [input.userId]);

@@ -12,7 +12,10 @@ import {
   allowsWriteVectors,
   routeAllowed,
 } from "./access.js";
+import type { JordDriverPort } from "@altr/jord";
+
 import type { JordAuthConfig } from "./config.js";
+import { sessionLive } from "./sessions.js";
 import type { Principal } from "./principal.js";
 import type { JwtKeyring } from "./keyring.js";
 import {
@@ -29,6 +32,8 @@ export type JordAuthVariables = {
 export function createAuthMiddleware(
   auth: JordAuthConfig,
   keyring?: JwtKeyring,
+  /** S0076: when given, user tokens carrying sid must have a live session. */
+  jord?: JordDriverPort,
 ) {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
@@ -55,6 +60,29 @@ export function createAuthMiddleware(
         throw new HTTPException(401, {
           message: "invalid or expired credentials",
         });
+      }
+
+      const sid = resolved.principal.claims.sid;
+      if (
+        jord &&
+        resolved.principal.kind === "user" &&
+        typeof sid === "string" &&
+        resolved.principal.uid
+      ) {
+        let live = false;
+        try {
+          live = await sessionLive({
+            jord,
+            id: sid,
+            userId: resolved.principal.uid,
+          });
+        } catch (err) {
+          // Fail closed: an unreadable session store must not grant access.
+          console.error("[@altr/jord-server] session check failed", err);
+        }
+        if (!live) {
+          throw new HTTPException(401, { message: "session revoked or expired" });
+        }
       }
 
       c.set("principal", resolved.principal);
