@@ -14,14 +14,22 @@ import {
 } from "./access.js";
 import type { JordAuthConfig } from "./config.js";
 import type { Principal } from "./principal.js";
-import { parseAuthorizationHeader, resolvePrincipal } from "./token.js";
+import type { JwtKeyring } from "./keyring.js";
+import {
+  jwtEnvKeys,
+  parseAuthorizationHeader,
+  resolvePrincipalWithKeys,
+} from "./token.js";
 
 export type JordAuthVariables = {
   principal: Principal;
   accessExp: number | null;
 };
 
-export function createAuthMiddleware(auth: JordAuthConfig) {
+export function createAuthMiddleware(
+  auth: JordAuthConfig,
+  keyring?: JwtKeyring,
+) {
   return createMiddleware<{ Variables: JordAuthVariables }>(
     async (c, next) => {
       const bearer = parseAuthorizationHeader(c.req.header("Authorization"));
@@ -31,7 +39,18 @@ export function createAuthMiddleware(auth: JordAuthConfig) {
         });
       }
 
-      const resolved = resolvePrincipal(bearer, auth);
+      let keys = jwtEnvKeys(auth);
+      if (keyring) {
+        try {
+          keys = await keyring.keys();
+        } catch (err) {
+          console.error(
+            "[@altr/jord-server] JWT keyring unavailable; using env keys",
+            err,
+          );
+        }
+      }
+      const resolved = resolvePrincipalWithKeys(bearer, auth, keys);
       if (!resolved) {
         throw new HTTPException(401, {
           message: "invalid or expired credentials",

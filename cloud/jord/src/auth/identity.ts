@@ -170,6 +170,11 @@ export async function signinUser(input: {
   if (!user || !match || !user.emailConfirmed || user.disabledAt != null) {
     return { ok: false, error: "invalid_credentials" };
   }
+  await q(
+    input.jord,
+    "UPDATE jord_users SET last_sign_in_at = ? WHERE id = ?",
+    [Date.now(), user.id],
+  );
   return { ok: true, user };
 }
 

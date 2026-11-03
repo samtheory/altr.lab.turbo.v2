@@ -54,7 +54,7 @@ A feature is **done** only when its contract landed. **jord-F0013** is **done** 
 | **jord-F0027** | schema-v2 | [[todo/jord-F0027-relationship-canvas]] | [[../../plan/Jord/phase-03/done/S0060-table-relationships-view\|S0060]] · [[../../plan/Jord/phase-03/done/S0061-erd-canvas\|S0061]] · [[../../plan/Jord/phase-03/done/S0062-canvas-layout\|S0062]] (**wave F closed**) |
 | **jord-F0028** | studio-v2 | [[todo/jord-F0028-sql-editor-v2]] | [[../../plan/Jord/phase-03/done/S0063-monaco-sql-editor\|S0063]] · [[../../plan/Jord/phase-03/done/S0064-query-tabs-history\|S0064]] · [[../../plan/Jord/phase-03/done/S0065-results-explain-cancel\|S0065]] (**wave G closed**) |
 | **jord-F0029** | storage | [[todo/jord-F0029-storage-buckets]] | [[../../plan/Jord/phase-03/done/S0066-bucket-registry\|S0066]] · [[../../plan/Jord/phase-03/done/S0067-bucket-config-api\|S0067]] · [[../../plan/Jord/phase-03/done/S0068-storage-studio-ui\|S0068]] |
-| **jord-F0030** | auth | [[todo/jord-F0030-auth-console]] | [[../../plan/Jord/phase-03/done/S0069-auth-settings-store\|S0069]] · [[../../plan/Jord/phase-03/S0070-auth-console-users\|S0070]] · [[../../plan/Jord/phase-03/S0071-auth-console-sections\|S0071]] · [[../../plan/Jord/phase-03/S0072-email-templates\|S0072]] |
+| **jord-F0030** | auth | [[todo/jord-F0030-auth-console]] | [[../../plan/Jord/phase-03/done/S0069-auth-settings-store\|S0069]] · [[../../plan/Jord/phase-03/done/S0070-auth-console-users\|S0070]] · [[../../plan/Jord/phase-03/done/S0071-auth-console-sections\|S0071]] · [[../../plan/Jord/phase-03/S0072-email-templates\|S0072]] |
 
 ## Soft (not numbered sprint work)
 

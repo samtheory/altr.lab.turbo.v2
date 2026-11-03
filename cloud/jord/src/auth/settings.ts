@@ -8,6 +8,8 @@ import {
   type JordDriverPort,
 } from "@altr/jord";
 
+import { RESERVED_JWT_CLAIMS } from "./jwt.js";
+
 export const AUTH_SETTINGS_ID = "default";
 
 export type AuthRateLimits = Record<AuthRateLimitKey, number>;
@@ -20,6 +22,13 @@ export type JordAuthSettings = {
   redirect_allowlist: string[];
   rate_limits: AuthRateLimits;
   session_ttl_seconds: number;
+  email_password_enabled: boolean;
+  anonymous_enabled: boolean;
+  custom_claims: Record<string, unknown>;
+  /** Non-secret identity of the stored signing key. */
+  jwt_key_fingerprint: string | null;
+  jwt_key_rotated_at: number | null;
+  jwt_key_configured: boolean;
   updated_by: string | null;
   updated_at: number | null;
 };
@@ -37,6 +46,12 @@ export function defaultAuthSettings(): JordAuthSettings {
     redirect_allowlist: [...DEFAULT_AUTH_SETTINGS.redirect_allowlist],
     rate_limits: defaultRateLimits(),
     session_ttl_seconds: DEFAULT_AUTH_SETTINGS.session_ttl_seconds,
+    email_password_enabled: DEFAULT_AUTH_SETTINGS.email_password_enabled,
+    anonymous_enabled: DEFAULT_AUTH_SETTINGS.anonymous_enabled,
+    custom_claims: {},
+    jwt_key_fingerprint: null,
+    jwt_key_rotated_at: null,
+    jwt_key_configured: false,
     updated_by: null,
     updated_at: null,
   };
@@ -107,6 +122,17 @@ function parseStoredRateLimits(value: unknown): AuthRateLimits {
   return next;
 }
 
+function parseStoredClaims(value: unknown): Record<string, unknown> {
+  const parsed = parseJson(value);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+  const next: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(parsed as Record<string, unknown>)) {
+    if ((RESERVED_JWT_CLAIMS as readonly string[]).includes(key)) continue;
+    next[key] = entry;
+  }
+  return next;
+}
+
 function mapSettingsRow(row: Record<string, unknown>): JordAuthSettings {
   const defaults = defaultAuthSettings();
   return {
@@ -128,6 +154,23 @@ function mapSettingsRow(row: Record<string, unknown>): JordAuthSettings {
       AUTH_SETTINGS_BOUNDS.sessionTtlSeconds.min,
       AUTH_SETTINGS_BOUNDS.sessionTtlSeconds.max,
     ),
+    email_password_enabled: asBool(
+      row.email_password_enabled,
+      defaults.email_password_enabled,
+    ),
+    anonymous_enabled: asBool(
+      row.anonymous_enabled,
+      defaults.anonymous_enabled,
+    ),
+    custom_claims: parseStoredClaims(row.custom_claims),
+    jwt_key_fingerprint:
+      typeof row.jwt_key_fingerprint === "string"
+        ? row.jwt_key_fingerprint
+        : null,
+    jwt_key_rotated_at:
+      row.jwt_key_rotated_at == null ? null : Number(row.jwt_key_rotated_at),
+    jwt_key_configured:
+      typeof row.jwt_key_sealed === "string" && row.jwt_key_sealed.length > 0,
     updated_by: typeof row.updated_by === "string" ? row.updated_by : null,
     updated_at: asInt(row.updated_at),
   };
@@ -172,6 +215,40 @@ export function validateRedirectPattern(pattern: unknown): string | null {
   const probe = trimmed.replace(/\*/g, "wildcard");
   if (!isHttpUrl(probe)) return "redirect pattern must be an absolute URL";
   return null;
+}
+
+/** Custom access-token claims: plain JSON object, no reserved or oversized keys. */
+export function validateCustomClaims(
+  value: unknown,
+): { ok: true; value: Record<string, unknown> } | { ok: false; error: string } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { ok: false, error: "custom_claims must be a JSON object" };
+  }
+  const entries = Object.entries(value as Record<string, unknown>);
+  for (const [key] of entries) {
+    if (key.trim() === "") {
+      return { ok: false, error: "custom_claims keys must not be empty" };
+    }
+    if ((RESERVED_JWT_CLAIMS as readonly string[]).includes(key)) {
+      return {
+        ok: false,
+        error: `custom_claims may not override the reserved claim "${key}"`,
+      };
+    }
+  }
+  let text: string;
+  try {
+    text = JSON.stringify(value);
+  } catch {
+    return { ok: false, error: "custom_claims must be JSON-serialisable" };
+  }
+  if (text.length > AUTH_SETTINGS_BOUNDS.customClaimsMaxChars) {
+    return {
+      ok: false,
+      error: `custom_claims must be at most ${AUTH_SETTINGS_BOUNDS.customClaimsMaxChars} characters`,
+    };
+  }
+  return { ok: true, value: value as Record<string, unknown> };
 }
 
 function escapeRegExp(value: string): string {
@@ -237,6 +314,9 @@ export type AuthSettingsPatch = Partial<
     | "redirect_allowlist"
     | "rate_limits"
     | "session_ttl_seconds"
+    | "email_password_enabled"
+    | "anonymous_enabled"
+    | "custom_claims"
   >
 >;
 
@@ -252,6 +332,9 @@ const KNOWN_KEYS = new Set([
   "redirect_allowlist",
   "rate_limits",
   "session_ttl_seconds",
+  "email_password_enabled",
+  "anonymous_enabled",
+  "custom_claims",
 ]);
 
 /** Strict patch validation; unknown keys are rejected rather than ignored. */
@@ -352,6 +435,25 @@ export function parseAuthSettingsPatch(body: unknown): ParseSettingsResult {
       patch.rate_limits = limits as AuthRateLimits;
     }
   }
+  if (raw.email_password_enabled !== undefined) {
+    if (typeof raw.email_password_enabled !== "boolean") {
+      errors.push("email_password_enabled must be a boolean");
+    } else {
+      patch.email_password_enabled = raw.email_password_enabled;
+    }
+  }
+  if (raw.anonymous_enabled !== undefined) {
+    if (typeof raw.anonymous_enabled !== "boolean") {
+      errors.push("anonymous_enabled must be a boolean");
+    } else {
+      patch.anonymous_enabled = raw.anonymous_enabled;
+    }
+  }
+  if (raw.custom_claims !== undefined) {
+    const claims = validateCustomClaims(raw.custom_claims);
+    if (!claims.ok) errors.push(claims.error);
+    else patch.custom_claims = claims.value;
+  }
   if (raw.session_ttl_seconds !== undefined) {
     const n = asInt(raw.session_ttl_seconds);
     if (
@@ -411,6 +513,9 @@ export async function updateAuthSettings(input: {
     next.session_ttl_seconds,
     next.updated_by,
     next.updated_at,
+    next.email_password_enabled ? 1 : 0,
+    next.anonymous_enabled ? 1 : 0,
+    JSON.stringify(next.custom_claims),
   ];
 
   await input.enqueueWrite(async () => {
@@ -418,8 +523,9 @@ export async function updateAuthSettings(input: {
       await input.jord.query(
         `INSERT INTO jord_auth_settings (
           id, signups_enabled, autoconfirm, password_min_length, site_url,
-          redirect_allowlist, rate_limits, session_ttl_seconds, updated_by, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+          redirect_allowlist, rate_limits, session_ttl_seconds, updated_by, updated_at,
+          email_password_enabled, anonymous_enabled, custom_claims
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
         ON CONFLICT (id) DO UPDATE SET
           signups_enabled = EXCLUDED.signups_enabled,
           autoconfirm = EXCLUDED.autoconfirm,
@@ -429,7 +535,10 @@ export async function updateAuthSettings(input: {
           rate_limits = EXCLUDED.rate_limits,
           session_ttl_seconds = EXCLUDED.session_ttl_seconds,
           updated_by = EXCLUDED.updated_by,
-          updated_at = EXCLUDED.updated_at`,
+          updated_at = EXCLUDED.updated_at,
+          email_password_enabled = EXCLUDED.email_password_enabled,
+          anonymous_enabled = EXCLUDED.anonymous_enabled,
+          custom_claims = EXCLUDED.custom_claims`,
         values,
       );
       return;
@@ -437,8 +546,9 @@ export async function updateAuthSettings(input: {
     await input.jord.query(
       `INSERT INTO jord_auth_settings (
         id, signups_enabled, autoconfirm, password_min_length, site_url,
-        redirect_allowlist, rate_limits, session_ttl_seconds, updated_by, updated_at
-      ) VALUES (?,?,?,?,?,?,?,?,?,?)
+        redirect_allowlist, rate_limits, session_ttl_seconds, updated_by, updated_at,
+        email_password_enabled, anonymous_enabled, custom_claims
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT (id) DO UPDATE SET
         signups_enabled = excluded.signups_enabled,
         autoconfirm = excluded.autoconfirm,
@@ -448,7 +558,10 @@ export async function updateAuthSettings(input: {
         rate_limits = excluded.rate_limits,
         session_ttl_seconds = excluded.session_ttl_seconds,
         updated_by = excluded.updated_by,
-        updated_at = excluded.updated_at`,
+        updated_at = excluded.updated_at,
+        email_password_enabled = excluded.email_password_enabled,
+        anonymous_enabled = excluded.anonymous_enabled,
+        custom_claims = excluded.custom_claims`,
       values,
     );
   });

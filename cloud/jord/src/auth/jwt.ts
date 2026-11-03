@@ -8,6 +8,18 @@ export const PREVIOUS_KID = "previous";
 /** Anon keys are long-lived and not stored server-side. */
 export const ANON_TTL_SEC = 10 * 365 * 24 * 60 * 60;
 
+/** Claims the server owns; custom claims may not override them. */
+export const RESERVED_JWT_CLAIMS = [
+  "iss",
+  "aud",
+  "sub",
+  "role",
+  "iat",
+  "exp",
+  "jti",
+  "nbf",
+] as const;
+
 export type JwtClaims = {
   iss: string;
   aud: string;
@@ -16,6 +28,7 @@ export type JwtClaims = {
   iat: number;
   exp: number;
   email?: string;
+  [claim: string]: unknown;
 };
 
 export type JwtKey = { kid: string; secret: string };
@@ -57,6 +70,8 @@ export function signAccessToken(input: {
   nowMs?: number;
   ttlSec?: number;
   kid?: string;
+  /** Extra claims (settings `custom_claims`); reserved names are ignored. */
+  extraClaims?: Record<string, unknown>;
 }): { token: string; expMs: number } {
   const nowMs = input.nowMs ?? Date.now();
   const iat = Math.floor(nowMs / 1000);
@@ -71,6 +86,10 @@ export function signAccessToken(input: {
     exp,
   };
   if (input.email) claims.email = input.email;
+  for (const [key, value] of Object.entries(input.extraClaims ?? {})) {
+    if ((RESERVED_JWT_CLAIMS as readonly string[]).includes(key)) continue;
+    if (value !== undefined) claims[key] = value;
+  }
   return {
     token: signJwt({ claims, secret: input.secret, kid: input.kid }),
     expMs: exp * 1000,

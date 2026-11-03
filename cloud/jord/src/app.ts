@@ -84,6 +84,8 @@ import {
   revokeUserSessions,
   setUserDisabled,
 } from "./auth/admin.js";
+import { createAdminAuthUserRoutes } from "./auth/admin-routes.js";
+import { createJwtKeyring } from "./auth/keyring.js";
 import {
   createProjectRoutes,
   createStudioProjectRoutes,
@@ -493,7 +495,7 @@ async function assertPolicyTable(
 export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
   const { upgradeWebSocket, injectWebSocket } = createNodeWebSocket({ app });
-  const requireAuth = createAuthMiddleware(deps.auth);
+
   const mailer = deps.mailer ?? new ConsoleMailer();
   const env = deps.env ?? process.env;
   const sharedState = deps.jord.dialect === "postgres";
@@ -540,6 +542,14 @@ export function createJordApp(deps: JordAppDeps) {
     createPort: deps.createBucketPort,
   });
   const enqueueWrite = instrumentWriteQueue(deps.enqueueWrite);
+  // S0071 — per-project signing key (sealed in auth settings, env fallback).
+  const jwtKeyring = createJwtKeyring({
+    jord: deps.jord,
+    auth: deps.auth,
+    secrets,
+    enqueueWrite,
+  });
+  const requireAuth = createAuthMiddleware(deps.auth, jwtKeyring);
   // Prefer `enqueueWrite` below so jobs get `jord.write` spans (S0039).
   const projectRegistry = {
     jord: deps.jord,
@@ -759,6 +769,7 @@ export function createJordApp(deps: JordAppDeps) {
       mailer,
       enqueueWrite: enqueueWrite,
       rateLimit: rateLimitStore,
+      keyring: jwtKeyring,
     }),
   );
 
@@ -3013,7 +3024,20 @@ export function createJordApp(deps: JordAppDeps) {
   // S0069 — auth settings document (admin-only; enforced inside /auth/*).
   protectedRoutes.route(
     "/admin/auth",
-    createAuthSettingsRoutes({ jord: deps.jord, enqueueWrite }),
+    createAuthSettingsRoutes({
+      jord: deps.jord,
+      enqueueWrite,
+      keyring: jwtKeyring,
+    }),
+  );
+  // S0070 — admin user CRUD (create/invite, metadata, ban, delete, revoke).
+  protectedRoutes.route(
+    "/admin/auth",
+    createAdminAuthUserRoutes({
+      jord: deps.jord,
+      mailer,
+      enqueueWrite,
+    }),
   );
   // S0043 — project registry (admin-only; secrets required for mutate/list).
   protectedRoutes.route("/admin", createProjectRoutes(projectRegistry));

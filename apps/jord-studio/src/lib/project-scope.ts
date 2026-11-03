@@ -18,7 +18,7 @@ export const PROJECT_SCOPED_ROOTS = [
   "/logs",
   "/apis",
   "/database",
-  "/auth/users",
+  "/auth",
   "/help",
 ] as const;
 
@@ -72,11 +72,7 @@ export function extractProjectRestPath(pathname: string): string {
 }
 
 export function isProjectScopedPath(pathname: string): boolean {
-  if (pathname === "/auth/users" || pathname.startsWith("/auth/users/")) {
-    return true;
-  }
   for (const root of PROJECT_SCOPED_ROOTS) {
-    if (root === "/auth/users") continue;
     if (pathname === root || pathname.startsWith(`${root}/`)) return true;
   }
   return false;

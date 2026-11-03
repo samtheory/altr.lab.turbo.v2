@@ -1,6 +1,6 @@
 ---
 title: "Jord — auth and roles"
-description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, the route matrix, and the S0069 auth settings document"
+description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, the route matrix, the S0069 auth settings document, S0070 user admin and S0071 JWT key rotation"
 created: 2026-10-24
 updated: 2026-11-03
 tags:
@@ -59,6 +59,8 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 | Custom `/x/:slug` | yes | yes | no | yes | as caller, no escalate | as caller, no escalate |
 | Jobs, policies, triggers | yes | no | inspect | no | no | no |
 | `GET/PATCH /admin/auth/settings` | yes | no | no | no | no | no |
+| `/admin/auth/users*` | yes | no | no | no | no | no |
+| `/admin/auth/jwt*` | yes | no | no | no | no | no |
 | `/api/v1` | yes (policies) | write / read | read | yes (bypass) | policies | policies |
 
 | HTTP | Meaning |
@@ -98,6 +100,9 @@ One row per project database in `jord_auth_settings` (`id = default`). A **missi
 | `redirect_allowlist` | `[]` | Absolute http(s) patterns — `*` one path segment, `**` anything. Fail closed: with no config every `redirect_to` is **400** `redirect_not_allowed` |
 | `rate_limits` | `30`/min each | `signup`, `signin`, `refresh`, `recover`, `reset`, `confirm` on the S0036 `RateLimitStore` (Postgres shared / memory); limiter outage allows |
 | `session_ttl_seconds` | `900` (60–86 400) | Access-token `exp` and `expires_in` on signin/refresh |
+| `email_password_enabled` | `true` | `POST /auth/signup` + `/auth/signin` → **403** `provider_disabled` |
+| `anonymous_enabled` | `true` | `POST /auth/anon-key` → **403** `provider_disabled` |
+| `custom_claims` | `{}` | Merged into user access tokens on sign-in/refresh; reserved claims refused |
 
 `redirect_to` is accepted by signup, recover, reset and confirm. Validation rejects non-http(s) schemes, protocol-relative `//host` values, embedded credentials and off-list hosts; wildcard patterns may not appear in the scheme. Redirect targets are only validated — email links are still console `confirm:` / `reset:` bodies until [[../../../plan/Jord/phase-03/S0073-mailer-port|S0073]]–[[../../../plan/Jord/phase-03/S0074-magic-link|S0074]].
 
@@ -110,6 +115,49 @@ One row per project database in `jord_auth_settings` (`id = default`). A **missi
 | Enforcement | `cloud/jord/src/auth/routes.ts` · `identity.ts` · `password.ts` |
 | Inventory | `/admin/auth/*` → `admin auth` surface in `route-inventory.ts` |
 | Tests | `cloud/jord/src/auth/settings.test.ts` — defaults, persistence, validation, 403 gate, autoconfirm, policy, open redirect, 429, TTL, audit |
+
+### User admin (S0070)
+
+Operator-admin CRUD over end users. Studio's Auth console is the caller; responses never contain a password hash, token hash or raw token.
+
+| Method | Path | Effect |
+|--------|------|--------|
+| GET | `/admin/auth/users` | All users, newest first (`AdminUser`: id, email, confirmed, disabledAt, banReason, metadata, lastSignInAt, timestamps) |
+| GET | `/admin/auth/users/:id` | One user or **404** `user_not_found` |
+| POST | `/admin/auth/users` | `mode: create` (password required, policy-checked) or `mode: invite` (random password, unconfirmed, confirm token + mail); 409 on duplicate email |
+| PATCH | `/admin/auth/users/:id` | `user_metadata` / `app_metadata` (objects, ≤16 KB), `email_confirm`, `ban_reason` |
+| POST | `/admin/auth/users/:id/ban` | `disabled` (default true) + `reason`; banning also revokes every refresh token |
+| POST | `/admin/auth/users/:id/revoke` | Revokes all active refresh tokens, returns `{ revoked }` |
+| DELETE | `/admin/auth/users/:id` | Deletes auth tokens, refresh tokens, then the user |
+
+Every mutation appends a `jord_logs` row with `source = auth.users` (actor, user id, action, changed fields / reason / revoked count). Migration `0017_auth_user_admin.sql` adds `ban_reason` plus `user_metadata` / `app_metadata` / `last_sign_in_at` on `jord_users` for fresh and upgraded installs.
+
+| Piece | Path |
+|-------|------|
+| Routes | `cloud/jord/src/auth/admin-routes.ts` → `/admin/auth/users*` |
+| Data layer | `cloud/jord/src/auth/admin.ts` |
+| Migration | `elements/jord/migrations/{libsql,postgres}/0017_auth_user_admin.sql` |
+| Tests | `cloud/jord/src/auth/admin-users.test.ts` — create/invite, metadata, ban + revoke, delete, validation, 403 |
+
+### JWT signing keys (S0071)
+
+One optional per-project signing key, stored **sealed** in `jord_auth_settings` (AES-256-GCM via `JORD_MASTER_KEY`). Resolution order per request: stored key → `JORD_JWT_SECRET` → none (no JWT routes, 503). The key itself is never returned; the API exposes only `source`, a sha256 **fingerprint** (16 hex chars) and `rotated_at`.
+
+| Method | Path | Effect |
+|--------|------|--------|
+| GET | `/admin/auth/jwt` | Key metadata + `session_ttl_seconds` + `custom_claims` |
+| POST | `/admin/auth/jwt/rotate` | Generates a new 32-byte secret, seals it, stores it; **503** `jwt_key_unavailable` without a master key; audited `auth.jwt` |
+| DELETE | `/admin/auth/jwt/key` | Removes the stored key; signs with `JORD_JWT_SECRET` again; audited `auth.jwt` |
+
+**Invalidation policy:** rotation is immediate — every access token signed with the previous key fails verification (kid stays `current`, the secret changed). Refresh tokens are untouched, so clients recover by refreshing or signing in. `JORD_JWT_SECRET_PREVIOUS` only participates while no stored key exists. Expiry is `session_ttl_seconds` (also editable from the JWT section).
+
+| Piece | Path |
+|-------|------|
+| Keyring | `cloud/jord/src/auth/keyring.ts` — sealed key → env, 5 s cache, invalidated on rotate/reset |
+| Migration | `elements/jord/migrations/{libsql,postgres}/0018_auth_console.sql` |
+| Middleware | `createAuthMiddleware(auth, keyring)` verifies with the resolved key list |
+| Signing | `/auth/signin`, `/auth/refresh`, `/auth/anon-key` ask the keyring for the current secret |
+| Tests | `cloud/jord/src/auth/console-sections.test.ts` — gates, claims, rotation + reset, non-disclosure, 503 |
 
 ## How
 
@@ -142,4 +190,4 @@ A raw `Authorization: Bearer $JORD_SERVER_TOKEN` is `service` / `service_role` u
 
 ## Not in Jord yet
 
-OAuth, SMTP/real mail delivery, magic link, and the Studio Auth console UI ([[../../../plan/Jord/phase-03/S0070-auth-console-users|S0070]]–[[../../../plan/Jord/phase-03/S0072-email-templates|S0072]]). Provider credentials and JWT key management are [[../../../plan/Jord/phase-03/S0071-auth-console-sections|S0071]].
+OAuth, SMTP/real mail delivery and magic link ([[../../../plan/Jord/phase-03/S0073-mailer-port|S0073]]–[[../../../plan/Jord/phase-03/S0075-oauth-provider|S0075]]); email templates are [[../../../plan/Jord/phase-03/S0072-email-templates|S0072]] and the Sessions section is [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]]. The Users console shipped in [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]]; providers, URL config, JWT keys/claims and rate limits in [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]].

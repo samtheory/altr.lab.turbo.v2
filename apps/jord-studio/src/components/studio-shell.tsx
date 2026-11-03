@@ -40,6 +40,7 @@ import {
 import { StudioSideNav } from "@/components/studio-side-nav";
 import { StudioSqlSidebar } from "@/components/studio-sql-sidebar";
 import { StudioTablesSidebar } from "@/components/studio-tables-sidebar";
+import { StudioUsersSidebar } from "@/components/studio-users-sidebar";
 import { SqlWorkspaceProvider } from "@/components/sql-workspace";
 import {
   WorkspaceTabsProvider,
@@ -109,6 +110,7 @@ function ContextualSidebarMount({
   if (contextual === "endpoints") return <StudioEndpointsSidebar />;
   if (contextual === "queries") return <StudioSqlSidebar />;
   if (contextual === "buckets") return <StudioBucketsSidebar role={role} />;
+  if (contextual === "users") return <StudioUsersSidebar role={role} />;
   return null;
 }
 

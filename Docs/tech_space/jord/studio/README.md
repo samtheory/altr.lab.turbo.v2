@@ -1,6 +1,6 @@
 ---
 title: "Jord Studio"
-description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0068 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL + storage buckets"
+description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0071 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL + storage buckets + auth console (users, providers, URLs, JWT, limits)"
 created: 2026-10-24
 updated: 2026-11-03
 tags:
@@ -42,7 +42,7 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts` (`icon` + optional `context
 | Connection | `/p/[project]/database/connection` | [[../dialects/README]] — labels only; **no URL editor** |
 | SQL editor | `/p/[project]/database/sql` | `POST /sql/execute` + `/sql/cancel` — admin; Monaco + DataGrid results (S0063–S0065) |
 | Migrate | `/p/[project]/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
-| Users | `/p/[project]/auth/users` | `GET /admin/users` — disable / revoke |
+| Auth console | `/p/[project]/auth/…` | Users, Providers, URL configuration, JWT, Rate limits and Settings live (S0070–S0071); Sessions (S0076) and Email (S0072) gated |
 | Projects | `/projects`, `/projects/new`, `/projects/[id]/edit` | BFF → `GET/POST /admin/projects` · test · rotate · archive · one-time key reveal (control plane, not project-prefixed) |
 | Project home | `/p/[project]` | Scoped landing + switcher target |
 | Policies / Triggers | `/p/[project]/database/…` | [[../policies/README]] |
@@ -170,7 +170,7 @@ Real second-column lists for the wired sections; selection is URL-driven and the
 | APIs | `StudioEndpointsSidebar` reads `GET /api/apis/generated` + `/api/custom-apis` + `/api/functions`, grouped by Tables/Custom with method badges |
 | Mount | `ContextualSidebarMount` in `studio-shell.tsx` registers the active section body into the slot |
 | SQL | Reserved `queries` slot; real list is [[../../../plan/Jord/phase-03/S0064-query-tabs-history\|S0064]] |
-| Auth | Reserved `users` slot; real list is [[../../../plan/Jord/phase-03/S0070-auth-console-users\|S0070]] |
+| Auth | `StudioUsersSidebar` (S0070) — search + 25/page pagination, status badge, `?user=` / `?q=` / `?new=`; create + invite actions; non-admin sees an admin-only list |
 | Storage | `StudioBucketsSidebar` (S0068) — provider badge, object count, paused state, `?bucket=` selection; non-admin falls back to `/api/blobs/buckets` |
 | Resize + persist | Drag handle with 12rem–30rem clamp; `sidebarWidth` + `sidebarCollapsed` kept in the S0046 shell prefs |
 | Selection | `?table=`, `?job=`, `?endpoint=` rewritten on item click; restored on reload |
@@ -275,6 +275,41 @@ Registry rows live in the project DB (`jord_buckets`, migration `0015`); credent
 
 Rotation probes with the new keys first; a failed probe keeps the old seals, a successful rotate revokes them immediately (S0067 `bucket-admin.test.ts`).
 
+### Auth console (S0070)
+
+Top-level **Auth** group in `studio-nav.ts` (left the Database group). Users, Providers, URL configuration, JWT, Rate limits and Settings are wired to the server; Sessions and Email remain explicit gates naming their cards.
+
+| Piece | Fact |
+|-------|------|
+| Sections | `/p/[project]/auth/{users,sessions,providers,url-configuration,jwt,email,rate-limits,settings}`; `auth` is a scoped root in `project-scope.ts` |
+| Users sidebar | `StudioUsersSidebar` — `GET /api/admin/auth/users`; search by email/id, 25-row pages, banned/unconfirmed/active badge, `?user=` selection, `?new=create\|invite` opens the dialog, `jord:auth-users-changed` refreshes after mutations |
+| Users panel | `UsersAdminPanel` — detail (id, created, updated, last sign-in, banned-at), `user_metadata` + `app_metadata` JSON editors with validation, mark email confirmed, revoke-all, ban/un-ban with reason, delete confirm |
+| Create / invite | Create needs a password checked against `password_min_length`; invite creates an unconfirmed account with a confirm token + mail. Both accept metadata JSON |
+| Gated sections | `AuthSectionGate` — warning alert + planned bullet list; Sessions → [[../../../plan/Jord/phase-03/S0076-sessions-claims\|S0076]], Email → [[../../../plan/Jord/phase-03/S0072-email-templates\|S0072]] |
+| Server | `cloud/jord/src/auth/admin-routes.ts` at `/admin/auth/users*`; data layer `admin.ts`; migration `0017_auth_user_admin.sql` |
+| BFF | `src/app/api/admin/auth/users/…` mirrors the server paths (old `/api/admin/users/*` deleted) |
+| Guards | Operator-admin only; responses are `AdminUser` (no hash/token); ban revokes refresh tokens; create/update/ban/revoke/delete each write a `jord_logs` row with `source = auth.users` |
+| Role UI | Non-admin gets an Admin-only alert and an admin-only sidebar state |
+| Helpers | `src/lib/studio-auth-users.ts` (status/filter/pagination/JSON) · `src/lib/studio-api.ts` (error + timestamp readers) |
+| Anchor | [[../../../plan/Jord/phase-03/done/S0070-auth-console-users\|S0070]] |
+
+### Auth console (S0071)
+
+Configuration sections over the S0069 settings row. Every save is a `PATCH /admin/auth/settings`; secrets are write-only.
+
+| Piece | Fact |
+|-------|------|
+| Components | `AuthProvidersSection`, `AuthUrlsSection`, `AuthJwtSection`, `AuthRateLimitsSection`, `AuthSettingsSection` in `auth-console-sections.tsx`; shared fetch/save hook, all admin-only with an Admin-only alert for other roles |
+| Providers | Email/password and anonymous toggles save immediately (`403 provider_disabled` when off). Magic link (S0074) and OAuth (S0075) are disabled cards with the dependency named |
+| URL configuration | Site URL + one-pattern-per-row allow-list, add/remove, client mirror of the server wildcard check; server still fails closed |
+| JWT | Key source/fingerprint/rotated-at, rotate confirm (names the immediate invalidation), reset-to-env, TTL field, custom-claims JSON editor and a decoded **shape** preview from a sample principal (reserved claims win; nothing is signed in the browser) |
+| Rate limits | Six endpoint rows with default/current values, reset-to-default, save applies on the next request |
+| Settings | Sign-up toggle, autoconfirm, minimum password length, session TTL |
+| BFF | `src/app/api/admin/auth/settings` (GET/PATCH) · `…/jwt/rotate` (POST) · `…/jwt/key` (DELETE) |
+| Helpers | `src/lib/studio-auth-settings.ts` — defaults, bounds, rate normalization, allowlist validation, claims parse, preview builder |
+| Errors | Server validation `details` shown inline (`readStudioError`), including reserved-claim and wildcard errors |
+| Anchor | [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections\|S0071]] |
+
 ### Right inspector (S0048)
 
 One host overlays the **content pane only** (primary nav stays clear). State is URL-addressable; ESC / backdrop / browser Back close it.
@@ -310,4 +345,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Multi-tenant hosting, Artemis screens inside Studio, image transforms and multipart uploads ([[../../../plan/Jord/phase-03/S0081-multipart-uploads|S0081]]). Waves C–H closed through [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui|S0068]]; the auth settings API is [[../../../plan/Jord/phase-03/done/S0069-auth-settings-store|S0069]] (server only). Next Studio card: [[../../../plan/Jord/phase-03/S0070-auth-console-users|S0070]].
+Multi-tenant hosting, Artemis screens inside Studio, image transforms and multipart uploads ([[../../../plan/Jord/phase-03/S0081-multipart-uploads|S0081]]). Waves C–H closed through [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui|S0068]]; the auth settings API is [[../../../plan/Jord/phase-03/done/S0069-auth-settings-store|S0069]], the Users console [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]] and the configuration sections [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]]. Next Studio cards: [[../../../plan/Jord/phase-03/S0072-email-templates|S0072]] (email) and [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]] (sessions).

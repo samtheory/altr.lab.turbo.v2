@@ -20,6 +20,7 @@ import {
   signupUser,
 } from "./identity.js";
 import { ACCESS_TTL_SEC, ANON_TTL_SEC, signAccessToken } from "./jwt.js";
+import type { JwtKeyring } from "./keyring.js";
 import type { MailerPort } from "./mailer.js";
 import {
   createAuthMiddleware,
@@ -60,11 +61,15 @@ async function readJson(request: Request): Promise<Record<string, unknown>> {
   }
 }
 
-function requireJwt(auth: JordAuthConfig): string {
-  if (!auth.jwtSecret) {
+async function requireJwt(
+  auth: JordAuthConfig,
+  keyring?: JwtKeyring,
+): Promise<string> {
+  const secret = keyring ? await keyring.current() : auth.jwtSecret;
+  if (!secret) {
     throw new HTTPException(503, { message: "jwt is not configured" });
   }
-  return auth.jwtSecret;
+  return secret;
 }
 
 function redirectDenied(
@@ -83,6 +88,8 @@ export function createAuthRoutes(input: {
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   /** Shared limiter from S0036; memory fallback for single-process boots. */
   rateLimit?: RateLimitStore;
+  /** Per-project signing key (S0071); env secret when absent. */
+  keyring?: JwtKeyring;
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
   const limiter = input.rateLimit ?? createMemoryRateLimitStore();
@@ -113,6 +120,9 @@ export function createAuthRoutes(input: {
 
   routes.post("/signup", async (c) => {
     const settings = await loadAuthSettings(input.jord);
+    if (!settings.email_password_enabled) {
+      return c.json({ error: "provider_disabled" }, 403);
+    }
     if (!settings.signups_enabled) {
       return c.json({ error: "signups_disabled" }, 403);
     }
@@ -142,12 +152,15 @@ export function createAuthRoutes(input: {
 
   routes.post("/signin", async (c) => {
     const settings = await loadAuthSettings(input.jord);
+    if (!settings.email_password_enabled) {
+      return c.json({ error: "provider_disabled" }, 403);
+    }
     const body = await readJson(c.req.raw);
     const email = typeof body.email === "string" ? body.email : "";
     const password = typeof body.password === "string" ? body.password : "";
     const result = await signinUser({ jord: input.jord, email, password });
     if (!result.ok) return c.json({ error: "invalid_credentials" }, 401);
-    const secret = requireJwt(input.auth);
+    const secret = await requireJwt(input.auth, input.keyring);
     const access = signAccessToken({
       secret,
       iss: input.auth.jwtIss,
@@ -156,6 +169,7 @@ export function createAuthRoutes(input: {
       role: "user",
       email: result.user.email,
       ttlSec: settings.session_ttl_seconds,
+      extraClaims: settings.custom_claims,
     });
     const refresh = await input.enqueueWrite(() =>
       issueRefreshToken({ jord: input.jord, userId: result.user.id }),
@@ -179,7 +193,7 @@ export function createAuthRoutes(input: {
     if (!rotated.ok) {
       return c.json({ error: rotated.error }, 401);
     }
-    const secret = requireJwt(input.auth);
+    const secret = await requireJwt(input.auth, input.keyring);
     const access = signAccessToken({
       secret,
       iss: input.auth.jwtIss,
@@ -188,6 +202,7 @@ export function createAuthRoutes(input: {
       role: "user",
       email: rotated.user.email,
       ttlSec: settings.session_ttl_seconds,
+      extraClaims: settings.custom_claims,
     });
     return c.json({
       token_type: "bearer" as const,
@@ -241,7 +256,7 @@ export function createAuthRoutes(input: {
     return c.json({ ok: true as const });
   });
 
-  const authed = createAuthMiddleware(input.auth);
+  const authed = createAuthMiddleware(input.auth, input.keyring);
 
   routes.post("/logout", authed, async (c) => {
     const body = await readJson(c.req.raw);
@@ -265,8 +280,12 @@ export function createAuthRoutes(input: {
     });
   });
 
-  routes.post("/anon-key", authed, requireOperatorAdmin(), (c) => {
-    const secret = requireJwt(input.auth);
+  routes.post("/anon-key", authed, requireOperatorAdmin(), async (c) => {
+    const settings = await loadAuthSettings(input.jord);
+    if (!settings.anonymous_enabled) {
+      return c.json({ error: "provider_disabled" }, 403);
+    }
+    const secret = await requireJwt(input.auth, input.keyring);
     const access = signAccessToken({
       secret,
       iss: input.auth.jwtIss,

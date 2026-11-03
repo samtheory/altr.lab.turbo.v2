@@ -21,9 +21,19 @@ export {
   CLOCK_SKEW_SEC,
   CURRENT_KID,
   PREVIOUS_KID,
+  RESERVED_JWT_CLAIMS,
   signAccessToken,
   verifyJwt,
+  type JwtClaims,
+  type JwtKey,
 } from "./jwt.js";
+export {
+  createJwtKeyring,
+  JWT_SECRET_ID,
+  type JwtKeyInfo,
+  type JwtKeyring,
+  type JwtKeySource,
+} from "./keyring.js";
 export { ConsoleMailer, type MailerPort, type OutboundMail } from "./mailer.js";
 export {
   createAuthMiddleware,
@@ -56,6 +66,7 @@ export {
   loadAuthSettings,
   parseAuthSettingsPatch,
   updateAuthSettings,
+  validateCustomClaims,
   validateRedirectParam,
   validateRedirectPattern,
   type AuthRateLimits,
@@ -78,10 +89,12 @@ export {
 } from "./roles.js";
 export {
   DEFAULT_SESSION_TTL_MS,
+  jwtEnvKeys,
   parseAuthorizationHeader,
   resetRawBearerWarning,
   resolveBearerRole,
   resolvePrincipal,
+  resolvePrincipalWithKeys,
   signSessionToken,
   warnRawBearer,
   type JordSessionClaims,

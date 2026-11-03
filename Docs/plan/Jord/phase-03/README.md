@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-03):** **S0034–S0069 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Wave G closed ([[done/S0063-monaco-sql-editor|S0063]]–[[done/S0065-results-explain-cancel|S0065]] / [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]]). Wave H closed ([[done/S0066-bucket-registry|S0066]]–[[done/S0068-storage-studio-ui|S0068]] / [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]]). Archived under [[done/README|done/]]. Wave I started ([[done/S0069-auth-settings-store|S0069]] / [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]); next open card: [[S0070-auth-console-users|S0070]] (wave I). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0030). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-03):** **S0034–S0071 done** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Wave G closed ([[done/S0063-monaco-sql-editor|S0063]]–[[done/S0065-results-explain-cancel|S0065]] / [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]]). Wave H closed ([[done/S0066-bucket-registry|S0066]]–[[done/S0068-storage-studio-ui|S0068]] / [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]]). Archived under [[done/README|done/]]. Wave I in progress ([[done/S0069-auth-settings-store|S0069]]–[[done/S0071-auth-console-sections|S0071]] / [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]]); next open card: [[S0072-email-templates|S0072]] (wave I). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0030). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
 
 ## How to run a task
 
@@ -140,8 +140,8 @@ flowchart LR
 | # | Id | Task | Parent | Est. |
 |--:|----|------|--------|------|
 | I1 | [[done/S0069-auth-settings-store\|S0069]] | Auth settings store + config API | F0030 | **done** 2026-11-03 |
-| I2 | [[S0070-auth-console-users\|S0070]] | Auth console shell + Users | F0030 | 2.5–3 h |
-| I3 | [[S0071-auth-console-sections\|S0071]] | Providers, URL config, JWT, rate limits | F0030 | 3 h |
+| I2 | [[done/S0070-auth-console-users\|S0070]] | Auth console shell + Users | F0030 | **done** 2026-11-03 |
+| I3 | [[done/S0071-auth-console-sections\|S0071]] | Providers, URL config, JWT, rate limits | F0030 | **done** 2026-11-03 |
 | I4 | [[S0072-email-templates\|S0072]] | Email templates + test send | F0030 | 2–3 h |
 | I5 | [[S0073-mailer-port\|S0073]] | Real `MailerPort` | F0016 | 2–3 h |
 | I6 | [[S0074-magic-link\|S0074]] | Magic-link sign-in | F0016 | 2–3 h |
@@ -217,7 +217,7 @@ Gate: parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord
 | [[done/S0056-grid-column-ops\|S0056]] | apolyx-F0008 DataGrid (column-ops slice) — **done** |
 | [[done/S0066-bucket-registry\|S0066]] | — **done** |
 | [[done/S0068-storage-studio-ui\|S0068]] | [[done/S0067-bucket-config-api\|S0067]] — **done** |
-| [[S0071-auth-console-sections\|S0071]] | [[done/S0069-auth-settings-store\|S0069]] — **done** (OAuth/magic-link sections need S0074/S0075) |
+| [[done/S0071-auth-console-sections\|S0071]] | S0069 + S0070 — **done** (OAuth/magic-link provider toggles need S0074/S0075) |
 | [[S0090-functions-worker-pool\|S0090]] | status gate |
 
 ## Rules

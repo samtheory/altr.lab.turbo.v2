@@ -18,6 +18,18 @@ export const jordAuthSettings = sqliteTable("jord_auth_settings", {
   sessionTtlSeconds: integer("session_ttl_seconds", { mode: "number" })
     .notNull()
     .default(900),
+  emailPasswordEnabled: integer("email_password_enabled", { mode: "number" })
+    .notNull()
+    .default(1),
+  anonymousEnabled: integer("anonymous_enabled", { mode: "number" })
+    .notNull()
+    .default(1),
+  /** JSON object merged into end-user access tokens (reserved claims refused). */
+  customClaims: text("custom_claims"),
+  /** AES-GCM envelope for the rotated signing key — never returned by the API. */
+  jwtKeySealed: text("jwt_key_sealed"),
+  jwtKeyFingerprint: text("jwt_key_fingerprint"),
+  jwtKeyRotatedAt: integer("jwt_key_rotated_at", { mode: "number" }),
   updatedBy: text("updated_by"),
   updatedAt: integer("updated_at", { mode: "number" }).notNull(),
 });
@@ -51,10 +63,14 @@ export const DEFAULT_AUTH_SETTINGS = {
     confirm: 30,
   } as Record<AuthRateLimitKey, number>,
   session_ttl_seconds: 900,
+  email_password_enabled: true,
+  anonymous_enabled: true,
+  custom_claims: {} as Record<string, unknown>,
 } as const;
 
 export const AUTH_SETTINGS_BOUNDS = {
   passwordMinLength: { min: 6, max: 128 },
   sessionTtlSeconds: { min: 60, max: 86_400 },
   rateLimit: { min: 1, max: 10_000 },
+  customClaimsMaxChars: 8_192,
 } as const;

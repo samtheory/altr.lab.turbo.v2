@@ -1,7 +1,12 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import type { JordAuthConfig } from "./config.js";
-import { CURRENT_KID, PREVIOUS_KID, verifyJwt } from "./jwt.js";
+import {
+  CURRENT_KID,
+  PREVIOUS_KID,
+  verifyJwt,
+  type JwtKey,
+} from "./jwt.js";
 import type { Principal } from "./principal.js";
 import { isJordRole, type JordRole } from "./roles.js";
 
@@ -108,8 +113,9 @@ export function resetRawBearerWarning(): void {
   rawBearerWarned = false;
 }
 
-function jwtKeys(auth: JordAuthConfig): Array<{ kid: string; secret: string }> {
-  const keys: Array<{ kid: string; secret: string }> = [];
+/** Env-only key list (tests, and the fallback when no keyring is wired). */
+export function jwtEnvKeys(auth: JordAuthConfig): JwtKey[] {
+  const keys: JwtKey[] = [];
   if (auth.jwtSecret) keys.push({ kid: CURRENT_KID, secret: auth.jwtSecret });
   if (auth.jwtSecretPrevious) {
     keys.push({ kid: PREVIOUS_KID, secret: auth.jwtSecretPrevious });
@@ -126,6 +132,16 @@ function jwtKeys(auth: JordAuthConfig): Array<{ kid: string; secret: string }> {
 export function resolvePrincipal(
   bearer: string,
   auth: JordAuthConfig,
+  nowMs: number = Date.now(),
+): ResolvedAccess | null {
+  return resolvePrincipalWithKeys(bearer, auth, jwtEnvKeys(auth), nowMs);
+}
+
+/** Same resolution, with an explicit key list (per-project keyring, S0071). */
+export function resolvePrincipalWithKeys(
+  bearer: string,
+  auth: JordAuthConfig,
+  keys: JwtKey[],
   nowMs: number = Date.now(),
 ): ResolvedAccess | null {
   if (!bearer) return null;
@@ -152,9 +168,9 @@ export function resolvePrincipal(
     };
   }
 
-  if (bearer.split(".").length === 3 && auth.jwtSecret) {
+  if (bearer.split(".").length === 3 && keys.length > 0) {
     const claims = verifyJwt(bearer, {
-      keys: jwtKeys(auth),
+      keys,
       iss: auth.jwtIss,
       aud: auth.jwtAud,
       nowMs,
