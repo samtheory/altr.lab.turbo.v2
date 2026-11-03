@@ -3,7 +3,7 @@ title: "jord-F0016 — auth v2"
 feature_id: jord-F0016
 description: "Real MailerPort, magic link, one OAuth, Studio policy tester, sessions, custom JWT claims"
 created: 2026-10-25
-updated: 2026-10-28
+updated: 2026-11-03
 tags:
   - feature
   - jord
@@ -35,7 +35,7 @@ Enumeration tests still pass; OAuth state/PKCE tested; policy tester matches ser
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0073-mailer-port\|S0073]] — real MailerPort | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0073-mailer-port\|S0073]] — real MailerPort | 2–3 h | **done** 2026-11-03 |
 | [[../../../plan/Jord/phase-03/S0074-magic-link\|S0074]] — magic-link sign-in | 2–3 h | todo |
 | [[../../../plan/Jord/phase-03/S0075-oauth-provider\|S0075]] — one OAuth provider (state + PKCE) | 3 h | todo |
 | [[../../../plan/Jord/phase-03/S0076-sessions-claims\|S0076]] — sessions + custom JWT claims | 2.5–3 h | todo |

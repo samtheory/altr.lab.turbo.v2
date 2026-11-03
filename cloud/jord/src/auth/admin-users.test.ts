@@ -159,7 +159,11 @@ describe("admin auth users", () => {
       };
       expect(invitedBody.user.emailConfirmed).toBe(false);
       expect(
-        ctx.mailer.sent.filter((mail) => mail.subject.includes("invited")),
+        ctx.mailer.sent.filter(
+          (mail) =>
+            mail.subject.includes("invited") &&
+            !mail.subject.includes("Confirm"),
+        ),
       ).toHaveLength(1);
 
       const patched = await ctx.app.request(

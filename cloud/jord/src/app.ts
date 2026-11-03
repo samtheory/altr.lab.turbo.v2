@@ -33,7 +33,7 @@ import {
   createAuthMiddleware,
   createAuthRoutes,
   createAuthSettingsRoutes,
-  ConsoleMailer,
+  createMailerFromEnv,
   requireAlterSchema,
   requireInvokeApis,
   requireManageApis,
@@ -496,8 +496,8 @@ export function createJordApp(deps: JordAppDeps) {
   const app = new Hono<{ Variables: JordAuthVariables }>();
   const { upgradeWebSocket, injectWebSocket } = createNodeWebSocket({ app });
 
-  const mailer = deps.mailer ?? new ConsoleMailer();
   const env = deps.env ?? process.env;
+  const mailer = deps.mailer ?? createMailerFromEnv({ env });
   const sharedState = deps.jord.dialect === "postgres";
   const idempotencyTtlMs = resolveIdempotencyTtlMs(env);
   const idempotency =
@@ -3028,6 +3028,8 @@ export function createJordApp(deps: JordAppDeps) {
       jord: deps.jord,
       enqueueWrite,
       keyring: jwtKeyring,
+      mailer,
+      rateLimit: rateLimitStore,
     }),
   );
   // S0070 — admin user CRUD (create/invite, metadata, ban, delete, revoke).

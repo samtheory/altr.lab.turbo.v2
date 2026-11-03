@@ -34,7 +34,38 @@ export {
   type JwtKeyring,
   type JwtKeySource,
 } from "./keyring.js";
-export { ConsoleMailer, type MailerPort, type OutboundMail } from "./mailer.js";
+export {
+  AUTH_EMAIL_TEMPLATE_KEYS,
+  AUTH_EMAIL_VARIABLES,
+  defaultAuthEmailTemplates,
+  escapeHtml,
+  normalizeAuthEmailSender,
+  normalizeAuthEmailTemplates,
+  renderAuthEmail,
+  sampleEmailVariables,
+  type AuthEmailSender,
+  type AuthEmailTemplate,
+  type AuthEmailTemplateKey,
+  type AuthEmailTemplates,
+  type AuthEmailVariable,
+} from "./email-templates.js";
+export { sendAuthEmail } from "./email-send.js";
+export {
+  ConsoleMailer,
+  MailerError,
+  createMailerFromEnv,
+  createResendMailer,
+  createSesMailer,
+  JORD_MAILER_KINDS,
+  type HttpMailerFetch,
+  type JordMailerKind,
+  type MailerFailureCode,
+  type MailerPort,
+  type MailResult,
+  type OutboundMail,
+  type ResendMailerOptions,
+  type SesMailerOptions,
+} from "./mailer.js";
 export {
   createAuthMiddleware,
   requireAlterSchema,

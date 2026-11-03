@@ -4,7 +4,15 @@ import { Hono } from "hono";
 
 import type { JordDriverPort } from "@altr/jord";
 
+import {
+  AUTH_EMAIL_TEMPLATE_KEYS,
+  renderAuthEmail,
+  sampleEmailVariables,
+  type AuthEmailTemplateKey,
+} from "./email-templates.js";
 import type { JwtKeyring } from "./keyring.js";
+import { MailerError, type MailerPort } from "./mailer.js";
+import type { RateLimitStore } from "../http/rate-limit-store.js";
 import {
   requireOperatorAdmin,
   type JordAuthVariables,
@@ -41,11 +49,39 @@ async function auditJwt(
   }
 }
 
+async function auditEmail(
+  jord: JordDriverPort,
+  input: {
+    actor: string | null;
+    to: string;
+    template: string;
+    messageId: string | null;
+  },
+): Promise<void> {
+  try {
+    await jord.query(
+      `INSERT INTO jord_logs (id, at, level, source, message, meta_json)
+       VALUES (?, ?, 'info', 'auth.email', ?, ?)`,
+      [
+        randomUUID(),
+        Date.now(),
+        `email test send ${input.template}`,
+        JSON.stringify(input),
+      ],
+    );
+  } catch (err) {
+    console.error("[@altr/jord-server] auth email audit failed", err);
+  }
+}
+
 /** `GET/PATCH /admin/auth/settings` + JWT key routes — operator admin only. */
 export function createAuthSettingsRoutes(input: {
   jord: JordDriverPort;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   keyring: JwtKeyring;
+  mailer: MailerPort;
+  /** Shared limiter for test sends (S0036); memory fallback when absent. */
+  rateLimit?: RateLimitStore;
 }): Hono<{ Variables: JordAuthVariables }> {
   const routes = new Hono<{ Variables: JordAuthVariables }>();
   routes.use("*", requireOperatorAdmin());
@@ -62,6 +98,7 @@ export function createAuthSettingsRoutes(input: {
         jwt_key_rotated_at: key.rotatedAt,
         jwt_key_configured: key.configured,
         jwt_key_source: key.source,
+        email_provider: input.mailer.kind ?? "custom",
       },
     });
   });
@@ -123,6 +160,74 @@ export function createAuthSettingsRoutes(input: {
               : "JWT signing key rotation is unavailable.",
         },
         503,
+      );
+    }
+  });
+
+  routes.post("/email/send-test", async (c) => {
+    const principal = c.get("principal");
+    const actor = principal.uid ?? principal.role;
+    const body = await readJson(c.req.raw);
+    const to = typeof body.to === "string" ? body.to.trim() : "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      return c.json({ error: "invalid_recipient" }, 400);
+    }
+    const key = body.template;
+    if (
+      typeof key !== "string" ||
+      !(AUTH_EMAIL_TEMPLATE_KEYS as readonly string[]).includes(key)
+    ) {
+      return c.json({ error: "unknown_template" }, 400);
+    }
+
+    if (input.rateLimit) {
+      try {
+        const hits = await input.rateLimit.hit(`admin:email-test:${actor}`, 60_000);
+        if (hits > 10) return c.json({ error: "too_many_test_sends" }, 429);
+      } catch (err) {
+        console.error("[@altr/jord-server] test-send limiter failed", err);
+      }
+    }
+
+    const settings = await loadAuthSettings(input.jord);
+    const template = settings.email_templates[key as AuthEmailTemplateKey];
+    const rendered = renderAuthEmail(template, {
+      ...sampleEmailVariables(),
+      email: to,
+    });
+    try {
+      const result = await input.mailer.send({
+        to,
+        subject: rendered.subject,
+        text: rendered.text,
+        ...(rendered.html ? { html: rendered.html } : {}),
+      });
+      await auditEmail(input.jord, {
+        actor,
+        to,
+        template: key,
+        messageId: result?.messageId ?? null,
+      });
+      return c.json({
+        ok: true as const,
+        provider: input.mailer.kind ?? "custom",
+        message_id: result?.messageId ?? null,
+        subject: rendered.subject,
+        to,
+      });
+    } catch (err) {
+      const mailerErr =
+        err instanceof MailerError
+          ? err
+          : null;
+      return c.json(
+        {
+          error: "email_send_failed",
+          code: mailerErr?.code ?? "provider_error",
+          provider_status: mailerErr?.providerStatus ?? null,
+          message: err instanceof Error ? err.message : "Mailer rejected the test",
+        },
+        502,
       );
     }
   });

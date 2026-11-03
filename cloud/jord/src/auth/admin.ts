@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 
 import type { JordDriverPort } from "@altr/jord";
 
+import { sendAuthEmail } from "./email-send.js";
 import type { MailerPort } from "./mailer.js";
 import { hashPassword, passwordPolicyError } from "./password.js";
 
@@ -225,10 +226,13 @@ export async function createAdminUser(
       "INSERT INTO jord_auth_tokens (id, user_id, purpose, token_hash, expires_at, used_at, created_at) VALUES (?, ?, 'confirm', ?, ?, NULL, ?)",
       [randomUUID(), id, sha256(token), now + CONFIRM_TTL_MS, now],
     );
-    await input.mailer.send({
+    await sendAuthEmail({
+      jord: input.jord,
+      mailer: input.mailer,
+      kind: mode === "invite" ? "invite" : "confirm",
       to: email,
-      subject: mode === "invite" ? "You are invited to Jord" : "Confirm your Jord account",
-      text: `confirm:${token}`,
+      token,
+      expiresInSeconds: CONFIRM_TTL_MS / 1000,
     });
   }
 

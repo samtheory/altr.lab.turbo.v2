@@ -8,6 +8,14 @@ import {
   type JordDriverPort,
 } from "@altr/jord";
 
+import {
+  normalizeAuthEmailSender,
+  normalizeAuthEmailTemplates,
+  parseAuthEmailSenderPatch,
+  parseAuthEmailTemplatesPatch,
+  type AuthEmailSender,
+  type AuthEmailTemplates,
+} from "./email-templates.js";
 import { RESERVED_JWT_CLAIMS } from "./jwt.js";
 
 export const AUTH_SETTINGS_ID = "default";
@@ -25,6 +33,8 @@ export type JordAuthSettings = {
   email_password_enabled: boolean;
   anonymous_enabled: boolean;
   custom_claims: Record<string, unknown>;
+  email_templates: AuthEmailTemplates;
+  email_sender: AuthEmailSender;
   /** Non-secret identity of the stored signing key. */
   jwt_key_fingerprint: string | null;
   jwt_key_rotated_at: number | null;
@@ -49,6 +59,8 @@ export function defaultAuthSettings(): JordAuthSettings {
     email_password_enabled: DEFAULT_AUTH_SETTINGS.email_password_enabled,
     anonymous_enabled: DEFAULT_AUTH_SETTINGS.anonymous_enabled,
     custom_claims: {},
+    email_templates: normalizeAuthEmailTemplates(null),
+    email_sender: normalizeAuthEmailSender(null),
     jwt_key_fingerprint: null,
     jwt_key_rotated_at: null,
     jwt_key_configured: false,
@@ -163,6 +175,8 @@ function mapSettingsRow(row: Record<string, unknown>): JordAuthSettings {
       defaults.anonymous_enabled,
     ),
     custom_claims: parseStoredClaims(row.custom_claims),
+    email_templates: normalizeAuthEmailTemplates(row.email_templates),
+    email_sender: normalizeAuthEmailSender(row.email_sender),
     jwt_key_fingerprint:
       typeof row.jwt_key_fingerprint === "string"
         ? row.jwt_key_fingerprint
@@ -317,6 +331,8 @@ export type AuthSettingsPatch = Partial<
     | "email_password_enabled"
     | "anonymous_enabled"
     | "custom_claims"
+    | "email_templates"
+    | "email_sender"
   >
 >;
 
@@ -335,6 +351,8 @@ const KNOWN_KEYS = new Set([
   "email_password_enabled",
   "anonymous_enabled",
   "custom_claims",
+  "email_templates",
+  "email_sender",
 ]);
 
 /** Strict patch validation; unknown keys are rejected rather than ignored. */
@@ -454,6 +472,16 @@ export function parseAuthSettingsPatch(body: unknown): ParseSettingsResult {
     if (!claims.ok) errors.push(claims.error);
     else patch.custom_claims = claims.value;
   }
+  if (raw.email_templates !== undefined) {
+    const templates = parseAuthEmailTemplatesPatch(raw.email_templates);
+    if (!templates.ok) errors.push(...templates.errors);
+    else Object.assign(patch, { email_templates: templates.value });
+  }
+  if (raw.email_sender !== undefined) {
+    const sender = parseAuthEmailSenderPatch(raw.email_sender);
+    if (!sender.ok) errors.push(...sender.errors);
+    else Object.assign(patch, { email_sender: sender.value });
+  }
   if (raw.session_ttl_seconds !== undefined) {
     const n = asInt(raw.session_ttl_seconds);
     if (
@@ -516,6 +544,8 @@ export async function updateAuthSettings(input: {
     next.email_password_enabled ? 1 : 0,
     next.anonymous_enabled ? 1 : 0,
     JSON.stringify(next.custom_claims),
+    JSON.stringify(next.email_templates),
+    JSON.stringify(next.email_sender),
   ];
 
   await input.enqueueWrite(async () => {
@@ -524,8 +554,9 @@ export async function updateAuthSettings(input: {
         `INSERT INTO jord_auth_settings (
           id, signups_enabled, autoconfirm, password_min_length, site_url,
           redirect_allowlist, rate_limits, session_ttl_seconds, updated_by, updated_at,
-          email_password_enabled, anonymous_enabled, custom_claims
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+          email_password_enabled, anonymous_enabled, custom_claims,
+          email_templates, email_sender
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         ON CONFLICT (id) DO UPDATE SET
           signups_enabled = EXCLUDED.signups_enabled,
           autoconfirm = EXCLUDED.autoconfirm,
@@ -538,7 +569,9 @@ export async function updateAuthSettings(input: {
           updated_at = EXCLUDED.updated_at,
           email_password_enabled = EXCLUDED.email_password_enabled,
           anonymous_enabled = EXCLUDED.anonymous_enabled,
-          custom_claims = EXCLUDED.custom_claims`,
+          custom_claims = EXCLUDED.custom_claims,
+          email_templates = EXCLUDED.email_templates,
+          email_sender = EXCLUDED.email_sender`,
         values,
       );
       return;
@@ -547,8 +580,9 @@ export async function updateAuthSettings(input: {
       `INSERT INTO jord_auth_settings (
         id, signups_enabled, autoconfirm, password_min_length, site_url,
         redirect_allowlist, rate_limits, session_ttl_seconds, updated_by, updated_at,
-        email_password_enabled, anonymous_enabled, custom_claims
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        email_password_enabled, anonymous_enabled, custom_claims,
+        email_templates, email_sender
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT (id) DO UPDATE SET
         signups_enabled = excluded.signups_enabled,
         autoconfirm = excluded.autoconfirm,
@@ -561,7 +595,9 @@ export async function updateAuthSettings(input: {
         updated_at = excluded.updated_at,
         email_password_enabled = excluded.email_password_enabled,
         anonymous_enabled = excluded.anonymous_enabled,
-        custom_claims = excluded.custom_claims`,
+        custom_claims = excluded.custom_claims,
+        email_templates = excluded.email_templates,
+        email_sender = excluded.email_sender`,
       values,
     );
   });

@@ -3,6 +3,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type { JordDriverPort } from "@altr/jord";
 
 import type { MailerPort } from "./mailer.js";
+import { sendAuthEmail } from "./email-send.js";
 import {
   dummyPasswordHash,
   hashPassword,
@@ -148,10 +149,13 @@ export async function signupUser(input: {
         "INSERT INTO jord_auth_tokens (id, user_id, purpose, token_hash, expires_at, used_at, created_at) VALUES (?, ?, 'confirm', ?, ?, NULL, ?)",
         [randomUUID(), id, sha256(token), now + CONFIRM_TTL_MS, now],
       );
-      await input.mailer.send({
+      await sendAuthEmail({
+        jord: input.jord,
+        mailer: input.mailer,
+        kind: "confirm",
         to: email,
-        subject: "Confirm your Jord account",
-        text: `confirm:${token}`,
+        token,
+        expiresInSeconds: Math.round(CONFIRM_TTL_MS / 1000),
       });
     }
   }
@@ -241,10 +245,13 @@ export async function recoverUser(input: {
       "INSERT INTO jord_auth_tokens (id, user_id, purpose, token_hash, expires_at, used_at, created_at) VALUES (?, ?, 'reset', ?, ?, NULL, ?)",
       [randomUUID(), user.id, sha256(token), now + RESET_TTL_MS, now],
     );
-    await input.mailer.send({
+    await sendAuthEmail({
+      jord: input.jord,
+      mailer: input.mailer,
+      kind: "reset",
       to: email,
-      subject: "Reset your Jord password",
-      text: `reset:${token}`,
+      token,
+      expiresInSeconds: Math.round(RESET_TTL_MS / 1000),
     });
   }
   return { ok: true };

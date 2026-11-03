@@ -13,7 +13,7 @@ tags:
 
 # S0074 — magic link sign-in
 
-> **Status:** todo · **Depends on** [[S0073-mailer-port|S0073]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/auth/README]]
+> **Status:** todo · **Depends on** [[done/S0073-mailer-port|S0073]] · **Phase:** [[README]] · Parent: [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] · After ship: [[../../../tech_space/jord/auth/README]]
 
 ## Routing (who / how long / which model)
 
@@ -38,7 +38,7 @@ Passwordless is one of the four `jord-F0016` capabilities and the first real con
 | Kind | Where |
 |------|-------|
 | Intent | [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]] |
-| Depends on | [[S0073-mailer-port|S0073]] · [[S0069-auth-settings-store|S0069]] (sign-up toggle, allowlist, limits) |
+| Depends on | [[done/S0073-mailer-port|S0073]] · [[done/S0069-auth-settings-store|S0069]] (sign-up toggle, allowlist, limits) |
 | Code today | `cloud/jord/src/auth/{routes,jwt,identity,password}.ts` + token helpers |
 | Tests | `cloud/jord/src/auth/token.test.ts` · `principals.test.ts` |
 

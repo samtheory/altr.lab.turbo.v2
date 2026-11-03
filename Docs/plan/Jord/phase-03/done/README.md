@@ -54,3 +54,5 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0069-auth-settings-store\|S0069]] | Auth settings store + config API | 2026-11-03 |
 | [[S0070-auth-console-users\|S0070]] | Auth console shell + Users (create/invite, metadata, ban, delete, revoke) | 2026-11-03 |
 | [[S0071-auth-console-sections\|S0071]] | Providers, URL config, JWT key/claims, rate limits | 2026-11-03 |
+| [[S0072-email-templates\|S0072]] | Email templates + test send (console mailer until S0073) | 2026-11-03 |
+| [[S0073-mailer-port\|S0073]] | Real `MailerPort` (console \| Resend \| SES) | 2026-11-03 |

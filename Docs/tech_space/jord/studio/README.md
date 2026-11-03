@@ -42,7 +42,7 @@ Nav config: `apps/jord-studio/src/lib/studio-nav.ts` (`icon` + optional `context
 | Connection | `/p/[project]/database/connection` | [[../dialects/README]] — labels only; **no URL editor** |
 | SQL editor | `/p/[project]/database/sql` | `POST /sql/execute` + `/sql/cancel` — admin; Monaco + DataGrid results (S0063–S0065) |
 | Migrate | `/p/[project]/database/migrate` | `POST /migrate/jobs` — admin; never deletes source |
-| Auth console | `/p/[project]/auth/…` | Users, Providers, URL configuration, JWT, Rate limits and Settings live (S0070–S0071); Sessions (S0076) and Email (S0072) gated |
+| Auth console | `/p/[project]/auth/…` | Users, Providers, URL, JWT, Rate limits, Settings, Email live (S0070–S0072); Sessions gated (S0076) |
 | Projects | `/projects`, `/projects/new`, `/projects/[id]/edit` | BFF → `GET/POST /admin/projects` · test · rotate · archive · one-time key reveal (control plane, not project-prefixed) |
 | Project home | `/p/[project]` | Scoped landing + switcher target |
 | Policies / Triggers | `/p/[project]/database/…` | [[../policies/README]] |
@@ -277,7 +277,7 @@ Rotation probes with the new keys first; a failed probe keeps the old seals, a s
 
 ### Auth console (S0070)
 
-Top-level **Auth** group in `studio-nav.ts` (left the Database group). Users, Providers, URL configuration, JWT, Rate limits and Settings are wired to the server; Sessions and Email remain explicit gates naming their cards.
+Top-level **Auth** group in `studio-nav.ts` (left the Database group). Users, Providers, URL configuration, JWT, Rate limits, Settings and Email are wired to the server; Sessions remains an explicit gate naming S0076.
 
 | Piece | Fact |
 |-------|------|
@@ -285,7 +285,7 @@ Top-level **Auth** group in `studio-nav.ts` (left the Database group). Users, Pr
 | Users sidebar | `StudioUsersSidebar` — `GET /api/admin/auth/users`; search by email/id, 25-row pages, banned/unconfirmed/active badge, `?user=` selection, `?new=create\|invite` opens the dialog, `jord:auth-users-changed` refreshes after mutations |
 | Users panel | `UsersAdminPanel` — detail (id, created, updated, last sign-in, banned-at), `user_metadata` + `app_metadata` JSON editors with validation, mark email confirmed, revoke-all, ban/un-ban with reason, delete confirm |
 | Create / invite | Create needs a password checked against `password_min_length`; invite creates an unconfirmed account with a confirm token + mail. Both accept metadata JSON |
-| Gated sections | `AuthSectionGate` — warning alert + planned bullet list; Sessions → [[../../../plan/Jord/phase-03/S0076-sessions-claims\|S0076]], Email → [[../../../plan/Jord/phase-03/S0072-email-templates\|S0072]] |
+| Gated sections | `AuthSectionGate` — warning alert + planned bullet list; Sessions → [[../../../plan/Jord/phase-03/S0076-sessions-claims\|S0076]] |
 | Server | `cloud/jord/src/auth/admin-routes.ts` at `/admin/auth/users*`; data layer `admin.ts`; migration `0017_auth_user_admin.sql` |
 | BFF | `src/app/api/admin/auth/users/…` mirrors the server paths (old `/api/admin/users/*` deleted) |
 | Guards | Operator-admin only; responses are `AdminUser` (no hash/token); ban revokes refresh tokens; create/update/ban/revoke/delete each write a `jord_logs` row with `source = auth.users` |
@@ -309,6 +309,16 @@ Configuration sections over the S0069 settings row. Every save is a `PATCH /admi
 | Helpers | `src/lib/studio-auth-settings.ts` — defaults, bounds, rate normalization, allowlist validation, claims parse, preview builder |
 | Errors | Server validation `details` shown inline (`readStudioError`), including reserved-claim and wildcard errors |
 | Anchor | [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections\|S0071]] |
+
+### Auth console Email (S0072)
+
+| Piece | Fact |
+|-------|------|
+| Component | `AuthEmailSection` — four templates, variable chips, preview, reset, sender identity, test send |
+| Warning | When `email_provider === "console"`, shows **Console mailer — no real delivery** (set `JORD_MAILER=resend|ses` for real delivery — [[../../../plan/Jord/phase-03/done/S0073-mailer-port\|S0073]]) |
+| BFF | `POST /api/admin/auth/email/send-test` → `/admin/auth/email/send-test` |
+| Helpers | `src/lib/studio-auth-email.ts` (+ unit tests) |
+| Anchor | [[../../../plan/Jord/phase-03/done/S0072-email-templates\|S0072]] · server [[../auth/README#email-templates-s0072]] |
 
 ### Right inspector (S0048)
 
@@ -345,4 +355,4 @@ One host overlays the **content pane only** (primary nav stays clear). State is 
 
 ## Not in Jord yet
 
-Multi-tenant hosting, Artemis screens inside Studio, image transforms and multipart uploads ([[../../../plan/Jord/phase-03/S0081-multipart-uploads|S0081]]). Waves C–H closed through [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui|S0068]]; the auth settings API is [[../../../plan/Jord/phase-03/done/S0069-auth-settings-store|S0069]], the Users console [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]] and the configuration sections [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]]. Next Studio cards: [[../../../plan/Jord/phase-03/S0072-email-templates|S0072]] (email) and [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]] (sessions).
+Multi-tenant hosting, Artemis screens inside Studio, image transforms and multipart uploads ([[../../../plan/Jord/phase-03/S0081-multipart-uploads|S0081]]). Waves C–H closed through [[../../../plan/Jord/phase-03/done/S0068-storage-studio-ui|S0068]]; auth settings [[../../../plan/Jord/phase-03/done/S0069-auth-settings-store|S0069]], Users [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]], config sections [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]], Email templates [[../../../plan/Jord/phase-03/done/S0072-email-templates|S0072]], MailerPort [[../../../plan/Jord/phase-03/done/S0073-mailer-port|S0073]]. Next Studio card: [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]] (sessions); next auth card [[../../../plan/Jord/phase-03/S0074-magic-link|S0074]].

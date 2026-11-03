@@ -25,6 +25,23 @@ import {
 import type { JordRole } from "@/lib/auth/roles";
 import { formatStudioTime, readStudioError } from "@/lib/studio-api";
 import {
+  AUTH_EMAIL_TEMPLATE_KEYS,
+  AUTH_EMAIL_TEMPLATE_LABELS,
+  AUTH_EMAIL_VARIABLES,
+  DEFAULT_AUTH_EMAIL_SENDER,
+  defaultAuthEmailTemplate,
+  defaultAuthEmailTemplates,
+  insertTemplateVariable,
+  renderAuthEmail,
+  sampleEmailVariables,
+  validateAuthEmailSender,
+  validateAuthEmailTemplate,
+  type AuthEmailSender,
+  type AuthEmailTemplate,
+  type AuthEmailTemplateKey,
+  type AuthEmailTemplates,
+} from "@/lib/studio-auth-email";
+import {
   AUTH_RATE_LIMIT_KEYS,
   AUTH_SETTINGS_LIMITS,
   DEFAULT_AUTH_RATE_LIMITS,
@@ -671,6 +688,315 @@ export function AuthRateLimitsSection({ role }: SectionProps) {
             >
               Reset to defaults
             </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function AuthEmailSection({ role }: SectionProps) {
+  const { settings, error, setError, notice, setNotice, saving, save } =
+    useAuthSettings(role);
+  const [templates, setTemplates] = useState<AuthEmailTemplates>(() =>
+    defaultAuthEmailTemplates(),
+  );
+  const [sender, setSender] = useState<AuthEmailSender>({
+    ...DEFAULT_AUTH_EMAIL_SENDER,
+  });
+  const [active, setActive] = useState<AuthEmailTemplateKey>("confirm");
+  const [recipient, setRecipient] = useState("");
+  const [test, setTest] = useState<{
+    provider: string;
+    messageId: string | null;
+    subject: string;
+  } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!settings) return;
+    setTemplates(settings.email_templates ?? defaultAuthEmailTemplates());
+    setSender(settings.email_sender ?? { ...DEFAULT_AUTH_EMAIL_SENDER });
+  }, [settings]);
+
+  const current = templates[active];
+  const preview = useMemo(
+    () =>
+      renderAuthEmail(
+        current,
+        sampleEmailVariables(
+          recipient.trim() ? { email: recipient.trim() } : undefined,
+        ),
+      ),
+    [current, recipient],
+  );
+
+  if (role !== "admin") return <Restricted />;
+
+  function patchTemplate(update: Partial<AuthEmailTemplate>) {
+    setTemplates((prev) => ({
+      ...prev,
+      [active]: { ...prev[active], ...update },
+    }));
+  }
+
+  async function submit() {
+    const problems = [
+      ...AUTH_EMAIL_TEMPLATE_KEYS.flatMap((key) =>
+        validateAuthEmailTemplate(templates[key], AUTH_EMAIL_TEMPLATE_LABELS[key]),
+      ),
+      ...validateAuthEmailSender(sender),
+    ];
+    if (problems.length > 0) {
+      setError(problems.join(" · "));
+      return;
+    }
+    await save({ email_templates: templates, email_sender: sender });
+  }
+
+  async function sendTest() {
+    setTest(null);
+    setError(null);
+    setNotice(null);
+    const to = recipient.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      setError("Enter a valid recipient email for the test send.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/auth/email/send-test", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ to, template: active }),
+      });
+      if (!res.ok) {
+        setError(await readStudioError(res));
+        return;
+      }
+      const body = (await res.json()) as {
+        provider: string;
+        message_id: string | null;
+        subject: string;
+      };
+      setTest({
+        provider: body.provider,
+        messageId: body.message_id,
+        subject: body.subject,
+      });
+      setNotice("Test email handed to the mailer.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
+      <Header
+        title="Email"
+        description="Templates, sender identity and a test send through the configured mailer."
+      />
+      <Feedback error={error} notice={notice} />
+
+      {settings?.email_provider === "console" ? (
+        <Alert variant="warning">
+          <AlertTitle>Console mailer — no real delivery</AlertTitle>
+          <AlertDescription>
+            Mail is recorded in the server process only. Real SMTP/API delivery
+            arrives with the mailer-port card (S0073).
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {!settings ? (
+        <p className="text-sm text-muted-foreground">Loading templates…</p>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {AUTH_EMAIL_TEMPLATE_KEYS.map((key) => (
+              <Button
+                key={key}
+                type="button"
+                size="sm"
+                variant={active === key ? "default" : "outline"}
+                aria-pressed={active === key}
+                onClick={() => setActive(key)}
+              >
+                {AUTH_EMAIL_TEMPLATE_LABELS[key]}
+              </Button>
+            ))}
+          </div>
+
+          <Field label="Subject" required>
+            <FieldInput
+              value={current.subject}
+              onChange={(event) =>
+                patchTemplate({ subject: event.target.value })
+              }
+            />
+          </Field>
+
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Variables</p>
+            <div className="flex flex-wrap gap-1">
+              {AUTH_EMAIL_VARIABLES.map((variable) => (
+                <Button
+                  key={variable}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="font-mono text-xs"
+                  onClick={() =>
+                    patchTemplate({
+                      text: insertTemplateVariable(current.text, variable),
+                    })
+                  }
+                >
+                  {`{{${variable}}}`}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Field
+            label="Plain text body"
+            description="Every value is substituted as-is; keep the token line for non-HTML clients."
+            required
+          >
+            <FieldTextarea
+              value={current.text}
+              rows={7}
+              spellCheck={false}
+              className="font-mono text-xs"
+              onChange={(event) => patchTemplate({ text: event.target.value })}
+            />
+          </Field>
+
+          <Field
+            label="HTML body"
+            optional
+            description="Variables are HTML-escaped before substitution — user data cannot inject markup."
+          >
+            <FieldTextarea
+              value={current.html ?? ""}
+              rows={5}
+              spellCheck={false}
+              className="font-mono text-xs"
+              onChange={(event) =>
+                patchTemplate({
+                  html:
+                    event.target.value.trim() === ""
+                      ? null
+                      : event.target.value,
+                })
+              }
+            />
+          </Field>
+
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Preview
+            </p>
+            <p className="mt-2 text-sm font-medium">{preview.subject}</p>
+            <pre className="mt-2 whitespace-pre-wrap text-xs">
+              {preview.text}
+            </pre>
+            {preview.html ? (
+              <pre className="mt-3 overflow-x-auto border-t border-border pt-3 text-xs">
+                {preview.html}
+              </pre>
+            ) : null}
+            <p className="mt-3 text-xs text-muted-foreground">
+              Sample values: token, link, expiry and project are placeholders.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                setTemplates((prev) => ({
+                  ...prev,
+                  [active]: defaultAuthEmailTemplate(active),
+                }))
+              }
+            >
+              Reset template
+            </Button>
+            <Button type="button" disabled={saving} onClick={() => void submit()}>
+              {saving ? "Saving…" : "Save templates"}
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Sender name" required>
+              <FieldInput
+                value={sender.from_name}
+                onChange={(event) =>
+                  setSender({ ...sender, from_name: event.target.value })
+                }
+              />
+            </Field>
+            <Field label="From address" required>
+              <FieldInput
+                type="email"
+                value={sender.from_address}
+                onChange={(event) =>
+                  setSender({ ...sender, from_address: event.target.value })
+                }
+              />
+            </Field>
+            <Field
+              label="Reply-to"
+              optional
+              description="Used by real mailers once delivery is configured."
+            >
+              <FieldInput
+                type="email"
+                value={sender.reply_to ?? ""}
+                onChange={(event) =>
+                  setSender({
+                    ...sender,
+                    reply_to:
+                      event.target.value.trim() === ""
+                        ? null
+                        : event.target.value,
+                  })
+                }
+              />
+            </Field>
+          </div>
+
+          <div className="space-y-2 rounded-lg border border-border p-4">
+            <p className="text-sm font-semibold">Send test</p>
+            <p className="text-xs text-muted-foreground">
+              Renders the selected template with sample values and sends it
+              through {settings.email_provider ?? "the configured mailer"}.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <FieldInput
+                type="email"
+                value={recipient}
+                placeholder="you@example.com"
+                aria-label="Test recipient"
+                onChange={(event) => setRecipient(event.target.value)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || saving}
+                onClick={() => void sendTest()}
+              >
+                {busy ? "Sending…" : "Send test"}
+              </Button>
+            </div>
+            {test ? (
+              <p className="text-xs text-muted-foreground">
+                Sent “{test.subject}” via {test.provider}
+                {test.messageId ? ` · id ${test.messageId}` : " · no message id"}
+              </p>
+            ) : null}
           </div>
         </>
       )}

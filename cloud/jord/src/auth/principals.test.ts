@@ -280,9 +280,10 @@ describe("auth routes", () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: "ada@lab.test", password: "correct-horse" }),
-      });
-      const confirmBody = ctx.mailer.sent[0]?.text ?? "";
-      expect(confirmBody.startsWith("confirm:")).toBe(true);
+      });			const confirmBody = ctx.mailer.sent[0]?.text ?? "";
+			expect(confirmBody).toContain("confirm:");
+			expect(confirmBody).toContain("ada@lab.test");
+			expect(ctx.mailer.sent[0]?.html != null).toBe(true);
       const confirmed = await ctx.app.request("/auth/confirm", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -363,7 +364,8 @@ describe("auth routes", () => {
         body: JSON.stringify({ email: "ada@lab.test" }),
       });
       const resetMail = ctx.mailer.sent.find((m) => m.subject.includes("Reset"));
-      expect(resetMail?.text.startsWith("reset:")).toBe(true);
+      expect(resetMail?.text).toMatch(/reset:[^\s]+/);
+      expect(resetMail?.html != null).toBe(true);
       const reset = await ctx.app.request("/auth/reset", {
         method: "POST",
         headers: { "content-type": "application/json" },

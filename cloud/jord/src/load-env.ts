@@ -19,6 +19,10 @@ import { resolve } from "node:path";
  *   project registry. Outside production, `ensureLocalDevMasterKey` persists a
  *   key to `data/jord-master.key` when unset. Set `JORD_DEV_MASTER_KEY=0` to
  *   disable that; set `=1` to allow it in production (not recommended).
+ * - Mailer (S0073): `JORD_MAILER=console|resend|ses` (default console). Resend
+ *   needs `JORD_RESEND_API_KEY` + `JORD_MAIL_FROM` (or `JORD_RESEND_FROM`).
+ *   SES needs region + AWS credentials + `JORD_MAIL_FROM`. Keys stay in env —
+ *   never the database or Studio UI.
  */
 export function loadLocalEnv(cwd: string = process.cwd()): void {
   const path = resolve(cwd, ".env");

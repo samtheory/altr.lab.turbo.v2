@@ -1,4 +1,11 @@
-/** Auth console settings helpers (S0071). */
+/** Auth console settings helpers (S0071 · email S0072). */
+
+import {
+  defaultAuthEmailTemplates,
+  DEFAULT_AUTH_EMAIL_SENDER,
+  type AuthEmailSender,
+  type AuthEmailTemplates,
+} from "@/lib/studio-auth-email";
 
 export const AUTH_RATE_LIMIT_KEYS = [
   "signup",
@@ -51,6 +58,9 @@ export type AuthSettings = {
   email_password_enabled: boolean;
   anonymous_enabled: boolean;
   custom_claims: Record<string, unknown>;
+  email_templates: AuthEmailTemplates;
+  email_sender: AuthEmailSender;
+  email_provider?: string;
   jwt_key_fingerprint: string | null;
   jwt_key_rotated_at: number | null;
   jwt_key_configured: boolean;
@@ -72,6 +82,8 @@ export type AuthSettingsPatch = Partial<
     | "email_password_enabled"
     | "anonymous_enabled"
     | "custom_claims"
+    | "email_templates"
+    | "email_sender"
   >
 >;
 
@@ -88,6 +100,8 @@ export function emptyAuthSettings(): AuthSettings {
     email_password_enabled: true,
     anonymous_enabled: true,
     custom_claims: {},
+    email_templates: defaultAuthEmailTemplates(),
+    email_sender: { ...DEFAULT_AUTH_EMAIL_SENDER },
     jwt_key_fingerprint: null,
     jwt_key_rotated_at: null,
     jwt_key_configured: false,

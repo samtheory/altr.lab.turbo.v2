@@ -15,7 +15,7 @@ tags:
 
 # jord-F0030 — auth console
 
-> **Status:** in progress (S0069–S0071 done) · **Id:** `jord-F0030` · Index: [[../INDEX]] · Today: `/auth/users` only · [[../done/jord-F0005-auth|jord-F0005]] · [[jord-F0016-auth-v2|jord-F0016]]
+> **Status:** in progress (S0069–S0072 done) · **Id:** `jord-F0030` · Index: [[../INDEX]] · Sessions still open · [[../done/jord-F0005-auth|jord-F0005]] · [[jord-F0016-auth-v2|jord-F0016]]
 
 ## What
 
@@ -75,6 +75,6 @@ SAML/SCIM · organization/team management UI · MFA enrollment screens (until au
 | [[../../../plan/Jord/phase-03/done/S0069-auth-settings-store\|S0069]] — auth settings store + API | 2.5–3 h | **done** 2026-11-03 |
 | [[../../../plan/Jord/phase-03/done/S0070-auth-console-users\|S0070]] — console shell + Users | 2.5–3 h | **done** 2026-11-03 |
 | [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections\|S0071]] — providers/URL/JWT/rates | 3 h | **done** 2026-11-03 |
-| [[../../../plan/Jord/phase-03/S0072-email-templates\|S0072]] — email templates + test send | 2–3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0072-email-templates\|S0072]] — email templates + test send | 2–3 h | **done** 2026-11-03 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

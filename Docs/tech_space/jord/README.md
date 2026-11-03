@@ -23,7 +23,7 @@ When something ships, **edit the category** (or add a note inside that category)
 | [[dialects/README]] | `file:` / `libsql://` / `postgres://`, WAL, health |
 | [[writes/README]] | Write queue, OCC `records`, user-table row writes |
 | [[schema/README]] | Schema-scoped introspect/DDL (`?schema=`), types/settings/ids/FKs (S0052–S0055), CREATE/ADD/DROP/RENAME |
-| [[auth/README]] | Principals, HMAC operators, JWT, scrypt, route matrix |
+| [[auth/README]] | Principals, HMAC operators, JWT, scrypt, MailerPort (console/Resend/SES), route matrix |
 | [[apis/README]] | Generated CRUD, function steps, `/x/:slug`, `/api/v1` table API, [[apis/ADR-functions-v2\|Functions v2 ADR]] |
 | [[jobs/README]] | Scheduler, built-in kinds, log ring |
 | [[policies/README]] | Deny-overrides, user/anon default-deny, `jord_app`, Postgres RLS |

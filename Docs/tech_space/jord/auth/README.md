@@ -1,6 +1,6 @@
 ---
 title: "Jord — auth and roles"
-description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, the route matrix, the S0069 auth settings document, S0070 user admin and S0071 JWT key rotation"
+description: "Principals (operator, service, user, anon), HMAC operator tokens, HS256 JWT, the route matrix, auth settings, user admin, JWT key rotation, email templates and MailerPort (console / Resend / SES)"
 created: 2026-10-24
 updated: 2026-11-03
 tags:
@@ -61,6 +61,7 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 | `GET/PATCH /admin/auth/settings` | yes | no | no | no | no | no |
 | `/admin/auth/users*` | yes | no | no | no | no | no |
 | `/admin/auth/jwt*` | yes | no | no | no | no | no |
+| `POST /admin/auth/email/send-test` | yes | no | no | no | no | no |
 | `/api/v1` | yes (policies) | write / read | read | yes (bypass) | policies | policies |
 
 | HTTP | Meaning |
@@ -80,7 +81,7 @@ Studio does not send the raw secret. It HMAC-signs a role and the BFF forwards t
 | Anon key | Not stored. `role=anon`, about 10 years |
 | Passwords | Async scrypt. Hash string stores N, r, p, and maxmem. Compare with `timingSafeEqual`. Minimum 10 characters; must not equal the email |
 | Enumeration | Signup, signin, and recover return the same body whether the email exists. Unknown sign-in still runs scrypt against a dummy hash |
-| Mail | `MailerPort`. The console adapter records confirm and reset bodies and logs only `to` + subject |
+| Mail | `MailerPort` via `createMailerFromEnv` — `JORD_MAILER=console|resend|ses` ([[../../../plan/Jord/phase-03/done/S0073-mailer-port\|S0073]]). Bodies from project templates (S0072); logs only `to` + subject |
 | Refresh | Opaque, SHA-256 hash only, rotate every use. Reuse revokes the family |
 
 SSE writes `event: expired` / `token_expired` and ends when `exp` passes. WebSocket closes with code **4401**.
@@ -104,7 +105,7 @@ One row per project database in `jord_auth_settings` (`id = default`). A **missi
 | `anonymous_enabled` | `true` | `POST /auth/anon-key` → **403** `provider_disabled` |
 | `custom_claims` | `{}` | Merged into user access tokens on sign-in/refresh; reserved claims refused |
 
-`redirect_to` is accepted by signup, recover, reset and confirm. Validation rejects non-http(s) schemes, protocol-relative `//host` values, embedded credentials and off-list hosts; wildcard patterns may not appear in the scheme. Redirect targets are only validated — email links are still console `confirm:` / `reset:` bodies until [[../../../plan/Jord/phase-03/S0073-mailer-port|S0073]]–[[../../../plan/Jord/phase-03/S0074-magic-link|S0074]].
+`redirect_to` is accepted by signup, recover, reset and confirm. Validation rejects non-http(s) schemes, protocol-relative `//host` values, embedded credentials and off-list hosts; wildcard patterns may not appear in the scheme. Redirect targets are validated; rendered mail uses templates (S0072) and the env-selected mailer (S0073). Magic-link auth is [[../../../plan/Jord/phase-03/S0074-magic-link|S0074]].
 
 | Piece | Path |
 |-------|------|
@@ -159,6 +160,46 @@ One optional per-project signing key, stored **sealed** in `jord_auth_settings` 
 | Signing | `/auth/signin`, `/auth/refresh`, `/auth/anon-key` ask the keyring for the current secret |
 | Tests | `cloud/jord/src/auth/console-sections.test.ts` — gates, claims, rotation + reset, non-disclosure, 503 |
 
+### Email templates (S0072)
+
+Four project-scoped templates (`confirm` · `magic_link` · `reset` · `invite`) plus sender identity live as JSON on `jord_auth_settings` (migration `0019_auth_email`). Variables: `{{email}}`, `{{token}}`, `{{link}}`, `{{expires_in}}`, `{{project}}`, `{{app_name}}`. HTML bodies HTML-escape every substitution; plain text does not. Defaults keep a `confirm:` / `reset:` / `magic:` token line so existing tooling still parses mail.
+
+| Method | Path | Effect |
+|--------|------|--------|
+| PATCH | `/admin/auth/settings` | `email_templates` (partial) + `email_sender` (`from_name`, `from_address`, optional `reply_to`) |
+| GET | `/admin/auth/settings` | Includes templates, sender and `email_provider` (`console` today) |
+| POST | `/admin/auth/email/send-test` | `{ to, template }` → render sample vars → mailer; returns `message_id` + provider; admin-only, ~10/min; audited `auth.email` |
+
+Signup confirm, admin invite and password recover all call `sendAuthEmail` so the Studio editor controls real outbound bodies. Without a real provider (`JORD_MAILER=console` or unset) the Studio Email section shows **Console mailer — no real delivery**.
+
+| Piece | Path |
+|-------|------|
+| Render | `cloud/jord/src/auth/email-templates.ts` |
+| Send helper | `cloud/jord/src/auth/email-send.ts` |
+| Routes | `cloud/jord/src/auth/settings-routes.ts` (`/email/send-test`) |
+| Migration | `elements/jord/migrations/{libsql,postgres}/0019_auth_email.sql` |
+| Studio | `AuthEmailSection` · BFF `apps/jord-studio/src/app/api/admin/auth/email/send-test` |
+| Tests | `email-templates.test.ts` · `studio-auth-email.test.ts` · principals recover path |
+
+### MailerPort (S0073)
+
+Process-wide mail adapter selected at boot. Keys stay in env / secret store — never the database or Studio UI.
+
+| `JORD_MAILER` | Required env | Behavior |
+|---------------|--------------|----------|
+| `console` (default) | — | stdout log + in-memory `sent[]` for tests |
+| `resend` | `JORD_RESEND_API_KEY`, `JORD_MAIL_FROM` (or `JORD_RESEND_FROM`) | HTTPS JSON to Resend |
+| `ses` | `JORD_MAIL_FROM`, region (`JORD_SES_REGION` / `AWS_REGION`), AWS access key + secret | SigV4 Query `SendEmail` |
+
+Both HTTP adapters use a **5 s** timeout and **one retry** on 5xx / 429 / network / timeout. Failures throw `MailerError` (`code`, `providerStatus`, `message`). Test-send returns those fields on **502**. Unknown `JORD_MAILER` or missing provider credentials refuse boot. When email is disabled for local work, leave `JORD_MAILER` unset (or `console`) — auth flows still mint tokens; only delivery is skipped beyond the console log.
+
+| Piece | Path |
+|-------|------|
+| Port + adapters | `cloud/jord/src/auth/mailer.ts` |
+| Boot wiring | `createJordApp` → `deps.mailer ?? createMailerFromEnv({ env })` |
+| Env docs | `cloud/jord/.env.example` · `load-env.ts` |
+| Tests | `cloud/jord/src/auth/mailer.test.ts` |
+
 ## How
 
 | Module | Role |
@@ -169,7 +210,8 @@ One optional per-project signing key, stored **sealed** in `jord_auth_settings` 
 | `cloud/jord/src/auth/jwt.ts` | HS256 sign / verify |
 | `cloud/jord/src/auth/password.ts` | Async scrypt |
 | `cloud/jord/src/auth/identity.ts` | Users, confirm/reset, refresh families |
-| `cloud/jord/src/auth/mailer.ts` | `ConsoleMailer` |
+| `cloud/jord/src/auth/mailer.ts` | `MailerPort`, console / Resend / SES, `createMailerFromEnv` |
+| `cloud/jord/src/auth/email-templates.ts` | Template defaults, escape, parse |
 | `cloud/jord/src/auth/routes.ts` | `/auth/*` |
 | `cloud/jord/src/auth/middleware.ts` | Sets `principal` on the Hono context |
 | `elements/jord/migrations/{libsql,postgres}/0002_principals.sql` | Account tables |
@@ -190,4 +232,4 @@ A raw `Authorization: Bearer $JORD_SERVER_TOKEN` is `service` / `service_role` u
 
 ## Not in Jord yet
 
-OAuth, SMTP/real mail delivery and magic link ([[../../../plan/Jord/phase-03/S0073-mailer-port|S0073]]–[[../../../plan/Jord/phase-03/S0075-oauth-provider|S0075]]); email templates are [[../../../plan/Jord/phase-03/S0072-email-templates|S0072]] and the Sessions section is [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]]. The Users console shipped in [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]]; providers, URL config, JWT keys/claims and rate limits in [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]].
+OAuth and magic link ([[../../../plan/Jord/phase-03/S0074-magic-link|S0074]]–[[../../../plan/Jord/phase-03/S0075-oauth-provider|S0075]]); Sessions console [[../../../plan/Jord/phase-03/S0076-sessions-claims|S0076]]. Shipped: Users [[../../../plan/Jord/phase-03/done/S0070-auth-console-users|S0070]] · providers/URL/JWT/rate limits [[../../../plan/Jord/phase-03/done/S0071-auth-console-sections|S0071]] · email templates [[../../../plan/Jord/phase-03/done/S0072-email-templates|S0072]] · MailerPort [[../../../plan/Jord/phase-03/done/S0073-mailer-port|S0073]].
