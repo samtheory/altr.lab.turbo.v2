@@ -1,9 +1,34 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
-import { Kbd, ThemeFamilySwitcher, ThemeToggle } from "@altr/apolyx";
+import {
+  Button,
+  Kbd,
+  Separator,
+  ThemeFamilySwitcher,
+  ThemeToggle,
+  cn,
+} from "@altr/apolyx";
 
 import { MobileNav } from "./mobile-nav";
+
+const NAV = [
+  { href: "/docs", label: "Docs", match: (path: string) => path === "/docs" || path === "/docs/" },
+  {
+    href: "/docs/components/button",
+    label: "Components",
+    match: (path: string) => path.startsWith("/docs/components"),
+  },
+  {
+    href: "/docs/theming",
+    label: "Theming",
+    match: (path: string) => path.startsWith("/docs/theming"),
+  },
+] as const;
+
+const TOOL = "size-9 shrink-0";
 
 function GitHubIcon() {
   return (
@@ -14,55 +39,92 @@ function GitHubIcon() {
 }
 
 export function SiteHeader() {
+  const pathname = usePathname() ?? "/";
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 sm:px-6">
-        <MobileNav />
-        <Link href="/" className="flex items-center gap-2 font-display text-base font-semibold tracking-tight">
-          <Image
-            src="/apolyx-logo.png"
-            alt=""
-            width={24}
-            height={24}
-            className="size-6 shrink-0"
-            priority
-            aria-hidden
-          />
-          <span>Apolyx</span>
-        </Link>
-        <nav aria-label="Primary" className="ml-4 hidden items-center gap-4 text-sm md:flex">
-          <Link href="/docs" className="text-muted-foreground transition-colors hover:text-foreground">
-            Docs
+    <header className="sticky top-0 z-40 h-16 border-b border-border/70 bg-background/75 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-auto flex h-full max-w-screen-2xl items-center gap-4 px-4 sm:gap-6 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <MobileNav />
+          <Link
+            href="/"
+            className="group flex items-baseline gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="font-display text-[1.35rem] leading-none tracking-tight text-foreground transition-opacity group-hover:opacity-80">
+              <span className="text-[var(--apolyx-mark)]">A</span>polyx
+            </span>
+            <span className="hidden font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:inline">
+              UI kit
+            </span>
           </Link>
-          <Link href="/docs/components/button" className="text-muted-foreground transition-colors hover:text-foreground">
-            Components
-          </Link>
-          <Link href="/docs/theming" className="text-muted-foreground transition-colors hover:text-foreground">
-            Theming
-          </Link>
+        </div>
+
+        <nav aria-label="Primary" className="hidden items-center self-stretch md:flex">
+          <ul className="flex h-full items-stretch gap-0.5">
+            {NAV.map((item) => {
+              const active = item.match(pathname);
+              return (
+                <li key={item.href} className="flex">
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "relative flex items-center px-3 text-sm transition-colors",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      active
+                        ? "font-medium text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {item.label}
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "pointer-events-none absolute inset-x-3 bottom-0 h-0.5 origin-left rounded-full bg-foreground transition-transform duration-200 ease-out",
+                        active ? "scale-x-100" : "scale-x-0",
+                      )}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+
+        <div className="ml-auto flex h-9 items-center gap-2">
           <button
             type="button"
             disabled
             title="Search is coming in a later sprint"
-            className="hidden h-9 w-56 items-center gap-2 rounded-md border border-border bg-muted/40 px-3 text-sm text-muted-foreground disabled:cursor-not-allowed sm:flex"
+            className={cn(
+              "hidden h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground",
+              "disabled:cursor-not-allowed lg:inline-flex",
+            )}
           >
-            <Search className="size-4" aria-hidden />
-            Search docs…
-            <Kbd className="ml-auto">⌘K</Kbd>
+            <Search className="size-3.5 shrink-0 opacity-70" aria-hidden />
+            <span className="pr-4">Search</span>
+            <Kbd className="ml-auto border-border/70 bg-muted/50">⌘K</Kbd>
           </button>
-          <ThemeFamilySwitcher className="hidden md:inline-flex" />
-          <ThemeToggle />
-          <a
-            href="https://github.com/samtheory/altr.lab.turbo.v2"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub repository"
-            className="grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+
+          <Separator orientation="vertical" className="mx-0.5 hidden h-5 sm:block" />
+
+          <ThemeFamilySwitcher className="hidden h-9 lg:inline-flex" />
+          <ThemeToggle className={TOOL} />
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className={cn(TOOL, "bg-foreground text-background hover:bg-foreground/90 hover:text-background")}
           >
-            <GitHubIcon />
-          </a>
+            <a
+              href="https://github.com/samtheory/altr.lab.turbo.v2"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="GitHub repository"
+            >
+              <GitHubIcon />
+            </a>
+          </Button>
         </div>
       </div>
     </header>

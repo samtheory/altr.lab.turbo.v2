@@ -44,9 +44,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans), "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), "Cascadia Code", ui-monospace, monospace;
-  --font-display: var(--font-geist-sans), "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-display: var(--font-oldenburg), ui-serif, Georgia, "Times New Roman", serif;
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);

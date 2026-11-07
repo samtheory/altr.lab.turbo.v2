@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./fonts.css";
 @import "./themes/default.css";
 @import "./themes/power-blue.css";
 @import "./themes/power-green.css";

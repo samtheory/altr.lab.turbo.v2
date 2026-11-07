@@ -24,7 +24,7 @@ export function ThemeFamilySwitcher({ className }: ThemeFamilySwitcherProps) {
       role="radiogroup"
       aria-label="Theme family"
       className={cn(
-        "inline-flex rounded-md border border-border bg-muted/40 p-0.5",
+        "inline-flex h-9 items-center rounded-md border border-border bg-muted/40 p-0.5",
         className,
       )}
     >
@@ -38,7 +38,7 @@ export function ThemeFamilySwitcher({ className }: ThemeFamilySwitcherProps) {
             aria-checked={selected}
             data-state={selected ? "checked" : "unchecked"}
             className={cn(
-              "rounded-[calc(var(--radius)-2px)] px-2.5 py-1 text-xs font-medium transition-colors",
+              "inline-flex h-full items-center rounded-[calc(var(--radius)-2px)] px-2.5 text-xs font-medium transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               selected
                 ? "bg-background text-foreground shadow-sm"

@@ -73,8 +73,10 @@ export default async function DocPage({ params }: Props) {
           ) : null}
         </nav>
       </article>
-      <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-52 shrink-0 overflow-y-auto py-10 xl:block">
-        <TableOfContents headings={headings} />
+      <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-52 shrink-0 self-start xl:block">
+        <div className="apolyx-rail h-full overflow-y-auto overscroll-contain py-10 [overflow-anchor:none]">
+          <TableOfContents headings={headings} />
+        </div>
       </aside>
     </div>
   );

@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { ApolyxProvider, ApolyxThemeScript, Toaster, TooltipProvider } from "@altr/apolyx";
 
 import { SiteHeader } from "@/components/site/site-header";
 
 import "./globals.css";
-
-const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
   title: "Apolyx — altr.lab UI kit",
@@ -15,7 +11,9 @@ export const metadata: Metadata = {
     "Ownable React components, primitives, motion, and charts with three theme families. Workspace import in the monorepo, CLI everywhere else.",
   icons: {
     icon: [
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
       { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/apolyx-logo.png", type: "image/png", sizes: "512x512" },
     ],
     apple: "/apolyx-apple-icon.png",
@@ -28,7 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <ApolyxThemeScript />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
+      <body className="font-sans antialiased">
         <ApolyxProvider defaultTheme="default" defaultMode="system">
           <TooltipProvider>
             <a

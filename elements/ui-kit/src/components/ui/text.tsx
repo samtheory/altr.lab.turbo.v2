@@ -47,7 +47,7 @@ export function Text({
   );
 }
 
-const headingVariants = cva("font-display font-semibold tracking-tight", {
+const headingVariants = cva("font-display font-normal tracking-tight", {
   variants: {
     size: {
       sm: "text-lg",

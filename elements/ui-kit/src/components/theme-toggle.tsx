@@ -4,9 +4,20 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { Button } from "./ui/button";
+import { cn } from "../lib/utils";
+import { Button, type ButtonProps } from "./ui/button";
 
-export function ThemeToggle() {
+export type ThemeToggleProps = {
+  className?: string;
+  size?: ButtonProps["size"];
+  variant?: ButtonProps["variant"];
+};
+
+export function ThemeToggle({
+  className,
+  size = "icon",
+  variant = "outline",
+}: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
@@ -16,7 +27,13 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="outline" size="icon" aria-label="Toggle theme" disabled>
+      <Button
+        variant={variant}
+        size={size}
+        className={cn(className)}
+        aria-label="Toggle theme"
+        disabled
+      >
         <Sun className="size-4" />
       </Button>
     );
@@ -26,8 +43,9 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="outline"
-      size="icon"
+      variant={variant}
+      size={size}
+      className={cn(className)}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >

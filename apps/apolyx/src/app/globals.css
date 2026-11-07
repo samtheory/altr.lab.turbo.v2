@@ -1,6 +1,16 @@
 @import "@altr/apolyx/globals.css";
 @source "../";
 
+/* Brand mark — red A in the Apolyx wordmark / favicon. */
+:root {
+  --apolyx-mark: oklch(0.55 0.21 25);
+  --apolyx-header-height: 4rem;
+}
+
+.dark {
+  --apolyx-mark: oklch(0.7 0.19 25);
+}
+
 /* Shiki dual themes: light colors inline, dark via --shiki-dark vars. */
 .code-block pre,
 pre.code-block,
@@ -21,10 +31,62 @@ pre.shiki {
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+}
+
+/* Thin, token-tinted scrollbars — Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 32%, transparent) transparent;
+}
+
+/* Chromium / Edge / Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 28%, transparent);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklch, var(--muted-foreground) 48%, transparent);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Docs side rails: quieter thumb until hover/focus */
+.apolyx-rail {
+  scrollbar-gutter: stable;
+}
+
+.apolyx-rail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.apolyx-rail::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 18%, transparent);
+}
+
+.apolyx-rail:hover::-webkit-scrollbar-thumb,
+.apolyx-rail:focus-within::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 40%, transparent);
 }

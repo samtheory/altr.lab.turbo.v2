@@ -46,9 +46,9 @@ function TokensGrid() {
 
       <section>
         <h2 className="mb-3 font-display text-lg font-semibold">Type</h2>
-        <p className="font-sans text-base">Sans — body copy</p>
-        <p className="font-display text-2xl font-semibold">Display — headline</p>
-        <p className="font-mono text-sm">Mono — code / data</p>
+        <p className="font-sans text-base">Satoshi — body / UI</p>
+        <p className="font-display text-2xl font-normal tracking-tight">Oldenburg — display / logo</p>
+        <p className="font-mono text-sm">JetBrains Mono — code / data</p>
       </section>
 
       <section>
