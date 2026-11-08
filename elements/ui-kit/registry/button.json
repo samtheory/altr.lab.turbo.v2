@@ -3,11 +3,15 @@
   "name": "button",
   "type": "ui",
   "title": "Button",
-  "description": "Variants, sizes, loading, asChild",
+  "description": "Variants, sizes, loading, asChild, shiny, and status tones",
   "files": [
     {
       "path": "src/components/ui/button.tsx",
       "target": "button.tsx"
+    },
+    {
+      "path": "src/components/ui/status-button.tsx",
+      "target": "status-button.tsx"
     }
   ],
   "dependencies": {

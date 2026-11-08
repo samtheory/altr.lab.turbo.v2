@@ -122,11 +122,31 @@ export function DropdownMenuTrigger({
   );
 }
 
+export type DropdownMenuMotion = "settle" | "expand";
+
 export type DropdownMenuContentProps = React.HTMLAttributes<HTMLDivElement> & {
   side?: Side;
   align?: Align;
   sideOffset?: number;
+  /**
+   * `settle` fades in place. `expand` grows from the trigger edge,
+   * starting at scale 0 so the menu opens out of the button.
+   */
+  motion?: DropdownMenuMotion;
 };
+
+function expandOrigin(side: Side, align: Align) {
+  if (side === "top") {
+    return align === "end" ? "bottom right" : align === "start" ? "bottom left" : "bottom center";
+  }
+  if (side === "left") {
+    return align === "end" ? "right bottom" : align === "start" ? "right top" : "right center";
+  }
+  if (side === "right") {
+    return align === "end" ? "left bottom" : align === "start" ? "left top" : "left center";
+  }
+  return align === "end" ? "top right" : align === "start" ? "top left" : "top center";
+}
 
 export function DropdownMenuContent(props: DropdownMenuContentProps) {
   const { open } = useMenu();
@@ -152,6 +172,7 @@ function MenuPanel({
   side = "bottom",
   align = "start",
   sideOffset = 6,
+  motion: motionKind = "settle",
   className,
   children,
   ...props
@@ -159,13 +180,14 @@ function MenuPanel({
   const { close, triggerRef, focusOnOpen, triggerId, contentId } = useMenu();
   const panelRef = React.useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const { style } = useFloating({
+  const floating = useFloating({
     anchorRef: triggerRef,
     floatingRef: panelRef,
     side,
     align,
     offset: sideOffset,
   });
+  const { style } = floating;
 
   React.useEffect(() => {
     const items = getItems(panelRef.current);
@@ -213,7 +235,12 @@ function MenuPanel({
     }
   };
 
-  const hidden = reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -4 };
+  const expand = motionKind === "expand";
+  const hidden = reduced
+    ? { opacity: 0 }
+    : expand
+      ? { opacity: 0, scale: 0 }
+      : { opacity: 0, scale: 0.97, y: -4 };
 
   return (
     <DismissableLayer
@@ -226,7 +253,11 @@ function MenuPanel({
       <motion.div
         initial={hidden}
         animate={present ? { opacity: 1, scale: 1, y: 0 } : hidden}
-        transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
+        transition={{
+          duration: reduced ? 0 : expand ? 0.2 : 0.14,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        style={expand ? { transformOrigin: expandOrigin(floating.side, align) } : undefined}
       >
         <div
           id={contentId}
@@ -235,6 +266,7 @@ function MenuPanel({
           aria-orientation="vertical"
           tabIndex={-1}
           data-slot="dropdown-menu-content"
+          data-motion={motionKind}
           data-state={present ? "open" : "closed"}
           className={cn(
             "min-w-44 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none",

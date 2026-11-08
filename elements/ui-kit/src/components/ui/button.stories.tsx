@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { themeFamilies } from "../../theme";
-import { Button } from "./button";
+import { Button, buttonShines, buttonTones } from "./button";
+import { StatusButton } from "./status-button";
 
 const meta = {
   title: "UI/Button",
@@ -17,6 +18,9 @@ const meta = {
         "secondary",
         "ghost",
         "link",
+        "shiny",
+        "status",
+        "status-inset",
       ],
     },
     size: {
@@ -98,8 +102,60 @@ export const HoverContrastDark: Story = {
               {variant}
             </Button>
           ))}
+          <Button variant="shiny">Shiny</Button>
         </div>
       ))}
+    </div>
+  ),
+};
+
+export const Shiny: Story = {
+  args: { children: "Continue", variant: "shiny", shine: "rainbow" },
+  render: () => (
+    <div className="flex flex-wrap items-center gap-3">
+      {buttonShines.map((shine) => (
+        <Button key={shine} variant="shiny" shine={shine}>
+          {shine}
+        </Button>
+      ))}
+      <Button variant="shiny" disabled>
+        Disabled
+      </Button>
+    </div>
+  ),
+};
+
+function StatusSet({ variant }: { variant: "status" | "status-inset" }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {buttonTones.map((tone) => (
+        <StatusButton key={tone} tone={tone} variant={variant} />
+      ))}
+    </div>
+  );
+}
+
+export const Status: Story = {
+  args: { children: "Pending", variant: "status", tone: "pending" },
+  render: () => (
+    <div className="grid gap-4">
+      <div className="dark rounded-xl bg-background p-4 text-foreground">
+        <StatusSet variant="status" />
+      </div>
+      <StatusSet variant="status" />
+    </div>
+  ),
+};
+
+export const StatusInset: Story = {
+  name: "Status inset",
+  args: { children: "Pending", variant: "status-inset", tone: "pending" },
+  render: () => (
+    <div className="grid gap-4">
+      <div className="dark rounded-xl bg-background p-4 text-foreground">
+        <StatusSet variant="status-inset" />
+      </div>
+      <StatusSet variant="status-inset" />
     </div>
   ),
 };

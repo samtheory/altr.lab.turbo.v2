@@ -1,0 +1,38 @@
+<ComponentPreview name="button-group-demo" />
+
+## Installation
+
+<InstallTabs name="button-group" exports="ButtonGroup, ButtonGroupItem, ButtonGroupAddon, ButtonGroupSeparator" />
+
+## Usage
+
+One side is the action. The other side can be an icon, a count, or any other widget. `ButtonGroupSeparator` draws the dividing line. Leave it out and the segments sit flush.
+
+```tsx
+<ButtonGroup>
+  <ButtonGroupItem>
+    <Star />
+    Star
+  </ButtonGroupItem>
+  <ButtonGroupSeparator />
+  <ButtonGroupAddon>
+    <Github />
+    15K
+  </ButtonGroupAddon>
+</ButtonGroup>
+```
+
+`variant="default"` paints the whole group with the primary face. The line uses the primary foreground at low opacity. `variant="outline"` is the neutral face.
+
+## Accessibility
+
+- The group is `role="group"`. Give it an `aria-label` when the visible text is not enough.
+- `ButtonGroupItem` is a real button. The addon is not, unless you put a button inside it.
+- The separator is decorative.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "variant", type: "\"outline\" | \"default\"", default: "\"outline\"", description: "Shared face for every segment." },
+  { prop: "size", type: "Button size", default: "\"md\"", description: "Passed to items and used to size the addon." },
+]} />

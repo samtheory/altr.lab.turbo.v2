@@ -22,11 +22,36 @@ Render a link that looks like a button with `asChild`:
 
 ## Variants
 
-`default`, `secondary`, `outline`, `ghost`, `destructive`, and `link`; sizes `sm`, `md`, `lg`, and `icon`. Use `buttonVariants()` to style other elements the same way.
+`default`, `secondary`, `outline`, `ghost`, `destructive`, `link`, `shiny`, `status`, and `status-inset`. Sizes: `xs`, `sm`, `md`, `lg`, `icon`, and `icon-xs`. Use `buttonVariants()` to style other elements the same way.
+
+## Shiny
+
+A click action with color drifting inside and a soft wave traveling the border. `shine="rainbow"` moves through violet, blue, green, amber, and rose. The other shines lock the wave to one hue: `iris`, `ocean`, `lime`, `amber`, `rose`. The motion is slow, and it stops under `prefers-reduced-motion`.
+
+<ComponentPreview name="button-shiny-demo" />
+
+```tsx
+<Button variant="shiny">Generate</Button>
+<Button variant="shiny" shine="ocean">Ocean</Button>
+```
+
+## Status
+
+Two faces for the same tones: Pending, In progress, Submitted, In review, Success, Failed, Expired.
+
+`status` is a tinted face with a matching icon and label. `status-inset` keeps that face color as an inner border (`--status-wash`, the filled button’s background) on a quieter fill.
+
+<ComponentPreview name="button-status-demo" />
+
+```tsx
+<StatusButton tone="pending" />
+<StatusButton tone="success" variant="status-inset" />
+<Button variant="status" tone="review">Needs a look</Button>
+```
 
 ## Tokens used
 
-`primary`, `secondary`, `destructive`, `accent`, `input`, `ring`, `radius`.
+`primary`, `secondary`, `destructive`, `success`, `warning`, `info`, `muted-foreground`, `status-submitted`, `status-review`, `accent`, `input`, `ring`, `radius`.
 
 ## Accessibility
 
@@ -38,8 +63,10 @@ Render a link that looks like a button with `asChild`:
 ## Props
 
 <PropsTable rows={[
-  { prop: "variant", type: "\"default\" | \"secondary\" | \"outline\" | \"ghost\" | \"destructive\" | \"link\"", default: "\"default\"", description: "Visual style." },
-  { prop: "size", type: "\"sm\" | \"md\" | \"lg\" | \"icon\"", default: "\"md\"", description: "Height and padding." },
+  { prop: "variant", type: "\"default\" | \"secondary\" | \"outline\" | \"ghost\" | \"destructive\" | \"link\" | \"shiny\" | \"status\" | \"status-inset\"", default: "\"default\"", description: "Visual style." },
+  { prop: "tone", type: "\"pending\" | \"progress\" | \"submitted\" | \"review\" | \"success\" | \"failed\" | \"expired\"", default: "\"pending\" on status faces", description: "Status color. Used by status and status-inset." },
+  { prop: "shine", type: "\"rainbow\" | \"iris\" | \"ocean\" | \"lime\" | \"amber\" | \"rose\"", default: "\"rainbow\"", description: "Color of a shiny button." },
+  { prop: "size", type: "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-xs\"", default: "\"md\"", description: "Height and padding." },
   { prop: "loading", type: "boolean", default: "false", description: "Shows a spinner, disables the button, sets aria-busy." },
   { prop: "asChild", type: "boolean", default: "false", description: "Merge props onto the single child instead of rendering a button." },
 ]} />

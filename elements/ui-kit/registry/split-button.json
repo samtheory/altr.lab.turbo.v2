@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "split-button",
+  "type": "ui",
+  "title": "Split Button",
+  "description": "Joined button whose icon opens a menu that grows from the trigger",
+  "files": [
+    {
+      "path": "src/components/ui/split-button.tsx",
+      "target": "split-button.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": ["button-group", "dropdown-menu", "utils"],
+  "docs": "components/split-button"
+}

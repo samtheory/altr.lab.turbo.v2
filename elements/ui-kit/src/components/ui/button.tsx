@@ -7,6 +7,32 @@ import { Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Slot } from "../../primitives/slot";
 
+export const buttonTones = [
+  "pending",
+  "progress",
+  "submitted",
+  "review",
+  "success",
+  "failed",
+  "expired",
+] as const;
+
+export type ButtonTone = (typeof buttonTones)[number];
+
+export const buttonShines = ["rainbow", "iris", "ocean", "lime", "amber", "rose"] as const;
+
+export type ButtonShine = (typeof buttonShines)[number];
+
+const toneClass: Record<ButtonTone, string> = {
+  pending: "[--status:var(--warning)]",
+  progress: "[--status:var(--info)]",
+  submitted: "[--status:var(--status-submitted)]",
+  review: "[--status:var(--status-review)]",
+  success: "[--status:var(--success)]",
+  failed: "[--status:var(--destructive)]",
+  expired: "[--status:var(--muted-foreground)]",
+};
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[background-color,color,border-color,box-shadow,transform] duration-(--duration-fast) ease-(--ease-out) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
@@ -22,6 +48,10 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary-hover",
         ghost: "hover:bg-accent-hover hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:text-primary-hover hover:underline",
+        shiny: "apolyx-shiny",
+        status: "apolyx-status",
+        "status-inset":
+          "apolyx-status-inset shadow-[inset_0_0_0_2px_var(--status-wash)]",
       },
       size: {
         xs: "h-7 gap-1.5 rounded-[calc(var(--radius)-2px)] px-2.5 text-xs [&_svg]:size-3.5",
@@ -32,6 +62,7 @@ const buttonVariants = cva(
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
       },
+      tone: toneClass,
     },
     defaultVariants: {
       variant: "default",
@@ -45,6 +76,8 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
+  /** Color of a `shiny` button. `rainbow` travels through several hues. */
+  shine?: ButtonShine;
   ref?: React.Ref<HTMLButtonElement>;
 }
 
@@ -52,6 +85,8 @@ function Button({
   className,
   variant,
   size,
+  tone,
+  shine,
   asChild = false,
   loading = false,
   disabled,
@@ -60,6 +95,8 @@ function Button({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
+  const status = variant === "status" || variant === "status-inset";
+  const resolvedTone = status ? (tone ?? "pending") : tone;
   const content = loading ? (
     <>
       <Loader2 className="animate-spin" aria-hidden />
@@ -71,7 +108,9 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      data-tone={resolvedTone || undefined}
+      data-shine={variant === "shiny" ? (shine ?? "rainbow") : undefined}
+      className={cn(buttonVariants({ variant, size, tone: resolvedTone, className }))}
       ref={ref}
       disabled={disabled || loading}
       aria-busy={loading || undefined}

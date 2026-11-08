@@ -4,6 +4,10 @@ import BadgeDemo from "./badge-demo";
 import BarChartDemo from "./bar-chart-demo";
 import BreadcrumbDemo from "./breadcrumb-demo";
 import ButtonDemo from "./button-demo";
+import ButtonShinyDemo from "./button-shiny-demo";
+import ButtonStatusDemo from "./button-status-demo";
+import ButtonGroupDemo from "./button-group-demo";
+import SplitButtonDemo from "./split-button-demo";
 import CardDemo from "./card-demo";
 import CheckboxDemo from "./checkbox-demo";
 import DialogDemo from "./dialog-demo";
@@ -150,6 +154,10 @@ export const demos = {
   "badge-demo": BadgeDemo,
   "bar-chart-demo": BarChartDemo,
   "button-demo": ButtonDemo,
+  "button-shiny-demo": ButtonShinyDemo,
+  "button-status-demo": ButtonStatusDemo,
+  "button-group-demo": ButtonGroupDemo,
+  "split-button-demo": SplitButtonDemo,
   "card-demo": CardDemo,
   "checkbox-demo": CheckboxDemo,
   "dialog-demo": DialogDemo,

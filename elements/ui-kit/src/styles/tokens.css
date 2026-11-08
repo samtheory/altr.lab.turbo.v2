@@ -24,6 +24,8 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-status-submitted: var(--status-submitted);
+  --color-status-review: var(--status-review);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -107,12 +109,219 @@
   }
 }
 
+@property --apolyx-shiny-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/** Soft crest traveling the border. Long transparent gaps keep it a wave, not a solid ring. */
+@keyframes apolyx-shiny-wave {
+  to {
+    --apolyx-shiny-angle: 360deg;
+  }
+}
+
+/** Slow light moving across the face. */
+@keyframes apolyx-shiny-sheen {
+  from {
+    background-position: 80% 40%;
+  }
+  to {
+    background-position: 20% 60%;
+  }
+}
+
+/** Soft color pools drifting inside the face. */
+@keyframes apolyx-shiny-glow {
+  from {
+    background-position: 0% 40%, 100% 60%;
+  }
+  to {
+    background-position: 80% 70%, 10% 30%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root,
   [data-theme] {
     --duration-fast: 0ms;
     --duration-base: 0ms;
     --duration-slow: 0ms;
+  }
+}
+
+/* Shiny: colored pools inside, and a feathered multi-hue wave on the edge. */
+.apolyx-shiny {
+  --shiny-1: var(--status-submitted);
+  --shiny-2: var(--info);
+  --shiny-3: var(--success);
+  --shiny-4: var(--warning);
+  --shiny-5: var(--destructive);
+  position: relative;
+  isolation: isolate;
+  border: 1px solid transparent;
+  color: var(--foreground);
+  background-color: var(--background);
+  background-image: linear-gradient(
+    115deg,
+    transparent 28%,
+    color-mix(in oklab, var(--shiny-2) 22%, transparent) 48%,
+    color-mix(in oklab, var(--shiny-4) 18%, transparent) 62%,
+    transparent 82%
+  );
+  background-size: 240% 240%;
+  background-repeat: no-repeat;
+  animation: apolyx-shiny-sheen 9s ease-in-out infinite alternate;
+}
+
+.apolyx-shiny[data-shine="iris"] {
+  --shiny-1: var(--status-submitted);
+  --shiny-2: var(--status-submitted);
+  --shiny-3: var(--status-submitted);
+  --shiny-4: var(--status-submitted);
+  --shiny-5: var(--status-submitted);
+}
+
+.apolyx-shiny[data-shine="ocean"] {
+  --shiny-1: var(--info);
+  --shiny-2: var(--info);
+  --shiny-3: var(--info);
+  --shiny-4: var(--info);
+  --shiny-5: var(--info);
+}
+
+.apolyx-shiny[data-shine="lime"] {
+  --shiny-1: var(--success);
+  --shiny-2: var(--success);
+  --shiny-3: var(--success);
+  --shiny-4: var(--success);
+  --shiny-5: var(--success);
+}
+
+.apolyx-shiny[data-shine="amber"] {
+  --shiny-1: var(--warning);
+  --shiny-2: var(--warning);
+  --shiny-3: var(--status-review);
+  --shiny-4: var(--warning);
+  --shiny-5: var(--warning);
+}
+
+.apolyx-shiny[data-shine="rose"] {
+  --shiny-1: var(--destructive);
+  --shiny-2: var(--destructive);
+  --shiny-3: var(--destructive);
+  --shiny-4: var(--destructive);
+  --shiny-5: var(--destructive);
+}
+
+.apolyx-shiny:hover:not(:disabled) {
+  background-color: color-mix(in oklab, var(--shiny-2) 10%, var(--background));
+}
+
+.apolyx-shiny:active:not(:disabled) {
+  background-color: color-mix(in oklab, var(--shiny-2) 16%, var(--background));
+}
+
+.apolyx-shiny::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--apolyx-shiny-angle),
+    transparent 0deg,
+    color-mix(in oklab, var(--shiny-1) 70%, transparent) 28deg,
+    var(--shiny-1) 58deg,
+    color-mix(in oklab, var(--shiny-2) 55%, transparent) 96deg,
+    transparent 140deg,
+    transparent 168deg,
+    color-mix(in oklab, var(--shiny-3) 75%, transparent) 198deg,
+    var(--shiny-4) 236deg,
+    color-mix(in oklab, var(--shiny-5) 40%, transparent) 278deg,
+    transparent 320deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: apolyx-shiny-wave 7.5s linear infinite;
+  pointer-events: none;
+}
+
+.apolyx-shiny::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 2px;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      42% 80% at 18% 50%,
+      color-mix(in oklab, var(--shiny-1) 42%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      46% 90% at 82% 50%,
+      color-mix(in oklab, var(--shiny-3) 36%, transparent),
+      transparent 72%
+    );
+  background-size: 160% 160%, 160% 160%;
+  background-repeat: no-repeat;
+  animation: apolyx-shiny-glow 11s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* Status chips. --status is set by the button tone. */
+.apolyx-status,
+.apolyx-status-inset {
+  /* Transparent mix keeps the tone hue. Mixing into --background in oklch swings the hue. */
+  --status-wash: color-mix(in oklab, var(--status) 24%, transparent);
+  border-radius: calc(var(--radius) + 4px);
+  color: var(--status);
+}
+
+.apolyx-status {
+  background-color: var(--status-wash);
+  border: 1px solid transparent;
+}
+
+.apolyx-status:hover:not(:disabled) {
+  background-color: color-mix(in oklab, var(--status) 36%, transparent);
+}
+
+/* Inset stroke is the filled chip's face (--status-wash). */
+.apolyx-status-inset {
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.apolyx-status-inset:hover:not(:disabled) {
+  background-color: color-mix(in oklab, var(--status) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apolyx-shiny,
+  .apolyx-shiny::before,
+  .apolyx-shiny::after {
+    animation: none;
+  }
+
+  .apolyx-shiny::before {
+    background: linear-gradient(
+      120deg,
+      var(--shiny-1),
+      var(--shiny-3),
+      var(--shiny-5),
+      var(--shiny-2)
+    );
   }
 }
 

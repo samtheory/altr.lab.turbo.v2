@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "button-group",
+  "type": "ui",
+  "title": "Button Group",
+  "description": "Joined button and any widget, with an optional divider",
+  "files": [
+    {
+      "path": "src/components/ui/button-group.tsx",
+      "target": "button-group.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": ["button", "utils"],
+  "docs": "components/button-group"
+}

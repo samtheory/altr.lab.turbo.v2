@@ -1,0 +1,37 @@
+<ComponentPreview name="split-button-demo" />
+
+## Installation
+
+<InstallTabs name="split-button" exports="SplitButton, SplitButtonAction, SplitButtonMenu" />
+
+## Usage
+
+Same shell as a button group. The action clicks through. The icon opens a menu that scales up from the button edge (`motion="expand"`), origin on the trigger side. Reduced motion fades it instead.
+
+```tsx
+<SplitButton>
+  <SplitButtonAction onClick={save}>Save</SplitButtonAction>
+  <SplitButtonMenu>
+    <DropdownMenuItem>Save as draft</DropdownMenuItem>
+    <DropdownMenuItem>Save and publish</DropdownMenuItem>
+  </SplitButtonMenu>
+</SplitButton>
+```
+
+Menu items are the dropdown menu parts. Arrow Down or Arrow Up on the icon opens the menu and moves focus into it.
+
+## Accessibility
+
+- The icon trigger is named with `label` (default `"More actions"`).
+- It exposes `aria-haspopup="menu"` and `aria-expanded`.
+- Choosing an item closes the menu and returns focus to the icon.
+
+## Props
+
+<PropsTable rows={[
+  { prop: "variant", type: "\"outline\" | \"default\"", default: "\"outline\"", description: "Shared face, same as ButtonGroup." },
+  { prop: "size", type: "Button size", default: "\"md\"", description: "Height of the action and the icon." },
+  { prop: "open", type: "boolean", default: "—", description: "Controlled menu state." },
+  { prop: "onOpenChange", type: "(open: boolean) => void", default: "—", description: "Fires when the menu opens or closes." },
+  { prop: "label", type: "string", default: "\"More actions\"", description: "Accessible name of the icon trigger. On SplitButtonMenu." },
+]} />
