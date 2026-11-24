@@ -1,0 +1,239 @@
+{
+  "scannedAt": "2026-11-24T08:38:54.724Z",
+  "base": "http://127.0.0.1:8787",
+  "mode": "agent-owasp-api (Composer, no Strix LLM)",
+  "counts": {
+    "fail": 0,
+    "pass": 7,
+    "info": 0,
+    "highCriticalFail": 0
+  },
+  "findings": [
+    {
+      "id": "BOLA-records",
+      "title": "Restricted user cross-record access / owner mass-assign",
+      "severity": "high",
+      "status": "PASS",
+      "detail": "getLab=403 getPriv=403 delPriv=403 patchOwner=403"
+    },
+    {
+      "id": "FLA-admin-manage",
+      "title": "User/anon reach admin, function manage, or SQL console",
+      "severity": "high",
+      "status": "PASS",
+      "detail": "userAdmin=403 userFns=403 userFnCreate=403 anonAdmin=401 userSql=403"
+    },
+    {
+      "id": "MASS-signup-role",
+      "title": "Signup accepts client-controlled elevated role",
+      "severity": "high",
+      "status": "PASS",
+      "detail": "status=200 roleField=n/a"
+    },
+    {
+      "id": "INJ-filter-select",
+      "title": "SQL injection via select/filter query params",
+      "severity": "critical",
+      "status": "PASS",
+      "detail": "select=400 filter=200 healthAfter=200"
+    },
+    {
+      "id": "AUTH-jwt-alg-none",
+      "title": "alg=none or wrong-secret JWT accepted",
+      "severity": "critical",
+      "status": "PASS",
+      "detail": "algNone=401 wrongSecretAdmin=401 operatorOnRecords=400"
+    },
+    {
+      "id": "AUTH-enum-signin",
+      "title": "Sign-in distinguishes unknown email vs bad password",
+      "severity": "medium",
+      "status": "PASS",
+      "detail": "unknown=401:invalid_credentials knownBadPw=401:invalid_credentials"
+    },
+    {
+      "id": "BLOB-user-list",
+      "title": "End-user listing blob buckets",
+      "severity": "medium",
+      "status": "PASS",
+      "detail": "status=403"
+    }
+  ],
+  "evidence": [
+    {
+      "method": "GET",
+      "path": "/health/live",
+      "status": 200,
+      "principal": "none",
+      "snippet": "{\"ok\":true}"
+    },
+    {
+      "method": "GET",
+      "path": "/records/c78bd84e-5630-4ad7-aadf-367fdca6b466",
+      "status": 403,
+      "principal": "user",
+      "snippet": "{\"error\":\"policy_denied\",\"operation\":\"select\",\"reason\":\"default_deny\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/records/9b57b183-c629-4039-95e9-662bf3bb93ed",
+      "status": 403,
+      "principal": "user",
+      "snippet": "{\"error\":\"policy_denied\",\"operation\":\"select\",\"reason\":\"default_deny\"}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/records/9b57b183-c629-4039-95e9-662bf3bb93ed",
+      "status": 403,
+      "principal": "user",
+      "snippet": "{\"error\":\"policy_denied\",\"operation\":\"delete\",\"reason\":\"default_deny\"}"
+    },
+    {
+      "method": "PATCH",
+      "path": "/records/9b57b183-c629-4039-95e9-662bf3bb93ed",
+      "status": 403,
+      "principal": "user",
+      "snippet": "{\"error\":\"policy_denied\",\"operation\":\"update\",\"reason\":\"default_deny\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/auth/settings",
+      "status": 403,
+      "principal": "user",
+      "snippet": "principal is not allowed on this route"
+    },
+    {
+      "method": "GET",
+      "path": "/functions",
+      "status": 403,
+      "principal": "user",
+      "snippet": "principal is not allowed on this route"
+    },
+    {
+      "method": "POST",
+      "path": "/functions",
+      "status": 403,
+      "principal": "user",
+      "snippet": "principal is not allowed on this route"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/projects",
+      "status": 401,
+      "principal": "none",
+      "snippet": "missing Authorization Bearer token"
+    },
+    {
+      "method": "POST",
+      "path": "/sql/query",
+      "status": 403,
+      "principal": "user",
+      "snippet": "principal is not allowed on this route"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/signup",
+      "status": 200,
+      "principal": "none",
+      "snippet": "{\"ok\":true}"
+    },
+    {
+      "method": "GET",
+      "path": "/records?select=id%2Cbody%22)%3BDROP%20TABLE%20jord_records%3B--",
+      "status": 400,
+      "principal": "service",
+      "snippet": "query bucket= is required"
+    },
+    {
+      "method": "GET",
+      "path": "/records?bucket=lab'%20OR%20'1'%3D'1",
+      "status": 200,
+      "principal": "service",
+      "snippet": "[]"
+    },
+    {
+      "method": "GET",
+      "path": "/health/live",
+      "status": 200,
+      "principal": "none",
+      "snippet": "{\"ok\":true}"
+    },
+    {
+      "method": "GET",
+      "path": "/records",
+      "status": 401,
+      "principal": "other",
+      "snippet": "invalid or expired credentials"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/auth/settings",
+      "status": 401,
+      "principal": "other",
+      "snippet": "invalid or expired credentials"
+    },
+    {
+      "method": "GET",
+      "path": "/records",
+      "status": 400,
+      "principal": "admin",
+      "snippet": "query bucket= is required"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/signin",
+      "status": 401,
+      "principal": "none",
+      "snippet": "{\"error\":\"invalid_credentials\"}"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/signin",
+      "status": 401,
+      "principal": "none",
+      "snippet": "{\"error\":\"invalid_credentials\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/metrics",
+      "status": 401,
+      "principal": "none",
+      "snippet": "missing Authorization Bearer token"
+    },
+    {
+      "method": "GET",
+      "path": "/openapi.json",
+      "status": 401,
+      "principal": "none",
+      "snippet": "missing Authorization Bearer token"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/projects",
+      "status": 401,
+      "principal": "none",
+      "snippet": "missing Authorization Bearer token"
+    },
+    {
+      "method": "GET",
+      "path": "/blobs/buckets",
+      "status": 401,
+      "principal": "none",
+      "snippet": "missing Authorization Bearer token"
+    },
+    {
+      "method": "GET",
+      "path": "/functions",
+      "status": 401,
+      "principal": "none",
+      "snippet": "missing Authorization Bearer token"
+    },
+    {
+      "method": "GET",
+      "path": "/blobs/buckets",
+      "status": 403,
+      "principal": "user",
+      "snippet": "principal is not allowed on this route"
+    }
+  ]
+}

@@ -1,20 +1,20 @@
 {
   "baseUrl": "http://127.0.0.1:8787",
-  "seededAt": "2026-11-11T09:38:35.922Z",
+  "seededAt": "2026-11-24T08:37:48.298Z",
   "serviceBearer": "dev-jord-token-change-me",
-  "operatorAdminBearer": "eyJyb2xlIjoiYWRtaW4iLCJleHAiOjE3OTQ0MzMxMTU3OTl9.Lx4g538myTwmbbLAosamq_02vT29lMZjN3vyrHBjS6k",
+  "operatorAdminBearer": "eyJyb2xlIjoiYWRtaW4iLCJleHAiOjE3OTU1NTI2NjgxNDR9.WOR0qGKLe1jH1GOqYywC27u5R3ZCgJWLC4ESQzrVivg",
   "restrictedUser": {
-    "email": "s0092-restricted-1794389915773@lab.local",
-    "password": "Lab-jn8jDag10xzC!a1",
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImN1cnJlbnQifQ.eyJpc3MiOiJqb3JkIiwiYXVkIjoiam9yZCIsInN1YiI6IjdkYWZkMTc0LWY0NTMtNGEzYi04N2Y3LTNjODkwYzk2MjViMCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzk0Mzg5OTE1LCJleHAiOjE3OTQzOTA4MTUsImVtYWlsIjoiczAwOTItcmVzdHJpY3RlZC0xNzk0Mzg5OTE1NzczQGxhYi5sb2NhbCIsInNpZCI6Ijc4Njg2MTQyLTdhNjgtNDUxZC1hZmJkLTQ5MTRlMWU3MjNmYSJ9.2AkPKGEuQgZ46YBXkY-hFUEgkp0fdDuKy19xLrDqOm0",
-    "refreshToken": "9fG7O-zNZr8OBMTtts1kY2RQbLn74UOKIL6jGE9Fjcs",
+    "email": "s0092-restricted-1795509468121@lab.local",
+    "password": "Lab-3S3Jwcmd50PK!a1",
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImN1cnJlbnQifQ.eyJpc3MiOiJqb3JkIiwiYXVkIjoiam9yZCIsInN1YiI6IjQyZGVkMmQxLTk1Y2EtNDQyYS04ZDEwLWI3YzE1ZmM3NjE2MSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzk1NTA5NDY4LCJleHAiOjE3OTU1MTAzNjgsImVtYWlsIjoiczAwOTItcmVzdHJpY3RlZC0xNzk1NTA5NDY4MTIxQGxhYi5sb2NhbCIsInNpZCI6IjRlMzVhNmE3LWI2OWMtNDVjMC05NGE1LTFiZmZkZDljMTkzMiJ9.4VWqEwhV1f5XNqPyHf8F4UN6LBKhfkgvFqm_WsgAMLM",
+    "refreshToken": "2Rmy_wthP4GrRhH2c9PlHWfEO5OHnwvCKlbFujQoJzg",
     "authStatus": 200
   },
   "records": {
     "lab": 201,
     "private": 201,
-    "labId": "572258f5-7205-4016-a910-b3645f073a15",
-    "privateId": "ca867604-af95-44be-b10e-6022a0c1d461"
+    "labId": "c78bd84e-5630-4ad7-aadf-367fdca6b466",
+    "privateId": "9b57b183-c629-4039-95e9-662bf3bb93ed"
   },
   "settingsPatch": 200,
   "note": "Lab-only. Staging under Docs/temp — do not promote secrets into vault truth."
