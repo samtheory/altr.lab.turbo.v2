@@ -14,7 +14,7 @@ tags:
 
 # jord-F0015 — Functions v2 runtime
 
-> **Status:** todo · **Id:** `jord-F0015` (was P3) · Index: [[../INDEX]] · ADR: [[../../../tech_space/jord/apis/ADR-functions-v2]]
+> **Status:** done (runtime) 2026-11-11 · **Id:** `jord-F0015` (was P3) · Index: [[../INDEX]] · ADR: [[../../../tech_space/jord/apis/ADR-functions-v2]] · As-built: [[../../../tech_space/jord/apis/README#functions-v2-runtime-s0090--s0091]]
 
 ## Why
 
@@ -40,7 +40,7 @@ Infinite loop killed at timeout; worker cannot read env secrets; writes respect 
 
 | Task | Est. | Status |
 |------|------|--------|
-| [[../../../plan/Jord/phase-03/S0090-functions-worker-pool\|S0090]] — worker pool + caps (GATED) | 3 h | todo |
-| [[../../../plan/Jord/phase-03/S0091-functions-client-logs\|S0091]] — principal-bound client + logs (GATED) | 3 h | todo |
+| [[../../../plan/Jord/phase-03/done/S0090-functions-worker-pool\|S0090]] — worker pool + caps | 3 h | **done** 2026-11-11 |
+| [[../../../plan/Jord/phase-03/done/S0091-functions-client-logs\|S0091]] — principal-bound client + logs | 3 h | **done** 2026-11-11 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].

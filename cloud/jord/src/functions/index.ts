@@ -17,3 +17,36 @@ export {
   parseCustomApiDisabledEnv,
   type CustomHttpMethod,
 } from "./slug.js";
+export {
+  FunctionInvokeError,
+  FunctionWorkerPool,
+  closeAllFunctionPools,
+  getFunctionPool,
+  type FunctionInvokeFailureCode,
+  type InvokeUserModuleInput,
+  type InvokeUserModuleResult,
+} from "./pool.js";
+export {
+  FUNCTION_POOL_DEFAULTS,
+  buildWorkerEnv,
+  clampPoolConfig,
+  osMinimalEnvKeys,
+  type FunctionPoolConfig,
+} from "./pool-limits.js";
+export {
+  FunctionRpcError,
+  executeFunctionRpc,
+  isFunctionRpcOp,
+  type FunctionPrincipal,
+  type FunctionRpcDeps,
+  type FunctionRpcOp,
+} from "./principal-client.js";
+export {
+  INVOCATION_LOG_SOURCE,
+  appendInvocationLog,
+  boundConsoleLines,
+  redactConsoleLine,
+  statusFromFailureCode,
+  type InvocationLogInput,
+  type InvocationStatus,
+} from "./invocation-log.js";

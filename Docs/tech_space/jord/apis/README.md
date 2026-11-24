@@ -128,17 +128,23 @@ if (live.status === "resync") {
 
 `pnpm --filter @altr/jord-client jord gen types --url <server> [--token T] [--schema S] [--out F] [--check]` reads `GET /schema/tables` and `/schema/tables/:name` and prints `Row` / `Insert` / `Update` per table plus a `Database` map keyed `schema.table`. Deterministic (sorted, no timestamps); `--check` exits 1 when `--out` is stale or missing; unreachable or unauthorized exits 1 with a one-line error; token from `--token`, `JORD_TOKEN` or `JORD_SERVER_TOKEN` and never written out. Mapping: integer/real -> `number`; bigint/numeric -> `string`; boolean; text/uuid/date-time -> `string`; json -> `unknown`; bytea -> `string` (base64); vectors -> `number[]`; unknown types -> `unknown` with a comment. Responses are capped (16 MiB, 2000 tables), redirects refused. Open: identity columns are guessed from a single integer PK; `tsx` is not a declared dependency of the package.
 
-## Functions v2 (S0026 — ADR only)
+## Functions v2 runtime (S0090 · S0091)
 
-User TypeScript handlers are **not** implemented. Decision record: [[ADR-functions-v2]].
+ADR: [[ADR-functions-v2]] (recommend `worker_threads`; reject `isolated-vm`). Gate lifted 2026-11-11.
 
-- **Recommend** `worker_threads` + wall-clock timeout + restricted message API.
-- **Reject** `isolated-vm` (native / node-gyp).
-- In-process registered TS handlers are not the default for untrusted code.
-- **Do not implement** a worker runtime until a follow-up sprint is explicitly approved. Soft backlog: [[../../../plan/Jord/phase-02/00-remaining-backlog]].
+| Piece | Fact |
+|-------|------|
+| Pool | `cloud/jord/src/functions/pool.ts` — warm workers, queue + 429 when saturated, recycle after N invokes, `terminate()` on wall-clock timeout |
+| Caps | timeout default 5 s (hard 60 s); `resourceLimits.maxOldGenerationSizeMb` default 64 (hard 512); max JSON result 1 MiB; allowlisted `env` only |
+| Bootstrap | `user-worker.cjs` — modules only under `moduleRoots`; handler `(input, { jord })` |
+| Principal client | Parent-mediated RPC (`principal-client.ts`): `records` select/insert + `blob.sign`; **never** `bypass`; no admin/SQL |
+| Logs | `source: "function"` via LogSink / `jord_logs`; redacted console capture; timeout/OOM/crash rows included |
+| Built-ins | Step runner (`echo`, `records_*`) unchanged |
 
-Built-in steps above remain the only function execution path today.
+Errors: `function_timeout` 504 · `function_oom` 503 · `function_crashed` 500 · `policy_denied` 403 · `pool_saturated` 429.
+
+Open: Studio function editor UI; HTTP wiring of user modules into `/functions/:id/invoke`; update/delete on the in-worker client; schema-qualified user tables beyond `records`.
 
 ## Not in Jord yet
 
-Embeds, joins, per-operation toggles, arbitrary SQL steps, user-uploaded code / Functions v2 runtime, a generated catalog per user table.
+Embeds (beyond table-API v2), joins UI catalog, per-operation toggles, arbitrary SQL steps inside user workers, Studio upload of user modules.

@@ -60,18 +60,18 @@ export function StudioEndpointsSidebar() {
               : `Failed to load endpoints (${genRes.status}).`),
         );
       }
-      const [genData, customData, fnData] = await Promise.all([
-        genRes.json(),
-        customRes.json(),
-        fnRes.json(),
-      ]);
-      setCatalog(genData as GeneratedApiCatalog);
-      const custom =
-        (customData as { custom_apis?: PublicCustomApi[] }).custom_apis ?? [];
-      setCustomApis(custom);
-      const fns =
-        (fnData as { functions?: PublicFunction[] }).functions ?? [];
-      setFunctions(fns);
+      // Functions list is manage-only (S0092); custom APIs may still be readable.
+      // Tolerate 403 so editor/readonly keep generated + custom catalogs.
+      const genData = (await genRes.json()) as GeneratedApiCatalog;
+      const customData = customRes.ok
+        ? ((await customRes.json()) as { custom_apis?: PublicCustomApi[] })
+        : { custom_apis: [] as PublicCustomApi[] };
+      const fnData = fnRes.ok
+        ? ((await fnRes.json()) as { functions?: PublicFunction[] })
+        : { functions: [] as PublicFunction[] };
+      setCatalog(genData);
+      setCustomApis(customData.custom_apis ?? []);
+      setFunctions(fnData.functions ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load endpoints");
       setCatalog(null);

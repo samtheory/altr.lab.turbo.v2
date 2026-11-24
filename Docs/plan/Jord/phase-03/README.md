@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-03 — single-task queue"
 description: "Phase-03 queue: one file per AI task, 63 cards across production ops, Studio v2, storage, auth, table API and security"
 created: 2026-10-27
-updated: 2026-11-03
+updated: 2026-11-11
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-03):** **S0034–S0089 + S0093–S0096 done (S0090–S0091 gated, S0092 needs an authorized target)** — wave A (production ops / [[../../../feature_list/Jord/done/jord-F0013-production-ops|jord-F0013]]) closed; wave B ([[done/S0042-control-plane-store-adr|S0042]]–[[done/S0045-project-scoped-routes|S0045]]) closed; wave C closed ([[done/S0046-three-pane-shell|S0046]]–[[done/S0051-workspace-tabs|S0051]]); wave D ([[done/S0052-type-registry|S0052]]–[[done/S0055-fk-relationship-editor|S0055]]) closed; wave E closed ([[done/S0056-grid-column-ops|S0056]]–[[done/S0059-policies-apis-drawers|S0059]]); wave F closed ([[done/S0060-table-relationships-view|S0060]]–[[done/S0062-canvas-layout|S0062]] / [[../../../feature_list/Jord/todo/jord-F0027-relationship-canvas|jord-F0027]]). Wave G closed ([[done/S0063-monaco-sql-editor|S0063]]–[[done/S0065-results-explain-cancel|S0065]] / [[../../../feature_list/Jord/todo/jord-F0028-sql-editor-v2|jord-F0028]]). Wave H closed ([[done/S0066-bucket-registry|S0066]]–[[done/S0068-storage-studio-ui|S0068]] / [[../../../feature_list/Jord/todo/jord-F0029-storage-buckets|jord-F0029]]). Archived under [[done/README|done/]]. Wave I in progress ([[done/S0069-auth-settings-store|S0069]]–[[done/S0076-sessions-claims|S0076]] / [[../../../feature_list/Jord/todo/jord-F0030-auth-console|jord-F0030]] + [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|jord-F0016]]); next open card: [[S0077-policy-tester|S0077]] (wave I). **63 cards** cover every open Jord feature — [[../../../feature_list/Jord/todo/jord-F0014-typed-dx|F0014]]…[[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|F0015]] and [[../../../feature_list/Jord/todo/jord-F0016-auth-v2|F0016]]…[[../../../feature_list/Jord/todo/jord-F0030-auth-console|F0030]], plus the Studio v2 wave (F0021–F0030). The only intent **not** carded is the soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] — promote it into a new `jord-F####` first.
+**Queue status (2026-11-11):** **S0034–S0091 + S0093–S0096 done; next open [[S0092-strix-pentest|S0092]] (needs an authorized target).** Waves A–N and O2–O3 + P closed. Wave N (Functions runtime / [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord-F0015]]) closed 2026-11-11 ([[done/S0090-functions-worker-pool|S0090]] · [[done/S0091-functions-client-logs|S0091]]). Soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] stays uncarded until promoted.
 
 ## How to run a task
 
@@ -185,10 +185,10 @@ flowchart LR
 
 | # | Id | Task | Est. |
 |--:|----|------|------|
-| N1 | [[S0090-functions-worker-pool\|S0090]] | Worker pool + timeout/memory caps — **do not start** | 3 h |
-| N2 | [[S0091-functions-client-logs\|S0091]] | Principal-bound client + logs — **do not start** | 3 h |
+| N1 | [[done/S0090-functions-worker-pool\|S0090]] | Worker pool + timeout/memory caps | **done** 2026-11-11 |
+| N2 | [[done/S0091-functions-client-logs\|S0091]] | Principal-bound client + logs | **done** 2026-11-11 |
 
-Gate: parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord-F0015]] + [[../../../tech_space/jord/apis/ADR-functions-v2|ADR-functions-v2]].
+Wave N closed 2026-11-11. Parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord-F0015]] + [[../../../tech_space/jord/apis/ADR-functions-v2|ADR-functions-v2]].
 
 ### Wave O — security pass ([[../../../feature_list/Jord/todo/jord-F0019-security-pass|jord-F0019]])
 
@@ -218,7 +218,7 @@ Gate: parent [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord
 | [[done/S0066-bucket-registry\|S0066]] | — **done** |
 | [[done/S0068-storage-studio-ui\|S0068]] | [[done/S0067-bucket-config-api\|S0067]] — **done** |
 | [[done/S0071-auth-console-sections\|S0071]] | S0069 + S0070 — **done** (OAuth/magic-link provider toggles need S0074/S0075) |
-| [[S0090-functions-worker-pool\|S0090]] | status gate |
+| [[done/S0090-functions-worker-pool\|S0090]] | status gate — **lifted / done** |
 
 ## Rules
 

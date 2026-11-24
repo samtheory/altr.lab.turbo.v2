@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 export type LogLevel = "info" | "warn" | "error";
-export type LogSource = "http" | "job" | "system" | "trigger";
+export type LogSource = "http" | "job" | "system" | "trigger" | "function";
 
 export type LogEvent = {
   id: string;

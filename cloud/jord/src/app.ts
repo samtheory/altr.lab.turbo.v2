@@ -2440,7 +2440,9 @@ export function createJordApp(deps: JordAppDeps) {
 
   const customApiDisabled = parseCustomApiDisabledEnv(process.env);
 
-  protectedRoutes.get("/functions", async (c) => {
+  // S0092: function definitions (incl. steps) are manage-plane only.
+  // Invoke stays on requireInvokeApis; editors must not read step graphs.
+  protectedRoutes.get("/functions", requireManageApis(), async (c) => {
     const rows = await deps.jord.listFunctions();
     return c.json({
       functions: rows.map(publicFunction),
@@ -2499,7 +2501,7 @@ export function createJordApp(deps: JordAppDeps) {
     return c.json(publicFunction(row), 201);
   });
 
-  protectedRoutes.get("/functions/:id", async (c) => {
+  protectedRoutes.get("/functions/:id", requireManageApis(), async (c) => {
     const row = await deps.jord.getFunction(c.req.param("id"));
     if (!row) throw new HTTPException(404, { message: "function not found" });
     return c.json(publicFunction(row));

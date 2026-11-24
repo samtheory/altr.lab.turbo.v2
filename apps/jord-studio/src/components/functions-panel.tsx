@@ -58,6 +58,12 @@ export function FunctionsPanel({ role }: Props) {
 
   const load = useCallback(async () => {
     setError(null);
+    // Definitions (steps) are manage-only on jord-server (S0092).
+    if (!canManage) {
+      setRows([]);
+      setSelectedId(null);
+      return [];
+    }
     const res = await fetch("/api/functions", { cache: "no-store" });
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as ApiError;
@@ -78,7 +84,7 @@ export function FunctionsPanel({ role }: Props) {
       );
     }
     return data.functions;
-  }, []);
+  }, [canManage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -258,11 +264,13 @@ export function FunctionsPanel({ role }: Props) {
         </div>
       ) : (
         <Alert variant="info">
-          <AlertTitle>Inspect only</AlertTitle>
+          <AlertTitle>Definitions restricted</AlertTitle>
           <AlertDescription>
-            Role <code className="font-mono">{role}</code> can list functions; only
-            admin can create or edit.{" "}
-            {canInvoke ? "You may invoke." : "Readonly cannot invoke."}
+            Role <code className="font-mono">{role}</code> cannot list function
+            definitions (steps are admin-only).{" "}
+            {canInvoke
+              ? "Invoke exposed custom APIs via /x/:slug instead."
+              : "Readonly cannot invoke."}
           </AlertDescription>
         </Alert>
       )}

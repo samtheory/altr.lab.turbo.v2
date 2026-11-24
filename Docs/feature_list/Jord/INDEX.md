@@ -40,7 +40,7 @@ A feature is **done** only when its contract landed. **jord-F0013** is **done** 
 | Id | Was / theme | Note | Plan tasks |
 |----|-----|------|------------|
 | **jord-F0014** | P2 | [[todo/jord-F0014-typed-dx]] | [[../../plan/Jord/phase-03/done/S0087-gen-types-cli\|S0087]] · [[../../plan/Jord/phase-03/done/S0088-typed-client-builder\|S0088]] · [[../../plan/Jord/phase-03/done/S0089-react-bindings\|S0089]] |
-| **jord-F0015** | P3 | [[todo/jord-F0015-functions-runtime]] | [[../../plan/Jord/phase-03/S0090-functions-worker-pool\|S0090]] · [[../../plan/Jord/phase-03/S0091-functions-client-logs\|S0091]] — **gated** |
+| **jord-F0015** | P3 | [[todo/jord-F0015-functions-runtime]] | [[../../plan/Jord/phase-03/done/S0090-functions-worker-pool\|S0090]] · [[../../plan/Jord/phase-03/done/S0091-functions-client-logs\|S0091]] — **done** 2026-11-11 |
 | **jord-F0016** | P4 | [[todo/jord-F0016-auth-v2]] | [[../../plan/Jord/phase-03/done/S0073-mailer-port\|S0073]] · [[../../plan/Jord/phase-03/S0074-magic-link\|S0074]] · [[../../plan/Jord/phase-03/S0075-oauth-provider\|S0075]] · [[../../plan/Jord/phase-03/done/S0076-sessions-claims\|S0076]] · [[../../plan/Jord/phase-03/done/S0077-policy-tester\|S0077]] |
 | **jord-F0017** | P5 | [[todo/jord-F0017-table-api-v2]] | [[../../plan/Jord/phase-03/done/S0078-fk-embeds\|S0078]] · [[../../plan/Jord/phase-03/done/S0079-keyset-pagination\|S0079]] · [[../../plan/Jord/phase-03/done/S0080-bulk-upsert-rpc\|S0080]] |
 | **jord-F0018** | P6 | [[todo/jord-F0018-storage-realtime-v2]] | [[../../plan/Jord/phase-03/done/S0081-multipart-uploads\|S0081]] · [[../../plan/Jord/phase-03/done/S0082-image-transforms\|S0082]] · [[../../plan/Jord/phase-03/done/S0083-presence-broadcast\|S0083]] |

@@ -76,3 +76,5 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0086-live-toggle-snippet\|S0086]] | Live toggle, realtime stats, client snippets | 2026-11-03 |
 | [[S0089-react-bindings\|S0089]] | `@altr/jord-react` (provider, query, live hooks) | 2026-11-03 |
 | [[S0096-dashboard-ui\|S0096]] | Project dashboard UI | 2026-11-03 |
+| [[S0090-functions-worker-pool\|S0090]] | Functions worker pool + timeout/memory caps | 2026-11-11 |
+| [[S0091-functions-client-logs\|S0091]] | Functions principal-bound client + invocation logs | 2026-11-11 |

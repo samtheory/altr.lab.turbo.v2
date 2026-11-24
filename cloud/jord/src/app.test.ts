@@ -855,6 +855,29 @@ describe("jord-server routes", () => {
       const fn = (await createdFn.json()) as { id: string; slug: string };
       expect(fn.slug).toBe("echo-lab");
 
+      // S0092: list/get of function definitions (steps) is manage-only.
+      for (const role of ["editor", "readonly"] as const) {
+        const listDenied = await ctx.app.request("/functions", {
+          headers: authHeaders(role),
+        });
+        expect(listDenied.status).toBe(403);
+        const getDenied = await ctx.app.request(`/functions/${fn.id}`, {
+          headers: authHeaders(role),
+        });
+        expect(getDenied.status).toBe(403);
+      }
+      const listed = await ctx.app.request("/functions", {
+        headers: authHeaders("admin"),
+      });
+      expect(listed.status).toBe(200);
+      const listBody = (await listed.json()) as {
+        functions: Array<{ id: string; steps: string }>;
+      };
+      expect(listBody.functions.some((row) => row.id === fn.id)).toBe(true);
+      expect(
+        listBody.functions.find((row) => row.id === fn.id)?.steps,
+      ).toContain("echo");
+
       const createdApi = await ctx.app.request("/custom-apis", {
         method: "POST",
         headers: {
