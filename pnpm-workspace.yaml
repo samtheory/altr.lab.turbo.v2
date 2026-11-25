@@ -2,3 +2,6 @@ packages:
   - "apps/*"
   - "cloud/*"
   - "elements/*"
+allowBuilds:
+  esbuild: true
+  protobufjs: true

@@ -1,8 +1,12 @@
 {
   "name": "altr-lab",
   "private": true,
-  "packageManager": "pnpm@10.27.0",
-  "workspaces": ["apps/*", "cloud/*", "elements/*"],
+  "packageManager": "pnpm@12.23.0",
+  "workspaces": [
+    "apps/*",
+    "cloud/*",
+    "elements/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -20,8 +24,8 @@
     "audit:all": "pnpm audit --audit-level=high"
   },
   "devDependencies": {
-    "turbo": "^2.5.4",
-    "typescript": "^5.9.2"
+    "turbo": "^2.11.13",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20"
