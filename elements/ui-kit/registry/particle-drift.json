@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.json",
+  "name": "particle-drift",
+  "type": "ui",
+  "title": "Particle Drift",
+  "description": "Apolyx S0012 — Particle Drift",
+  "files": [
+    {
+      "path": "src/components/ui/particle-drift.tsx",
+      "target": "particle-drift.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "pattern-frame"],
+  "docs": "components/particle-drift"
+}

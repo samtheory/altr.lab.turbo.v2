@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-ripple",
+  "type": "ui",
+  "title": "Pattern Ripple",
+  "description": "Apolyx S0012 — Pattern Ripple",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-ripple.tsx",
+      "target": "pattern-ripple.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-ripple"
+}

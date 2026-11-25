@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "dot-map",
+  "type": "ui",
+  "title": "Dot Map",
+  "description": "Apolyx S0012 — Dot Map",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/dot-map.tsx",
+      "target": "dot-map.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/dot-map"
+}

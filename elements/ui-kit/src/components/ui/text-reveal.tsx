@@ -8,6 +8,8 @@ import { useReducedMotion } from "../../motion/use-reduced-motion";
 
 export type TextRevealProps = {
   text: string;
+  /** Diagonal clip mask variant (dia-text-reveal). */
+  variant?: "default" | "diagonal";
   by?: "word" | "char";
   /** ms between pieces */
   stagger?: number;
@@ -25,6 +27,7 @@ const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 /** Words or letters fade in from a soft blur and rise into place. */
 export function TextReveal({
   text,
+  variant = "default",
   by = "word",
   stagger = 40,
   delay = 0,
@@ -75,11 +78,17 @@ export function TextReveal({
   return (
     <Tag
       ref={ref as React.Ref<never>}
-      className={cn(className)}
+      className={cn(variant === "diagonal" && "apolyx-text-reveal-diagonal", className)}
       data-slot="text-reveal"
+      data-variant={variant}
     >
       <span className="sr-only">{text}</span>
       <span aria-hidden>{pieces}</span>
     </Tag>
   );
+}
+
+/** Diagonal-mask variant of {@link TextReveal}. */
+export function TextRevealDiagonal(props: Omit<TextRevealProps, "variant">) {
+  return <TextReveal {...props} variant="diagonal" />;
 }

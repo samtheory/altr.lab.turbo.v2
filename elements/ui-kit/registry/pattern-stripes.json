@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-stripes",
+  "type": "ui",
+  "title": "Pattern Stripes",
+  "description": "Apolyx S0012 — Pattern Stripes",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-stripes.tsx",
+      "target": "pattern-stripes.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-stripes"
+}

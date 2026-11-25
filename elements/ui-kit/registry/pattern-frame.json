@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-frame",
+  "type": "ui",
+  "title": "Pattern Frame",
+  "description": "Stacks a full-bleed decorative layer behind content.",
+  "files": [
+    {
+      "path": "src/components/ui/pattern-frame.tsx",
+      "target": "pattern-frame.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-dots"
+}

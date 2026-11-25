@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-motion",
+  "type": "ui",
+  "title": "Text Motion",
+  "description": "Apolyx S0012 — Text Motion",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/text-motion.tsx",
+      "target": "text-motion.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/text-motion"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "gradient-flow-text",
+  "type": "ui",
+  "title": "Gradient Flow Text",
+  "description": "Apolyx S0012 — Gradient Flow Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/gradient-flow-text.tsx",
+      "target": "gradient-flow-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/gradient-flow-text"
+}

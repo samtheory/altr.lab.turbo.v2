@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "meteor-shower",
+  "type": "ui",
+  "title": "Meteor Shower",
+  "description": "Apolyx S0012 — Meteor Shower",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/meteor-shower.tsx",
+      "target": "meteor-shower.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/meteor-shower"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "orbit-ring",
+  "type": "ui",
+  "title": "Orbit Ring",
+  "description": "Apolyx S0012 — Orbit Ring",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/orbit-ring.tsx",
+      "target": "orbit-ring.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/orbit-ring"
+}

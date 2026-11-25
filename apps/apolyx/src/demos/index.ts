@@ -130,6 +130,66 @@ import ErrorRetryDemo from "./error-retry-demo";
 import ArtifactPanelDemo from "./artifact-panel-demo";
 import CostTrackerDemo from "./cost-tracker-demo";
 import ModelArenaDemo from "./model-arena-demo";
+import PatternDotsDemo from "./pattern-dots-demo";
+import PatternHexDemo from "./pattern-hex-demo";
+import PatternStripesDemo from "./pattern-stripes-demo";
+import PatternRetroGridDemo from "./pattern-retro-grid-demo";
+import PatternPulseGridDemo from "./pattern-pulse-grid-demo";
+import PatternFlickerGridDemo from "./pattern-flicker-grid-demo";
+import PatternRippleDemo from "./pattern-ripple-demo";
+import PatternLightRaysDemo from "./pattern-light-rays-demo";
+import PatternDitherDemo from "./pattern-dither-demo";
+import ParticleFieldDemo from "./particle-field-demo";
+import ParticleDriftDemo from "./particle-drift-demo";
+import MarqueeDemo from "./marquee-demo";
+import NumberTickerDemo from "./number-ticker-demo";
+import WordCycleDemo from "./word-cycle-demo";
+import AuroraTextDemo from "./aurora-text-demo";
+import ShimmerTextDemo from "./shimmer-text-demo";
+import TypewriterTextDemo from "./typewriter-text-demo";
+import BentoGridDemo from "./bento-grid-demo";
+import ScrollProgressDemo from "./scroll-progress-demo";
+import BeamLinkDemo from "./beam-link-demo";
+import BorderGlowDemo from "./border-glow-demo";
+import ShimmerButtonDemo from "./shimmer-button-demo";
+import RippleButtonDemo from "./ripple-button-demo";
+import BlurFadeDemo from "./blur-fade-demo";
+import ClipVideoTextDemo from "./clip-video-text-demo";
+import GlyphMatrixDemo from "./glyph-matrix-demo";
+import BacklightPlateDemo from "./backlight-plate-demo";
+import ProgressRingDemo from "./progress-ring-demo";
+import MagnetButtonDemo from "./magnet-button-demo";
+import PulseButtonDemo from "./pulse-button-demo";
+import PixelRevealDemo from "./pixel-reveal-demo";
+import FileTreeDemo from "./file-tree-demo";
+import KineticTextDemo from "./kinetic-text-demo";
+import ComicTextDemo from "./comic-text-demo";
+import SpinLabelDemo from "./spin-label-demo";
+import MorphTextDemo from "./morph-text-demo";
+import SparkleTextDemo from "./sparkle-text-demo";
+import ScrollVelocityTextDemo from "./scroll-velocity-text-demo";
+import ScrambleTextDemo from "./scramble-text-demo";
+import GradientFlowTextDemo from "./gradient-flow-text-demo";
+import LineShadowTextDemo from "./line-shadow-text-demo";
+import TextMotionDemo from "./text-motion-demo";
+import ThemeMorphToggleDemo from "./theme-morph-toggle-demo";
+import ConfettiBurstDemo from "./confetti-burst-demo";
+import GradientGlowCardDemo from "./gradient-glow-card-demo";
+import MeteorShowerDemo from "./meteor-shower-demo";
+import GlareSurfaceDemo from "./glare-surface-demo";
+import SpotlightCardDemo from "./spotlight-card-demo";
+import ShineFrameDemo from "./shine-frame-demo";
+import DotMapDemo from "./dot-map-demo";
+import EdgeFadeBlurDemo from "./edge-fade-blur-demo";
+import CursorGlowDemo from "./cursor-glow-demo";
+import MagnifyLensDemo from "./magnify-lens-demo";
+import OrbitRingDemo from "./orbit-ring-demo";
+import SocialQuoteCardDemo from "./social-quote-card-demo";
+import AndroidFrameDemo from "./android-frame-demo";
+import PhoneFrameDemo from "./phone-frame-demo";
+import BrowserFrameDemo from "./browser-frame-demo";
+import RevealListDemo from "./reveal-list-demo";
+import DockBarDemo from "./dock-bar-demo";
 import HeroPillDemo from "./hero-pill-demo";
 import HeroGridDemo from "./hero-grid-demo";
 import HeroWaitlistDemo from "./hero-waitlist-demo";
@@ -365,6 +425,66 @@ export const demos = {
   "artifact-panel-demo": ArtifactPanelDemo,
   "cost-tracker-demo": CostTrackerDemo,
   "model-arena-demo": ModelArenaDemo,
+  "pattern-dots-demo": PatternDotsDemo,
+  "pattern-hex-demo": PatternHexDemo,
+  "pattern-stripes-demo": PatternStripesDemo,
+  "pattern-retro-grid-demo": PatternRetroGridDemo,
+  "pattern-pulse-grid-demo": PatternPulseGridDemo,
+  "pattern-flicker-grid-demo": PatternFlickerGridDemo,
+  "pattern-ripple-demo": PatternRippleDemo,
+  "pattern-light-rays-demo": PatternLightRaysDemo,
+  "pattern-dither-demo": PatternDitherDemo,
+  "particle-field-demo": ParticleFieldDemo,
+  "particle-drift-demo": ParticleDriftDemo,
+  "marquee-demo": MarqueeDemo,
+  "number-ticker-demo": NumberTickerDemo,
+  "word-cycle-demo": WordCycleDemo,
+  "aurora-text-demo": AuroraTextDemo,
+  "shimmer-text-demo": ShimmerTextDemo,
+  "typewriter-text-demo": TypewriterTextDemo,
+  "bento-grid-demo": BentoGridDemo,
+  "scroll-progress-demo": ScrollProgressDemo,
+  "beam-link-demo": BeamLinkDemo,
+  "border-glow-demo": BorderGlowDemo,
+  "shimmer-button-demo": ShimmerButtonDemo,
+  "ripple-button-demo": RippleButtonDemo,
+  "blur-fade-demo": BlurFadeDemo,
+  "clip-video-text-demo": ClipVideoTextDemo,
+  "glyph-matrix-demo": GlyphMatrixDemo,
+  "backlight-plate-demo": BacklightPlateDemo,
+  "progress-ring-demo": ProgressRingDemo,
+  "magnet-button-demo": MagnetButtonDemo,
+  "pulse-button-demo": PulseButtonDemo,
+  "pixel-reveal-demo": PixelRevealDemo,
+  "file-tree-demo": FileTreeDemo,
+  "kinetic-text-demo": KineticTextDemo,
+  "comic-text-demo": ComicTextDemo,
+  "spin-label-demo": SpinLabelDemo,
+  "morph-text-demo": MorphTextDemo,
+  "sparkle-text-demo": SparkleTextDemo,
+  "scroll-velocity-text-demo": ScrollVelocityTextDemo,
+  "scramble-text-demo": ScrambleTextDemo,
+  "gradient-flow-text-demo": GradientFlowTextDemo,
+  "line-shadow-text-demo": LineShadowTextDemo,
+  "text-motion-demo": TextMotionDemo,
+  "theme-morph-toggle-demo": ThemeMorphToggleDemo,
+  "confetti-burst-demo": ConfettiBurstDemo,
+  "gradient-glow-card-demo": GradientGlowCardDemo,
+  "meteor-shower-demo": MeteorShowerDemo,
+  "glare-surface-demo": GlareSurfaceDemo,
+  "spotlight-card-demo": SpotlightCardDemo,
+  "shine-frame-demo": ShineFrameDemo,
+  "dot-map-demo": DotMapDemo,
+  "edge-fade-blur-demo": EdgeFadeBlurDemo,
+  "cursor-glow-demo": CursorGlowDemo,
+  "magnify-lens-demo": MagnifyLensDemo,
+  "orbit-ring-demo": OrbitRingDemo,
+  "social-quote-card-demo": SocialQuoteCardDemo,
+  "android-frame-demo": AndroidFrameDemo,
+  "phone-frame-demo": PhoneFrameDemo,
+  "browser-frame-demo": BrowserFrameDemo,
+  "reveal-list-demo": RevealListDemo,
+  "dock-bar-demo": DockBarDemo,
   "hero-pill-demo": HeroPillDemo,
   "hero-grid-demo": HeroGridDemo,
   "hero-waitlist-demo": HeroWaitlistDemo,

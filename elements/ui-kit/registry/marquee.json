@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "marquee",
+  "type": "ui",
+  "title": "Marquee",
+  "description": "Apolyx S0012 — Marquee",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/marquee.tsx",
+      "target": "marquee.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/marquee"
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-retro-grid",
+  "type": "ui",
+  "title": "Pattern Retro Grid",
+  "description": "Apolyx S0012 — Pattern Retro Grid",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-retro-grid.tsx",
+      "target": "pattern-retro-grid.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-retro-grid"
+}

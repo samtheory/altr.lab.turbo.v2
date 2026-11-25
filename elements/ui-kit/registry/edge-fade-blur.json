@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "edge-fade-blur",
+  "type": "ui",
+  "title": "Edge Fade Blur",
+  "description": "Apolyx S0012 — Edge Fade Blur",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/edge-fade-blur.tsx",
+      "target": "edge-fade-blur.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/edge-fade-blur"
+}

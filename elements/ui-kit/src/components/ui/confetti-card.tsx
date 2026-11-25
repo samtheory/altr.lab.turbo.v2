@@ -66,14 +66,20 @@ export function ConfettiCard({
 
   const seed = React.useCallback(
     (n: number) => {
-      const next: Particle[] = Array.from({ length: Math.min(n, 28) }, (_, i) => ({
-        id: `${range}-${i}-${Date.now()}`,
-        x: 8 + Math.random() * 84,
-        delay: i * 0.05,
-        tone: TONES[i % TONES.length]!,
-        Icon: icons[i % icons.length]!,
-        size: 28 + Math.random() * 10,
-      }));
+      const slots = Math.min(n, 14);
+      const cols = Math.min(slots, 7);
+      const next: Particle[] = Array.from({ length: slots }, (_, i) => {
+        const col = i % cols;
+        const jitter = ((i * 17) % 13) - 6;
+        return {
+          id: `${range}-${i}`,
+          x: 10 + (col + 0.5) * (80 / cols) + jitter * 0.35,
+          delay: (i % cols) * 0.09 + Math.floor(i / cols) * 0.14,
+          tone: TONES[i % TONES.length]!,
+          Icon: icons[i % icons.length]!,
+          size: 26 + (i % 3) * 4,
+        };
+      });
       setParticles(next);
     },
     [icons, range],
@@ -108,7 +114,10 @@ export function ConfettiCard({
       className={cn("w-full max-w-xs overflow-hidden", className)}
     >
       <div ref={stageRef} className="relative h-[22rem] overflow-hidden">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[52%] overflow-hidden"
+        >
           <AnimatePresence>
             {particles.map((p) => (
               <motion.div
@@ -117,12 +126,12 @@ export function ConfettiCard({
                   "absolute top-0 flex items-center justify-center rounded-full shadow-md ring-2 ring-card",
                   p.tone,
                 )}
-                style={{ left: `${p.x}%`, width: p.size, height: p.size }}
-                initial={reduce ? { y: "70%", opacity: 1 } : { y: "-20%", opacity: 0, rotate: -20 }}
+                style={{ left: `${p.x}%`, width: p.size, height: p.size, marginLeft: -p.size / 2 }}
+                initial={reduce ? { y: "55%", opacity: 1 } : { y: "-20%", opacity: 0, rotate: -20 }}
                 animate={
                   reduce
-                    ? { y: "70%", opacity: 1 }
-                    : { y: ["-15%", "72%"], opacity: [0, 1, 1, 0.9], rotate: [-10, 25] }
+                    ? { y: "55%", opacity: 1 }
+                    : { y: ["-12%", "88%"], opacity: [0, 1, 1, 0.85], rotate: [-8, 18] }
                 }
                 transition={
                   reduce
@@ -136,7 +145,7 @@ export function ConfettiCard({
           </AnimatePresence>
         </div>
 
-        <div className="relative flex flex-col items-center px-6 pt-24 text-center">
+        <div className="relative z-10 flex flex-col items-center px-6 pt-[10.5rem] text-center">
           <h3 className="w-fit text-2xl font-semibold leading-tight tracking-tight">
             {heading}
             <br />

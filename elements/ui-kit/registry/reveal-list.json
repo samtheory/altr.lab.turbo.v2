@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "reveal-list",
+  "type": "ui",
+  "title": "Reveal List",
+  "description": "Apolyx S0012 — Reveal List",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/reveal-list.tsx",
+      "target": "reveal-list.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "motion-tokens"
+  ],
+  "docs": "components/reveal-list"
+}

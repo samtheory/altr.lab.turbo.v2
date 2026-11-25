@@ -68,7 +68,7 @@ export function ReceiptCard({
         ))}
       </ul>
       <motion.div
-        className="flex items-center justify-between border-t border-dashed border-border px-5 py-4 text-sm font-semibold"
+        className="relative z-[1] flex items-center justify-between border-t border-dashed border-border px-5 py-4 pb-6 text-sm font-semibold"
         initial={reduce ? false : { opacity: 0 }}
         animate={{ opacity: show ? 1 : 0 }}
         transition={{ delay: reduce ? 0 : 0.45 }}
@@ -78,9 +78,9 @@ export function ReceiptCard({
       </motion.div>
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute right-6 bottom-16 rotate-[-18deg] rounded border-2 border-success px-3 py-1 text-xs font-bold tracking-widest text-success"
-        initial={reduce ? false : { opacity: 0, scale: 1.4 }}
-        animate={show ? { opacity: 0.9, scale: 1 } : { opacity: 0, scale: 1.4 }}
+        className="pointer-events-none absolute top-[38%] right-5 z-0 rotate-[-14deg] rounded border-2 border-success/90 bg-success/5 px-2.5 py-0.5 text-[10px] font-bold tracking-[0.2em] text-success shadow-sm"
+        initial={reduce ? false : { opacity: 0, scale: 1.35 }}
+        animate={show ? { opacity: 0.92, scale: 1 } : { opacity: 0, scale: 1.35 }}
         transition={{ delay: reduce ? 0 : 0.7, type: "spring", stiffness: 260, damping: 18 }}
       >
         {stamp}

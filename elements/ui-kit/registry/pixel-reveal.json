@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "pixel-reveal",
+  "type": "ui",
+  "title": "Pixel Reveal",
+  "description": "Apolyx S0012 — Pixel Reveal",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pixel-reveal.tsx",
+      "target": "pixel-reveal.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/pixel-reveal"
+}

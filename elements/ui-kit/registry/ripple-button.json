@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "ripple-button",
+  "type": "ui",
+  "title": "Ripple Button",
+  "description": "Apolyx S0012 — Ripple Button",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/ripple-button.tsx",
+      "target": "ripple-button.tsx"
+    }
+  ],
+  "registryDependencies": [ "button" ],
+  "docs": "components/ripple-button"
+}

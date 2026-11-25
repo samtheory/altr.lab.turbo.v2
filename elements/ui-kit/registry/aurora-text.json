@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "aurora-text",
+  "type": "ui",
+  "title": "Aurora Text",
+  "description": "Apolyx S0012 — Aurora Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/aurora-text.tsx",
+      "target": "aurora-text.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/aurora-text"
+}

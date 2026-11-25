@@ -4,7 +4,11 @@ import { Field, InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from 
 
 export default function InputOTPDemo() {
   return (
-    <Field label="Verification code" description="We sent a 6-digit code to •••• 0199.">
+    <Field
+      label="Verification code"
+      description="We sent a 6-digit code to •••• 0199."
+      className="w-fit"
+    >
       <InputOTP maxLength={6}>
         <InputOTPGroup>
           <InputOTPSlot index={0} />

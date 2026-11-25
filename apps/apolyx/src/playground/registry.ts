@@ -13,6 +13,7 @@ import {
   spinnerPlayground,
   stampPlayground,
   switchPlayground,
+  diffViewerPlayground,
 } from "./pilots";
 import type { PlaygroundSchema } from "./types";
 
@@ -29,6 +30,7 @@ const playgrounds: PlaygroundSchema[] = [
   skeletonPlayground,
   checkboxPlayground,
   stampPlayground,
+  diffViewerPlayground,
 ];
 
 export const playgroundByDemo = Object.fromEntries(

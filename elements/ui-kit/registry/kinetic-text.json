@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "kinetic-text",
+  "type": "ui",
+  "title": "Kinetic Text",
+  "description": "Apolyx S0012 — Kinetic Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/kinetic-text.tsx",
+      "target": "kinetic-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/kinetic-text"
+}

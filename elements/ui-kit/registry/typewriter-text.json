@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "typewriter-text",
+  "type": "ui",
+  "title": "Typewriter Text",
+  "description": "Apolyx S0012 — Typewriter Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/typewriter-text.tsx",
+      "target": "typewriter-text.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/typewriter-text"
+}

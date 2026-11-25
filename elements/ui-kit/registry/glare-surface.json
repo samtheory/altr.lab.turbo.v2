@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "glare-surface",
+  "type": "ui",
+  "title": "Glare Surface",
+  "description": "Apolyx S0012 — Glare Surface",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/glare-surface.tsx",
+      "target": "glare-surface.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/glare-surface"
+}

@@ -1,0 +1,15 @@
+<ComponentPreview name="clip-video-text-demo" />
+
+## Installation
+
+<InstallTabs name="clip-video-text" exports="ClipVideoText" />
+
+## Usage
+
+```tsx
+import { ClipVideoText } from "@altr/apolyx";
+```
+
+Headline text is filled with looping video. With **reduced motion**, the `poster` still is used as a `background-clip: text` fill when provided; otherwise children render as normal text.
+
+Plain-string children mask best; complex nodes still measure layout but the SVG mask uses a fallback label.

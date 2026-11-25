@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "social-quote-card",
+  "type": "ui",
+  "title": "Social Quote Card",
+  "description": "Apolyx S0012 — Social Quote Card",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/social-quote-card.tsx",
+      "target": "social-quote-card.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/social-quote-card"
+}

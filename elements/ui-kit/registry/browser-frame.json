@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "browser-frame",
+  "type": "ui",
+  "title": "Browser Frame",
+  "description": "Apolyx S0012 — Browser Frame",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/browser-frame.tsx",
+      "target": "browser-frame.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/browser-frame"
+}

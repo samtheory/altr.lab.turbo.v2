@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "bento-grid",
+  "type": "ui",
+  "title": "Bento Grid",
+  "description": "Apolyx S0012 — Bento Grid",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/bento-grid.tsx",
+      "target": "bento-grid.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/bento-grid"
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "./schema.json",
+  "name": "theme-morph-toggle",
+  "type": "ui",
+  "title": "Theme Morph Toggle",
+  "description": "Apolyx S0012 — Theme Morph Toggle",
+  "dependencies": {
+    "motion": "^12.23.12",
+    "lucide-react": "^0.525.0",
+    "next-themes": "^0.4.6"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/theme-morph-toggle.tsx",
+      "target": "theme-morph-toggle.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "button"
+  ],
+  "docs": "components/theme-morph-toggle"
+}

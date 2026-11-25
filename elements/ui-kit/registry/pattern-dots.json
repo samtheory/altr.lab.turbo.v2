@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-dots",
+  "type": "ui",
+  "title": "Pattern Dots",
+  "description": "Apolyx S0012 — Pattern Dots",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-dots.tsx",
+      "target": "pattern-dots.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-dots"
+}

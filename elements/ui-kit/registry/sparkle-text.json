@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "sparkle-text",
+  "type": "ui",
+  "title": "Sparkle Text",
+  "description": "Apolyx S0012 — Sparkle Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/sparkle-text.tsx",
+      "target": "sparkle-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/sparkle-text"
+}

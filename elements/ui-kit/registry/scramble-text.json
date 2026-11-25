@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "scramble-text",
+  "type": "ui",
+  "title": "Scramble Text",
+  "description": "Apolyx S0012 — Scramble Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/scramble-text.tsx",
+      "target": "scramble-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/scramble-text"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "morph-text",
+  "type": "ui",
+  "title": "Morph Text",
+  "description": "Apolyx S0012 — Morph Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/morph-text.tsx",
+      "target": "morph-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/morph-text"
+}

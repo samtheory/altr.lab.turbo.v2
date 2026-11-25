@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "dock-bar",
+  "type": "ui",
+  "title": "Dock Bar",
+  "description": "Apolyx S0012 — Dock Bar",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/dock-bar.tsx",
+      "target": "dock-bar.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/dock-bar"
+}

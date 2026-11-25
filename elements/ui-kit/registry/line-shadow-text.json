@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "line-shadow-text",
+  "type": "ui",
+  "title": "Line Shadow Text",
+  "description": "Apolyx S0012 — Line Shadow Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/line-shadow-text.tsx",
+      "target": "line-shadow-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/line-shadow-text"
+}

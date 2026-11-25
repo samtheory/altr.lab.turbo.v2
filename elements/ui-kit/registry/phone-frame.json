@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "phone-frame",
+  "type": "ui",
+  "title": "Phone Frame",
+  "description": "Apolyx S0012 — Phone Frame",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/phone-frame.tsx",
+      "target": "phone-frame.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/phone-frame"
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-hex",
+  "type": "ui",
+  "title": "Pattern Hex",
+  "description": "Apolyx S0012 — Pattern Hex",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-hex.tsx",
+      "target": "pattern-hex.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-hex"
+}

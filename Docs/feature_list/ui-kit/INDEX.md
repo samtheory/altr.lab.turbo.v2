@@ -30,7 +30,8 @@ tags:
 | **apolyx-F0012** | [[10-apolyx-s0009-agent-core]] | done (Apolyx-S0009) |
 | **apolyx-F0013** | [[11-apolyx-s0010-hitl-blocks]] | done (Apolyx-S0010) |
 | **apolyx-F0014** | [[12-apolyx-s0011-agent-extras]] | done (Apolyx-S0011) |
+| **apolyx-F0015** | [[13-apolyx-s0012-magicui-wave]] | in progress (Apolyx-S0012) |
 
 ## Next free id
 
-**apolyx-F0015**
+**apolyx-F0016**

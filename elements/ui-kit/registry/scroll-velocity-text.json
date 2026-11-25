@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "scroll-velocity-text",
+  "type": "ui",
+  "title": "Scroll Velocity Text",
+  "description": "Apolyx S0012 — Scroll Velocity Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/scroll-velocity-text.tsx",
+      "target": "scroll-velocity-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/scroll-velocity-text"
+}

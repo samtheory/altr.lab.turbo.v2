@@ -258,7 +258,326 @@
   }
 }
 
+.apolyx-pattern-retro-drift {
+  animation: apolyx-pattern-retro-drift 14s linear infinite;
+}
+@keyframes apolyx-pattern-retro-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 64px;
+  }
+}
 
+.apolyx-pattern-pulse-grid {
+  --apolyx-grid-cell: 40px;
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 70%);
+  background-image: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--primary) 35%, transparent) 0%,
+      transparent 40%,
+      transparent 100%
+    ),
+    linear-gradient(to right, color-mix(in oklab, var(--border) 80%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 80%, transparent) 1px, transparent 1px);
+  background-size: 200% 100%, var(--apolyx-grid-cell) var(--apolyx-grid-cell),
+    var(--apolyx-grid-cell) var(--apolyx-grid-cell);
+  animation: apolyx-pattern-pulse-grid 6s ease-in-out infinite;
+}
+@keyframes apolyx-pattern-pulse-grid {
+  0%,
+  100% {
+    background-position: 0% 0, 0 0, 0 0;
+  }
+  50% {
+    background-position: 100% 0, 0 0, 0 0;
+  }
+}
+
+.apolyx-pattern-ripple {
+  animation: apolyx-pattern-ripple 4s ease-out infinite;
+  opacity: 0;
+}
+@keyframes apolyx-pattern-ripple {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+
+.apolyx-pattern-rays-spin {
+  animation: apolyx-pattern-rays-spin 48s linear infinite;
+}
+@keyframes apolyx-pattern-rays-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.apolyx-marquee-track {
+  animation: apolyx-marquee var(--marquee-duration, 30s) linear infinite;
+}
+.apolyx-marquee-track[data-reverse="true"] {
+  animation-direction: reverse;
+}
+.apolyx-marquee-track[data-vertical="true"] {
+  animation-name: apolyx-marquee-y;
+}
+@keyframes apolyx-marquee {
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
+}
+@keyframes apolyx-marquee-y {
+  to {
+    transform: translateY(calc(-50% - 0.5rem));
+  }
+}
+
+.apolyx-border-glow {
+  background: conic-gradient(
+    from var(--apolyx-border-angle, 0deg),
+    transparent 0deg,
+    color-mix(in oklab, var(--primary) 70%, transparent) 60deg,
+    transparent 120deg
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+  animation: apolyx-border-glow var(--border-glow-duration, 5s) linear infinite;
+}
+@property --apolyx-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes apolyx-border-glow {
+  to {
+    --apolyx-border-angle: 360deg;
+  }
+}
+
+.apolyx-beam-pulse {
+  stroke-dasharray: 0.12 0.88;
+  animation: apolyx-beam-pulse 2.4s linear infinite;
+}
+@keyframes apolyx-beam-pulse {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+
+.apolyx-aurora-text {
+  background: linear-gradient(
+    100deg,
+    var(--primary) 0%,
+    var(--info) 35%,
+    var(--success) 70%,
+    var(--primary) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: apolyx-aurora-text 8s ease-in-out infinite alternate;
+}
+@keyframes apolyx-aurora-text {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.apolyx-shimmer-text {
+  --apolyx-shimmer-base: var(--foreground);
+  background: linear-gradient(
+    90deg,
+    var(--apolyx-shimmer-base) 35%,
+    color-mix(in oklab, var(--primary) 72%, var(--apolyx-shimmer-base)) 50%,
+    var(--apolyx-shimmer-base) 65%
+  );
+  background-size: 220% 100%;
+  background-position: 100% center;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: apolyx-shimmer-text 2.8s ease-in-out infinite;
+}
+@keyframes apolyx-shimmer-text {
+  from {
+    background-position: 120% center;
+  }
+  to {
+    background-position: -20% center;
+  }
+}
+
+@keyframes apolyx-ripple {
+  to {
+    width: 220px;
+    height: 220px;
+    opacity: 0;
+  }
+}
+
+.apolyx-shine-frame {
+  background: conic-gradient(
+    from var(--apolyx-shine-angle, 0deg),
+    transparent,
+    color-mix(in oklab, var(--primary) 55%, transparent),
+    transparent
+  );
+  animation: apolyx-shine-frame 4s linear infinite;
+}
+@property --apolyx-shine-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes apolyx-shine-frame {
+  to {
+    --apolyx-shine-angle: 360deg;
+  }
+}
+
+.apolyx-orbit-item {
+  animation: apolyx-orbit-spin var(--orbit-dur, 18s) linear infinite;
+  transform: rotate(calc(360deg / var(--orbit-n, 1) * var(--orbit-i, 0)))
+    translateX(var(--orbit-r, 72px))
+    rotate(calc(-360deg / var(--orbit-n, 1) * var(--orbit-i, 0)));
+}
+@keyframes apolyx-orbit-spin {
+  to {
+    transform: rotate(calc(360deg + 360deg / var(--orbit-n, 1) * var(--orbit-i, 0)))
+      translateX(var(--orbit-r, 72px))
+      rotate(calc(-360deg - 360deg / var(--orbit-n, 1) * var(--orbit-i, 0)));
+  }
+}
+
+.apolyx-meteor {
+  animation: apolyx-meteor 2.2s linear infinite;
+}
+@keyframes apolyx-meteor {
+  from {
+    transform: translateY(-10%) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(120%) translateX(-40px);
+    opacity: 0;
+  }
+}
+
+.apolyx-line-shadow-text {
+  text-shadow:
+    0.06em 0.06em 0 var(--muted-foreground),
+  0.12em 0.12em 0 color-mix(in oklab, var(--primary) 40%, transparent);
+}
+
+.apolyx-gradient-flow-text {
+  background: linear-gradient(90deg, var(--foreground), var(--primary), var(--foreground));
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: apolyx-gradient-flow-text 5s linear infinite;
+}
+@keyframes apolyx-gradient-flow-text {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.apolyx-sparkle-text::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--primary) 35%, transparent) 0 1px, transparent 2px);
+  background-size: 12px 12px;
+  opacity: 0.35;
+  animation: apolyx-sparkle-text 2.5s ease-in-out infinite alternate;
+}
+@keyframes apolyx-sparkle-text {
+  to {
+    opacity: 0.65;
+    transform: translateY(-2px);
+  }
+}
+
+.apolyx-spin-label {
+  transform-origin: 50% 50%;
+  animation: apolyx-spin-label var(--spin-dur, 12s) linear infinite;
+}
+@keyframes apolyx-spin-label {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.apolyx-comic-text {
+  -webkit-text-stroke: 2px var(--foreground);
+  paint-order: stroke fill;
+  letter-spacing: 0.04em;
+  filter: drop-shadow(3px 3px 0 color-mix(in oklab, var(--primary) 50%, transparent));
+}
+
+.apolyx-pulse-button {
+  animation: apolyx-pulse-button 2.4s ease-in-out infinite;
+}
+@keyframes apolyx-pulse-button {
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.apolyx-glyph-flicker {
+  animation: apolyx-glyph-flicker 2.2s steps(2, end) infinite;
+}
+
+.apolyx-text-reveal-diagonal {
+  clip-path: polygon(0 12%, 100% 0, 100% 88%, 0 100%);
+}
+@keyframes apolyx-glyph-flicker {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apolyx-pattern-retro-drift,
+  .apolyx-pattern-pulse-grid,
+  .apolyx-pattern-ripple,
+  .apolyx-pattern-rays-spin,
+  .apolyx-marquee-track,
+  .apolyx-border-glow,
+  .apolyx-beam-pulse,
+  .apolyx-aurora-text,
+  .apolyx-shimmer-text,
+  .apolyx-shine-frame,
+  .apolyx-orbit-item,
+  .apolyx-meteor,
+  .apolyx-gradient-flow-text,
+  .apolyx-sparkle-text::after,
+  .apolyx-spin-label,
+  .apolyx-pulse-button,
+  .apolyx-glyph-flicker {
+    animation: none;
+  }
+  .apolyx-aurora-text,
+  .apolyx-shimmer-text {
+    color: currentColor;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   :root,

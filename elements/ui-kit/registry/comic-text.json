@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "comic-text",
+  "type": "ui",
+  "title": "Comic Text",
+  "description": "Apolyx S0012 — Comic Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/comic-text.tsx",
+      "target": "comic-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/comic-text"
+}

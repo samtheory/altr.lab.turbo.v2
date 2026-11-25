@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "particle-field",
+  "type": "ui",
+  "title": "Particle Field",
+  "description": "Apolyx S0012 — Particle Field",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/particle-field.tsx",
+      "target": "particle-field.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/particle-field"
+}

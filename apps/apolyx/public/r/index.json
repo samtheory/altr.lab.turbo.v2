@@ -92,6 +92,17 @@
     "docs": "components/alert"
   },
   {
+    "name": "android-frame",
+    "type": "ui",
+    "title": "Android Frame",
+    "description": "Apolyx S0012 — Android Frame",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/android-frame"
+  },
+  {
     "name": "app-shelf",
     "type": "ui",
     "title": "App Shelf",
@@ -124,6 +135,17 @@
       "use-reduced-motion"
     ],
     "docs": "components/attachments"
+  },
+  {
+    "name": "aurora-text",
+    "type": "ui",
+    "title": "Aurora Text",
+    "description": "Apolyx S0012 — Aurora Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/aurora-text"
   },
   {
     "name": "avatar",
@@ -170,6 +192,17 @@
     "docs": "components/background-tasks"
   },
   {
+    "name": "backlight-plate",
+    "type": "ui",
+    "title": "Backlight Plate",
+    "description": "Apolyx S0012 — Backlight Plate",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/backlight-plate"
+  },
+  {
     "name": "badge",
     "type": "ui",
     "title": "Badge",
@@ -189,6 +222,50 @@
       "use-reduced-motion"
     ],
     "docs": "charts/bar-chart"
+  },
+  {
+    "name": "beam-link",
+    "type": "ui",
+    "title": "Beam Link",
+    "description": "Apolyx S0012 — Beam Link",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/beam-link"
+  },
+  {
+    "name": "bento-grid",
+    "type": "ui",
+    "title": "Bento Grid",
+    "description": "Apolyx S0012 — Bento Grid",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/bento-grid"
+  },
+  {
+    "name": "blur-fade",
+    "type": "ui",
+    "title": "Blur Fade",
+    "description": "Apolyx S0012 — Blur Fade",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/blur-fade"
+  },
+  {
+    "name": "border-glow",
+    "type": "ui",
+    "title": "Border Glow",
+    "description": "Apolyx S0012 — Border Glow",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/border-glow"
   },
   {
     "name": "breadcrumb",
@@ -211,6 +288,17 @@
       "use-reduced-motion"
     ],
     "docs": "components/browser-agent"
+  },
+  {
+    "name": "browser-frame",
+    "type": "ui",
+    "title": "Browser Frame",
+    "description": "Apolyx S0012 — Browser Frame",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/browser-frame"
   },
   {
     "name": "button",
@@ -280,6 +368,17 @@
     "docs": "components/checkpoint-rewind"
   },
   {
+    "name": "clip-video-text",
+    "type": "ui",
+    "title": "Clip Video Text",
+    "description": "Apolyx S0012 — Clip Video Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/clip-video-text"
+  },
+  {
     "name": "combobox",
     "type": "ui",
     "title": "Combobox",
@@ -300,12 +399,34 @@
     "docs": "components/combobox"
   },
   {
+    "name": "comic-text",
+    "type": "ui",
+    "title": "Comic Text",
+    "description": "Apolyx S0012 — Comic Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/comic-text"
+  },
+  {
     "name": "compose-refs",
     "type": "primitive",
     "title": "Compose refs",
     "description": "Merge multiple refs into one callback",
     "registryDependencies": [],
     "docs": "primitives"
+  },
+  {
+    "name": "confetti-burst",
+    "type": "ui",
+    "title": "Confetti Burst",
+    "description": "Apolyx S0012 — Confetti Burst",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/confetti-burst"
   },
   {
     "name": "confetti-card",
@@ -375,6 +496,17 @@
       "button"
     ],
     "docs": "blocks/creative-home-hero"
+  },
+  {
+    "name": "cursor-glow",
+    "type": "ui",
+    "title": "Cursor Glow",
+    "description": "Apolyx S0012 — Cursor Glow",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/cursor-glow"
   },
   {
     "name": "dashboard-home",
@@ -470,6 +602,28 @@
     "docs": "components/doc-stack"
   },
   {
+    "name": "dock-bar",
+    "type": "ui",
+    "title": "Dock Bar",
+    "description": "Apolyx S0012 — Dock Bar",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/dock-bar"
+  },
+  {
+    "name": "dot-map",
+    "type": "ui",
+    "title": "Dot Map",
+    "description": "Apolyx S0012 — Dot Map",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/dot-map"
+  },
+  {
     "name": "dropdown-menu",
     "type": "ui",
     "title": "Dropdown Menu",
@@ -498,6 +652,17 @@
       "motion-tokens"
     ],
     "docs": "components/dropzone"
+  },
+  {
+    "name": "edge-fade-blur",
+    "type": "ui",
+    "title": "Edge Fade Blur",
+    "description": "Apolyx S0012 — Edge Fade Blur",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/edge-fade-blur"
   },
   {
     "name": "empty-state",
@@ -546,6 +711,16 @@
     "docs": "components/field"
   },
   {
+    "name": "file-tree",
+    "type": "ui",
+    "title": "File Tree",
+    "description": "Apolyx S0012 — File Tree",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/file-tree"
+  },
+  {
     "name": "flip-clock",
     "type": "ui",
     "title": "Flip Clock",
@@ -589,6 +764,17 @@
     "docs": "components/folder-card"
   },
   {
+    "name": "glare-surface",
+    "type": "ui",
+    "title": "Glare Surface",
+    "description": "Apolyx S0012 — Glare Surface",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/glare-surface"
+  },
+  {
     "name": "globe-arcs",
     "type": "ui",
     "title": "Globe Arcs",
@@ -597,6 +783,39 @@
       "utils"
     ],
     "docs": "components/globe-arcs"
+  },
+  {
+    "name": "glyph-matrix",
+    "type": "ui",
+    "title": "Glyph Matrix",
+    "description": "Apolyx S0012 — Glyph Matrix",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/glyph-matrix"
+  },
+  {
+    "name": "gradient-flow-text",
+    "type": "ui",
+    "title": "Gradient Flow Text",
+    "description": "Apolyx S0012 — Gradient Flow Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/gradient-flow-text"
+  },
+  {
+    "name": "gradient-glow-card",
+    "type": "ui",
+    "title": "Gradient Glow Card",
+    "description": "Apolyx S0012 — Gradient Glow Card",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/gradient-glow-card"
   },
   {
     "name": "grid",
@@ -750,6 +969,17 @@
     "docs": "components/kbd"
   },
   {
+    "name": "kinetic-text",
+    "type": "ui",
+    "title": "Kinetic Text",
+    "description": "Apolyx S0012 — Kinetic Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/kinetic-text"
+  },
+  {
     "name": "label",
     "type": "ui",
     "title": "Label",
@@ -792,6 +1022,17 @@
     "docs": "charts/line-chart"
   },
   {
+    "name": "line-shadow-text",
+    "type": "ui",
+    "title": "Line Shadow Text",
+    "description": "Apolyx S0012 — Line Shadow Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/line-shadow-text"
+  },
+  {
     "name": "list",
     "type": "ui",
     "title": "List",
@@ -801,6 +1042,40 @@
       "utils"
     ],
     "docs": "components/list"
+  },
+  {
+    "name": "magnet-button",
+    "type": "ui",
+    "title": "Magnet Button",
+    "description": "Apolyx S0012 — Magnet Button",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/magnet-button"
+  },
+  {
+    "name": "magnify-lens",
+    "type": "ui",
+    "title": "Magnify Lens",
+    "description": "Apolyx S0012 — Magnify Lens",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/magnify-lens"
+  },
+  {
+    "name": "marquee",
+    "type": "ui",
+    "title": "Marquee",
+    "description": "Apolyx S0012 — Marquee",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/marquee"
   },
   {
     "name": "marquee-card",
@@ -857,6 +1132,17 @@
     "docs": "components/message-actions"
   },
   {
+    "name": "meteor-shower",
+    "type": "ui",
+    "title": "Meteor Shower",
+    "description": "Apolyx S0012 — Meteor Shower",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/meteor-shower"
+  },
+  {
     "name": "metric-spark-card",
     "type": "ui",
     "title": "Metric Spark Card",
@@ -903,6 +1189,17 @@
       "input"
     ],
     "docs": "blocks/moodboard-generator"
+  },
+  {
+    "name": "morph-text",
+    "type": "ui",
+    "title": "Morph Text",
+    "description": "Apolyx S0012 — Morph Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/morph-text"
   },
   {
     "name": "motion-tokens",
@@ -956,6 +1253,17 @@
     "docs": "components/number-input"
   },
   {
+    "name": "number-ticker",
+    "type": "ui",
+    "title": "Number Ticker",
+    "description": "Apolyx S0012 — Number Ticker",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/number-ticker"
+  },
+  {
     "name": "oauth-consent",
     "type": "ui",
     "title": "OAuth Consent",
@@ -968,6 +1276,17 @@
     "docs": "components/oauth-consent"
   },
   {
+    "name": "orbit-ring",
+    "type": "ui",
+    "title": "Orbit Ring",
+    "description": "Apolyx S0012 — Orbit Ring",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/orbit-ring"
+  },
+  {
     "name": "pagination",
     "type": "ui",
     "title": "Pagination",
@@ -977,6 +1296,30 @@
       "utils"
     ],
     "docs": "components/pagination"
+  },
+  {
+    "name": "particle-drift",
+    "type": "ui",
+    "title": "Particle Drift",
+    "description": "Apolyx S0012 — Particle Drift",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/particle-drift"
+  },
+  {
+    "name": "particle-field",
+    "type": "ui",
+    "title": "Particle Field",
+    "description": "Apolyx S0012 — Particle Field",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/particle-field"
   },
   {
     "name": "password-input",
@@ -994,6 +1337,147 @@
       "utils"
     ],
     "docs": "components/password-input"
+  },
+  {
+    "name": "pattern-dither",
+    "type": "ui",
+    "title": "Pattern Dither",
+    "description": "Apolyx S0012 — Pattern Dither",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-dither"
+  },
+  {
+    "name": "pattern-dots",
+    "type": "ui",
+    "title": "Pattern Dots",
+    "description": "Apolyx S0012 — Pattern Dots",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-dots"
+  },
+  {
+    "name": "pattern-flicker-grid",
+    "type": "ui",
+    "title": "Pattern Flicker Grid",
+    "description": "Apolyx S0012 — Pattern Flicker Grid",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-flicker-grid"
+  },
+  {
+    "name": "pattern-frame",
+    "type": "ui",
+    "title": "Pattern Frame",
+    "description": "Stacks a full-bleed decorative layer behind content.",
+    "registryDependencies": [
+      "utils",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-dots"
+  },
+  {
+    "name": "pattern-hex",
+    "type": "ui",
+    "title": "Pattern Hex",
+    "description": "Apolyx S0012 — Pattern Hex",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-hex"
+  },
+  {
+    "name": "pattern-light-rays",
+    "type": "ui",
+    "title": "Pattern Light Rays",
+    "description": "Apolyx S0012 — Pattern Light Rays",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-light-rays"
+  },
+  {
+    "name": "pattern-pulse-grid",
+    "type": "ui",
+    "title": "Pattern Pulse Grid",
+    "description": "Apolyx S0012 — Pattern Pulse Grid",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-pulse-grid"
+  },
+  {
+    "name": "pattern-retro-grid",
+    "type": "ui",
+    "title": "Pattern Retro Grid",
+    "description": "Apolyx S0012 — Pattern Retro Grid",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-retro-grid"
+  },
+  {
+    "name": "pattern-ripple",
+    "type": "ui",
+    "title": "Pattern Ripple",
+    "description": "Apolyx S0012 — Pattern Ripple",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-ripple"
+  },
+  {
+    "name": "pattern-stripes",
+    "type": "ui",
+    "title": "Pattern Stripes",
+    "description": "Apolyx S0012 — Pattern Stripes",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "pattern-frame"
+    ],
+    "docs": "components/pattern-stripes"
+  },
+  {
+    "name": "phone-frame",
+    "type": "ui",
+    "title": "Phone Frame",
+    "description": "Apolyx S0012 — Phone Frame",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/phone-frame"
+  },
+  {
+    "name": "pixel-reveal",
+    "type": "ui",
+    "title": "Pixel Reveal",
+    "description": "Apolyx S0012 — Pixel Reveal",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/pixel-reveal"
   },
   {
     "name": "plan-review",
@@ -1097,6 +1581,29 @@
     "docs": "components/progress"
   },
   {
+    "name": "progress-ring",
+    "type": "ui",
+    "title": "Progress Ring",
+    "description": "Apolyx S0012 — Progress Ring",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/progress-ring"
+  },
+  {
+    "name": "pulse-button",
+    "type": "ui",
+    "title": "Pulse Button",
+    "description": "Apolyx S0012 — Pulse Button",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/pulse-button"
+  },
+  {
     "name": "pulse-card",
     "type": "ui",
     "title": "Pulse Card",
@@ -1181,6 +1688,28 @@
     "docs": "components/receipt-card"
   },
   {
+    "name": "reveal-list",
+    "type": "ui",
+    "title": "Reveal List",
+    "description": "Apolyx S0012 — Reveal List",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "motion-tokens"
+    ],
+    "docs": "components/reveal-list"
+  },
+  {
+    "name": "ripple-button",
+    "type": "ui",
+    "title": "Ripple Button",
+    "description": "Apolyx S0012 — Ripple Button",
+    "registryDependencies": [
+      "button"
+    ],
+    "docs": "components/ripple-button"
+  },
+  {
     "name": "roving-focus",
     "type": "primitive",
     "title": "RovingFocusGroup",
@@ -1216,6 +1745,17 @@
     "docs": "components/scheduled-trigger"
   },
   {
+    "name": "scramble-text",
+    "type": "ui",
+    "title": "Scramble Text",
+    "description": "Apolyx S0012 — Scramble Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/scramble-text"
+  },
+  {
     "name": "scroll-area",
     "type": "ui",
     "title": "Scroll Area",
@@ -1232,6 +1772,28 @@
     "description": "Body scroll lock with scrollbar compensation",
     "registryDependencies": [],
     "docs": "primitives"
+  },
+  {
+    "name": "scroll-progress",
+    "type": "ui",
+    "title": "Scroll Progress",
+    "description": "Apolyx S0012 — Scroll Progress",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/scroll-progress"
+  },
+  {
+    "name": "scroll-velocity-text",
+    "type": "ui",
+    "title": "Scroll Velocity Text",
+    "description": "Apolyx S0012 — Scroll Velocity Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/scroll-velocity-text"
   },
   {
     "name": "secret-request",
@@ -1295,6 +1857,40 @@
     "docs": "components/sheet"
   },
   {
+    "name": "shimmer-button",
+    "type": "ui",
+    "title": "Shimmer Button",
+    "description": "Apolyx S0012 — Shimmer Button",
+    "registryDependencies": [
+      "button",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/shimmer-button"
+  },
+  {
+    "name": "shimmer-text",
+    "type": "ui",
+    "title": "Shimmer Text",
+    "description": "Apolyx S0012 — Shimmer Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/shimmer-text"
+  },
+  {
+    "name": "shine-frame",
+    "type": "ui",
+    "title": "Shine Frame",
+    "description": "Apolyx S0012 — Shine Frame",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/shine-frame"
+  },
+  {
     "name": "sign-in",
     "type": "ui",
     "title": "Sign In",
@@ -1340,6 +1936,17 @@
     "docs": "primitives"
   },
   {
+    "name": "social-quote-card",
+    "type": "ui",
+    "title": "Social Quote Card",
+    "description": "Apolyx S0012 — Social Quote Card",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/social-quote-card"
+  },
+  {
     "name": "sound-ring",
     "type": "ui",
     "title": "Sound Ring",
@@ -1359,6 +1966,28 @@
       "use-reduced-motion"
     ],
     "docs": "components/sources-list"
+  },
+  {
+    "name": "sparkle-text",
+    "type": "ui",
+    "title": "Sparkle Text",
+    "description": "Apolyx S0012 — Sparkle Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/sparkle-text"
+  },
+  {
+    "name": "spin-label",
+    "type": "ui",
+    "title": "Spin Label",
+    "description": "Apolyx S0012 — Spin Label",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/spin-label"
   },
   {
     "name": "spinner",
@@ -1382,6 +2011,17 @@
       "utils"
     ],
     "docs": "components/split-button"
+  },
+  {
+    "name": "spotlight-card",
+    "type": "ui",
+    "title": "Spotlight Card",
+    "description": "Apolyx S0012 — Spotlight Card",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/spotlight-card"
   },
   {
     "name": "sql-query-card",
@@ -1596,6 +2236,17 @@
     "docs": "components/text-highlight"
   },
   {
+    "name": "text-motion",
+    "type": "ui",
+    "title": "Text Motion",
+    "description": "Apolyx S0012 — Text Motion",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/text-motion"
+  },
+  {
     "name": "text-reveal",
     "type": "ui",
     "title": "Text Reveal",
@@ -1675,6 +2326,18 @@
       "utils"
     ],
     "docs": "theming"
+  },
+  {
+    "name": "theme-morph-toggle",
+    "type": "ui",
+    "title": "Theme Morph Toggle",
+    "description": "Apolyx S0012 — Theme Morph Toggle",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/theme-morph-toggle"
   },
   {
     "name": "theme-power-blue",
@@ -1835,6 +2498,17 @@
     "docs": "components/trace-waterfall"
   },
   {
+    "name": "typewriter-text",
+    "type": "ui",
+    "title": "Typewriter Text",
+    "description": "Apolyx S0012 — Typewriter Text",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/typewriter-text"
+  },
+  {
     "name": "usage-card",
     "type": "ui",
     "title": "Usage Card",
@@ -1919,5 +2593,16 @@
       "use-reduced-motion"
     ],
     "docs": "components/voice-orb"
+  },
+  {
+    "name": "word-cycle",
+    "type": "ui",
+    "title": "Word Cycle",
+    "description": "Apolyx S0012 — Word Cycle",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/word-cycle"
   }
 ]

@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "border-glow",
+  "type": "ui",
+  "title": "Border Glow",
+  "description": "Apolyx S0012 — Border Glow",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/border-glow.tsx",
+      "target": "border-glow.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/border-glow"
+}

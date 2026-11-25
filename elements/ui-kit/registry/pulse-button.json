@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pulse-button",
+  "type": "ui",
+  "title": "Pulse Button",
+  "description": "Apolyx S0012 — Pulse Button",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pulse-button.tsx",
+      "target": "pulse-button.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "button"
+  ],
+  "docs": "components/pulse-button"
+}

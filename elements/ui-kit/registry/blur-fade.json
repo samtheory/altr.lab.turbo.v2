@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "blur-fade",
+  "type": "ui",
+  "title": "Blur Fade",
+  "description": "Apolyx S0012 — Blur Fade",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/motion/blur-fade.tsx",
+      "target": "blur-fade.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/blur-fade"
+}

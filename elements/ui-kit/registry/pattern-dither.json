@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-dither",
+  "type": "ui",
+  "title": "Pattern Dither",
+  "description": "Apolyx S0012 — Pattern Dither",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-dither.tsx",
+      "target": "pattern-dither.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-dither"
+}

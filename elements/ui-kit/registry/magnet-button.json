@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "magnet-button",
+  "type": "ui",
+  "title": "Magnet Button",
+  "description": "Apolyx S0012 — Magnet Button",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/magnet-button.tsx",
+      "target": "magnet-button.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "button"
+  ],
+  "docs": "components/magnet-button"
+}

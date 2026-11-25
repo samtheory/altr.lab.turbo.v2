@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "beam-link",
+  "type": "ui",
+  "title": "Beam Link",
+  "description": "Apolyx S0012 — Beam Link",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/beam-link.tsx",
+      "target": "beam-link.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/beam-link"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "spin-label",
+  "type": "ui",
+  "title": "Spin Label",
+  "description": "Apolyx S0012 — Spin Label",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/spin-label.tsx",
+      "target": "spin-label.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/spin-label"
+}

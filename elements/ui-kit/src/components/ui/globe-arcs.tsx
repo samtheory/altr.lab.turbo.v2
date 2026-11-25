@@ -40,6 +40,15 @@ const DEFAULT_ROUTES: [string, string][] = [
 const RAD = Math.PI / 180;
 type Vec = [number, number, number];
 
+function resolveToken(el: HTMLElement, token: string, fallback: string) {
+  if (!token.startsWith("var(")) return token;
+  const name = token.slice(4, -1).trim();
+  const raw = getComputedStyle(el).getPropertyValue(name).trim();
+  if (raw) return raw;
+  if (name === "--primary") return fallback;
+  return getComputedStyle(el).getPropertyValue("--primary").trim() || fallback;
+}
+
 const toVec = (lat: number, lng: number): Vec => [
   Math.cos(lat * RAD) * Math.sin(lng * RAD),
   Math.sin(lat * RAD),
@@ -146,6 +155,10 @@ export function GlobeArcs({
     };
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const accentResolved = resolveToken(wrapEl, accent, "#6366f1");
+    const mutedDot =
+      getComputedStyle(wrapEl).getPropertyValue("--muted-foreground").trim() ||
+      getComputedStyle(wrapEl).color;
 
     const draw = (now: number) => {
       const R = width * 0.42;
@@ -154,7 +167,7 @@ export function GlobeArcs({
       if (!reduce.matches && !drag && speed) yaw += (speed * RAD * 0.016) % (Math.PI * 2);
 
       ctx.clearRect(0, 0, width, width);
-      const dotColor = getComputedStyle(canvas).color;
+      const dotColor = mutedDot;
       ctx.fillStyle = dotColor;
       for (const p of dots) {
         const v = project(p);
@@ -169,7 +182,7 @@ export function GlobeArcs({
       }
       ctx.globalAlpha = 1;
 
-      ctx.strokeStyle = accent;
+      ctx.strokeStyle = accentResolved;
       ctx.lineWidth = Math.max(1.2, width / 280);
       ctx.lineCap = "round";
       arcs.forEach((arc, i) => {
@@ -201,7 +214,7 @@ export function GlobeArcs({
         if (v[2]! < 0.05) continue;
         const x = c + v[0]! * R;
         const y = c - v[1]! * R;
-        ctx.fillStyle = accent;
+        ctx.fillStyle = accentResolved;
         ctx.beginPath();
         ctx.arc(x, y, Math.max(2.5, width / 140), 0, Math.PI * 2);
         ctx.fill();

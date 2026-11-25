@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-light-rays",
+  "type": "ui",
+  "title": "Pattern Light Rays",
+  "description": "Apolyx S0012 — Pattern Light Rays",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-light-rays.tsx",
+      "target": "pattern-light-rays.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-light-rays"
+}

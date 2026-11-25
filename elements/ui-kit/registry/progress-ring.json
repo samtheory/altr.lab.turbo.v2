@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "progress-ring",
+  "type": "ui",
+  "title": "Progress Ring",
+  "description": "Apolyx S0012 — Progress Ring",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/progress-ring.tsx",
+      "target": "progress-ring.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/progress-ring"
+}

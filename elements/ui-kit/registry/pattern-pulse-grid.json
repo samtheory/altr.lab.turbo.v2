@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-pulse-grid",
+  "type": "ui",
+  "title": "Pattern Pulse Grid",
+  "description": "Apolyx S0012 — Pattern Pulse Grid",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-pulse-grid.tsx",
+      "target": "pattern-pulse-grid.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-pulse-grid"
+}

@@ -32,8 +32,8 @@ const DEFAULT_ITEMS: StackCardItem[] = [
 
 const CARD_H = 112;
 const DEPTH = 4;
-const STEP = 10;
-const SHRINK = 0.07;
+const STEP = 12;
+const SHRINK = 0.035;
 const DROP = CARD_H + 34;
 
 function stacked(order: number) {
@@ -123,9 +123,12 @@ export function StackCards({
       data-slot="stack-cards"
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
-      className={cn("relative mx-auto h-[312px] w-full max-w-xs", className)}
+      className={cn("relative mx-auto h-[312px] w-full max-w-sm px-3", className)}
     >
-      <div className="absolute inset-x-0" style={{ top: DEPTH * STEP + 4 }}>
+      <div
+        className="absolute inset-x-3 [perspective:900px]"
+        style={{ top: DEPTH * STEP + 4 }}
+      >
         {items.map((item, i) => {
           const order = (i - active + n) % n;
           const leaving = cycled && n > 1 && order === n - 1;
@@ -140,7 +143,7 @@ export function StackCards({
               aria-hidden={!front}
               initial={false}
               {...motionProps}
-              className="absolute inset-x-0 top-0 flex h-28 origin-top items-center rounded-[2.5rem] border border-border bg-card px-5 text-card-foreground shadow-md will-change-transform"
+              className="absolute inset-x-0 top-0 mx-auto flex h-28 w-full max-w-[19.5rem] origin-top items-center rounded-[2.5rem] border border-border bg-card px-5 text-card-foreground shadow-md will-change-transform"
             >
               <motion.div
                 initial={false}

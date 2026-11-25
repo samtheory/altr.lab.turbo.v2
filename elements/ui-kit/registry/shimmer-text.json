@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "shimmer-text",
+  "type": "ui",
+  "title": "Shimmer Text",
+  "description": "Apolyx S0012 — Shimmer Text",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/shimmer-text.tsx",
+      "target": "shimmer-text.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/shimmer-text"
+}

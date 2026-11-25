@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "number-ticker",
+  "type": "ui",
+  "title": "Number Ticker",
+  "description": "Apolyx S0012 — Number Ticker",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/number-ticker.tsx",
+      "target": "number-ticker.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/number-ticker"
+}

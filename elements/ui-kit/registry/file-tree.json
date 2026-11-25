@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "file-tree",
+  "type": "ui",
+  "title": "File Tree",
+  "description": "Apolyx S0012 — File Tree",
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/file-tree.tsx",
+      "target": "file-tree.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "docs": "components/file-tree"
+}

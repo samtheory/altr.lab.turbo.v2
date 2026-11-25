@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-video-text",
+  "type": "ui",
+  "title": "Clip Video Text",
+  "description": "Apolyx S0012 — Clip Video Text",
+  "files": [
+    {
+      "path": "src/components/ui/clip-video-text.tsx",
+      "target": "clip-video-text.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/clip-video-text"
+}

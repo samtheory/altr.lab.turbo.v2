@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "cursor-glow",
+  "type": "ui",
+  "title": "Cursor Glow",
+  "description": "Apolyx S0012 — Cursor Glow",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/cursor-glow.tsx",
+      "target": "cursor-glow.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/cursor-glow"
+}

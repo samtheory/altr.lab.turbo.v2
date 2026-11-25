@@ -31,8 +31,9 @@ Each sprint lives in its own folder `Apolyx-S000N/`. Closed sprints stay as an a
 | [[Apolyx-S0009/README]] | Agent core UI | closed (2026-11-25) |
 | [[Apolyx-S0010/README]] | HITL / voice / marketing blocks | closed (2026-11-25) |
 | [[Apolyx-S0011/README]] | Agent extras (NextUI leftovers) | closed (2026-11-25) |
+| [[Apolyx-S0012/README]] | Magic UI reference wave (patterns, text, chrome) | in progress |
 
-**Active Apolyx sprint:** none. Last closed: [[Apolyx-S0011/README]] · Feature: [[../../feature_list/ui-kit/12-apolyx-s0011-agent-extras]].
+**Active Apolyx sprint:** [[Apolyx-S0012/README]] · Feature: [[../../feature_list/ui-kit/13-apolyx-s0012-magicui-wave]].
 
 **Lab next:** pick from [[../../feature_list/ui-kit/01-apolyx-s0001-carryovers]] or Jord [[../Jord/Jord-S0001/README]].
 

@@ -145,6 +145,7 @@ export {
 } from "./components/ui/stamp";
 export {
   TextReveal,
+  TextRevealDiagonal,
   type TextRevealProps,
 } from "./components/ui/text-reveal";
 export {
@@ -234,6 +235,126 @@ export {
   type PulseCardProps,
 } from "./components/ui/pulse-card";
 export {
+  PatternDots,
+  type PatternDotsProps,
+} from "./components/ui/pattern-dots";
+export {
+  PatternHex,
+  type PatternHexProps,
+} from "./components/ui/pattern-hex";
+export {
+  PatternStripes,
+  type PatternStripesProps,
+} from "./components/ui/pattern-stripes";
+export {
+  PatternRetroGrid,
+  type PatternRetroGridProps,
+} from "./components/ui/pattern-retro-grid";
+export {
+  PatternPulseGrid,
+  type PatternPulseGridProps,
+} from "./components/ui/pattern-pulse-grid";
+export {
+  PatternFlickerGrid,
+  type PatternFlickerGridProps,
+} from "./components/ui/pattern-flicker-grid";
+export {
+  PatternRipple,
+  type PatternRippleProps,
+} from "./components/ui/pattern-ripple";
+export {
+  PatternLightRays,
+  type PatternLightRaysProps,
+} from "./components/ui/pattern-light-rays";
+export {
+  PatternDither,
+  type PatternDitherProps,
+} from "./components/ui/pattern-dither";
+export {
+  ParticleField,
+  type ParticleFieldProps,
+} from "./components/ui/particle-field";
+export {
+  ParticleDrift,
+  type ParticleDriftProps,
+} from "./components/ui/particle-drift";
+export {
+  ClipVideoText,
+  type ClipVideoTextProps,
+} from "./components/ui/clip-video-text";
+export { Marquee, type MarqueeProps } from "./components/ui/marquee";
+export {
+  NumberTicker,
+  type NumberTickerProps,
+} from "./components/ui/number-ticker";
+export { WordCycle, type WordCycleProps } from "./components/ui/word-cycle";
+export { AuroraText, type AuroraTextProps } from "./components/ui/aurora-text";
+export { ShimmerText, type ShimmerTextProps } from "./components/ui/shimmer-text";
+export {
+  TypewriterText,
+  type TypewriterTextProps,
+} from "./components/ui/typewriter-text";
+export {
+  BentoGrid,
+  BentoItem,
+  type BentoGridProps,
+  type BentoItemProps,
+} from "./components/ui/bento-grid";
+export {
+  ScrollProgress,
+  type ScrollProgressProps,
+} from "./components/ui/scroll-progress";
+export {
+  BeamLink,
+  BeamCanvas,
+  BeamNode,
+  BeamConnections,
+  type BeamLinkProps,
+  type BeamEndpoint,
+  type BeamCanvasProps,
+  type BeamNodeProps,
+  type BeamConnectionsProps,
+  type BeamConnection,
+} from "./components/ui/beam-link";
+export { BorderGlow, type BorderGlowProps } from "./components/ui/border-glow";
+export { ShimmerButton, type ShimmerButtonProps } from "./components/ui/shimmer-button";
+export { RippleButton, type RippleButtonProps } from "./components/ui/ripple-button";
+export { DockBar, DockItem, type DockBarProps, type DockItemProps } from "./components/ui/dock-bar";
+export { RevealList, type RevealListProps } from "./components/ui/reveal-list";
+export { BrowserFrame, type BrowserFrameProps } from "./components/ui/browser-frame";
+export { PhoneFrame, type PhoneFrameProps } from "./components/ui/phone-frame";
+export { AndroidFrame, type AndroidFrameProps } from "./components/ui/android-frame";
+export { SocialQuoteCard, type SocialQuoteCardProps } from "./components/ui/social-quote-card";
+export { OrbitRing, type OrbitRingProps } from "./components/ui/orbit-ring";
+export { MagnifyLens, type MagnifyLensProps } from "./components/ui/magnify-lens";
+export { CursorGlow, type CursorGlowProps } from "./components/ui/cursor-glow";
+export { EdgeFadeBlur, type EdgeFadeBlurProps } from "./components/ui/edge-fade-blur";
+export { DotMap, type DotMapProps } from "./components/ui/dot-map";
+export { ShineFrame, type ShineFrameProps } from "./components/ui/shine-frame";
+export { SpotlightCard, type SpotlightCardProps } from "./components/ui/spotlight-card";
+export { GlareSurface, type GlareSurfaceProps } from "./components/ui/glare-surface";
+export { MeteorShower, type MeteorShowerProps } from "./components/ui/meteor-shower";
+export { GradientGlowCard, type GradientGlowCardProps } from "./components/ui/gradient-glow-card";
+export { ConfettiBurst, type ConfettiBurstProps } from "./components/ui/confetti-burst";
+export { ThemeMorphToggle, type ThemeMorphToggleProps } from "./components/ui/theme-morph-toggle";
+export { TextMotion, type TextMotionProps, type TextMotionPreset } from "./components/ui/text-motion";
+export { LineShadowText, type LineShadowTextProps } from "./components/ui/line-shadow-text";
+export { GradientFlowText, type GradientFlowTextProps } from "./components/ui/gradient-flow-text";
+export { ScrambleText, type ScrambleTextProps } from "./components/ui/scramble-text";
+export { ScrollVelocityText, type ScrollVelocityTextProps } from "./components/ui/scroll-velocity-text";
+export { SparkleText, type SparkleTextProps } from "./components/ui/sparkle-text";
+export { MorphText, type MorphTextProps } from "./components/ui/morph-text";
+export { SpinLabel, type SpinLabelProps } from "./components/ui/spin-label";
+export { ComicText, type ComicTextProps } from "./components/ui/comic-text";
+export { KineticText, type KineticTextProps } from "./components/ui/kinetic-text";
+export { FileTree, type FileTreeProps, type FileTreeNode } from "./components/ui/file-tree";
+export { PixelReveal, type PixelRevealProps } from "./components/ui/pixel-reveal";
+export { PulseButton, type PulseButtonProps } from "./components/ui/pulse-button";
+export { MagnetButton, type MagnetButtonProps } from "./components/ui/magnet-button";
+export { ProgressRing, type ProgressRingProps } from "./components/ui/progress-ring";
+export { BacklightPlate, type BacklightPlateProps } from "./components/ui/backlight-plate";
+export { GlyphMatrix, type GlyphMatrixProps } from "./components/ui/glyph-matrix";
+export {
   ThinkingRing,
   type ThinkingRingProps,
 } from "./components/ui/thinking-ring";
@@ -298,6 +419,7 @@ export {
 export {
   DiffViewer,
   type DiffViewerProps,
+  type DiffViewerMode,
   type DiffLine,
 } from "./components/ui/diff-viewer";
 export {
@@ -779,7 +901,7 @@ export {
 } from "./components/theme-provider";
 export { ThemeToggle } from "./components/theme-toggle";
 export { ThemeFamilySwitcher } from "./components/theme-family-switcher";
-export { FadeIn, motion } from "./components/motion";
+export { FadeIn, BlurFade, motion, type BlurFadeProps } from "./components/motion";
 export {
   durations,
   easings,

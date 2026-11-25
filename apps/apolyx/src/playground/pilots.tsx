@@ -21,6 +21,7 @@ import {
   Spinner,
   Stamp,
   Switch,
+  DiffViewer,
 } from "@altr/apolyx";
 
 import type { PlaygroundSchema, PlaygroundValues } from "./types";
@@ -617,5 +618,50 @@ export const stampPlayground: PlaygroundSchema = {
       duration !== "28" ? ` duration={${duration}}` : "",
     ].join("");
     return `<Stamp${parts}>${label}</Stamp>`;
+  },
+};
+
+const DIFF_DEMO = [
+  { type: "context" as const, text: "export function greet(name: string) {", oldNo: 1, newNo: 1 },
+  { type: "remove" as const, text: '  return "Hi " + name;', oldNo: 2 },
+  { type: "add" as const, text: "  return `Hello, ${name}!`;", newNo: 2 },
+  { type: "context" as const, text: "}", oldNo: 3, newNo: 3 },
+];
+
+export const diffViewerPlayground: PlaygroundSchema = {
+  id: "diff-viewer-demo",
+  component: "DiffViewer",
+  installName: "diff-viewer",
+  docsPath: "/docs/components/diff-viewer",
+  controls: [
+    {
+      kind: "enum",
+      key: "mode",
+      label: "Layout",
+      options: [
+        { value: "unified", label: "unified" },
+        { value: "split", label: "side-by-side" },
+      ],
+    },
+    { kind: "string", key: "title", label: "File title", placeholder: "greet.ts" },
+  ],
+  defaults: { mode: "unified", title: "greet.ts" },
+  render(values) {
+    const mode = str(values, "mode", "unified") as "unified" | "split";
+    return (
+      <DiffViewer
+        title={str(values, "title", "greet.ts")}
+        lines={DIFF_DEMO}
+        mode={mode}
+        className="max-w-2xl"
+      />
+    );
+  },
+  toJsx(values) {
+    const mode = str(values, "mode", "unified");
+    const title = str(values, "title", "greet.ts");
+    return `<DiffViewer${mode !== "unified" ? ` mode=${JSON.stringify(mode)}` : ""}${
+      title !== "greet.ts" ? ` title=${JSON.stringify(title)}` : ""
+    } />`;
   },
 };

@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "pattern-flicker-grid",
+  "type": "ui",
+  "title": "Pattern Flicker Grid",
+  "description": "Apolyx S0012 — Pattern Flicker Grid",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pattern-flicker-grid.tsx",
+      "target": "pattern-flicker-grid.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/pattern-flicker-grid"
+}

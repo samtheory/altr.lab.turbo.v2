@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "magnify-lens",
+  "type": "ui",
+  "title": "Magnify Lens",
+  "description": "Apolyx S0012 — Magnify Lens",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/magnify-lens.tsx",
+      "target": "magnify-lens.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/magnify-lens"
+}

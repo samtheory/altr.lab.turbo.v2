@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "scroll-progress",
+  "type": "ui",
+  "title": "Scroll Progress",
+  "description": "Apolyx S0012 — Scroll Progress",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/scroll-progress.tsx",
+      "target": "scroll-progress.tsx"
+    }
+  ],
+  "registryDependencies": [ "utils", "use-reduced-motion" ],
+  "docs": "components/scroll-progress"
+}

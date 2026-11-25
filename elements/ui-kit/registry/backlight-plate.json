@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "backlight-plate",
+  "type": "ui",
+  "title": "Backlight Plate",
+  "description": "Apolyx S0012 — Backlight Plate",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/backlight-plate.tsx",
+      "target": "backlight-plate.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/backlight-plate"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "shine-frame",
+  "type": "ui",
+  "title": "Shine Frame",
+  "description": "Apolyx S0012 — Shine Frame",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/shine-frame.tsx",
+      "target": "shine-frame.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/shine-frame"
+}

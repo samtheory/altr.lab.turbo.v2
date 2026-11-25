@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "shimmer-button",
+  "type": "ui",
+  "title": "Shimmer Button",
+  "description": "Apolyx S0012 — Shimmer Button",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/shimmer-button.tsx",
+      "target": "shimmer-button.tsx"
+    }
+  ],
+  "registryDependencies": [ "button", "use-reduced-motion", "utils" ],
+  "docs": "components/shimmer-button"
+}
