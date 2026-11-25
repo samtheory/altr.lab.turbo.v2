@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DocStatusBadge } from "@/components/site/doc-status-badge";
 import { TableOfContents } from "@/components/site/toc";
 import { allDocs, docFile, docHref, findDoc, neighbours } from "@/docs-config";
-import { extractHeadings } from "@/lib/slugify";
+import { buildDocToc } from "@/lib/slugify";
 
 type Props = { params: Promise<{ slug?: string[] }> };
 
@@ -40,13 +40,13 @@ export default async function DocPage({ params }: Props) {
     path.join(process.cwd(), "src", "content", "docs", `${file}.mdx`),
     "utf8",
   );
-  const headings = extractHeadings(source);
+  const headings = buildDocToc(doc.title, source);
   const { prev, next } = neighbours(doc.slug);
 
   return (
-    <div className="flex gap-6 xl:gap-8">
-      <article className="min-w-0 max-w-4xl flex-1 py-10">
-        <header className="mb-8 space-y-3">
+    <div className="flex gap-4 xl:gap-8">
+      <article className="min-w-0 flex-1 py-10">
+        <header id="doc-top" className="mb-8 scroll-mt-24 space-y-3">
           <div className="flex items-center gap-2">
             <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">
               {doc.title}
@@ -73,8 +73,8 @@ export default async function DocPage({ params }: Props) {
           ) : null}
         </nav>
       </article>
-      <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-48 shrink-0 self-start xl:block">
-        <div className="apolyx-rail h-full overflow-y-auto overscroll-contain py-10 [overflow-anchor:none]">
+      <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-56 shrink-0 self-start xl:block">
+        <div className="apolyx-rail h-full overflow-y-auto overscroll-contain py-10 ps-3 [overflow-anchor:none]">
           <TableOfContents headings={headings} />
         </div>
       </aside>

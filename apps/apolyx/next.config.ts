@@ -3,13 +3,18 @@ import rehypeShiki from "@shikijs/rehype";
 import type { NextConfig } from "next";
 import remarkGfm from "remark-gfm";
 
+import { apolyxDark, apolyxLight } from "./src/lib/apolyx-shiki-themes";
+
 const withMDX = createMDX({
   options: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
       [
         rehypeShiki,
-        { themes: { light: "github-light", dark: "github-dark" } },
+        {
+          themes: { light: apolyxLight, dark: apolyxDark },
+          defaultColor: "light",
+        },
       ],
     ],
   },

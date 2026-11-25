@@ -6,6 +6,19 @@ import {
   AlertTitle,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Input,
+  Label,
+  Progress,
+  Separator,
+  Skeleton,
+  Spinner,
   Switch,
 } from "@altr/apolyx";
 
@@ -221,5 +234,286 @@ export const switchPlayground: PlaygroundSchema = {
   toJsx(values) {
     const defaults = switchPlayground.defaults;
     return `<Switch${attr("size", str(values, "size"), defaults)}${attr("tone", str(values, "tone"), defaults)}${attr("checked", bool(values, "checked"))}${attr("disabled", bool(values, "disabled") || undefined)} aria-label="Notifications" />`;
+  },
+};
+
+export const cardPlayground: PlaygroundSchema = {
+  id: "card-demo",
+  component: "Card",
+  installName: "card",
+  docsPath: "/docs/components/card",
+  controls: [
+    { kind: "string", key: "title", label: "Title", placeholder: "Title" },
+    { kind: "string", key: "description", label: "Description", placeholder: "Description" },
+    { kind: "string", key: "label", label: "Field label", placeholder: "Name" },
+    { kind: "string", key: "placeholder", label: "Placeholder", placeholder: "apolyx-docs" },
+    { kind: "string", key: "primary", label: "Primary action", placeholder: "Create" },
+    { kind: "boolean", key: "showCancel", label: "Show cancel" },
+  ],
+  defaults: {
+    title: "Create project",
+    description: "Deploy a new project in one click.",
+    label: "Name",
+    placeholder: "apolyx-docs",
+    primary: "Create",
+    showCancel: true,
+  },
+  render(values) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>{str(values, "title", "Create project")}</CardTitle>
+          <CardDescription>
+            {str(values, "description", "Deploy a new project in one click.")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Label htmlFor="pg-card-project">{str(values, "label", "Name")}</Label>
+          <Input
+            id="pg-card-project"
+            placeholder={str(values, "placeholder", "apolyx-docs")}
+          />
+        </CardContent>
+        <CardFooter className="justify-end gap-2">
+          {bool(values, "showCancel") ? <Button variant="ghost">Cancel</Button> : null}
+          <Button>{str(values, "primary", "Create")}</Button>
+        </CardFooter>
+      </Card>
+    );
+  },
+  toJsx(values) {
+    const cancel = bool(values, "showCancel")
+      ? `    <Button variant="ghost">Cancel</Button>\n`
+      : "";
+    return `<Card className="w-full max-w-sm">
+  <CardHeader>
+    <CardTitle>${str(values, "title")}</CardTitle>
+    <CardDescription>${str(values, "description")}</CardDescription>
+  </CardHeader>
+  <CardContent className="space-y-2">
+    <Label htmlFor="card-project">${str(values, "label")}</Label>
+    <Input id="card-project" placeholder=${JSON.stringify(str(values, "placeholder"))} />
+  </CardContent>
+  <CardFooter className="justify-end gap-2">
+${cancel}    <Button>${str(values, "primary")}</Button>
+  </CardFooter>
+</Card>`;
+  },
+};
+
+export const inputPlayground: PlaygroundSchema = {
+  id: "input-demo",
+  component: "Input",
+  installName: "input",
+  docsPath: "/docs/components/input",
+  controls: [
+    {
+      kind: "enum",
+      key: "variant",
+      label: "Variant",
+      options: ["outline", "filled", "underline", "ghost"].map((value) => ({ value, label: value })),
+    },
+    {
+      kind: "enum",
+      key: "size",
+      label: "Size",
+      options: ["sm", "md", "lg"].map((value) => ({ value, label: value })),
+    },
+    {
+      kind: "enum",
+      key: "shape",
+      label: "Shape",
+      options: ["default", "pill"].map((value) => ({ value, label: value })),
+    },
+    { kind: "string", key: "placeholder", label: "Placeholder", placeholder: "Email" },
+    { kind: "boolean", key: "disabled", label: "Disabled" },
+  ],
+  defaults: {
+    variant: "outline",
+    size: "md",
+    shape: "default",
+    placeholder: "you@apolyx.dev",
+    disabled: false,
+  },
+  render(values) {
+    return (
+      <Input
+        className="max-w-sm"
+        variant={str(values, "variant", "outline") as "outline"}
+        size={str(values, "size", "md") as "md"}
+        shape={str(values, "shape", "default") as "default"}
+        placeholder={str(values, "placeholder")}
+        disabled={bool(values, "disabled")}
+      />
+    );
+  },
+  toJsx(values) {
+    const defaults = inputPlayground.defaults;
+    return `<Input${attr("variant", str(values, "variant"), defaults)}${attr("size", str(values, "size"), defaults)}${attr("shape", str(values, "shape"), defaults)} placeholder=${JSON.stringify(str(values, "placeholder"))}${attr("disabled", bool(values, "disabled") || undefined)} />`;
+  },
+};
+
+export const progressPlayground: PlaygroundSchema = {
+  id: "progress-demo",
+  component: "Progress",
+  installName: "progress",
+  docsPath: "/docs/components/progress",
+  controls: [
+    {
+      kind: "enum",
+      key: "mode",
+      label: "Mode",
+      options: [
+        { value: "determinate", label: "determinate" },
+        { value: "indeterminate", label: "indeterminate" },
+      ],
+    },
+    { kind: "string", key: "value", label: "Value (0–100)", placeholder: "64" },
+  ],
+  defaults: { mode: "determinate", value: "64" },
+  render(values) {
+    const indeterminate = str(values, "mode") === "indeterminate";
+    const raw = Number(str(values, "value", "64"));
+    const value = Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
+    return (
+      <Progress
+        className="w-full max-w-sm"
+        value={indeterminate ? undefined : value}
+        aria-label="Progress"
+      />
+    );
+  },
+  toJsx(values) {
+    if (str(values, "mode") === "indeterminate") {
+      return `<Progress className="w-full max-w-sm" aria-label="Progress" />`;
+    }
+    return `<Progress className="w-full max-w-sm" value={${Number(str(values, "value", "64")) || 0}} aria-label="Progress" />`;
+  },
+};
+
+export const separatorPlayground: PlaygroundSchema = {
+  id: "separator-demo",
+  component: "Separator",
+  installName: "separator",
+  docsPath: "/docs/components/separator",
+  controls: [
+    {
+      kind: "enum",
+      key: "orientation",
+      label: "Orientation",
+      options: ["horizontal", "vertical"].map((value) => ({ value, label: value })),
+    },
+  ],
+  defaults: { orientation: "horizontal" },
+  render(values) {
+    const vertical = str(values, "orientation") === "vertical";
+    return (
+      <div className={cnSep(vertical)}>
+        <span className="text-sm text-muted-foreground">{vertical ? "A" : "Above"}</span>
+        <Separator
+          orientation={str(values, "orientation", "horizontal") as "horizontal"}
+          className={vertical ? "h-10 self-center" : undefined}
+        />
+        <span className="text-sm text-muted-foreground">{vertical ? "B" : "Below"}</span>
+      </div>
+    );
+  },
+  toJsx(values) {
+    return `<Separator${attr("orientation", str(values, "orientation"), separatorPlayground.defaults)} />`;
+  },
+};
+
+function cnSep(vertical: boolean) {
+  return vertical
+    ? "flex h-16 items-center gap-3"
+    : "flex w-full max-w-sm flex-col gap-3";
+}
+
+export const spinnerPlayground: PlaygroundSchema = {
+  id: "spinner-demo",
+  component: "Spinner",
+  installName: "spinner",
+  docsPath: "/docs/components/spinner",
+  controls: [
+    { kind: "string", key: "label", label: "Label", placeholder: "Loading" },
+  ],
+  defaults: { label: "Loading" },
+  render(values) {
+    return <Spinner label={str(values, "label", "Loading")} />;
+  },
+  toJsx(values) {
+    const label = str(values, "label", "Loading");
+    return label === "Loading"
+      ? `<Spinner />`
+      : `<Spinner label=${JSON.stringify(label)} />`;
+  },
+};
+
+export const skeletonPlayground: PlaygroundSchema = {
+  id: "skeleton-demo",
+  component: "Skeleton",
+  installName: "skeleton",
+  docsPath: "/docs/components/skeleton",
+  controls: [
+    {
+      kind: "enum",
+      key: "shape",
+      label: "Shape",
+      options: [
+        { value: "line", label: "line" },
+        { value: "avatar", label: "avatar" },
+        { value: "block", label: "block" },
+      ],
+    },
+  ],
+  defaults: { shape: "line" },
+  render(values) {
+    const shape = str(values, "shape", "line");
+    if (shape === "avatar") return <Skeleton className="size-12 rounded-full" />;
+    if (shape === "block") return <Skeleton className="h-24 w-full max-w-sm rounded-xl" />;
+    return (
+      <div className="grid w-full max-w-sm gap-2">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+    );
+  },
+  toJsx(values) {
+    const shape = str(values, "shape", "line");
+    if (shape === "avatar") return `<Skeleton className="size-12 rounded-full" />`;
+    if (shape === "block") return `<Skeleton className="h-24 w-full rounded-xl" />`;
+    return `<Skeleton className="h-4 w-full" />`;
+  },
+};
+
+export const checkboxPlayground: PlaygroundSchema = {
+  id: "checkbox-demo",
+  component: "Checkbox",
+  installName: "checkbox",
+  docsPath: "/docs/components/checkbox",
+  controls: [
+    { kind: "boolean", key: "checked", label: "Checked" },
+    { kind: "boolean", key: "disabled", label: "Disabled" },
+    { kind: "string", key: "label", label: "Label", placeholder: "Accept terms" },
+  ],
+  defaults: { checked: true, disabled: false, label: "Accept terms" },
+  render(values, setValue) {
+    return (
+      <label className="flex items-center gap-2 text-sm">
+        <Checkbox
+          checked={bool(values, "checked")}
+          disabled={bool(values, "disabled")}
+          onCheckedChange={(checked) => setValue("checked", checked === true)}
+        />
+        {str(values, "label", "Accept terms")}
+      </label>
+    );
+  },
+  toJsx(values) {
+    return `<label className="flex items-center gap-2 text-sm">
+  <Checkbox${attr("checked", bool(values, "checked"))}${attr("disabled", bool(values, "disabled") || undefined)} />
+  ${str(values, "label", "Accept terms")}
+</label>`;
   },
 };

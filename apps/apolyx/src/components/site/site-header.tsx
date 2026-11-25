@@ -43,7 +43,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 h-16 border-b border-border/70 bg-background/75 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-full max-w-screen-2xl items-center gap-4 px-4 sm:gap-6 sm:px-6">
+      <div className="mx-auto flex h-full w-full items-center gap-4 px-2 sm:gap-6 sm:px-3 lg:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <MobileNav />
           <Link

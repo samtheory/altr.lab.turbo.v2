@@ -11,22 +11,85 @@
   --apolyx-mark: oklch(0.7 0.19 25);
 }
 
-/* Shiki dual themes: light colors inline, dark via --shiki-dark vars. */
+/* Shiki dual themes: light colors inline, dark via --shiki-dark vars.
+   Token hues come from apolyx-light / apolyx-dark (amber · sky · green). */
 .code-block pre,
 pre.code-block,
 pre.shiki {
-  background-color: color-mix(in oklch, var(--muted) 55%, transparent) !important;
-  padding: 1rem;
-  line-height: 1.6;
+  background:
+    radial-gradient(
+      90% 70% at 100% 0%,
+      color-mix(in oklch, var(--info, var(--primary)) 8%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      80% 60% at 0% 100%,
+      color-mix(in oklch, var(--warning, var(--primary)) 6%, transparent),
+      transparent 45%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in oklch, var(--muted) 55%, var(--card)),
+      color-mix(in oklch, var(--card) 92%, var(--muted))
+    ) !important;
+  padding: 1.15rem 1.05rem 1.3rem;
+  line-height: 1.7;
+  font-size: 0.7rem;
+  letter-spacing: -0.015em;
+  font-variant-ligatures: none;
+  tab-size: 2;
 }
 
 .code-block pre {
   margin: 0;
 }
 
+.code-block .shiki,
+pre.code-block.shiki,
+pre.shiki {
+  /* Let panel chrome own the fill; keep Shiki bg transparent */
+  --shiki-light-bg: transparent;
+  --shiki-dark-bg: transparent;
+}
+
+.apolyx-code-panel {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--muted) 40%, var(--card)),
+      color-mix(in oklch, var(--card) 94%, var(--muted))
+    );
+}
+
+.apolyx-code-block pre {
+  padding-top: 1.4rem;
+  padding-right: 3.1rem;
+}
+
 .dark .shiki,
 .dark .shiki span {
   color: var(--shiki-dark) !important;
+}
+
+.dark .code-block pre,
+.dark pre.code-block,
+.dark pre.shiki {
+  background:
+    radial-gradient(
+      90% 70% at 100% 0%,
+      color-mix(in oklch, var(--info, var(--primary)) 12%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      80% 60% at 0% 100%,
+      color-mix(in oklch, var(--warning, var(--primary)) 10%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in oklch, var(--muted) 45%, #0c1218),
+      color-mix(in oklch, var(--card) 88%, #0a1016)
+    ) !important;
 }
 
 html {
@@ -90,6 +153,13 @@ html {
   text-shadow: 0 0 18px color-mix(in oklch, var(--primary) 35%, transparent);
 }
 
+.apolyx-toc-dot {
+  background: var(--primary);
+  box-shadow:
+    0 0 0 2px color-mix(in oklch, var(--primary) 28%, transparent),
+    0 0 8px color-mix(in oklch, var(--primary) 45%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .apolyx-lightning-fill {
     box-shadow: none;
@@ -97,11 +167,16 @@ html {
   .apolyx-toc-active {
     text-shadow: none;
   }
+  .apolyx-toc-dot {
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 28%, transparent);
+  }
 }
 
 /* Docs side rails: quieter thumb until hover/focus */
 .apolyx-rail {
   scrollbar-gutter: stable;
+  /* Keep nav / TOC clear of the scrollbar thumb */
+  padding-inline-end: 0.25rem;
 }
 
 .apolyx-rail::-webkit-scrollbar {

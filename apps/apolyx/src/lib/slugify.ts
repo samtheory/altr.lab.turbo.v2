@@ -32,3 +32,19 @@ export function extractHeadings(source: string) {
   }
   return headings;
 }
+
+/**
+ * TOC for a docs page: page title first (Overview / component name),
+ * then `##` sections. Avoids leading with Installation when the H1
+ * is the real entry point.
+ */
+export function buildDocToc(
+  pageTitle: string,
+  source: string,
+  options?: { leadLabel?: string },
+): { id: string; title: string }[] {
+  const leadId = "doc-top";
+  const leadTitle = options?.leadLabel ?? pageTitle;
+  const rest = extractHeadings(source).filter((h) => h.id !== leadId && h.id !== slugify(pageTitle));
+  return [{ id: leadId, title: leadTitle }, ...rest];
+}

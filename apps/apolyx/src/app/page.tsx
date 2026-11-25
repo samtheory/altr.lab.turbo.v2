@@ -3,8 +3,11 @@ import { ArrowRight } from "lucide-react";
 import { Badge, Button } from "@altr/apolyx";
 
 import { CopyButton } from "@/components/docs/copy-button";
+import { ColoredCode } from "@/components/docs/jsx-snippet";
 import { LandingShowcase } from "@/components/site/landing-showcase";
 import { allDocs } from "@/docs-config";
+
+const LANDING_INSTALL = "pnpm dlx apolyx add button";
 
 const pillars = [
   {
@@ -49,11 +52,15 @@ export default function HomePage() {
               <Link href="/docs/components/button">Browse components</Link>
             </Button>
           </div>
-          <div className="flex max-w-md items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 py-1.5 pl-4 pr-1.5 font-mono text-sm">
-            <span>
-              <span className="text-muted-foreground">$</span> npx apolyx add button
+          <div className="flex max-w-md items-center justify-between gap-2 rounded-xl border border-border/80 bg-[linear-gradient(165deg,color-mix(in_oklch,var(--muted)_70%,var(--card)),color-mix(in_oklch,var(--card)_90%,var(--muted)))] py-1.5 pl-4 pr-1.5">
+            <span className="flex min-w-0 items-center gap-2 overflow-x-auto">
+              <span className="shrink-0 font-mono text-[12px] text-muted-foreground">$</span>
+              <ColoredCode code={LANDING_INSTALL} lang="shell" className="text-[12px] leading-[1.7]" />
             </span>
-            <CopyButton value="npx apolyx add button" />
+            <CopyButton
+              value={LANDING_INSTALL}
+              className="shrink-0 rounded-md border border-border/50 bg-background/75 backdrop-blur-sm"
+            />
           </div>
         </div>
         <LandingShowcase />
