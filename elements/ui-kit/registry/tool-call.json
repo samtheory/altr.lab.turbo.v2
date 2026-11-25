@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "tool-call",
+  "type": "ui",
+  "title": "Tool Call",
+  "description": "Collapsible card for one agent tool call",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/tool-call.tsx", "target": "tool-call.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "use-id"],
+  "docs": "components/tool-call"
+}

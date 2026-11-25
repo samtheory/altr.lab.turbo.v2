@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "hero-chat",
+  "type": "ui",
+  "title": "Hero Chat",
+  "description": "Hero with mini conversation preview",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/hero-chat.tsx", "target": "hero-chat.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "blocks/hero-chat"
+}

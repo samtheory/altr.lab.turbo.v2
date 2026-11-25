@@ -2,7 +2,7 @@
 title: "Apolyx feature index (apolyx-F####)"
 description: "Stable feature IDs for Apolyx / ui-kit intent"
 created: 2026-10-27
-updated: 2026-10-28
+updated: 2026-11-25
 tags:
   - feature
   - apolyx
@@ -24,8 +24,13 @@ tags:
 | **apolyx-F0006** | [[05-apolyx-s0004-popover]] | done (S0004) |
 | **apolyx-F0007** | [[06-apolyx-s0005-product-gate]] | done (S0005) |
 | **apolyx-F0008** | [[apolyx-F0008-datagrid]] | in progress (column ops via S0056; editing open) |
-| **apolyx-F0009** | [[07-apolyx-s0006-nextui-wave]] | in progress (Apolyx-S0006) |
+| **apolyx-F0009** | [[07-apolyx-s0006-nextui-wave]] | done (Apolyx-S0006) |
+| **apolyx-F0010** | [[08-apolyx-s0007-motion-cards]] | done (Apolyx-S0007) |
+| **apolyx-F0011** | [[09-apolyx-s0008-ornaments]] | done (Apolyx-S0008) |
+| **apolyx-F0012** | [[10-apolyx-s0009-agent-core]] | done (Apolyx-S0009) |
+| **apolyx-F0013** | [[11-apolyx-s0010-hitl-blocks]] | done (Apolyx-S0010) |
+| **apolyx-F0014** | [[12-apolyx-s0011-agent-extras]] | done (Apolyx-S0011) |
 
 ## Next free id
 
-**apolyx-F0010**
+**apolyx-F0015**

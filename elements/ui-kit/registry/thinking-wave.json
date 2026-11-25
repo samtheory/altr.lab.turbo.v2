@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "thinking-wave",
+  "type": "ui",
+  "title": "Thinking Wave",
+  "description": "Equalizer-style thinking bars with a status label",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/thinking-wave.tsx", "target": "thinking-wave.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/thinking-wave"
+}

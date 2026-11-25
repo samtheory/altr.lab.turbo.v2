@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "trace-waterfall",
+  "type": "ui",
+  "title": "Trace Waterfall",
+  "description": "Live agent span waterfall with playhead, nested kinds, errors, and a detail panel",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/trace-waterfall.tsx", "target": "trace-waterfall.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/trace-waterfall"
+}

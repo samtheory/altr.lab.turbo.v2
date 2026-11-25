@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "streaming-message",
+  "type": "ui",
+  "title": "Streaming Message",
+  "description": "Assistant message that streams word by word",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/streaming-message.tsx", "target": "streaming-message.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/streaming-message"
+}

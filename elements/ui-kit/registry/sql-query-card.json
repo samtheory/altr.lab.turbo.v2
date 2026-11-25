@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "sql-query-card",
+  "type": "ui",
+  "title": "SQL Query Card",
+  "description": "SQL query with results table",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/sql-query-card.tsx", "target": "sql-query-card.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/sql-query-card"
+}

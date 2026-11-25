@@ -37,4 +37,4 @@ S0007 motion text + display cards · S0008 visual ornaments · S0009 agent core 
 
 ## Status
 
-**in progress** — kit components + docs/registry for S0006.
+**done** — kit components + docs/registry for S0006. Next: [[08-apolyx-s0007-motion-cards]].

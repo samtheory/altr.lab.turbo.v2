@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "slash-menu",
+  "type": "ui",
+  "title": "Slash Menu",
+  "description": "Slash-command palette for a chat composer",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/slash-menu.tsx", "target": "slash-menu.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/slash-menu"
+}

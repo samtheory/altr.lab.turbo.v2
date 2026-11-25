@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-highlight",
+  "type": "ui",
+  "title": "Text Highlight",
+  "description": "Sweep marker behind a phrase",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/text-highlight.tsx",
+      "target": "text-highlight.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/text-highlight"
+}

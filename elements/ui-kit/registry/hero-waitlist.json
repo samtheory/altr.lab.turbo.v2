@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "hero-waitlist",
+  "type": "ui",
+  "title": "Hero Waitlist",
+  "description": "Hero with email join field",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/hero-waitlist.tsx", "target": "hero-waitlist.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button", "input", "avatar"],
+  "docs": "blocks/hero-waitlist"
+}

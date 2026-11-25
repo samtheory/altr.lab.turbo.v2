@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "the-shift",
+  "type": "ui",
+  "title": "The Shift",
+  "description": "Before after comparison section",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/the-shift.tsx", "target": "the-shift.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/the-shift"
+}

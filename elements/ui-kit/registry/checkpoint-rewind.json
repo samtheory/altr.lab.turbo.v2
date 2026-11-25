@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "checkpoint-rewind",
+  "type": "ui",
+  "title": "Checkpoint Rewind",
+  "description": "Session checkpoints with code or chat restore",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/checkpoint-rewind.tsx", "target": "checkpoint-rewind.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "components/checkpoint-rewind"
+}

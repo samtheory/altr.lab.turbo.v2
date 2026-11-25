@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "background-tasks",
+  "type": "ui",
+  "title": "Background Tasks",
+  "description": "Background jobs with progress and status",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/background-tasks.tsx", "target": "background-tasks.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "progress"],
+  "docs": "components/background-tasks"
+}

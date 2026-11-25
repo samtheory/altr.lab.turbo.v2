@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "artifact-panel",
+  "type": "ui",
+  "title": "Artifact Panel",
+  "description": "Collapsible generated artifacts panel",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/artifact-panel.tsx", "target": "artifact-panel.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "use-id"],
+  "docs": "components/artifact-panel"
+}

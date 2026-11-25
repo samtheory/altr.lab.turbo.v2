@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "sources-list",
+  "type": "ui",
+  "title": "Sources List",
+  "description": "Cited sources under an assistant reply",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/sources-list.tsx", "target": "sources-list.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/sources-list"
+}

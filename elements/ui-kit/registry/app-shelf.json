@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "app-shelf",
+  "type": "ui",
+  "title": "App Shelf",
+  "description": "Horizontal shelf of app tiles",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/app-shelf.tsx", "target": "app-shelf.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/app-shelf"
+}

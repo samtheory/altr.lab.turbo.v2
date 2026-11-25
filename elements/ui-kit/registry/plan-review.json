@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "plan-review",
+  "type": "ui",
+  "title": "Plan Review",
+  "description": "Review and approve an agent execution plan",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/plan-review.tsx", "target": "plan-review.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "components/plan-review"
+}

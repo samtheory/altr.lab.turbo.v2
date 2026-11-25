@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "agent-memory",
+  "type": "ui",
+  "title": "Agent Memory",
+  "description": "Expandable drawer of learned agent memory rules",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/agent-memory.tsx", "target": "agent-memory.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button", "use-id"],
+  "docs": "components/agent-memory"
+}

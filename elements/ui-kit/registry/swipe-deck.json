@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "swipe-deck",
+  "type": "ui",
+  "title": "Swipe Deck",
+  "description": "Draggable swipe card deck",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/swipe-deck.tsx",
+      "target": "swipe-deck.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/swipe-deck"
+}

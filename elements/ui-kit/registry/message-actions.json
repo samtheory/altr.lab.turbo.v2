@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "message-actions",
+  "type": "ui",
+  "title": "Message Actions",
+  "description": "Copy, regenerate, and feedback for a message",
+  "dependencies": { "lucide-react": "^0.525.0" },
+  "files": [{ "path": "src/components/ui/message-actions.tsx", "target": "message-actions.tsx" }],
+  "registryDependencies": ["utils"],
+  "docs": "components/message-actions"
+}

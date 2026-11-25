@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "tool-approval",
+  "type": "ui",
+  "title": "Tool Approval",
+  "description": "Approve or deny an agent tool with side effects",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/tool-approval.tsx", "target": "tool-approval.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "components/tool-approval"
+}

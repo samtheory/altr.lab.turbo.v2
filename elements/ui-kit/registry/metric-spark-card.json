@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "metric-spark-card",
+  "type": "ui",
+  "title": "Metric Spark Card",
+  "description": "Metric tile with animated sparkline",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/metric-spark-card.tsx",
+      "target": "metric-spark-card.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/metric-spark-card"
+}

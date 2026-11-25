@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "creative-home-hero",
+  "type": "ui",
+  "title": "Creative Home Hero",
+  "description": "Bold creative landing hero",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/creative-home-hero.tsx", "target": "creative-home-hero.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "blocks/creative-home-hero"
+}

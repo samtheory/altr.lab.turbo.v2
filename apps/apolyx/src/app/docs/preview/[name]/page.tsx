@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { demos, type DemoName } from "@/demos";
 
-type Props = { params: Promise<{ name: string }> };
+type Props = {
+  params: Promise<{ name: string }>;
+  searchParams: Promise<{ embed?: string }>;
+};
 
 export const dynamicParams = false;
 
@@ -16,10 +19,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `${name} · Preview · Apolyx` };
 }
 
-export default async function DemoPreviewPage({ params }: Props) {
+export default async function DemoPreviewPage({ params, searchParams }: Props) {
   const { name } = await params;
+  const { embed } = await searchParams;
   if (!(name in demos)) notFound();
   const Demo = demos[name as DemoName];
+  const isEmbed = embed === "1" || embed === "true";
+
+  if (isEmbed) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background p-6 text-foreground">
+        <div className="flex w-full max-w-3xl flex-wrap items-center justify-center gap-4">
+          <Demo />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
@@ -28,12 +43,20 @@ export default async function DemoPreviewPage({ params }: Props) {
           <p className="truncate font-mono text-xs text-muted-foreground">{name}</p>
           <p className="font-display text-sm font-medium">Isolated preview</p>
         </div>
-        <Link
-          href="/docs/components"
-          className="shrink-0 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-        >
-          Back to docs
-        </Link>
+        <div className="flex shrink-0 items-center gap-4">
+          <Link
+            href="/catalog"
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Catalog
+          </Link>
+          <Link
+            href="/docs/components"
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Docs
+          </Link>
+        </div>
       </header>
       <main className="flex flex-1 items-center justify-center p-6 sm:p-10">
         <div className="flex w-full max-w-4xl flex-wrap items-center justify-center gap-4 rounded-2xl border border-dashed border-border bg-card/40 p-8 sm:p-12">

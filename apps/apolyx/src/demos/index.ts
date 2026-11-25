@@ -66,6 +66,87 @@ import EmptyStateDemo from "./empty-state-demo";
 import PriceBadgeDemo from "./price-badge-demo";
 import QrBadgeDemo from "./qr-badge-demo";
 import StampDemo from "./stamp-demo";
+import TextRevealDemo from "./text-reveal-demo";
+import FlipTextDemo from "./flip-text-demo";
+import TextHighlightDemo from "./text-highlight-demo";
+import TextSwapDemo from "./text-swap-demo";
+import SoundRingDemo from "./sound-ring-demo";
+import MarqueeCardDemo from "./marquee-card-demo";
+import CountUpCardDemo from "./count-up-card-demo";
+import FolderCardDemo from "./folder-card-demo";
+import ConfettiCardDemo from "./confetti-card-demo";
+import StackCardsDemo from "./stack-cards-demo";
+import SwipeDeckDemo from "./swipe-deck-demo";
+import MetricSparkCardDemo from "./metric-spark-card-demo";
+import StoryQuoteDemo from "./story-quote-demo";
+import ReceiptCardDemo from "./receipt-card-demo";
+import DocStackDemo from "./doc-stack-demo";
+import AdmitPassDemo from "./admit-pass-demo";
+import GlobeArcsDemo from "./globe-arcs-demo";
+import ActivityBarsDemo from "./activity-bars-demo";
+import FlipClockDemo from "./flip-clock-demo";
+import PulseCardDemo from "./pulse-card-demo";
+import ThinkingRingDemo from "./thinking-ring-demo";
+import ThinkingWaveDemo from "./thinking-wave-demo";
+import ThinkingSparkleDemo from "./thinking-sparkle-demo";
+import ThinkingBotDemo from "./thinking-bot-demo";
+import ToolCallDemo from "./tool-call-demo";
+import StreamingMessageDemo from "./streaming-message-demo";
+import ConversationShellDemo from "./conversation-shell-demo";
+import MessageActionsDemo from "./message-actions-demo";
+import ReasoningBlockDemo from "./reasoning-block-demo";
+import TraceWaterfallDemo from "./trace-waterfall-demo";
+import TaskChecklistDemo from "./task-checklist-demo";
+import TerminalOutputDemo from "./terminal-output-demo";
+import SourcesListDemo from "./sources-list-demo";
+import DiffViewerDemo from "./diff-viewer-demo";
+import ContextMeterDemo from "./context-meter-demo";
+import AttachmentsDemo from "./attachments-demo";
+import ModelPickerDemo from "./model-picker-demo";
+import MentionPickerDemo from "./mention-picker-demo";
+import SlashMenuDemo from "./slash-menu-demo";
+import RagSourcesDemo from "./rag-sources-demo";
+import ToolApprovalDemo from "./tool-approval-demo";
+import GuardrailCheckDemo from "./guardrail-check-demo";
+import OauthConsentDemo from "./oauth-consent-demo";
+import AgentTimelineDemo from "./agent-timeline-demo";
+import AgentHandoffDemo from "./agent-handoff-demo";
+import VoiceOrbDemo from "./voice-orb-demo";
+import VoiceAgentDemo from "./voice-agent-demo";
+import AgentMemoryDemo from "./agent-memory-demo";
+import CheckpointRewindDemo from "./checkpoint-rewind-demo";
+import AgentQuestionDemo from "./agent-question-demo";
+import PlanReviewDemo from "./plan-review-demo";
+import StagedActionDemo from "./staged-action-demo";
+import SecretRequestDemo from "./secret-request-demo";
+import McpServersDemo from "./mcp-servers-demo";
+import BrowserAgentDemo from "./browser-agent-demo";
+import SqlQueryCardDemo from "./sql-query-card-demo";
+import SandboxPreviewDemo from "./sandbox-preview-demo";
+import BackgroundTasksDemo from "./background-tasks-demo";
+import SubAgentsDemo from "./sub-agents-demo";
+import ScheduledTriggerDemo from "./scheduled-trigger-demo";
+import ErrorRetryDemo from "./error-retry-demo";
+import ArtifactPanelDemo from "./artifact-panel-demo";
+import CostTrackerDemo from "./cost-tracker-demo";
+import ModelArenaDemo from "./model-arena-demo";
+import HeroPillDemo from "./hero-pill-demo";
+import HeroGridDemo from "./hero-grid-demo";
+import HeroWaitlistDemo from "./hero-waitlist-demo";
+import HeroChatDemo from "./hero-chat-demo";
+import CreativeHomeHeroDemo from "./creative-home-hero-demo";
+import AppShelfDemo from "./app-shelf-demo";
+import UsageCardDemo from "./usage-card-demo";
+import PricingTiersDemo from "./pricing-tiers-demo";
+import SignInDemo from "./sign-in-demo";
+import TeamDemo from "./team-demo";
+import QuoteDemo from "./quote-demo";
+import LeadsTableDemo from "./leads-table-demo";
+import DashboardHomeDemo from "./dashboard-home-demo";
+import DesignResultsDemo from "./design-results-demo";
+import LaunchPerksDemo from "./launch-perks-demo";
+import TheShiftDemo from "./the-shift-demo";
+import MoodboardGeneratorDemo from "./moodboard-generator-demo";
 import InputMaskDemo from "./input-mask-demo";
 import InputMaskPresetsDemo from "./input-mask-presets-demo";
 import InputMaskBillingDemo from "./input-mask-billing-demo";
@@ -220,6 +301,87 @@ export const demos = {
   "price-badge-demo": PriceBadgeDemo,
   "qr-badge-demo": QrBadgeDemo,
   "stamp-demo": StampDemo,
+  "text-reveal-demo": TextRevealDemo,
+  "flip-text-demo": FlipTextDemo,
+  "text-highlight-demo": TextHighlightDemo,
+  "text-swap-demo": TextSwapDemo,
+  "sound-ring-demo": SoundRingDemo,
+  "marquee-card-demo": MarqueeCardDemo,
+  "count-up-card-demo": CountUpCardDemo,
+  "folder-card-demo": FolderCardDemo,
+  "confetti-card-demo": ConfettiCardDemo,
+  "stack-cards-demo": StackCardsDemo,
+  "swipe-deck-demo": SwipeDeckDemo,
+  "metric-spark-card-demo": MetricSparkCardDemo,
+  "story-quote-demo": StoryQuoteDemo,
+  "receipt-card-demo": ReceiptCardDemo,
+  "doc-stack-demo": DocStackDemo,
+  "admit-pass-demo": AdmitPassDemo,
+  "globe-arcs-demo": GlobeArcsDemo,
+  "activity-bars-demo": ActivityBarsDemo,
+  "flip-clock-demo": FlipClockDemo,
+  "pulse-card-demo": PulseCardDemo,
+  "thinking-ring-demo": ThinkingRingDemo,
+  "thinking-wave-demo": ThinkingWaveDemo,
+  "thinking-sparkle-demo": ThinkingSparkleDemo,
+  "thinking-bot-demo": ThinkingBotDemo,
+  "tool-call-demo": ToolCallDemo,
+  "streaming-message-demo": StreamingMessageDemo,
+  "conversation-shell-demo": ConversationShellDemo,
+  "message-actions-demo": MessageActionsDemo,
+  "reasoning-block-demo": ReasoningBlockDemo,
+  "trace-waterfall-demo": TraceWaterfallDemo,
+  "task-checklist-demo": TaskChecklistDemo,
+  "terminal-output-demo": TerminalOutputDemo,
+  "sources-list-demo": SourcesListDemo,
+  "diff-viewer-demo": DiffViewerDemo,
+  "context-meter-demo": ContextMeterDemo,
+  "attachments-demo": AttachmentsDemo,
+  "model-picker-demo": ModelPickerDemo,
+  "mention-picker-demo": MentionPickerDemo,
+  "slash-menu-demo": SlashMenuDemo,
+  "rag-sources-demo": RagSourcesDemo,
+  "tool-approval-demo": ToolApprovalDemo,
+  "guardrail-check-demo": GuardrailCheckDemo,
+  "oauth-consent-demo": OauthConsentDemo,
+  "agent-timeline-demo": AgentTimelineDemo,
+  "agent-handoff-demo": AgentHandoffDemo,
+  "voice-orb-demo": VoiceOrbDemo,
+  "voice-agent-demo": VoiceAgentDemo,
+  "agent-memory-demo": AgentMemoryDemo,
+  "checkpoint-rewind-demo": CheckpointRewindDemo,
+  "agent-question-demo": AgentQuestionDemo,
+  "plan-review-demo": PlanReviewDemo,
+  "staged-action-demo": StagedActionDemo,
+  "secret-request-demo": SecretRequestDemo,
+  "mcp-servers-demo": McpServersDemo,
+  "browser-agent-demo": BrowserAgentDemo,
+  "sql-query-card-demo": SqlQueryCardDemo,
+  "sandbox-preview-demo": SandboxPreviewDemo,
+  "background-tasks-demo": BackgroundTasksDemo,
+  "sub-agents-demo": SubAgentsDemo,
+  "scheduled-trigger-demo": ScheduledTriggerDemo,
+  "error-retry-demo": ErrorRetryDemo,
+  "artifact-panel-demo": ArtifactPanelDemo,
+  "cost-tracker-demo": CostTrackerDemo,
+  "model-arena-demo": ModelArenaDemo,
+  "hero-pill-demo": HeroPillDemo,
+  "hero-grid-demo": HeroGridDemo,
+  "hero-waitlist-demo": HeroWaitlistDemo,
+  "hero-chat-demo": HeroChatDemo,
+  "creative-home-hero-demo": CreativeHomeHeroDemo,
+  "app-shelf-demo": AppShelfDemo,
+  "usage-card-demo": UsageCardDemo,
+  "pricing-tiers-demo": PricingTiersDemo,
+  "sign-in-demo": SignInDemo,
+  "team-demo": TeamDemo,
+  "quote-demo": QuoteDemo,
+  "leads-table-demo": LeadsTableDemo,
+  "dashboard-home-demo": DashboardHomeDemo,
+  "design-results-demo": DesignResultsDemo,
+  "launch-perks-demo": LaunchPerksDemo,
+  "the-shift-demo": TheShiftDemo,
+  "moodboard-generator-demo": MoodboardGeneratorDemo,
   "input-mask-demo": InputMaskDemo,
   "input-mask-presets-demo": InputMaskPresetsDemo,
   "input-mask-billing-demo": InputMaskBillingDemo,

@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "reasoning-block",
+  "type": "ui",
+  "title": "Reasoning Block",
+  "description": "Collapsible chain-of-thought panel",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/reasoning-block.tsx", "target": "reasoning-block.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "use-id"],
+  "docs": "components/reasoning-block"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "conversation-shell",
+  "type": "ui",
+  "title": "Conversation Shell",
+  "description": "App frame for an agent chat with composer",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/conversation-shell.tsx", "target": "conversation-shell.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/conversation-shell"
+}

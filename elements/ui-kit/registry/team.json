@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "team",
+  "type": "ui",
+  "dependencies": { "motion": "^12.23.12" },
+  "title": "Team",
+  "description": "Team member grid",
+  "files": [{ "path": "src/blocks/team.tsx", "target": "team.tsx" }],
+  "registryDependencies": ["use-reduced-motion", "utils"],
+  "docs": "blocks/team"
+}

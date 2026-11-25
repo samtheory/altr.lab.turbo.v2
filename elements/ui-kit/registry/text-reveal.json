@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-reveal",
+  "type": "ui",
+  "title": "Text Reveal",
+  "description": "Word or character blur-rise reveal",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/text-reveal.tsx",
+      "target": "text-reveal.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/text-reveal"
+}

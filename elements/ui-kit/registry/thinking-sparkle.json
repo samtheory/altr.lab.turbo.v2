@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "thinking-sparkle",
+  "type": "ui",
+  "title": "Thinking Sparkle",
+  "description": "Soft pulsing sparkle with status copy",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/thinking-sparkle.tsx", "target": "thinking-sparkle.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/thinking-sparkle"
+}

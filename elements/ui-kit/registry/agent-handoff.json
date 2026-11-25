@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "agent-handoff",
+  "type": "ui",
+  "title": "Agent Handoff",
+  "description": "Specialist transfer card with context payload",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/agent-handoff.tsx", "target": "agent-handoff.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/agent-handoff"
+}

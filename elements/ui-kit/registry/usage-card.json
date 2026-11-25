@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "usage-card",
+  "type": "ui",
+  "title": "Usage Card",
+  "description": "Usage meter card with optional breakdown",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/usage-card.tsx", "target": "usage-card.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/usage-card"
+}

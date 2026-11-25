@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "voice-orb",
+  "type": "ui",
+  "title": "Voice Orb",
+  "description": "Pulsing orb driven by a 0-1 voice level",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/voice-orb.tsx", "target": "voice-orb.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/voice-orb"
+}

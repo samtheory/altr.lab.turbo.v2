@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "doc-stack",
+  "type": "ui",
+  "title": "Doc Stack",
+  "description": "Stacked document card with fan-in profiles",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/doc-stack.tsx", "target": "doc-stack.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/doc-stack"
+}

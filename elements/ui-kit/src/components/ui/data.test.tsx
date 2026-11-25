@@ -61,14 +61,16 @@ describe("List", () => {
 });
 
 describe("Grid", () => {
-  it("maps responsive cols to classes and supports auto-fill", () => {
+  it("maps responsive cols to container-query classes and supports auto-fill", () => {
     const { container, rerender } = render(<Grid cols={{ base: 1, md: 3 }} />);
-    const grid = container.firstElementChild as HTMLElement;
+    const shell = container.firstElementChild as HTMLElement;
+    const grid = shell.querySelector("[data-slot=grid]") as HTMLElement;
+    expect(shell.className).toContain("@container");
     expect(grid.className).toContain("grid-cols-1");
-    expect(grid.className).toContain("md:grid-cols-3");
+    expect(grid.className).toContain("@min-[48rem]:grid-cols-3");
     rerender(<Grid minItemWidth="12rem" />);
-    expect((container.firstElementChild as HTMLElement).style.gridTemplateColumns).toContain(
-      "auto-fill",
-    );
+    expect(
+      (container.querySelector("[data-slot=grid]") as HTMLElement).style.gridTemplateColumns,
+    ).toContain("auto-fill");
   });
 });

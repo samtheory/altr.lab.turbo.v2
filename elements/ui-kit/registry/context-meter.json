@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "context-meter",
+  "type": "ui",
+  "title": "Context Meter",
+  "description": "Context-window usage meter",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/context-meter.tsx", "target": "context-meter.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/context-meter"
+}

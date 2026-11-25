@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "design-results",
+  "type": "ui",
+  "title": "Design Results",
+  "description": "Masonry-ish design result cards",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/design-results.tsx", "target": "design-results.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/design-results"
+}

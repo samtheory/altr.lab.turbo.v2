@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "confetti-card",
+  "type": "ui",
+  "title": "Confetti Card",
+  "description": "Celebration count with raining icons",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/confetti-card.tsx",
+      "target": "confetti-card.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/confetti-card"
+}

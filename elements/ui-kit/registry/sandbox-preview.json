@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "sandbox-preview",
+  "type": "ui",
+  "title": "Sandbox Preview",
+  "description": "Code sandbox preview frame with build status",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/sandbox-preview.tsx", "target": "sandbox-preview.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/sandbox-preview"
+}

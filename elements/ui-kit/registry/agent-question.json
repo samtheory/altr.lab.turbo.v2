@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "agent-question",
+  "type": "ui",
+  "title": "Agent Question",
+  "description": "Agent clarifying question with choice options",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/agent-question.tsx", "target": "agent-question.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "components/agent-question"
+}

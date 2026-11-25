@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "scheduled-trigger",
+  "type": "ui",
+  "title": "Scheduled Trigger",
+  "description": "Cron schedule trigger with enable toggle",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/scheduled-trigger.tsx", "target": "scheduled-trigger.tsx" }],
+  "registryDependencies": ["utils", "use-id", "switch", "label"],
+  "docs": "components/scheduled-trigger"
+}

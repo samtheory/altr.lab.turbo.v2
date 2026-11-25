@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "flip-clock",
+  "type": "ui",
+  "title": "Flip Clock",
+  "description": "Split-flap minutes and seconds clock",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/flip-clock.tsx", "target": "flip-clock.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/flip-clock"
+}

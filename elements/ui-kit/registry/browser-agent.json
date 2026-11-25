@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "browser-agent",
+  "type": "ui",
+  "title": "Browser Agent",
+  "description": "Browser automation chrome with URL and screenshot",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/browser-agent.tsx", "target": "browser-agent.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/browser-agent"
+}

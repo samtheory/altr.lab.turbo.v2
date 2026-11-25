@@ -1,5 +1,87 @@
 [
   {
+    "name": "accordion",
+    "type": "ui",
+    "title": "Accordion",
+    "description": "Single and multiple accordion plus Collapsible",
+    "registryDependencies": [
+      "use-controllable-state",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/accordion"
+  },
+  {
+    "name": "activity-bars",
+    "type": "ui",
+    "title": "Activity Bars",
+    "description": "Segmented activity columns with a goal line",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/activity-bars"
+  },
+  {
+    "name": "admit-pass",
+    "type": "ui",
+    "title": "Admit Pass",
+    "description": "Ticket-style pass with tilt and glare",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/admit-pass"
+  },
+  {
+    "name": "agent-handoff",
+    "type": "ui",
+    "title": "Agent Handoff",
+    "description": "Specialist transfer card with context payload",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/agent-handoff"
+  },
+  {
+    "name": "agent-memory",
+    "type": "ui",
+    "title": "Agent Memory",
+    "description": "Expandable drawer of learned agent memory rules",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button",
+      "use-id"
+    ],
+    "docs": "components/agent-memory"
+  },
+  {
+    "name": "agent-question",
+    "type": "ui",
+    "title": "Agent Question",
+    "description": "Agent clarifying question with choice options",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/agent-question"
+  },
+  {
+    "name": "agent-timeline",
+    "type": "ui",
+    "title": "Agent Timeline",
+    "description": "Vertical timeline of agent run events",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/agent-timeline"
+  },
+  {
     "name": "alert",
     "type": "ui",
     "title": "Alert",
@@ -10,6 +92,40 @@
     "docs": "components/alert"
   },
   {
+    "name": "app-shelf",
+    "type": "ui",
+    "title": "App Shelf",
+    "description": "Horizontal shelf of app tiles",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/app-shelf"
+  },
+  {
+    "name": "artifact-panel",
+    "type": "ui",
+    "title": "Artifact Panel",
+    "description": "Collapsible generated artifacts panel",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/artifact-panel"
+  },
+  {
+    "name": "attachments",
+    "type": "ui",
+    "title": "Attachments",
+    "description": "Composer attachment chips",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/attachments"
+  },
+  {
     "name": "avatar",
     "type": "ui",
     "title": "Avatar",
@@ -18,6 +134,40 @@
       "utils"
     ],
     "docs": "components/avatar"
+  },
+  {
+    "name": "avatar-group",
+    "type": "ui",
+    "title": "Avatar Group",
+    "description": "Overlapping avatars with hover lift and overflow count",
+    "registryDependencies": [
+      "utils",
+      "avatar"
+    ],
+    "docs": "components/avatar-group"
+  },
+  {
+    "name": "avatar-status",
+    "type": "ui",
+    "title": "Avatar Status",
+    "description": "Avatar with a presence ring and status dot",
+    "registryDependencies": [
+      "utils",
+      "avatar"
+    ],
+    "docs": "components/avatar-status"
+  },
+  {
+    "name": "background-tasks",
+    "type": "ui",
+    "title": "Background Tasks",
+    "description": "Background jobs with progress and status",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "progress"
+    ],
+    "docs": "components/background-tasks"
   },
   {
     "name": "badge",
@@ -52,15 +202,37 @@
     "docs": "components/breadcrumb"
   },
   {
+    "name": "browser-agent",
+    "type": "ui",
+    "title": "Browser Agent",
+    "description": "Browser automation chrome with URL and screenshot",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/browser-agent"
+  },
+  {
     "name": "button",
     "type": "ui",
     "title": "Button",
-    "description": "Variants, sizes, loading, asChild",
+    "description": "Variants, sizes, loading, asChild, shiny, and status tones",
     "registryDependencies": [
       "slot",
       "utils"
     ],
     "docs": "components/button"
+  },
+  {
+    "name": "button-group",
+    "type": "ui",
+    "title": "Button Group",
+    "description": "Joined button and any widget, with an optional divider",
+    "registryDependencies": [
+      "button",
+      "utils"
+    ],
+    "docs": "components/button-group"
   },
   {
     "name": "card",
@@ -96,12 +268,156 @@
     "docs": "components/checkbox"
   },
   {
+    "name": "checkpoint-rewind",
+    "type": "ui",
+    "title": "Checkpoint Rewind",
+    "description": "Session checkpoints with code or chat restore",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/checkpoint-rewind"
+  },
+  {
+    "name": "combobox",
+    "type": "ui",
+    "title": "Combobox",
+    "description": "Searchable select with filter input and empty state",
+    "registryDependencies": [
+      "dismissable-layer",
+      "portal",
+      "position",
+      "presence",
+      "select",
+      "slot",
+      "use-controllable-state",
+      "use-floating",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/combobox"
+  },
+  {
     "name": "compose-refs",
     "type": "primitive",
     "title": "Compose refs",
     "description": "Merge multiple refs into one callback",
     "registryDependencies": [],
     "docs": "primitives"
+  },
+  {
+    "name": "confetti-card",
+    "type": "ui",
+    "title": "Confetti Card",
+    "description": "Celebration count with raining icons",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/confetti-card"
+  },
+  {
+    "name": "context-meter",
+    "type": "ui",
+    "title": "Context Meter",
+    "description": "Context-window usage meter",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/context-meter"
+  },
+  {
+    "name": "conversation-shell",
+    "type": "ui",
+    "title": "Conversation Shell",
+    "description": "App frame for an agent chat with composer",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/conversation-shell"
+  },
+  {
+    "name": "cost-tracker",
+    "type": "ui",
+    "title": "Cost Tracker",
+    "description": "Token and cost usage breakdown",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/cost-tracker"
+  },
+  {
+    "name": "count-up-card",
+    "type": "ui",
+    "title": "Count Up Card",
+    "description": "Vertical metrics conveyor card",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/count-up-card"
+  },
+  {
+    "name": "creative-home-hero",
+    "type": "ui",
+    "title": "Creative Home Hero",
+    "description": "Bold creative landing hero",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "blocks/creative-home-hero"
+  },
+  {
+    "name": "dashboard-home",
+    "type": "ui",
+    "title": "Dashboard Home",
+    "description": "Marketing dashboard preview chrome",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/dashboard-home"
+  },
+  {
+    "name": "data-grid",
+    "type": "ui",
+    "title": "DataGrid",
+    "description": "Virtualized data grid with column ops, typed filters, inline edit, and controlled view state",
+    "registryDependencies": [
+      "utils",
+      "button",
+      "badge",
+      "alert",
+      "checkbox",
+      "input",
+      "textarea",
+      "select",
+      "switch",
+      "dropdown-menu",
+      "skeleton",
+      "use-controllable-state"
+    ],
+    "docs": "components/data-grid"
+  },
+  {
+    "name": "design-results",
+    "type": "ui",
+    "title": "Design Results",
+    "description": "Masonry-ish design result cards",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/design-results"
   },
   {
     "name": "dialog",
@@ -123,6 +439,16 @@
     "docs": "components/dialog"
   },
   {
+    "name": "diff-viewer",
+    "type": "ui",
+    "title": "Diff Viewer",
+    "description": "Unified diff panel for agent file edits",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/diff-viewer"
+  },
+  {
     "name": "dismissable-layer",
     "type": "primitive",
     "title": "DismissableLayer",
@@ -131,6 +457,17 @@
       "compose-refs"
     ],
     "docs": "primitives"
+  },
+  {
+    "name": "doc-stack",
+    "type": "ui",
+    "title": "Doc Stack",
+    "description": "Stacked document card with fan-in profiles",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/doc-stack"
   },
   {
     "name": "dropdown-menu",
@@ -150,6 +487,40 @@
       "utils"
     ],
     "docs": "components/dropdown-menu"
+  },
+  {
+    "name": "dropzone",
+    "type": "ui",
+    "title": "Dropzone",
+    "description": "Drag-and-drop file upload with single or multi file lists and progress",
+    "registryDependencies": [
+      "utils",
+      "motion-tokens"
+    ],
+    "docs": "components/dropzone"
+  },
+  {
+    "name": "empty-state",
+    "type": "ui",
+    "title": "Empty State",
+    "description": "Dashed empty surface with illustration, copy, and actions",
+    "registryDependencies": [
+      "utils",
+      "button"
+    ],
+    "docs": "components/empty-state"
+  },
+  {
+    "name": "error-retry",
+    "type": "ui",
+    "title": "Error Retry",
+    "description": "Failed step with retry and dismiss",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/error-retry"
   },
   {
     "name": "fade-in",
@@ -175,6 +546,28 @@
     "docs": "components/field"
   },
   {
+    "name": "flip-clock",
+    "type": "ui",
+    "title": "Flip Clock",
+    "description": "Split-flap minutes and seconds clock",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/flip-clock"
+  },
+  {
+    "name": "flip-text",
+    "type": "ui",
+    "title": "Flip Text",
+    "description": "Rolling 3D letter cubes",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/flip-text"
+  },
+  {
     "name": "focus-scope",
     "type": "primitive",
     "title": "FocusScope",
@@ -183,6 +576,27 @@
       "compose-refs"
     ],
     "docs": "primitives"
+  },
+  {
+    "name": "folder-card",
+    "type": "ui",
+    "title": "Folder Card",
+    "description": "Hover-open folder with fan-out sheets",
+    "registryDependencies": [
+      "utils",
+      "card"
+    ],
+    "docs": "components/folder-card"
+  },
+  {
+    "name": "globe-arcs",
+    "type": "ui",
+    "title": "Globe Arcs",
+    "description": "Dotted globe with animated city arcs",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/globe-arcs"
   },
   {
     "name": "grid",
@@ -194,6 +608,70 @@
       "utils"
     ],
     "docs": "components/grid"
+  },
+  {
+    "name": "guardrail-check",
+    "type": "ui",
+    "title": "Guardrail Check",
+    "description": "Safety and policy verification before an agent runs",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/guardrail-check"
+  },
+  {
+    "name": "hero-chat",
+    "type": "ui",
+    "title": "Hero Chat",
+    "description": "Hero with mini conversation preview",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "blocks/hero-chat"
+  },
+  {
+    "name": "hero-grid",
+    "type": "ui",
+    "title": "Hero Grid",
+    "description": "Hero on a blinking integrations grid",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "motion-tokens",
+      "button"
+    ],
+    "docs": "blocks/hero-grid"
+  },
+  {
+    "name": "hero-pill",
+    "type": "ui",
+    "title": "Hero Pill",
+    "description": "Centered hero with cycling headline pill",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "motion-tokens",
+      "button",
+      "avatar"
+    ],
+    "docs": "blocks/hero-pill"
+  },
+  {
+    "name": "hero-waitlist",
+    "type": "ui",
+    "title": "Hero Waitlist",
+    "description": "Hero with email join field",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button",
+      "input",
+      "avatar"
+    ],
+    "docs": "blocks/hero-waitlist"
   },
   {
     "name": "hover-lift",
@@ -251,7 +729,7 @@
     "name": "input-otp",
     "type": "ui",
     "title": "Input OTP",
-    "description": "One-time-code input: one real input with visual slots, paste, SMS autofill, patterns, and PIN masking",
+    "description": "One-time-code input with slots, paste, SMS autofill, patterns, PIN masking, and resend chrome",
     "registryDependencies": [
       "compose-refs",
       "field",
@@ -282,6 +760,27 @@
     "docs": "components/label"
   },
   {
+    "name": "launch-perks",
+    "type": "ui",
+    "title": "Launch Perks",
+    "description": "Launch offer perk chips",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/launch-perks"
+  },
+  {
+    "name": "leads-table",
+    "type": "ui",
+    "title": "Leads Table",
+    "description": "Presentational leads table",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "blocks/leads-table"
+  },
+  {
     "name": "line-chart",
     "type": "chart",
     "title": "Line Chart",
@@ -304,12 +803,106 @@
     "docs": "components/list"
   },
   {
+    "name": "marquee-card",
+    "type": "ui",
+    "title": "Marquee Card",
+    "description": "Alternating marquee tag rows with copy",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/marquee-card"
+  },
+  {
     "name": "mask",
     "type": "lib",
     "title": "Mask engine",
     "description": "Pure input-mask engine: tokens, optional sections, presets, caret mapping, and card brand detection",
     "registryDependencies": [],
     "docs": "components/input-mask"
+  },
+  {
+    "name": "mcp-servers",
+    "type": "ui",
+    "title": "MCP Servers",
+    "description": "MCP server list with status and connect toggles",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/mcp-servers"
+  },
+  {
+    "name": "mention-picker",
+    "type": "ui",
+    "title": "Mention Picker",
+    "description": "At-mention list for a chat composer",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/mention-picker"
+  },
+  {
+    "name": "message-actions",
+    "type": "ui",
+    "title": "Message Actions",
+    "description": "Copy, regenerate, and feedback for a message",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/message-actions"
+  },
+  {
+    "name": "metric-spark-card",
+    "type": "ui",
+    "title": "Metric Spark Card",
+    "description": "Metric tile with animated sparkline",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/metric-spark-card"
+  },
+  {
+    "name": "model-arena",
+    "type": "ui",
+    "title": "Model Arena",
+    "description": "Side-by-side model reply comparison",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/model-arena"
+  },
+  {
+    "name": "model-picker",
+    "type": "ui",
+    "title": "Model Picker",
+    "description": "Composer model switcher with reasoning effort",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/model-picker"
+  },
+  {
+    "name": "moodboard-generator",
+    "type": "ui",
+    "title": "Moodboard Generator",
+    "description": "Palette swatches prompt and mood tiles",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button",
+      "input"
+    ],
+    "docs": "blocks/moodboard-generator"
   },
   {
     "name": "motion-tokens",
@@ -363,19 +956,77 @@
     "docs": "components/number-input"
   },
   {
+    "name": "oauth-consent",
+    "type": "ui",
+    "title": "OAuth Consent",
+    "description": "Permission card for connecting an agent to an app",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/oauth-consent"
+  },
+  {
+    "name": "pagination",
+    "type": "ui",
+    "title": "Pagination",
+    "description": "Accessible pagination chrome and page-range helper",
+    "registryDependencies": [
+      "button",
+      "utils"
+    ],
+    "docs": "components/pagination"
+  },
+  {
     "name": "password-input",
     "type": "ui",
     "title": "Password Input",
-    "description": "Password field with a show / hide toggle, plus PasswordStrength meter and rule checklist",
+    "description": "Password field with show/hide, PasswordStrength, and PasswordRules checklist",
     "registryDependencies": [
       "compose-refs",
       "field",
       "input-group",
+      "label",
+      "motion-tokens",
       "use-controllable-state",
       "use-id",
       "utils"
     ],
     "docs": "components/password-input"
+  },
+  {
+    "name": "plan-review",
+    "type": "ui",
+    "title": "Plan Review",
+    "description": "Review and approve an agent execution plan",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/plan-review"
+  },
+  {
+    "name": "popover",
+    "type": "ui",
+    "title": "Popover",
+    "description": "Interactive panel anchored to a trigger, with pop, slide, and fade motion",
+    "registryDependencies": [
+      "dismissable-layer",
+      "focus-scope",
+      "portal",
+      "position",
+      "presence",
+      "slot",
+      "use-controllable-state",
+      "use-floating",
+      "use-id",
+      "use-reduced-motion",
+      "motion-tokens",
+      "utils"
+    ],
+    "docs": "components/popover"
   },
   {
     "name": "portal",
@@ -414,6 +1065,122 @@
     "docs": "motion/pressable"
   },
   {
+    "name": "price-badge",
+    "type": "ui",
+    "title": "Price Badge",
+    "description": "Price pill with glyph-by-glyph rolling animation and optional compare-at",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/price-badge"
+  },
+  {
+    "name": "pricing-tiers",
+    "type": "ui",
+    "title": "Pricing Tiers",
+    "description": "Three plans with monthly annual toggle",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "blocks/pricing-tiers"
+  },
+  {
+    "name": "progress",
+    "type": "ui",
+    "title": "Progress",
+    "description": "Determinate and indeterminate progress bar",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/progress"
+  },
+  {
+    "name": "pulse-card",
+    "type": "ui",
+    "title": "Pulse Card",
+    "description": "Heart-rate summary with animated ECG",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/pulse-card"
+  },
+  {
+    "name": "qr-badge",
+    "type": "ui",
+    "title": "QR Badge",
+    "description": "QR matrix that dissolves into a scan badge and grows back",
+    "registryDependencies": [
+      "utils",
+      "badge"
+    ],
+    "docs": "components/qr-badge"
+  },
+  {
+    "name": "quote",
+    "type": "ui",
+    "title": "Quote",
+    "description": "Large testimonial quote block",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/quote"
+  },
+  {
+    "name": "radio-group",
+    "type": "ui",
+    "title": "Radio Group",
+    "description": "Accessible radio group with roving focus",
+    "registryDependencies": [
+      "field",
+      "roving-focus",
+      "use-controllable-state",
+      "use-id",
+      "utils"
+    ],
+    "docs": "components/radio-group"
+  },
+  {
+    "name": "rag-sources",
+    "type": "ui",
+    "title": "RAG Sources",
+    "description": "Retrieved RAG chunks with scores",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/rag-sources"
+  },
+  {
+    "name": "reasoning-block",
+    "type": "ui",
+    "title": "Reasoning Block",
+    "description": "Collapsible chain-of-thought panel",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/reasoning-block"
+  },
+  {
+    "name": "receipt-card",
+    "type": "ui",
+    "title": "Receipt Card",
+    "description": "Animated service receipt",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/receipt-card"
+  },
+  {
     "name": "roving-focus",
     "type": "primitive",
     "title": "RovingFocusGroup",
@@ -425,12 +1192,80 @@
     "docs": "primitives"
   },
   {
+    "name": "sandbox-preview",
+    "type": "ui",
+    "title": "Sandbox Preview",
+    "description": "Code sandbox preview frame with build status",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/sandbox-preview"
+  },
+  {
+    "name": "scheduled-trigger",
+    "type": "ui",
+    "title": "Scheduled Trigger",
+    "description": "Cron schedule trigger with enable toggle",
+    "registryDependencies": [
+      "utils",
+      "use-id",
+      "switch",
+      "label"
+    ],
+    "docs": "components/scheduled-trigger"
+  },
+  {
+    "name": "scroll-area",
+    "type": "ui",
+    "title": "Scroll Area",
+    "description": "Owned scrollport with token-styled scrollbars",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/scroll-area"
+  },
+  {
     "name": "scroll-lock",
     "type": "primitive",
     "title": "lockScroll",
     "description": "Body scroll lock with scrollbar compensation",
     "registryDependencies": [],
     "docs": "primitives"
+  },
+  {
+    "name": "secret-request",
+    "type": "ui",
+    "title": "Secret Request",
+    "description": "Request a secret or API key with masked input",
+    "registryDependencies": [
+      "utils",
+      "use-id",
+      "button",
+      "input",
+      "label"
+    ],
+    "docs": "components/secret-request"
+  },
+  {
+    "name": "select",
+    "type": "ui",
+    "title": "Select",
+    "description": "Listbox select with keyboard, typeahead, and Field wiring",
+    "registryDependencies": [
+      "dismissable-layer",
+      "field",
+      "portal",
+      "position",
+      "presence",
+      "slot",
+      "use-controllable-state",
+      "use-floating",
+      "use-id",
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "components/select"
   },
   {
     "name": "separator",
@@ -460,6 +1295,20 @@
     "docs": "components/sheet"
   },
   {
+    "name": "sign-in",
+    "type": "ui",
+    "title": "Sign In",
+    "description": "Email password sign-in block with OAuth buttons",
+    "registryDependencies": [
+      "use-reduced-motion",
+      "utils",
+      "button",
+      "input",
+      "label"
+    ],
+    "docs": "blocks/sign-in"
+  },
+  {
     "name": "skeleton",
     "type": "ui",
     "title": "Skeleton",
@@ -470,6 +1319,17 @@
     "docs": "components/skeleton"
   },
   {
+    "name": "slash-menu",
+    "type": "ui",
+    "title": "Slash Menu",
+    "description": "Slash-command palette for a chat composer",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/slash-menu"
+  },
+  {
     "name": "slot",
     "type": "primitive",
     "title": "Slot",
@@ -478,6 +1338,27 @@
       "compose-refs"
     ],
     "docs": "primitives"
+  },
+  {
+    "name": "sound-ring",
+    "type": "ui",
+    "title": "Sound Ring",
+    "description": "Canvas audio-visualizer ring",
+    "registryDependencies": [
+      "utils"
+    ],
+    "docs": "components/sound-ring"
+  },
+  {
+    "name": "sources-list",
+    "type": "ui",
+    "title": "Sources List",
+    "description": "Cited sources under an assistant reply",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/sources-list"
   },
   {
     "name": "spinner",
@@ -491,6 +1372,53 @@
     "docs": "components/spinner"
   },
   {
+    "name": "split-button",
+    "type": "ui",
+    "title": "Split Button",
+    "description": "Joined button whose icon opens a menu that grows from the trigger",
+    "registryDependencies": [
+      "button-group",
+      "dropdown-menu",
+      "utils"
+    ],
+    "docs": "components/split-button"
+  },
+  {
+    "name": "sql-query-card",
+    "type": "ui",
+    "title": "SQL Query Card",
+    "description": "SQL query with results table",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/sql-query-card"
+  },
+  {
+    "name": "stack-cards",
+    "type": "ui",
+    "title": "Stack Cards",
+    "description": "Cycling contact or feature card stack",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/stack-cards"
+  },
+  {
+    "name": "staged-action",
+    "type": "ui",
+    "title": "Staged Action",
+    "description": "Preview a staged side-effect before confirm",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/staged-action"
+  },
+  {
     "name": "stagger",
     "type": "motion",
     "title": "Stagger",
@@ -501,6 +1429,78 @@
       "utils"
     ],
     "docs": "motion/stagger"
+  },
+  {
+    "name": "stamp",
+    "type": "ui",
+    "title": "Stamp",
+    "description": "Circle or square seal with orbiting caption and animated tick ring",
+    "registryDependencies": [
+      "utils",
+      "use-id"
+    ],
+    "docs": "components/stamp"
+  },
+  {
+    "name": "story-quote",
+    "type": "ui",
+    "title": "Story Quote",
+    "description": "Animated testimonial quote card",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/story-quote"
+  },
+  {
+    "name": "streaming-message",
+    "type": "ui",
+    "title": "Streaming Message",
+    "description": "Assistant message that streams word by word",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/streaming-message"
+  },
+  {
+    "name": "sub-agents",
+    "type": "ui",
+    "title": "Sub Agents",
+    "description": "Parallel sub-agent lanes with status",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/sub-agents"
+  },
+  {
+    "name": "subscribe-field",
+    "type": "ui",
+    "title": "Subscribe Field",
+    "description": "Email signup with live avatar stack and rolling join counter",
+    "registryDependencies": [
+      "utils",
+      "avatar",
+      "button",
+      "input",
+      "label",
+      "motion-tokens"
+    ],
+    "docs": "components/subscribe-field"
+  },
+  {
+    "name": "swipe-deck",
+    "type": "ui",
+    "title": "Swipe Deck",
+    "description": "Draggable swipe card deck",
+    "registryDependencies": [
+      "utils",
+      "card",
+      "use-reduced-motion"
+    ],
+    "docs": "components/swipe-deck"
   },
   {
     "name": "switch",
@@ -542,6 +1542,39 @@
     "docs": "components/tabs"
   },
   {
+    "name": "task-checklist",
+    "type": "ui",
+    "title": "Task Checklist",
+    "description": "Agent task checklist with pending running done",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/task-checklist"
+  },
+  {
+    "name": "team",
+    "type": "ui",
+    "title": "Team",
+    "description": "Team member grid",
+    "registryDependencies": [
+      "use-reduced-motion",
+      "utils"
+    ],
+    "docs": "blocks/team"
+  },
+  {
+    "name": "terminal-output",
+    "type": "ui",
+    "title": "Terminal Output",
+    "description": "Styled terminal log panel",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/terminal-output"
+  },
+  {
     "name": "text",
     "type": "ui",
     "title": "Text / Heading",
@@ -552,6 +1585,39 @@
     "docs": "components/text"
   },
   {
+    "name": "text-highlight",
+    "type": "ui",
+    "title": "Text Highlight",
+    "description": "Sweep marker behind a phrase",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/text-highlight"
+  },
+  {
+    "name": "text-reveal",
+    "type": "ui",
+    "title": "Text Reveal",
+    "description": "Word or character blur-rise reveal",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/text-reveal"
+  },
+  {
+    "name": "text-swap",
+    "type": "ui",
+    "title": "Text Swap",
+    "description": "Perspective multi-line phrase swap",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/text-swap"
+  },
+  {
     "name": "textarea",
     "type": "ui",
     "title": "Textarea",
@@ -560,6 +1626,17 @@
       "utils"
     ],
     "docs": "components/textarea"
+  },
+  {
+    "name": "the-shift",
+    "type": "ui",
+    "title": "The Shift",
+    "description": "Before after comparison section",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/the-shift"
   },
   {
     "name": "theme-base",
@@ -640,6 +1717,50 @@
     "docs": "theming"
   },
   {
+    "name": "thinking-bot",
+    "type": "ui",
+    "title": "Thinking Bot",
+    "description": "Bot avatar with bouncing dots",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/thinking-bot"
+  },
+  {
+    "name": "thinking-ring",
+    "type": "ui",
+    "title": "Thinking Ring",
+    "description": "Breathing dot ring with shimmering status label",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/thinking-ring"
+  },
+  {
+    "name": "thinking-sparkle",
+    "type": "ui",
+    "title": "Thinking Sparkle",
+    "description": "Soft pulsing sparkle with status copy",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/thinking-sparkle"
+  },
+  {
+    "name": "thinking-wave",
+    "type": "ui",
+    "title": "Thinking Wave",
+    "description": "Equalizer-style thinking bars with a status label",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/thinking-wave"
+  },
+  {
     "name": "timeline",
     "type": "ui",
     "title": "Timeline",
@@ -661,6 +1782,30 @@
     "docs": "components/toast"
   },
   {
+    "name": "tool-approval",
+    "type": "ui",
+    "title": "Tool Approval",
+    "description": "Approve or deny an agent tool with side effects",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "button"
+    ],
+    "docs": "components/tool-approval"
+  },
+  {
+    "name": "tool-call",
+    "type": "ui",
+    "title": "Tool Call",
+    "description": "Collapsible card for one agent tool call",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "use-id"
+    ],
+    "docs": "components/tool-call"
+  },
+  {
     "name": "tooltip",
     "type": "ui",
     "title": "Tooltip",
@@ -677,6 +1822,28 @@
       "utils"
     ],
     "docs": "components/tooltip"
+  },
+  {
+    "name": "trace-waterfall",
+    "type": "ui",
+    "title": "Trace Waterfall",
+    "description": "Live agent span waterfall with playhead, nested kinds, errors, and a detail panel",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/trace-waterfall"
+  },
+  {
+    "name": "usage-card",
+    "type": "ui",
+    "title": "Usage Card",
+    "description": "Usage meter card with optional breakdown",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "blocks/usage-card"
   },
   {
     "name": "use-controllable-state",
@@ -729,5 +1896,28 @@
       "utils"
     ],
     "docs": "primitives"
+  },
+  {
+    "name": "voice-agent",
+    "type": "ui",
+    "title": "Voice Agent",
+    "description": "Voice assistant card with start and end call",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion",
+      "voice-orb"
+    ],
+    "docs": "components/voice-agent"
+  },
+  {
+    "name": "voice-orb",
+    "type": "ui",
+    "title": "Voice Orb",
+    "description": "Pulsing orb driven by a 0-1 voice level",
+    "registryDependencies": [
+      "utils",
+      "use-reduced-motion"
+    ],
+    "docs": "components/voice-orb"
   }
 ]

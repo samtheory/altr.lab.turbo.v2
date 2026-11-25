@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "moodboard-generator",
+  "type": "ui",
+  "title": "Moodboard Generator",
+  "description": "Palette swatches prompt and mood tiles",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/moodboard-generator.tsx", "target": "moodboard-generator.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button", "input"],
+  "docs": "blocks/moodboard-generator"
+}

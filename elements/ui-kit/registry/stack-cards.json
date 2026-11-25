@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "stack-cards",
+  "type": "ui",
+  "title": "Stack Cards",
+  "description": "Cycling contact or feature card stack",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/stack-cards.tsx",
+      "target": "stack-cards.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/stack-cards"
+}

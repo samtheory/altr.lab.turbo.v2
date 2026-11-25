@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "hero-grid",
+  "type": "ui",
+  "title": "Hero Grid",
+  "description": "Hero on a blinking integrations grid",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/hero-grid.tsx", "target": "hero-grid.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "motion-tokens", "button"],
+  "docs": "blocks/hero-grid"
+}

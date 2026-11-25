@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "thinking-bot",
+  "type": "ui",
+  "title": "Thinking Bot",
+  "description": "Bot avatar with bouncing dots",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/thinking-bot.tsx", "target": "thinking-bot.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/thinking-bot"
+}

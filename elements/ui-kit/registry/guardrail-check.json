@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "guardrail-check",
+  "type": "ui",
+  "title": "Guardrail Check",
+  "description": "Safety and policy verification before an agent runs",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/guardrail-check.tsx", "target": "guardrail-check.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/guardrail-check"
+}

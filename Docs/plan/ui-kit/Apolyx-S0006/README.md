@@ -17,7 +17,7 @@ tags:
 > Who: **apollo** executes cards; **docs_man** closes the sprint. Intent: [[../../../feature_list/ui-kit/07-apolyx-s0006-nextui-wave]]. Previous: [[../Apolyx-S0005/README]].
 
 **Sprint id:** `Apolyx-S0006`  
-**Status:** in progress — 2026-11-25 · **Owner:** apollo · **Docs steward:** docs_man  
+**Status:** done — 2026-11-25 · **Owner:** apollo · **Docs steward:** docs_man  
 **Parent feature:** apolyx-F0009
 
 ## Goal

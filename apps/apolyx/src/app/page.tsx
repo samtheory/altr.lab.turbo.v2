@@ -49,7 +49,7 @@ export default function HomePage() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/docs/components/button">Browse components</Link>
+              <Link href="/catalog">Browse catalog</Link>
             </Button>
           </div>
           <div className="flex max-w-md items-center justify-between gap-2 rounded-xl border border-border/80 bg-[linear-gradient(165deg,color-mix(in_oklch,var(--muted)_70%,var(--card)),color-mix(in_oklch,var(--card)_90%,var(--muted)))] py-1.5 pl-4 pr-1.5">

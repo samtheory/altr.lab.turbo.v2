@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.json",
+  "name": "folder-card",
+  "type": "ui",
+  "title": "Folder Card",
+  "description": "Hover-open folder with fan-out sheets",
+  "files": [
+    {
+      "path": "src/components/ui/folder-card.tsx",
+      "target": "folder-card.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "card"],
+  "docs": "components/folder-card"
+}

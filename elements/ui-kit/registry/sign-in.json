@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "sign-in",
+  "type": "ui",
+  "title": "Sign In",
+  "description": "Email password sign-in block with OAuth buttons",
+  "dependencies": { "motion": "^12.23.12", "lucide-react": "^0.525.0" },
+  "files": [{ "path": "src/blocks/sign-in.tsx", "target": "sign-in.tsx" }],
+  "registryDependencies": ["use-reduced-motion", "utils", "button", "input", "label"],
+  "docs": "blocks/sign-in"
+}

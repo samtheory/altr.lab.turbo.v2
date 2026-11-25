@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-swap",
+  "type": "ui",
+  "title": "Text Swap",
+  "description": "Perspective multi-line phrase swap",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/text-swap.tsx",
+      "target": "text-swap.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/text-swap"
+}

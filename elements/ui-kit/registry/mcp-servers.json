@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "mcp-servers",
+  "type": "ui",
+  "title": "MCP Servers",
+  "description": "MCP server list with status and connect toggles",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/mcp-servers.tsx", "target": "mcp-servers.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "components/mcp-servers"
+}

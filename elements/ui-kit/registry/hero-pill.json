@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "hero-pill",
+  "type": "ui",
+  "title": "Hero Pill",
+  "description": "Centered hero with cycling headline pill",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/hero-pill.tsx", "target": "hero-pill.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "motion-tokens", "button", "avatar"],
+  "docs": "blocks/hero-pill"
+}

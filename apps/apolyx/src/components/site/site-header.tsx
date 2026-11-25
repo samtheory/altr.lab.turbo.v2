@@ -17,6 +17,11 @@ import { MobileNav } from "./mobile-nav";
 const NAV = [
   { href: "/docs", label: "Docs", match: (path: string) => path === "/docs" || path === "/docs/" },
   {
+    href: "/catalog",
+    label: "Catalog",
+    match: (path: string) => path === "/catalog" || path.startsWith("/catalog/"),
+  },
+  {
     href: "/docs/components",
     label: "Components",
     match: (path: string) => path.startsWith("/docs/components"),
@@ -40,6 +45,11 @@ function GitHubIcon() {
 
 export function SiteHeader() {
   const pathname = usePathname() ?? "/";
+
+  // Isolated / embed previews stay chrome-free for catalog iframes.
+  if (pathname.startsWith("/docs/preview")) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-40 h-16 border-b border-border/70 bg-background/75 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -92,6 +102,19 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex h-9 items-center gap-2">
+          <Link
+            href="/catalog"
+            className={cn(
+              "inline-flex h-9 items-center rounded-md px-2.5 text-sm md:hidden",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              pathname.startsWith("/catalog")
+                ? "font-medium text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Catalog
+          </Link>
+
           <button
             type="button"
             disabled

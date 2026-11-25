@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "pricing-tiers",
+  "type": "ui",
+  "title": "Pricing Tiers",
+  "description": "Three plans with monthly annual toggle",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/pricing-tiers.tsx", "target": "pricing-tiers.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "blocks/pricing-tiers"
+}

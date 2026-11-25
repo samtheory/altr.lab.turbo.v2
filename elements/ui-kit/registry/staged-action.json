@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "staged-action",
+  "type": "ui",
+  "title": "Staged Action",
+  "description": "Preview a staged side-effect before confirm",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/staged-action.tsx", "target": "staged-action.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "components/staged-action"
+}

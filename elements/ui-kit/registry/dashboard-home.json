@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "dashboard-home",
+  "type": "ui",
+  "title": "Dashboard Home",
+  "description": "Marketing dashboard preview chrome",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/dashboard-home.tsx", "target": "dashboard-home.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/dashboard-home"
+}

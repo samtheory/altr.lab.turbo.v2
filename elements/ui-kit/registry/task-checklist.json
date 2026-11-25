@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "task-checklist",
+  "type": "ui",
+  "title": "Task Checklist",
+  "description": "Agent task checklist with pending running done",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/task-checklist.tsx", "target": "task-checklist.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/task-checklist"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "launch-perks",
+  "type": "ui",
+  "title": "Launch Perks",
+  "description": "Launch offer perk chips",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/launch-perks.tsx", "target": "launch-perks.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/launch-perks"
+}

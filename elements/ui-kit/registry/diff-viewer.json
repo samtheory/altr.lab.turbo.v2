@@ -1,0 +1,10 @@
+{
+  "$schema": "./schema.json",
+  "name": "diff-viewer",
+  "type": "ui",
+  "title": "Diff Viewer",
+  "description": "Unified diff panel for agent file edits",
+  "files": [{ "path": "src/components/ui/diff-viewer.tsx", "target": "diff-viewer.tsx" }],
+  "registryDependencies": ["utils"],
+  "docs": "components/diff-viewer"
+}

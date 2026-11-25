@@ -163,6 +163,20 @@ html {
 .apolyx-toc-hammer-icon {
   display: block;
   transform: scaleX(-1);
+  overflow: visible;
+}
+
+/*
+ * Exact hammer silhouette behind the glyph.
+ * ~1.4px screen halo at 20px size: 1.4 * (512 / 20) ≈ 36 viewBox units.
+ */
+.apolyx-toc-hammer-mask {
+  fill: var(--background);
+  stroke: var(--background);
+  stroke-width: 36;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  paint-order: stroke fill;
 }
 
 .apolyx-toc-hammer-glyph {

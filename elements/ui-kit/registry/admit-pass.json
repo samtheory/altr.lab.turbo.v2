@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "admit-pass",
+  "type": "ui",
+  "title": "Admit Pass",
+  "description": "Ticket-style pass with tilt and glare",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/admit-pass.tsx", "target": "admit-pass.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/admit-pass"
+}

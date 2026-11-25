@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "activity-bars",
+  "type": "ui",
+  "title": "Activity Bars",
+  "description": "Segmented activity columns with a goal line",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/activity-bars.tsx", "target": "activity-bars.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/activity-bars"
+}

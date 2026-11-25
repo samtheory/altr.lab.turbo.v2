@@ -149,6 +149,117 @@
   }
 }
 
+/** FlipText letter cubes. */
+.apolyx-flip-text-char {
+  height: 1.2em;
+  line-height: 1.2em;
+  vertical-align: middle;
+  color: inherit;
+  -webkit-text-fill-color: transparent;
+  transform-style: preserve-3d;
+  animation: apolyx-flip-roll var(--flip-duration) var(--flip-delay) var(--flip-iteration) ease;
+}
+.apolyx-flip-text-char::before,
+.apolyx-flip-text-char::after {
+  content: attr(data-char);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  -webkit-text-fill-color: currentColor;
+  backface-visibility: hidden;
+  animation: apolyx-flip-fade var(--flip-duration) var(--flip-delay) var(--flip-iteration) ease;
+}
+.apolyx-flip-text-char::after {
+  transform: translate(-50%, -50%) translateZ(0.6em);
+}
+.apolyx-flip-text-char::before {
+  opacity: 0;
+  --flip-opacity: 1;
+  transform: translate(-50%, -50%) rotateX(-90deg) translateZ(0.6em);
+}
+@keyframes apolyx-flip-roll {
+  0% {
+    transform: rotateX(0);
+  }
+  25%,
+  100% {
+    transform: rotateX(90deg);
+  }
+}
+@keyframes apolyx-flip-fade {
+  0% {
+    opacity: 1;
+  }
+  30%,
+  100% {
+    opacity: var(--flip-opacity, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .apolyx-flip-text-char,
+  .apolyx-flip-text-char::before,
+  .apolyx-flip-text-char::after {
+    animation: none;
+  }
+  .apolyx-flip-text-char {
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+.apolyx-tool-shimmer {
+  color: transparent;
+  background: linear-gradient(
+      90deg,
+      var(--muted-foreground) 40%,
+      var(--foreground) 50%,
+      var(--muted-foreground) 60%
+    )
+    0 0 / 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: apolyx-tool-shimmer 2s ease-in-out infinite;
+}
+@keyframes apolyx-tool-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .apolyx-tool-shimmer {
+    animation: none;
+    color: var(--muted-foreground);
+  }
+}
+
+.apolyx-stream-word {
+  animation: apolyx-stream-in 0.45s ease-out both;
+}
+@keyframes apolyx-stream-in {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .apolyx-stream-word {
+    animation: none;
+  }
+}
+
+
+
 @media (prefers-reduced-motion: reduce) {
   :root,
   [data-theme] {

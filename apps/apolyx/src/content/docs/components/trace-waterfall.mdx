@@ -1,0 +1,21 @@
+<ComponentPreview name="trace-waterfall-demo" />
+
+## Installation
+
+<InstallTabs name="trace-waterfall" exports="TraceWaterfall" />
+
+## Usage
+
+```tsx
+import { TraceWaterfall, type TraceSpan } from "@altr/apolyx";
+
+const spans: TraceSpan[] = [
+  { id: "s1", name: "agent.run", kind: "agent", start: 0, duration: 2400, depth: 0 },
+  { id: "s2", name: "plan", kind: "llm", start: 40, duration: 520, depth: 1, tokens: 1100 },
+  { id: "s3", name: "search_docs", kind: "retrieval", start: 600, duration: 400, depth: 1 },
+];
+
+<TraceWaterfall traceId="run_7f3a" spans={spans} />
+```
+
+Pass `now` for a live playhead, or `autoPlay` for the scripted demo. Click a span to open its detail panel. Respects `prefers-reduced-motion`.

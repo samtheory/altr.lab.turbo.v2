@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "model-arena",
+  "type": "ui",
+  "title": "Model Arena",
+  "description": "Side-by-side model reply comparison",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/model-arena.tsx", "target": "model-arena.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/model-arena"
+}

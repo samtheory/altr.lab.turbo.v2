@@ -144,6 +144,322 @@ export {
   type StampProps,
 } from "./components/ui/stamp";
 export {
+  TextReveal,
+  type TextRevealProps,
+} from "./components/ui/text-reveal";
+export {
+  FlipText,
+  type FlipTextProps,
+} from "./components/ui/flip-text";
+export {
+  TextHighlight,
+  type TextHighlightProps,
+} from "./components/ui/text-highlight";
+export {
+  TextSwap,
+  type TextSwapProps,
+} from "./components/ui/text-swap";
+export {
+  SoundRing,
+  type SoundRingProps,
+} from "./components/ui/sound-ring";
+export {
+  MarqueeCard,
+  type MarqueeCardProps,
+  type MarqueeRow,
+  type MarqueeTag,
+} from "./components/ui/marquee-card";
+export {
+  CountUpCard,
+  type CountUpCardProps,
+  type CountUpMetric,
+} from "./components/ui/count-up-card";
+export {
+  FolderCard,
+  type FolderCardProps,
+} from "./components/ui/folder-card";
+export {
+  ConfettiCard,
+  type ConfettiCardProps,
+  type ConfettiRange,
+} from "./components/ui/confetti-card";
+export {
+  StackCards,
+  type StackCardsProps,
+  type StackCardItem,
+} from "./components/ui/stack-cards";
+export {
+  SwipeDeck,
+  type SwipeDeckProps,
+  type SwipeDeckCard,
+} from "./components/ui/swipe-deck";
+export {
+  MetricSparkCard,
+  type MetricSparkCardProps,
+} from "./components/ui/metric-spark-card";
+export {
+  StoryQuote,
+  type StoryQuoteProps,
+} from "./components/ui/story-quote";
+export {
+  ReceiptCard,
+  type ReceiptCardProps,
+  type ReceiptLine,
+} from "./components/ui/receipt-card";
+export {
+  DocStack,
+  type DocStackProps,
+  type DocStackProfile,
+} from "./components/ui/doc-stack";
+export {
+  AdmitPass,
+  type AdmitPassProps,
+} from "./components/ui/admit-pass";
+export {
+  GlobeArcs,
+  type GlobeArcsProps,
+  type GlobeCity,
+} from "./components/ui/globe-arcs";
+export {
+  ActivityBars,
+  type ActivityBarsProps,
+  type ActivityNight,
+} from "./components/ui/activity-bars";
+export {
+  FlipClock,
+  type FlipClockProps,
+} from "./components/ui/flip-clock";
+export {
+  PulseCard,
+  type PulseCardProps,
+} from "./components/ui/pulse-card";
+export {
+  ThinkingRing,
+  type ThinkingRingProps,
+} from "./components/ui/thinking-ring";
+export {
+  ThinkingWave,
+  type ThinkingWaveProps,
+} from "./components/ui/thinking-wave";
+export {
+  ThinkingSparkle,
+  type ThinkingSparkleProps,
+} from "./components/ui/thinking-sparkle";
+export {
+  ThinkingBot,
+  type ThinkingBotProps,
+} from "./components/ui/thinking-bot";
+export {
+  ToolCall,
+  type ToolCallProps,
+  type ToolCallState,
+  type ToolPartLike,
+} from "./components/ui/tool-call";
+export {
+  StreamingMessage,
+  parseBlocks,
+  type StreamingMessageProps,
+  type TextPartLike,
+} from "./components/ui/streaming-message";
+export {
+  ConversationShell,
+  type ConversationShellProps,
+  type ConversationMessage,
+} from "./components/ui/conversation-shell";
+export {
+  MessageActions,
+  type MessageActionsProps,
+} from "./components/ui/message-actions";
+export {
+  ReasoningBlock,
+  type ReasoningBlockProps,
+} from "./components/ui/reasoning-block";
+export {
+  TraceWaterfall,
+  type TraceWaterfallProps,
+  type TraceSpan,
+  type TraceSpanKind,
+} from "./components/ui/trace-waterfall";
+export {
+  TaskChecklist,
+  type TaskChecklistProps,
+  type TaskItem,
+} from "./components/ui/task-checklist";
+export {
+  TerminalOutput,
+  type TerminalOutputProps,
+  type TerminalLine,
+} from "./components/ui/terminal-output";
+export {
+  SourcesList,
+  type SourcesListProps,
+  type SourceItem,
+} from "./components/ui/sources-list";
+export {
+  DiffViewer,
+  type DiffViewerProps,
+  type DiffLine,
+} from "./components/ui/diff-viewer";
+export {
+  ContextMeter,
+  type ContextMeterProps,
+} from "./components/ui/context-meter";
+export {
+  Attachments,
+  type AttachmentsProps,
+  type AttachmentItem,
+} from "./components/ui/attachments";
+export {
+  ModelPicker,
+  type ModelPickerProps,
+  type ModelOption,
+  type ReasoningEffort,
+} from "./components/ui/model-picker";
+export {
+  MentionPicker,
+  type MentionPickerProps,
+  type MentionOption,
+} from "./components/ui/mention-picker";
+export {
+  SlashMenu,
+  type SlashMenuProps,
+  type SlashCommand,
+} from "./components/ui/slash-menu";
+export {
+  RagSources,
+  type RagSourcesProps,
+  type RagChunk,
+} from "./components/ui/rag-sources";
+export {
+  ToolApproval,
+  type ToolApprovalProps,
+  type ToolApprovalStatus,
+  type ToolApprovalDetail,
+} from "./components/ui/tool-approval";
+export {
+  GuardrailCheck,
+  type GuardrailCheckProps,
+  type GuardrailRule,
+  type GuardrailRuleState,
+} from "./components/ui/guardrail-check";
+export {
+  OAuthConsent,
+  type OAuthConsentProps,
+  type OAuthScope,
+  type OAuthScopeRisk,
+  type OAuthConsentStatus,
+} from "./components/ui/oauth-consent";
+export {
+  AgentTimeline,
+  type AgentTimelineProps,
+  type AgentTimelineItem,
+  type AgentTimelineTone,
+} from "./components/ui/agent-timeline";
+export {
+  AgentHandoff,
+  type AgentHandoffProps,
+  type AgentHandoffPhase,
+  type AgentHandoffContextItem,
+} from "./components/ui/agent-handoff";
+export {
+  VoiceAgent,
+  type VoiceAgentProps,
+} from "./components/ui/voice-agent";
+export {
+  VoiceOrb,
+  type VoiceOrbProps,
+} from "./components/ui/voice-orb";
+export {
+  AgentMemory,
+  type AgentMemoryProps,
+  type AgentMemoryEntry,
+} from "./components/ui/agent-memory";
+export {
+  CheckpointRewind,
+  type CheckpointRewindProps,
+  type Checkpoint,
+  type CheckpointKind,
+  type CheckpointRestoreMode,
+} from "./components/ui/checkpoint-rewind";
+export {
+  AgentQuestion,
+  type AgentQuestionProps,
+  type AgentQuestionOption,
+} from "./components/ui/agent-question";
+export {
+  PlanReview,
+  type PlanReviewProps,
+  type PlanStep,
+} from "./components/ui/plan-review";
+export {
+  StagedAction,
+  type StagedActionProps,
+  type StagedActionDetail,
+} from "./components/ui/staged-action";
+export {
+  SecretRequest,
+  type SecretRequestProps,
+} from "./components/ui/secret-request";
+export {
+  McpServers,
+  type McpServersProps,
+  type McpServer,
+  type McpServerStatus,
+} from "./components/ui/mcp-servers";
+export {
+  BrowserAgent,
+  type BrowserAgentProps,
+  type BrowserAgentStatus,
+} from "./components/ui/browser-agent";
+export {
+  SqlQueryCard,
+  type SqlQueryCardProps,
+  type SqlQueryColumn,
+  type SqlQueryRow,
+} from "./components/ui/sql-query-card";
+export {
+  SandboxPreview,
+  type SandboxPreviewProps,
+  type SandboxPreviewStatus,
+} from "./components/ui/sandbox-preview";
+export {
+  BackgroundTasks,
+  type BackgroundTasksProps,
+  type BackgroundTask,
+  type BackgroundTaskStatus,
+} from "./components/ui/background-tasks";
+export {
+  SubAgents,
+  type SubAgentsProps,
+  type SubAgentLane,
+  type SubAgentStatus,
+} from "./components/ui/sub-agents";
+export {
+  ScheduledTrigger,
+  type ScheduledTriggerProps,
+} from "./components/ui/scheduled-trigger";
+export {
+  ErrorRetry,
+  type ErrorRetryProps,
+  type ErrorRetryPhase,
+} from "./components/ui/error-retry";
+export {
+  ArtifactPanel,
+  type ArtifactPanelProps,
+  type ArtifactItem,
+} from "./components/ui/artifact-panel";
+export {
+  CostTracker,
+  type CostTrackerProps,
+  type CostBreakdownLine,
+} from "./components/ui/cost-tracker";
+export {
+  ModelArena,
+  type ModelArenaProps,
+  type ModelArenaReply,
+} from "./components/ui/model-arena";
+export * from "./blocks";
+export {
   NumberInput,
   parseLocaleNumber,
   clampNumber,

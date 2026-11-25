@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "rag-sources",
+  "type": "ui",
+  "title": "RAG Sources",
+  "description": "Retrieved RAG chunks with scores",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/rag-sources.tsx", "target": "rag-sources.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "use-id"],
+  "docs": "components/rag-sources"
+}

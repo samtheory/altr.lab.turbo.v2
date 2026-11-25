@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "flip-text",
+  "type": "ui",
+  "title": "Flip Text",
+  "description": "Rolling 3D letter cubes",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/flip-text.tsx",
+      "target": "flip-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/flip-text"
+}

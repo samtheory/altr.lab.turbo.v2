@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "quote",
+  "type": "ui",
+  "title": "Quote",
+  "description": "Large testimonial quote block",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/quote.tsx", "target": "quote.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/quote"
+}

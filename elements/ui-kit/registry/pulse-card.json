@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "pulse-card",
+  "type": "ui",
+  "title": "Pulse Card",
+  "description": "Heart-rate summary with animated ECG",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/pulse-card.tsx", "target": "pulse-card.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "use-id"],
+  "docs": "components/pulse-card"
+}

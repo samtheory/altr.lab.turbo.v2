@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "marquee-card",
+  "type": "ui",
+  "title": "Marquee Card",
+  "description": "Alternating marquee tag rows with copy",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/marquee-card.tsx",
+      "target": "marquee-card.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/marquee-card"
+}

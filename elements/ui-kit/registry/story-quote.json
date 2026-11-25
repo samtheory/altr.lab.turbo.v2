@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "story-quote",
+  "type": "ui",
+  "title": "Story Quote",
+  "description": "Animated testimonial quote card",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/story-quote.tsx",
+      "target": "story-quote.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/story-quote"
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "./schema.json",
+  "name": "leads-table",
+  "type": "ui",
+  "title": "Leads Table",
+  "description": "Presentational leads table",
+  "files": [{ "path": "src/blocks/leads-table.tsx", "target": "leads-table.tsx" }],
+  "registryDependencies": ["utils"],
+  "docs": "blocks/leads-table"
+}

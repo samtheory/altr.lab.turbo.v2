@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "model-picker",
+  "type": "ui",
+  "title": "Model Picker",
+  "description": "Composer model switcher with reasoning effort",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/model-picker.tsx", "target": "model-picker.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "use-id"],
+  "docs": "components/model-picker"
+}

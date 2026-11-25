@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "count-up-card",
+  "type": "ui",
+  "title": "Count Up Card",
+  "description": "Vertical metrics conveyor card",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/count-up-card.tsx",
+      "target": "count-up-card.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "card",
+    "use-reduced-motion"
+  ],
+  "docs": "components/count-up-card"
+}

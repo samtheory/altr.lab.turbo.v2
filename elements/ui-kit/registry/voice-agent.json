@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "voice-agent",
+  "type": "ui",
+  "title": "Voice Agent",
+  "description": "Voice assistant card with start and end call",
+  "dependencies": { "lucide-react": "^0.525.0", "motion": "^12.23.12" },
+  "files": [{ "path": "src/components/ui/voice-agent.tsx", "target": "voice-agent.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "voice-orb"],
+  "docs": "components/voice-agent"
+}

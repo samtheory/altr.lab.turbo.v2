@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "terminal-output",
+  "type": "ui",
+  "title": "Terminal Output",
+  "description": "Styled terminal log panel",
+  "dependencies": { "lucide-react": "^0.525.0" },
+  "files": [{ "path": "src/components/ui/terminal-output.tsx", "target": "terminal-output.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/terminal-output"
+}

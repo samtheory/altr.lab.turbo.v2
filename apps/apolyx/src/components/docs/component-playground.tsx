@@ -236,7 +236,7 @@ export function ComponentPlayground({
           <div className="relative min-h-56 overflow-auto border-b border-border/70 p-6 lg:border-b-0 lg:border-r">
             <div
               className={cn(
-                "mx-auto flex min-h-44 flex-wrap gap-4 rounded-xl border border-dashed border-border/80 bg-background p-6 transition-[max-width] duration-300 ease-out motion-reduce:transition-none",
+                "@container mx-auto flex min-h-44 w-full min-w-0 flex-wrap gap-4 rounded-xl border border-dashed border-border/80 bg-background p-6 transition-[max-width] duration-300 ease-out motion-reduce:transition-none",
                 align === "center" ? "items-center justify-center" : "items-start justify-start",
               )}
               style={{ maxWidth: stageWidth }}
