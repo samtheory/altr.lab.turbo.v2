@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "spotlight-beam",
+  "type": "ui",
+  "title": "Spotlight Beam",
+  "description": "Apolyx S0013 — Spotlight Beam",
+  "dependencies": {},
+  "files": [
+    {
+      "path": "src/components/ui/spotlight-beam.tsx",
+      "target": "spotlight-beam.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/spotlight-beam"
+}

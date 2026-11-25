@@ -55,13 +55,13 @@ function errorMessage(err: unknown): string {
   return String(err);
 }
 
-function normalizeFileTarget(target: string): string {
+export function normalizeFileTarget(target: string): string {
   const trimmed = target.trim();
   if (trimmed.startsWith("file:")) return trimmed;
   return fsPathToFileUrl(trimmed);
 }
 
-function buildPostgresUrl(input: ProjectConnectInput): string {
+export function buildPostgresUrl(input: ProjectConnectInput): string {
   const raw = input.target.trim();
   const url = new URL(raw);
   if (input.dbUser?.trim()) url.username = input.dbUser.trim();
@@ -73,6 +73,24 @@ function buildPostgresUrl(input: ProjectConnectInput): string {
     url.searchParams.set("sslmode", "verify-full");
   }
   return url.toString();
+}
+
+/** Resolve createJordClient options for a registered project target. */
+export function projectClientOptions(input: ProjectConnectInput): {
+  url: string;
+  authToken?: string;
+  postgresDdl?: boolean;
+} {
+  if (input.engine === "postgres") {
+    return { url: buildPostgresUrl(input), postgresDdl: true };
+  }
+  if (input.engine === "libsql-turso") {
+    return {
+      url: input.target.trim(),
+      authToken: input.password?.trim() || undefined,
+    };
+  }
+  return { url: normalizeFileTarget(input.target) };
 }
 
 async function pingLibsql(input: ProjectConnectInput): Promise<void> {

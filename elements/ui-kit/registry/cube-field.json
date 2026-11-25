@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "cube-field",
+  "type": "ui",
+  "title": "Cube Field",
+  "description": "Apolyx S0013 — Cube Field",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/cube-field.tsx",
+      "target": "cube-field.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/cube-field"
+}

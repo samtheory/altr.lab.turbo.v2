@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "step-loader",
+  "type": "ui",
+  "title": "Step Loader",
+  "description": "Apolyx S0013 — Step Loader",
+  "dependencies": {
+    "motion": "^12.23.12",
+    "lucide-react": "^0.525.0"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/step-loader.tsx",
+      "target": "step-loader.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "visually-hidden"
+  ],
+  "docs": "components/step-loader"
+}

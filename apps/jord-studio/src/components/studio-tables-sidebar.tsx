@@ -88,10 +88,14 @@ export function StudioTablesSidebar() {
     return schemas.find((s) => s.name === selectedSchema)?.readOnly ?? false;
   }, [schemas, selectedSchema]);
 
-  const singleReadonlyMain =
-    schemas.length === 1 &&
-    schemas[0]?.name === "main" &&
-    schemas[0]?.readOnly === true;
+  /** libSQL exposes one fixed `main` schema; engine marks it readOnly for
+   * CREATE SCHEMA only — table DDL on main is allowed (see LibSqlAdapter). */
+  const singleLibsqlMain =
+    schemas.length === 1 && schemas[0]?.name === "main";
+
+  /** True when this schema forbids table DDL (not the fixed libSQL main). */
+  const schemaBlocksTableDdl =
+    !singleLibsqlMain && schemaReadOnly;
 
   // Sync search from URL without fighting typing.
   useEffect(() => {
@@ -299,13 +303,13 @@ export function StudioTablesSidebar() {
       ) {
         return;
       }
-      if (selectedSchema === SCHEMA_ALL || schemaReadOnly) return;
+      if (selectedSchema === SCHEMA_ALL || schemaBlocksTableDdl) return;
       e.preventDefault();
       openCreateTable();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openCreateTable, selectedSchema, schemaReadOnly]);
+  }, [openCreateTable, selectedSchema, schemaBlocksTableDdl]);
 
   const onSelect = useCallback(
     (item: SidebarItem, _index: number) => {
@@ -384,7 +388,7 @@ export function StudioTablesSidebar() {
           <Select
             value={selectedSchema}
             onValueChange={onSchemaChange}
-            disabled={loading || !schemaReady || singleReadonlyMain}
+            disabled={loading || !schemaReady || singleLibsqlMain}
           >
             <SelectTrigger
               id="jord-schema-picker"
@@ -404,7 +408,7 @@ export function StudioTablesSidebar() {
                   <span className="flex w-full items-center justify-between gap-2">
                     <span className="font-mono text-xs">
                       {s.name}
-                      {s.readOnly ? " (read-only)" : ""}
+                      {s.readOnly && s.name !== "main" ? " (read-only)" : ""}
                     </span>
                     <Badge
                       variant="outline"
@@ -423,10 +427,10 @@ export function StudioTablesSidebar() {
             </Badge>
           ) : null}
         </div>
-        {singleReadonlyMain ? (
+        {singleLibsqlMain ? (
           <p className="text-[11px] text-muted-foreground">
             libSQL exposes a single <code className="font-mono">main</code>{" "}
-            schema.
+            schema — you can still create tables here.
           </p>
         ) : null}
       </div>
@@ -439,7 +443,7 @@ export function StudioTablesSidebar() {
         disabled={
           loading ||
           selectedSchema === SCHEMA_ALL ||
-          schemaReadOnly ||
+          schemaBlocksTableDdl ||
           !inspector
         }
         onClick={openCreateTable}
@@ -482,7 +486,7 @@ export function StudioTablesSidebar() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={schemaReadOnly || !inspector}
+                  disabled={schemaBlocksTableDdl || !inspector}
                   onClick={openCreateTable}
                 >
                   <Plus className="mr-1 size-3.5" aria-hidden />

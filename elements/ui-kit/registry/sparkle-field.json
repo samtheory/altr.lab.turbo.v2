@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "sparkle-field",
+  "type": "ui",
+  "title": "Sparkle Field",
+  "description": "Apolyx S0013 — Sparkle Field",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/sparkle-field.tsx",
+      "target": "sparkle-field.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/sparkle-field"
+}

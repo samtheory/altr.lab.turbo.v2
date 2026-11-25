@@ -1,0 +1,21 @@
+<ComponentPreview name="step-loader-demo" />
+
+## Installation
+
+<InstallTabs name="step-loader" exports="StepLoader" />
+
+## Usage
+
+```tsx
+<StepLoader
+  steps={[
+    { label: "Connect", description: "Open the workspace." },
+    { label: "Sync", description: "Pull tokens." },
+    { label: "Ready" },
+  ]}
+  duration={1600}
+  loop
+/>
+```
+
+Pass `current` to control the active step. Auto-advance respects `prefers-reduced-motion` (jumps to the last step). Status is announced with `role="status"`.

@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "lamp-glow",
+  "type": "ui",
+  "title": "Lamp Glow",
+  "description": "Apolyx S0013 — Lamp Glow",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/lamp-glow.tsx",
+      "target": "lamp-glow.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/lamp-glow"
+}

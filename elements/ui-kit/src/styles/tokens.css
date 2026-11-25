@@ -551,6 +551,130 @@
   }
 }
 
+.apolyx-mesh-blob {
+  animation: apolyx-mesh-blob 14s ease-in-out infinite alternate;
+}
+.apolyx-mesh-blob-b {
+  animation-duration: 18s;
+  animation-delay: -4s;
+}
+.apolyx-mesh-blob-c {
+  animation-duration: 22s;
+  animation-delay: -8s;
+}
+@keyframes apolyx-mesh-blob {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(8%, -6%, 0) scale(1.12);
+  }
+}
+
+.apolyx-lamp-pulse {
+  animation: apolyx-lamp-pulse 5.5s ease-in-out infinite alternate;
+}
+@keyframes apolyx-lamp-pulse {
+  from {
+    opacity: 0.55;
+    transform: translateX(-50%) scaleY(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1.05);
+  }
+}
+.apolyx-lamp-cone {
+  animation: apolyx-lamp-cone 6s ease-in-out infinite alternate;
+}
+@keyframes apolyx-lamp-cone {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.apolyx-star-twinkle {
+  animation: apolyx-star-twinkle 2.8s ease-in-out infinite alternate;
+}
+@keyframes apolyx-star-twinkle {
+  from {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.apolyx-forge-sheen {
+  animation: apolyx-forge-sheen 2.4s ease-in-out infinite;
+}
+@keyframes apolyx-forge-sheen {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+@property --hb-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.apolyx-hover-border {
+  animation: apolyx-hover-border var(--hb-duration, 3s) linear infinite;
+  animation-play-state: paused;
+}
+[data-slot="hover-border"]:hover .apolyx-hover-border,
+[data-slot="hover-border"]:focus-within .apolyx-hover-border {
+  animation-play-state: running;
+}
+@keyframes apolyx-hover-border {
+  to {
+    --hb-angle: 360deg;
+  }
+}
+
+.apolyx-glow-frame-border {
+  background: conic-gradient(
+    from var(--glow-frame-angle, 0deg),
+    transparent 20%,
+    color-mix(in oklab, var(--primary) 70%, transparent) 45%,
+    transparent 70%
+  );
+  animation: apolyx-glow-frame-border 5s linear infinite;
+}
+@property --glow-frame-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes apolyx-glow-frame-border {
+  to {
+    --glow-frame-angle: 360deg;
+  }
+}
+
+.apolyx-spotlight-beam {
+  animation: apolyx-spotlight-beam 5s ease-in-out infinite alternate;
+}
+@keyframes apolyx-spotlight-beam {
+  from {
+    opacity: 0.55;
+    transform: translateX(-50%) scaleX(0.92);
+  }
+  to {
+    opacity: 0.95;
+    transform: translateX(-50%) scaleX(1.05);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .apolyx-pattern-retro-drift,
   .apolyx-pattern-pulse-grid,
@@ -568,7 +692,17 @@
   .apolyx-sparkle-text::after,
   .apolyx-spin-label,
   .apolyx-pulse-button,
-  .apolyx-glyph-flicker {
+  .apolyx-glyph-flicker,
+  .apolyx-mesh-blob,
+  .apolyx-mesh-blob-b,
+  .apolyx-mesh-blob-c,
+  .apolyx-lamp-pulse,
+  .apolyx-lamp-cone,
+  .apolyx-star-twinkle,
+  .apolyx-forge-sheen,
+  .apolyx-hover-border,
+  .apolyx-glow-frame-border,
+  .apolyx-spotlight-beam {
     animation: none;
   }
   .apolyx-aurora-text,

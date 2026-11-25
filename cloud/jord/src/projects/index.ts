@@ -47,3 +47,13 @@ export {
   createProjectRoutes,
   createStudioProjectRoutes,
 } from "./routes.js";
+export {
+  createScopedJordPort,
+  DEFAULT_PROJECT_SLUG,
+  PROJECT_HEADER,
+  ProjectDataPlane,
+  type PlaneContext,
+  type ProjectPlaneDeps,
+  type ResolvePlaneResult,
+} from "./plane.js";
+export { projectClientOptions } from "./connect-test.js";

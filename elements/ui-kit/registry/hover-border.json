@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "hover-border",
+  "type": "ui",
+  "title": "Hover Border",
+  "description": "Apolyx S0013 — Hover Border",
+  "dependencies": {},
+  "files": [
+    {
+      "path": "src/components/ui/hover-border.tsx",
+      "target": "hover-border.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "slot"
+  ],
+  "docs": "components/hover-border"
+}

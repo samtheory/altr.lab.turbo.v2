@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "vortex-field",
+  "type": "ui",
+  "title": "Vortex Field",
+  "description": "Apolyx S0013 — Vortex Field",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/vortex-field.tsx",
+      "target": "vortex-field.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/vortex-field"
+}

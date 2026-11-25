@@ -1,11 +1,13 @@
 export { RealtimeBus, type RealtimeListener, type RealtimeSubscribeFilter } from "./bus.js";
 export {
   createOutbox,
+  createOutboxRegistry,
   resolveRetention,
   sanitizeRowForOutbox,
   DEFAULT_RETENTION_DAYS,
   DEFAULT_RETENTION_ROWS,
   type Outbox,
+  type OutboxRegistry,
   type OutboxRow,
 } from "./outbox.js";
 export {

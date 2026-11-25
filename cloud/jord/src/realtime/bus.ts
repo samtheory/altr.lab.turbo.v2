@@ -8,6 +8,8 @@ export type RealtimeListener = (event: JordChangeEvent) => void;
 export type RealtimeSubscribeFilter = {
   table: string;
   id?: string | null;
+  /** When set, only events tagged with this project slug are delivered (S0098). */
+  project?: string | null;
 };
 
 /**
@@ -50,6 +52,10 @@ export class RealtimeBus {
   ): (() => void) | null {
     return this.trySubscribe((event) => {
       if (event.table !== filter.table) return;
+      if (filter.project != null && filter.project !== "") {
+        const eventProject = event.project ?? "default";
+        if (eventProject !== filter.project) return;
+      }
       // A table-level resync reaches id-filtered subscribers too.
       if (filter.id && event.op !== "resync" && event.id !== filter.id) return;
       listener(event);

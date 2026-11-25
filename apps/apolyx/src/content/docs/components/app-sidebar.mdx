@@ -1,0 +1,21 @@
+<ComponentPreview name="app-sidebar-demo" />
+
+## Installation
+
+<InstallTabs name="app-sidebar" exports="AppSidebar, AppSidebarHeader, AppSidebarBrand, AppSidebarToggle, AppSidebarBody, AppSidebarGroup, AppSidebarItem, AppSidebarFooter, useAppSidebar" />
+
+## Usage
+
+```tsx
+<AppSidebar defaultOpen>
+  <AppSidebarHeader>
+    <AppSidebarBrand>Apolyx</AppSidebarBrand>
+    <AppSidebarToggle />
+  </AppSidebarHeader>
+  <AppSidebarBody>
+    <AppSidebarItem href="/" active>Home</AppSidebarItem>
+  </AppSidebarBody>
+</AppSidebar>
+```
+
+Collapse with the toggle or **Ctrl/⌘+B**. Width animates; labels hide when collapsed. Controlled via `open` / `onOpenChange`.

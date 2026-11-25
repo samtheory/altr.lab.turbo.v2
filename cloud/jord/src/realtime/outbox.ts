@@ -354,7 +354,10 @@ export function createOutbox(jord: JordDriverPort) {
     return { deleted: Math.max(0, countBefore - remaining) };
   }
 
-  function toEvent(row: OutboxRow): JordChangeEvent {
+  function toEvent(
+    row: OutboxRow,
+    projectSlug?: string | null,
+  ): JordChangeEvent {
     let version: number | undefined;
     if (row.newJson) {
       try {
@@ -364,6 +367,8 @@ export function createOutbox(jord: JordDriverPort) {
         /* ignore */
       }
     }
+    const project =
+      projectSlug && projectSlug.trim() ? projectSlug.trim() : "default";
     return {
       type: "jord.change",
       table: row.tableName,
@@ -373,6 +378,7 @@ export function createOutbox(jord: JordDriverPort) {
       at: row.ts,
       dialect: jord.dialect,
       seq: row.seq,
+      project,
     };
   }
 
@@ -393,3 +399,20 @@ export function createOutbox(jord: JordDriverPort) {
 }
 
 export type Outbox = ReturnType<typeof createOutbox>;
+
+/** One outbox (watermark + dialect) per driver instance (S0098). */
+export function createOutboxRegistry() {
+  const map = new WeakMap<JordDriverPort, Outbox>();
+  return {
+    get(driver: JordDriverPort): Outbox {
+      let box = map.get(driver);
+      if (!box) {
+        box = createOutbox(driver);
+        map.set(driver, box);
+      }
+      return box;
+    },
+  };
+}
+
+export type OutboxRegistry = ReturnType<typeof createOutboxRegistry>;

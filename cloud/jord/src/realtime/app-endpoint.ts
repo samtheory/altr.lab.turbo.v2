@@ -26,18 +26,14 @@
  * paused/archived or is unknown; 403 `wrong_project` / 410 need a VALID key.
  *
  * ===========================================================================
- * KNOWN LIMITATIONS (security review, documented decisions — not built here)
+ * KNOWN LIMITATIONS (security review, documented decisions)
  * ===========================================================================
- * (a) CROSS-PROJECT DATA. Keys are bound to the `:project` slug, but tables,
- *     policies and the outbox all come from the single primary database
- *     (`deps.jord`). Every project's publishable key therefore reads the SAME
- *     tables today; the project binding only gates the handshake, revocation
- *     and archive. Do not market per-project isolation on this endpoint until
- *     data is routed per project. A `console.warn` fires once at registration
- *     when more than one active project exists.
- * (b) GLOBAL SEQ GAPS. `seq` / `cursor` are global outbox sequence numbers;
- *     gaps between consecutive deltas reveal that other (invisible) writes
- *     happened, and roughly how many. Accepted for Slice 0.
+ * (a) CROSS-PROJECT DATA — **closed in S0098.** Handshake keys still live on
+ *     the control-plane primary; after a valid handshake the connection binds
+ *     the project's target driver for snapshot / outbox / policy row checks.
+ *     Bus events carry `project` and subscribers filter on it.
+ * (b) SEQ GAPS. `seq` / `cursor` are per-project-outbox sequence numbers;
+ *     gaps still reveal other writes *inside that project*. Accepted.
  * (c) X-FORWARDED-FOR is trusted for the per-IP caps and handshake rate limit
  *     (project-wide pattern). Deploy behind a proxy that overwrites it, or a
  *     client can spread itself across fake IPs.
@@ -202,8 +198,9 @@ export function sendWithBackpressure(
 }
 
 /**
- * Limitation (a) in the header: warn when several active projects share the
- * single primary database this endpoint reads. Never throws.
+ * Soft notice when several projects are active. S0098 routes each project's
+ * snapshot/outbox to its own target; this only reminds operators that the
+ * in-process bus is still one process (events are filtered by project slug).
  */
 export async function warnIfMultiProject(jord: JordDriverPort): Promise<boolean> {
   try {
@@ -212,8 +209,8 @@ export async function warnIfMultiProject(jord: JordDriverPort): Promise<boolean>
     );
     const n = Number(rows[0]?.n ?? 0);
     if (n > 1) {
-      console.warn(
-        `[@altr/jord-server] app realtime: ${n} active projects share ONE database; every project's publishable key reads the same tables, policies and change feed (no per-project data isolation yet)`,
+      console.info(
+        `[@altr/jord-server] app realtime: ${n} active projects — snapshots/outbox are per-target (S0098); bus fans out in-process with project slug filters`,
       );
       return true;
     }
@@ -303,6 +300,13 @@ export class AppConnectionCaps {
 // Handshake
 // ---------------------------------------------------------------------------
 
+type DataPlaneBinding = {
+  jord: JordDriverPort;
+  outbox: Outbox;
+  slug: string;
+  dialect: "libsql" | "postgres";
+};
+
 export type HandshakeOk = {
   ok: true;
   principal: Principal;
@@ -310,6 +314,8 @@ export type HandshakeOk = {
   project: ProjectRef;
   keyHash: string;
   caps: CapKeys;
+  /** Bound project data plane (S0098). */
+  plane: DataPlaneBinding;
 };
 
 export type HandshakeFail = {
@@ -528,10 +534,29 @@ export type AppRealtimeFrame =
 // ---------------------------------------------------------------------------
 
 export type AppRealtimeDeps = {
+  /**
+   * Control-plane primary — project key lookup + project status only.
+   * Prefer this over `jord` when both are set (S0098).
+   */
+  controlJord?: JordDriverPort;
+  /** @deprecated Prefer `controlJord` + `resolveDataPlane` (S0098). */
   jord: JordDriverPort;
   auth: JordAuthConfig;
   keyring?: JwtKeyring;
+  /** @deprecated Prefer `outboxFor` (S0098). Kept for older call sites/tests. */
   outbox: Outbox;
+  /** Per-driver outbox factory (S0098). */
+  outboxFor?: (driver: JordDriverPort) => Outbox;
+  /**
+   * Open the registered project target after handshake (S0098).
+   * When omitted, data stays on `jord` (single-DB boots / older tests).
+   */
+  resolveDataPlane?: (
+    slug: string,
+  ) => Promise<
+    | { ok: true; jord: JordDriverPort; slug: string }
+    | { ok: false; status: 404 | 410 | 503; error: string; reason?: string }
+  >;
   bus: RealtimeBus;
   decide: (
     principal: Principal,
@@ -550,7 +575,11 @@ export type AppRealtimeDeps = {
 export function createAppRealtime(deps: AppRealtimeDeps) {
   const limits: AppRealtimeLimits = { ...DEFAULT_APP_REALTIME_LIMITS, ...(deps.limits ?? {}) };
   const caps = new AppConnectionCaps(limits);
-  const dialect: "libsql" | "postgres" = deps.jord.dialect === "postgres" ? "postgres" : "libsql";
+  const controlJord = deps.controlJord ?? deps.jord;
+
+  function outboxFor(driver: JordDriverPort): Outbox {
+    return deps.outboxFor?.(driver) ?? deps.outbox;
+  }
 
   async function jwtKeys(): Promise<JwtKey[]> {
     let keys = jwtEnvKeys(deps.auth);
@@ -626,17 +655,43 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
     // unknown / paused / archived projects all answer the same 401.
     const keyHash = hashProjectKey(key);
     const match = key.startsWith("jord_pub_")
-      ? await findProjectKeyByHash(deps.jord, keyHash)
+      ? await findProjectKeyByHash(controlJord, keyHash)
       : null;
     if (!match) return fail(401, "invalid_key", "invalid project key");
     if (match.kind !== "publishable") return SECRET_REJECT();
-    const project = await findProjectRef(deps.jord, c.req.param("project") ?? "");
+    const project = await findProjectRef(controlJord, c.req.param("project") ?? "");
     if (!project || match.projectId !== project.id) {
       return fail(403, "wrong_project", "key does not belong to this project");
     }
     if (project.status !== "active") return projectGone(project);
 
-    // 3. Optional end-user JWT (normal path incl. session check).
+    // 2b. Bind the project's data plane (S0098). Keys stay on the primary.
+    let plane: DataPlaneBinding;
+    if (deps.resolveDataPlane) {
+      const resolved = await deps.resolveDataPlane(project.slug);
+      if (!resolved.ok) {
+        return fail(
+          resolved.status,
+          resolved.error,
+          resolved.reason ?? "project data plane unavailable",
+        );
+      }
+      plane = {
+        jord: resolved.jord,
+        outbox: outboxFor(resolved.jord),
+        slug: resolved.slug,
+        dialect: resolved.jord.dialect === "postgres" ? "postgres" : "libsql",
+      };
+    } else {
+      plane = {
+        jord: deps.jord,
+        outbox: outboxFor(deps.jord),
+        slug: project.slug,
+        dialect: deps.jord.dialect === "postgres" ? "postgres" : "libsql",
+      };
+    }
+
+    // 3. Optional end-user JWT (session checked on the project data plane).
     let principal: Principal = ANON;
     let accessExp: number | null = null;
     if (bearer) {
@@ -645,7 +700,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
       if (resolved.principal.kind !== "user" && resolved.principal.kind !== "anon") {
         return SECRET_REJECT();
       }
-      if (!(await principalSessionLive(deps.jord, resolved.principal))) {
+      if (!(await principalSessionLive(plane.jord, resolved.principal))) {
         return fail(401, "session_revoked", "session revoked or expired");
       }
       principal = resolved.principal;
@@ -665,13 +720,14 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
     if (deps.bus.size >= MAX_REALTIME_SUBSCRIBERS) {
       return fail(503, "realtime_full", "too many realtime subscribers");
     }
-    return { ok: true, principal, accessExp, project, keyHash, caps: capKeys };
+    return { ok: true, principal, accessExp, project, keyHash, caps: capKeys, plane };
   }
 
   /** Validate a subscription before any frame / stream byte is sent. */
   async function plan(
     principal: Principal,
     req: SubscribeRequest,
+    plane: DataPlaneBinding,
   ): Promise<SubscribePlan | SubscribeFail> {
     const { table } = req;
     if (table === REALTIME_V1_TABLE) {
@@ -692,7 +748,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
       return { ok: false, status: 403, body: deniedTableBody(table) };
     }
     if (!decision.allowed) return { ok: false, status: 403, body: deniedTableBody(table) };
-    const info = await deps.jord.describeTable(table);
+    const info = await plane.jord.describeTable(table);
     if (!info) return { ok: false, status: 403, body: deniedTableBody(table) };
 
     const entries = Object.entries(req.filter ?? {});
@@ -738,7 +794,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
     let since: number | null = null;
     if (req.since != null) {
       since = req.since;
-      const floor = await deps.outbox.minSeq();
+      const floor = await plane.outbox.minSeq();
       // Same expiry predicate as the Studio feed (`/realtime?since=`).
       const expired = floor == null ? since > 0 : since < floor - 1;
       if (expired) {
@@ -796,15 +852,27 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
     return null;
   }
 
-  async function snapshot(principal: Principal, p: SubscribePlan) {
+  async function snapshot(
+    principal: Principal,
+    p: SubscribePlan,
+    plane: DataPlaneBinding,
+  ) {
     const parsed = parseTableQuery(p.info, new URLSearchParams(), undefined);
     parsed.filters = p.filters;
     parsed.limit = p.limit + 1;
     parsed.offset = 0;
     parsed.order = pkColumns(p.info).map((col) => ({ column: col.name, dir: "asc" as const }));
-    const compiled = compileSelect(p.info, parsed, dialect, scopeFor(p.info, p.decision.scope));
+    const compiled = compileSelect(
+      p.info,
+      parsed,
+      plane.dialect,
+      scopeFor(p.info, p.decision.scope),
+    );
     deps.bindRls?.(principal);
-    const raw = await deps.jord.query(compiled.sql, compiled.args as Array<string | number | null>);
+    const raw = await plane.jord.query(
+      compiled.sql,
+      compiled.args as Array<string | number | null>,
+    );
     let truncated = raw.length > p.limit;
     const rows: Array<Record<string, unknown>> = [];
     // Serialized-size cap: one snapshot frame never exceeds maxSnapshotBytes
@@ -840,6 +908,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
   function run(
     principal: Principal,
     p: SubscribePlan,
+    plane: DataPlaneBinding,
     send: (frame: AppRealtimeFrame) => Promise<void> | void,
     onEnd: (reason: "resync" | "error") => void,
   ): (() => void) | null {
@@ -862,7 +931,8 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
       const out: { frame: AppRealtimeFrame | null } = { frame: null };
       const ok = await liveDeliveryAllowed({
         event,
-        getBySeq: async (seq) => (known && known.seq === seq ? known : deps.outbox.getBySeq(seq)),
+        getBySeq: async (seq) =>
+          known && known.seq === seq ? known : plane.outbox.getBySeq(seq),
         allowed: async (ev, row) => {
           out.frame = await deltaFor(principal, p, ev, row);
           return out.frame != null;
@@ -877,17 +947,20 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
       }
     };
 
-    const unsubscribe = deps.bus.trySubscribeFiltered({ table: p.table }, (event) => {
-      enqueue(() => deliver(event));
-    });
+    const unsubscribe = deps.bus.trySubscribeFiltered(
+      { table: p.table, project: plane.slug },
+      (event) => {
+        enqueue(() => deliver(event));
+      },
+    );
     if (!unsubscribe) return null;
 
     enqueue(async () => {
       try {
         let cursor: number;
         if (p.since == null) {
-          cursor = await deps.outbox.readableWatermark();
-          const snap = await snapshot(principal, p);
+          cursor = await plane.outbox.readableWatermark();
+          const snap = await snapshot(principal, p, plane);
           await send({
             type: "snapshot",
             table: p.table,
@@ -908,10 +981,13 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
             onEnd("resync");
             return;
           }
-          const rows = await deps.outbox.listAfter(lastSeq, { table: p.table, limit: CATCHUP_BATCH });
+          const rows = await plane.outbox.listAfter(lastSeq, {
+            table: p.table,
+            limit: CATCHUP_BATCH,
+          });
           for (const row of rows) {
             if (stopped) return;
-            await deliver(deps.outbox.toEvent(row), row);
+            await deliver(plane.outbox.toEvent(row, plane.slug), row);
           }
           if (rows.length < CATCHUP_BATCH) break;
         }
@@ -933,15 +1009,15 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
   async function recheck(
     hs: HandshakeOk,
   ): Promise<{ ok: true } | { ok: false; code: number; reason: string }> {
-    if (!(await principalSessionLive(deps.jord, hs.principal))) {
+    if (!(await principalSessionLive(hs.plane.jord, hs.principal))) {
       return { ok: false, code: APP_REALTIME_CLOSE.unauthorized, reason: "session_revoked" };
     }
     try {
-      const project = await findProjectRef(deps.jord, hs.project.id);
+      const project = await findProjectRef(controlJord, hs.project.id);
       if (!project || project.status !== "active") {
         return { ok: false, code: APP_REALTIME_CLOSE.projectGone, reason: "project_unavailable" };
       }
-      const match = await findProjectKeyByHash(deps.jord, hs.keyHash);
+      const match = await findProjectKeyByHash(controlJord, hs.keyHash);
       if (!match || match.kind !== "publishable" || match.projectId !== hs.project.id) {
         return { ok: false, code: APP_REALTIME_CLOSE.unauthorized, reason: "key_revoked" };
       }
@@ -956,7 +1032,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
 
   function register(app: Hono<{ Variables: JordAuthVariables }>): void {
     // Limitation (a): warn once if several active projects share this DB.
-    void warnIfMultiProject(deps.jord);
+    void warnIfMultiProject(controlJord);
     app.get(
       "/p/:project/realtime",
       async (c, next) => {
@@ -1091,7 +1167,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
             const my = gen;
             slot = "pending";
             const current = () => !closed && my === gen;
-            void plan(hs.principal, req)
+            void plan(hs.principal, req, hs.plane)
               .then((p) => {
                 // Stale (unsubscribed / re-subscribed / socket closed): nothing
                 // was acquired yet, so there is nothing to release.
@@ -1103,6 +1179,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
                 const s = run(
                   hs.principal,
                   p,
+                  hs.plane,
                   (frame) => {
                     if (current()) sendFrame(frame);
                   },
@@ -1155,7 +1232,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
           limit: c.req.query("limit"),
         });
         if ("error" in req) return c.json(req, 400);
-        const p = await plan(hs.principal, req);
+        const p = await plan(hs.principal, req, hs.plane);
         if (!p.ok) return c.json(p.body, p.status);
         const release = caps.acquire(hs.caps);
         if (!release) {
@@ -1166,6 +1243,7 @@ export function createAppRealtime(deps: AppRealtimeDeps) {
           const stop = run(
             hs.principal,
             p,
+            hs.plane,
             async (frame) => {
               const type = (frame as { type: string }).type;
               await stream.writeSSE({ event: type, data: JSON.stringify(frame) });

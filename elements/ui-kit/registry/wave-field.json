@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "wave-field",
+  "type": "ui",
+  "title": "Wave Field",
+  "description": "Apolyx S0013 — Wave Field",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/wave-field.tsx",
+      "target": "wave-field.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/wave-field"
+}

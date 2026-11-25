@@ -1,0 +1,24 @@
+{
+  "$schema": "./schema.json",
+  "name": "mega-nav",
+  "type": "ui",
+  "title": "Mega Nav",
+  "description": "Apolyx S0013 — Mega Nav",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/mega-nav.tsx",
+      "target": "mega-nav.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "use-controllable-state",
+    "use-id",
+    "slot"
+  ],
+  "docs": "components/mega-nav"
+}

@@ -18,7 +18,7 @@ Reference list of modern React component libraries, registries, and design syste
 | **MVPBlocks** | https://blocks.mvp-subha.me/ | Prebuilt UI blocks for MVPs. Next.js + Tailwind + Framer Motion. V0 compatible. |
 | **Tailark** | https://tailark.com/ | Shadcn registry for marketing websites. Multiple styles, pages, illustrations. |
 | **Kokonut UI** | https://kokonutui.com/ | 102 free components (React, Tailwind, Motion). Backed by Vercel OSS. Pro: 120+ components, 6 templates. |
-| **Aceternity UI** | https://ui.aceternity.com/ | 200+ components, blocks, templates. React + Tailwind + Motion. MCP + AI agent ready. |
+| **Aceternity UI** | https://ui.aceternity.com/ | 200+ components, blocks, templates. React + Tailwind + Motion. MCP + AI agent ready. **Apolyx map:** `Docs/feature_list/ui-kit/14-apolyx-s0013-aceternity-wave.md` (`apolyx-F0016`, S0013/S0014). |
 | **21st.dev** | https://21st.dev/ | Community components, templates, shaders, icons. AI-agent friendly (MCP, prompts). |
 | **Preline UI** | https://preline.co/ | Open-source Tailwind CSS library. 640+ free components, 972 blocks, 22 templates. Universal framework support. |
 | **Smooth UI** | https://smoothui.dev/ | 228 animated primitives/components. Motion + GSAP, React 19, Tailwind v4. shadcn compatible. AI-native (MCP, API). |
@@ -32,7 +32,7 @@ Reference list of modern React component libraries, registries, and design syste
 | **Motion Primitives** | https://motion-primitives.com/ | Beautiful animated UI kit. React + TypeScript + Tailwind + Motion. Open source. |
 | **Smooth UI** | https://smoothui.dev/ | Motion-first primitives with spring physics, reduced-motion aware. |
 | **Magic UI** | https://magicui.design/ | Animation-heavy components (border beam, comet, shimmer, etc.). |
-| **Aceternity UI** | https://ui.aceternity.com/ | Heavy use of Motion for backgrounds, cards, text effects, 3D. |
+| **Aceternity UI** | https://ui.aceternity.com/ | Heavy use of Motion for backgrounds, cards, text effects, 3D. Ledger: `Docs/feature_list/ui-kit/14-apolyx-s0013-aceternity-wave.md`. |
 | **Kokonut UI** | https://kokonutui.com/ | Motion-based interactions (detent dial, wheel picker, activity rings, etc.). |
 
 ---
@@ -209,5 +209,12 @@ npx shadcn@latest add https://ui.aceternity.com/r/button.json
 
 ---
 
-*Last updated: 2026-11-07*
+*Last updated: 2026-11-25*
 *Use this as a living document — add new discoveries as you find them.*
+
+### Apolyx inspiration waves (in-repo)
+
+| Source | Feature note | Sprint |
+|--------|--------------|--------|
+| Magic UI | `Docs/feature_list/ui-kit/13-apolyx-s0012-magicui-wave.md` | Apolyx-S0012 (done) |
+| Aceternity UI | `Docs/feature_list/ui-kit/14-apolyx-s0013-aceternity-wave.md` | Apolyx-S0013 → S0014 (active) |

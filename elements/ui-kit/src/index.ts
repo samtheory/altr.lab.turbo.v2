@@ -334,6 +334,57 @@ export { ShineFrame, type ShineFrameProps } from "./components/ui/shine-frame";
 export { SpotlightCard, type SpotlightCardProps } from "./components/ui/spotlight-card";
 export { GlareSurface, type GlareSurfaceProps } from "./components/ui/glare-surface";
 export { MeteorShower, type MeteorShowerProps } from "./components/ui/meteor-shower";
+export { CubeField, type CubeFieldProps } from "./components/ui/cube-field";
+export { HoverBoxes, type HoverBoxesProps } from "./components/ui/hover-boxes";
+export { MeshGradient, type MeshGradientProps } from "./components/ui/mesh-gradient";
+export { WaveField, type WaveFieldProps } from "./components/ui/wave-field";
+export { VortexField, type VortexFieldProps } from "./components/ui/vortex-field";
+export { LampGlow, type LampGlowProps } from "./components/ui/lamp-glow";
+export { SparkleField, type SparkleFieldProps } from "./components/ui/sparkle-field";
+export { Starfield, type StarfieldProps } from "./components/ui/starfield";
+export {
+  StepLoader,
+  type StepLoaderProps,
+  type StepLoaderStep,
+} from "./components/ui/step-loader";
+export { ForgeLoader, type ForgeLoaderProps } from "./components/ui/forge-loader";
+export {
+  FloatNav,
+  FloatNavItem,
+  FloatNavAction,
+  type FloatNavProps,
+  type FloatNavItemProps,
+  type FloatNavActionProps,
+} from "./components/ui/float-nav";
+export {
+  MegaNav,
+  MegaNavList,
+  MegaNavItem,
+  MegaNavTrigger,
+  MegaNavPanel,
+  MegaNavLink,
+  MegaNavAnchor,
+  type MegaNavProps,
+  type MegaNavItemProps,
+  type MegaNavLinkProps,
+} from "./components/ui/mega-nav";
+export {
+  AppSidebar,
+  AppSidebarHeader,
+  AppSidebarBrand,
+  AppSidebarToggle,
+  AppSidebarBody,
+  AppSidebarGroup,
+  AppSidebarItem,
+  AppSidebarFooter,
+  useAppSidebar,
+  type AppSidebarProps,
+  type AppSidebarItemProps,
+} from "./components/ui/app-sidebar";
+export { PointerFollow, type PointerFollowProps } from "./components/ui/pointer-follow";
+export { HoverBorder, type HoverBorderProps } from "./components/ui/hover-border";
+export { GlowFrame, type GlowFrameProps } from "./components/ui/glow-frame";
+export { SpotlightBeam, type SpotlightBeamProps } from "./components/ui/spotlight-beam";
 export { GradientGlowCard, type GradientGlowCardProps } from "./components/ui/gradient-glow-card";
 export { ConfettiBurst, type ConfettiBurstProps } from "./components/ui/confetti-burst";
 export { ThemeMorphToggle, type ThemeMorphToggleProps } from "./components/ui/theme-morph-toggle";

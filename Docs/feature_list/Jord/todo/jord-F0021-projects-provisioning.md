@@ -3,7 +3,7 @@ title: "jord-F0021 — projects & provisioning"
 feature_id: jord-F0021
 description: "Studio Projects surface: define a project, pick libSQL/libSQL-Turso/Postgres, set credentials and keys at create time"
 created: 2026-10-28
-updated: 2026-11-01
+updated: 2026-11-25
 tags:
   - feature
   - jord
@@ -82,5 +82,8 @@ Billing · per-project team RBAC · hosted provider APIs (Turso/Neon) · databas
 | [[../../../plan/Jord/phase-03/done/S0043-project-registry-api\|S0043]] — project registry API + keys | 2.5–3 h | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/done/S0044-new-project-wizard\|S0044]] — New project wizard | 2.5–3 h | **done** 2026-11-01 |
 | [[../../../plan/Jord/phase-03/done/S0045-project-scoped-routes\|S0045]] — /p/[project] scoping + switcher | 2.5–3 h | **done** 2026-11-01 |
+| [[../../../plan/Jord/phase-03/done/S0097-project-data-plane\|S0097]] — per-project data-plane fan-out | 2–3 h | **done** 2026-11-25 |
 
 Queue: [[../../../plan/Jord/phase-03/README]].
+
+**Acceptance note (2026-11-25):** S0097 closes the S0045 gap — registered project targets are live data planes for Studio schema/tables/SQL. Realtime bus isolation across projects is still shared on the primary (S0084).

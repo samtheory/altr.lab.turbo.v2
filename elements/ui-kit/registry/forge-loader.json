@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "forge-loader",
+  "type": "ui",
+  "title": "Forge Loader",
+  "description": "Apolyx S0013 — Forge Loader",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/forge-loader.tsx",
+      "target": "forge-loader.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "visually-hidden"
+  ],
+  "docs": "components/forge-loader"
+}

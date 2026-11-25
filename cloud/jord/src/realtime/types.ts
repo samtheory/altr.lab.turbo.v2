@@ -29,6 +29,11 @@ export type JordChangeEvent = {
   dialect: "libsql" | "postgres";
   /** Outbox sequence for resume (`?since=`). */
   seq?: number;
+  /**
+   * Project slug that owns this change (S0098). `default` / omitted = primary.
+   * Bus subscribers filter on this so projects do not see each other's feed.
+   */
+  project?: string;
 };
 
 export type JordChangeDraft = {

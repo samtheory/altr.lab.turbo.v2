@@ -1,0 +1,25 @@
+<ComponentPreview name="mega-nav-demo" />
+
+## Installation
+
+<InstallTabs name="mega-nav" exports="MegaNav, MegaNavList, MegaNavItem, MegaNavTrigger, MegaNavPanel, MegaNavLink, MegaNavAnchor" />
+
+## Usage
+
+```tsx
+<MegaNav>
+  <MegaNavList>
+    <MegaNavItem value="products">
+      <MegaNavTrigger>Products</MegaNavTrigger>
+      <MegaNavPanel>
+        <MegaNavLink href="/kit" title="Kit" description="Primitives and tokens." />
+      </MegaNavPanel>
+    </MegaNavItem>
+    <li>
+      <MegaNavAnchor href="/pricing">Pricing</MegaNavAnchor>
+    </li>
+  </MegaNavList>
+</MegaNav>
+```
+
+Hover or focus a trigger to open its panel. `Escape` closes. Keyboard: `ArrowDown` opens the focused item.

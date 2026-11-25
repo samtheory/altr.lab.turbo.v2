@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "hover-boxes",
+  "type": "ui",
+  "title": "Hover Boxes",
+  "description": "Apolyx S0013 — Hover Boxes",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/hover-boxes.tsx",
+      "target": "hover-boxes.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/hover-boxes"
+}

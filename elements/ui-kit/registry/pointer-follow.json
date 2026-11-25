@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "pointer-follow",
+  "type": "ui",
+  "title": "Pointer Follow",
+  "description": "Apolyx S0013 — Pointer Follow",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pointer-follow.tsx",
+      "target": "pointer-follow.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/pointer-follow"
+}

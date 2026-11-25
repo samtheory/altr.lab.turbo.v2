@@ -141,6 +141,23 @@ import PatternLightRaysDemo from "./pattern-light-rays-demo";
 import PatternDitherDemo from "./pattern-dither-demo";
 import ParticleFieldDemo from "./particle-field-demo";
 import ParticleDriftDemo from "./particle-drift-demo";
+import CubeFieldDemo from "./cube-field-demo";
+import HoverBoxesDemo from "./hover-boxes-demo";
+import MeshGradientDemo from "./mesh-gradient-demo";
+import WaveFieldDemo from "./wave-field-demo";
+import VortexFieldDemo from "./vortex-field-demo";
+import LampGlowDemo from "./lamp-glow-demo";
+import SparkleFieldDemo from "./sparkle-field-demo";
+import StarfieldDemo from "./starfield-demo";
+import StepLoaderDemo from "./step-loader-demo";
+import ForgeLoaderDemo from "./forge-loader-demo";
+import FloatNavDemo from "./float-nav-demo";
+import MegaNavDemo from "./mega-nav-demo";
+import AppSidebarDemo from "./app-sidebar-demo";
+import PointerFollowDemo from "./pointer-follow-demo";
+import HoverBorderDemo from "./hover-border-demo";
+import GlowFrameDemo from "./glow-frame-demo";
+import SpotlightBeamDemo from "./spotlight-beam-demo";
 import MarqueeDemo from "./marquee-demo";
 import NumberTickerDemo from "./number-ticker-demo";
 import WordCycleDemo from "./word-cycle-demo";
@@ -436,6 +453,23 @@ export const demos = {
   "pattern-dither-demo": PatternDitherDemo,
   "particle-field-demo": ParticleFieldDemo,
   "particle-drift-demo": ParticleDriftDemo,
+  "cube-field-demo": CubeFieldDemo,
+  "hover-boxes-demo": HoverBoxesDemo,
+  "mesh-gradient-demo": MeshGradientDemo,
+  "wave-field-demo": WaveFieldDemo,
+  "vortex-field-demo": VortexFieldDemo,
+  "lamp-glow-demo": LampGlowDemo,
+  "sparkle-field-demo": SparkleFieldDemo,
+  "starfield-demo": StarfieldDemo,
+  "step-loader-demo": StepLoaderDemo,
+  "forge-loader-demo": ForgeLoaderDemo,
+  "float-nav-demo": FloatNavDemo,
+  "mega-nav-demo": MegaNavDemo,
+  "app-sidebar-demo": AppSidebarDemo,
+  "pointer-follow-demo": PointerFollowDemo,
+  "hover-border-demo": HoverBorderDemo,
+  "glow-frame-demo": GlowFrameDemo,
+  "spotlight-beam-demo": SpotlightBeamDemo,
   "marquee-demo": MarqueeDemo,
   "number-ticker-demo": NumberTickerDemo,
   "word-cycle-demo": WordCycleDemo,

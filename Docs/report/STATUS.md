@@ -1,7 +1,7 @@
 ---title: "Status — complete vs remaining"
-description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0091 + S0093–S0096; next S0092 needs authorized target); Functions v2 runtime shipped"
+description: "Jord phase-01 shipped; phase-02 accepted; phase-02.75 closed; phase-03 active (S0034–S0091 + S0093–S0097; next S0092 needs authorized target); Functions v2 + project data-plane fan-out shipped"
 created: 2026-09-19
-updated: 2026-11-11
+updated: 2026-11-25
 tags:
   - report
   - status
@@ -13,7 +13,7 @@ tags:
 
 # Status
 
-Last updated: 2026-11-11 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0090 Functions worker pool · S0091 principal-bound client + logs** (jord-F0015) · Prior: **S0077 · S0085 · S0086 · S0089 · S0096** · Prior: **S0080 · S0084 · S0088 · S0093 · S0095** · **phase-02.75 closed** · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
+Last updated: 2026-11-25 · Living map: [[../brain/00-Docs-Brain]] · Last ship: **S0097 per-project data-plane fan-out** (jord-F0021) + Studio libSQL Add-table UX · Prior: **S0090 · S0091** (jord-F0015) · Prior: **S0077 · S0085 · S0086 · S0089 · S0096** · **phase-02.75 closed** · **Phase-01 closed** · **Phase-02 accepted** · Closeout: [[../plan/Jord/phase-02.5/README]] · Shipped review: [[Jord-implemented-review]] · Phase-02 task rollup: [[../plan/Jord/phase-02/00-task-rollup]]
 
 ## Implemented
 
@@ -29,6 +29,7 @@ Last updated: 2026-11-11 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 - **Phase-03 S0043 / jord-F0021 (partial)** — `/admin/projects` registry + keys + connect test · [[../tech_space/jord/studio/README#control-plane-store-s0042--registry-api-s0043--studio-wizard-s0044]] · card [[../plan/Jord/phase-03/done/S0043-project-registry-api|S0043]]
 - **Phase-03 S0044 / jord-F0021 (partial)** — Studio `/projects` list + New project wizard + one-time key reveal · [[../tech_space/jord/studio/README#studio-create-flow-s0044]] · card [[../plan/Jord/phase-03/done/S0044-new-project-wizard|S0044]]
 - **Phase-03 S0045 / jord-F0021 (partial)** — `/p/[project]/…` screens, `jord_project` cookie, header switcher, BFF fail-closed · [[../tech_space/jord/studio/README#project-scoped-routes-s0045]] · card [[../plan/Jord/phase-03/done/S0045-project-scoped-routes|S0045]]
+- **Phase-03 S0097 / jord-F0021** — server honors `X-Jord-Project`: cached per-target drivers for schema/tables/SQL; control plane stays primary; Studio no longer blocks Add table on libSQL `main` · [[../tech_space/jord/studio/README#project-scoped-routes-s0045]] · card [[../plan/Jord/phase-03/done/S0097-project-data-plane|S0097]]
 - **Phase-03 S0046 / jord-F0023 (partial)** — three-pane shell + nav `contextual` + inspector overlay frame · [[../tech_space/jord/studio/README#three-pane-shell-s0046]] · card [[../plan/Jord/phase-03/done/S0046-three-pane-shell|S0046]]
 - **Phase-03 S0047 / jord-F0023 (partial)** — contextual sidebars for Tables/Jobs/APIs + shared sidebar list primitive + resize/persist/URL selection · [[../tech_space/jord/studio/README#contextual-sidebars-s0047]] · card [[../plan/Jord/phase-03/done/S0047-contextual-sidebar|S0047]]
 - **Phase-03 S0048 / jord-F0023 (partial)** — right inspector host + `?inspector=` deep links; migrate/create/detail panels · [[../tech_space/jord/studio/README#right-inspector-s0048]] · card [[../plan/Jord/phase-03/done/S0048-right-inspector|S0048]]
@@ -68,7 +69,7 @@ Last updated: 2026-11-11 · Living map: [[../brain/00-Docs-Brain]] · Last ship:
 
 ## In progress
 
-- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **S0034–S0091 + S0093–S0096 done**. **Wave N closed** (Functions runtime). **Next open:** [[../plan/Jord/phase-03/S0092-strix-pentest|S0092]] (authorized Strix pentest). Feature index: [[../feature_list/Jord/INDEX]].
+- **Phase-03** — **Active single-task queue**: [[../plan/Jord/phase-03/README]] — **S0034–S0091 + S0093–S0097 done**. **Wave N closed** (Functions runtime). **Next open:** [[../plan/Jord/phase-03/S0092-strix-pentest|S0092]] (authorized Strix pentest). Feature index: [[../feature_list/Jord/INDEX]].
 - **S0027 branch protection** — ops only; commands on the S0027 card. Not open product debt.
 
 ## Gate — closed (shipped)

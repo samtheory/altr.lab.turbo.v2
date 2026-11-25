@@ -2,22 +2,19 @@
 title: "feature_list/ui-kit — Apolyx intent index"
 description: "Product intent for the Apolyx UI kit (elements/ui-kit + apps/apolyx + CLI)"
 created: 2026-10-10
-updated: 2026-10-21
+updated: 2026-11-25
 tags:
   - feature
   - ui-kit
   - apolyx
-  - Apolyx-S0001
-  - Apolyx-S0002
-  - Apolyx-S0003
-  - Apolyx-S0004
-  - Apolyx-S0005
+  - Apolyx-S0013
+  - Apolyx-S0014
   - readme
 ---
 
 # feature_list / ui-kit
 
-Intent for **Apolyx** — portable design system for altr.lab and future publish. S0001–**S0005** closed. Lab next: Jord.
+Intent for **Apolyx** — portable design system for altr.lab and future publish. Active: **Apolyx-S0013** Aceternity wave ([[14-apolyx-s0013-aceternity-wave|apolyx-F0016]]).
 
 **Feature ids:** [[INDEX]] (`apolyx-F####`). Map: [[../../brain/00-Docs-Brain]] · Idea: [[../../idea/Apolyx (ui-kit)/README]] · Builder: [[../../agents/apollo/00-index]] · Sprints: [[../../plan/ui-kit/README]] · As-built: [[../../tech_space/ui-kit/README]] · Roadmap: [[../../plan/00-roadmap-apolyx-jord-artemis]]
 
@@ -43,6 +40,10 @@ Intent for **Apolyx** — portable design system for altr.lab and future publish
 | **apolyx-F0006** | [[05-apolyx-s0004-popover]] | **Apolyx-S0004** closed |
 | **apolyx-F0007** | [[06-apolyx-s0005-product-gate]] | **Apolyx-S0005** closed 2026-10-21 |
 | **apolyx-F0008** | [[apolyx-F0008-datagrid]] | in progress — DataGrid column ops shipped (S0056); editing/live hooks still open |
+| **apolyx-F0015** | [[13-apolyx-s0012-magicui-wave]] | done (Apolyx-S0012) |
+| **apolyx-F0016** | [[14-apolyx-s0013-aceternity-wave]] | planned — S0013 components → S0014 blocks |
+
+Full id table: [[INDEX]].
 
 ## Related shipped foundation (pre-Apolyx)
 

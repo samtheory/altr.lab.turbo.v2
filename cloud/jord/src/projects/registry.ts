@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 
 import {
   createJordClient,
-  fsPathToFileUrl,
   type AesGcmSecretPort,
   type JordDriverPort,
   type JordProjectEngine,
@@ -12,6 +11,7 @@ import {
 
 import {
   defaultProjectConnectTest,
+  projectClientOptions,
   type ProjectConnectInput,
   type ProjectConnectResult,
   type ProjectConnectTester,
@@ -84,6 +84,8 @@ export type ProjectRegistryDeps = {
   /** Open target and run migrations (default). Tests may no-op. */
   baseline?: (input: ProjectConnectInput) => Promise<void>;
   enqueueWrite: <T>(work: () => Promise<T>) => Promise<T>;
+  /** Drop a cached data-plane driver after archive (S0097). */
+  onProjectArchived?: (slug: string) => void | Promise<void>;
 };
 
 function requireSecretPort(secrets: SecretPort | null): SecretPort {
@@ -202,28 +204,8 @@ export function publicProjectJson(project: ProjectPublic): ProjectPublic {
 }
 
 async function defaultBaseline(input: ProjectConnectInput): Promise<void> {
-  let url: string;
-  let authToken: string | undefined;
-  if (input.engine === "libsql-file") {
-    url = input.target.trim().startsWith("file:")
-      ? input.target.trim()
-      : fsPathToFileUrl(input.target.trim());
-  } else if (input.engine === "libsql-turso") {
-    url = input.target.trim();
-    authToken = input.password?.trim() || undefined;
-  } else {
-    const parsed = new URL(input.target.trim());
-    if (input.dbUser?.trim()) parsed.username = input.dbUser.trim();
-    if (input.password != null) parsed.password = input.password;
-    if (input.tlsMode === "disable") parsed.searchParams.set("sslmode", "disable");
-    else if (input.tlsMode === "require") {
-      parsed.searchParams.set("sslmode", "require");
-    } else if (input.tlsMode === "verify-full") {
-      parsed.searchParams.set("sslmode", "verify-full");
-    }
-    url = parsed.toString();
-  }
-  const client = await createJordClient({ url, authToken });
+  const opts = projectClientOptions(input);
+  const client = await createJordClient(opts);
   await client.close();
 }
 
@@ -549,7 +531,7 @@ export async function archiveProject(
   | { ok: false; status: 404 | 410; error: string; reason?: string }
 > {
   const rows = await deps.jord.query(
-    `SELECT id, status FROM jord_projects WHERE id = ${ph(deps.jord, 1)} LIMIT 1`,
+    `SELECT id, slug, status FROM jord_projects WHERE id = ${ph(deps.jord, 1)} LIMIT 1`,
     [id],
   );
   const row = rows[0];
@@ -563,6 +545,7 @@ export async function archiveProject(
     };
   }
 
+  const slug = String(row.slug);
   const now = Date.now();
   // One transaction: keys, retiring keys and status change together (no
   // half-archived project with live keys).
@@ -584,6 +567,7 @@ export async function archiveProject(
     );
   }));
 
+  await deps.onProjectArchived?.(slug);
   return { ok: true };
 }
 

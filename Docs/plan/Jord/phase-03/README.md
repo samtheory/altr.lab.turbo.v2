@@ -2,7 +2,7 @@
 title: "plan/Jord/phase-03 — single-task queue"
 description: "Phase-03 queue: one file per AI task, 63 cards across production ops, Studio v2, storage, auth, table API and security"
 created: 2026-10-27
-updated: 2026-11-11
+updated: 2026-11-25
 tags:
   - plan
   - jord
@@ -14,7 +14,7 @@ tags:
 
 > **One markdown file = one task for one AI session.** Features: [[../../../feature_list/Jord/INDEX]] (`jord-F####`). Template: [[../../../agents/templates/plan-task]]. Hub: [[../README]]. Completed cards: [[done/README]].
 
-**Queue status (2026-11-11):** **S0034–S0091 + S0093–S0096 done; next open [[S0092-strix-pentest|S0092]] (needs an authorized target).** Waves A–N and O2–O3 + P closed. Wave N (Functions runtime / [[../../../feature_list/Jord/todo/jord-F0015-functions-runtime|jord-F0015]]) closed 2026-11-11 ([[done/S0090-functions-worker-pool|S0090]] · [[done/S0091-functions-client-logs|S0091]]). Soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] stays uncarded until promoted.
+**Queue status (2026-11-25):** **S0034–S0091 + S0093–S0097 done; next open [[S0092-strix-pentest|S0092]] (needs an authorized target).** Waves A–N and O2–O3 + P closed. **S0097** closed the S0045 follow-up (per-project data-plane fan-out). Soft backlog [[../../../feature_list/Jord/todo/jord-F0020-soft-leftovers|jord-F0020]] stays uncarded until promoted.
 
 ## How to run a task
 
@@ -81,6 +81,7 @@ flowchart LR
 | B2 | [[done/S0043-project-registry-api\|S0043]] | Project registry API + keys + connect test | **done** 2026-11-01 |
 | B3 | [[done/S0044-new-project-wizard\|S0044]] | Projects list + New project wizard | **done** 2026-11-01 |
 | B4 | [[done/S0045-project-scoped-routes\|S0045]] | `/p/[project]` scoping + switcher | **done** 2026-11-01 |
+| B5 | [[done/S0097-project-data-plane\|S0097]] | Per-project data-plane fan-out (`X-Jord-Project`) | **done** 2026-11-25 |
 
 ### Wave C — Studio shell ([[../../../feature_list/Jord/todo/jord-F0023-studio-shell-v2|jord-F0023]])
 

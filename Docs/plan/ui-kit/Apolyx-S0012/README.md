@@ -17,7 +17,7 @@ tags:
 > Who: **apollo**. Feature: [[../../../feature_list/ui-kit/13-apolyx-s0012-magicui-wave|apolyx-F0015]]. Prior: [[../Apolyx-S0011/README]].
 
 **Sprint id:** `Apolyx-S0012`  
-**Status:** done · **Owner:** apollo · **Wave:** complete (67/67; `ClipVideoText`, `ParticleDrift` shipped 2026-11-25)
+**Status:** closed · **Owner:** apollo · **Wave:** complete (67/67; `ClipVideoText`, `ParticleDrift` shipped 2026-11-25) · Next: [[../Apolyx-S0013/README]]
 
 ## Goal
 

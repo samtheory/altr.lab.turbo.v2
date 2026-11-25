@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "float-nav",
+  "type": "ui",
+  "title": "Float Nav",
+  "description": "Apolyx S0013 — Float Nav",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/float-nav.tsx",
+      "target": "float-nav.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "slot"
+  ],
+  "docs": "components/float-nav"
+}

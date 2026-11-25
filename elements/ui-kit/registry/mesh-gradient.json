@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "mesh-gradient",
+  "type": "ui",
+  "title": "Mesh Gradient",
+  "description": "Apolyx S0013 — Mesh Gradient",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/mesh-gradient.tsx",
+      "target": "mesh-gradient.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/mesh-gradient"
+}

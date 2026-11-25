@@ -1,0 +1,24 @@
+{
+  "$schema": "./schema.json",
+  "name": "app-sidebar",
+  "type": "ui",
+  "title": "App Sidebar",
+  "description": "Apolyx S0013 — App Sidebar",
+  "dependencies": {
+    "motion": "^12.23.12",
+    "lucide-react": "^0.525.0"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/app-sidebar.tsx",
+      "target": "app-sidebar.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "use-controllable-state",
+    "slot"
+  ],
+  "docs": "components/app-sidebar"
+}

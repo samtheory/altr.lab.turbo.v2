@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "starfield",
+  "type": "ui",
+  "title": "Starfield",
+  "description": "Apolyx S0013 — Starfield",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/starfield.tsx",
+      "target": "starfield.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/starfield"
+}

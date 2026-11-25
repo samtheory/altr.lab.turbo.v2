@@ -1,0 +1,17 @@
+<ComponentPreview name="float-nav-demo" />
+
+## Installation
+
+<InstallTabs name="float-nav" exports="FloatNav, FloatNavItem, FloatNavAction" />
+
+## Usage
+
+```tsx
+<FloatNav>
+  <FloatNavItem href="/" active>Home</FloatNavItem>
+  <FloatNavItem href="/pricing">Pricing</FloatNavItem>
+  <FloatNavAction>Login</FloatNavAction>
+</FloatNav>
+```
+
+Scroll down to hide, scroll up to reveal. Pass `visible` to control from outside (as in the demo). Enter/exit motion respects `prefers-reduced-motion`.

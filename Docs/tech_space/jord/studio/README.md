@@ -2,7 +2,7 @@
 title: "Jord Studio"
 description: "Next.js control plane: BFF, session cookie, Apolyx-only UI; S0042–S0071 projects + shell + DataGrid tables + policies/APIs + relations + ERD + Monaco SQL + storage buckets + auth console (users, providers, URLs, JWT, limits)"
 created: 2026-10-24
-updated: 2026-11-03
+updated: 2026-11-25
 tags:
   - tech-space
   - jord
@@ -145,7 +145,7 @@ Zero-project / single-DB boots stay valid without `JORD_MASTER_KEY` (registry ro
 | Catalog | `GET /studio/projects` (any auth) lists active summaries for the switcher |
 | Nav | `navForRole(role, projectSlug)` prefixes data/runtime/API/database/help hrefs |
 
-**Note:** Scope is enforced in Studio routing/BFF. Data still hits the primary server DB until a later card fans out connections per project target.
+**Note (S0097):** Studio BFF still sends `X-Jord-Project`. The server now opens (and caches) each registered project's target for schema / tables / rows / SQL / records. Slug `default` or a missing header stays on the primary `DATABASE_URL`. Control-plane routes (`/admin/projects`, `/studio/projects`, operator login) always use the primary. Realtime outbox/bus isolation across projects remains a follow-up (S0084 caveat).
 
 ### Three-pane shell (S0046)
 
