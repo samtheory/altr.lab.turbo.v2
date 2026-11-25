@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import { Check, Eye, EyeOff, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "../../lib/utils";
+import { easings } from "../../motion/tokens";
 import { useComposedRefs } from "../../primitives/compose-refs";
 import { useControllableState } from "../../primitives/use-controllable-state";
 import { useId } from "../../primitives/use-id";
@@ -16,6 +18,7 @@ import {
   InputGroupInput,
   type InputGroupInputProps,
 } from "./input-group";
+import { Label } from "./label";
 
 export type PasswordInputProps = Omit<InputGroupInputProps, "type"> & {
   visible?: boolean;
@@ -189,6 +192,7 @@ export function PasswordStrength({
   className,
   ...props
 }: PasswordStrengthProps) {
+  const reduce = useReducedMotion();
   const results = rules.map((rule) => ({ rule, met: value.length > 0 && rule.test(value) }));
   const max = maxProp ?? rules.length;
   const score = scoreProp ?? results.filter((r) => r.met).length;
@@ -216,11 +220,20 @@ export function PasswordStrength({
             className="flex gap-1"
           >
             {Array.from({ length: max }, (_, i) => (
-              <span
+              <motion.span
                 key={i}
                 data-filled={i < score ? "" : undefined}
+                initial={false}
+                animate={
+                  reduce
+                    ? undefined
+                    : i < score
+                      ? { scaleY: [0.6, 1.15, 1], opacity: 1 }
+                      : { scaleY: 1, opacity: 1 }
+                }
+                transition={{ duration: 0.28, ease: easings.out, delay: i * 0.03 }}
                 className={cn(
-                  "h-1 flex-1 rounded-full bg-muted transition-colors duration-200 motion-reduce:transition-none",
+                  "h-1 flex-1 origin-center rounded-full bg-muted transition-colors duration-200 motion-reduce:transition-none",
                   i < score && levelTone[level],
                 )}
               />
@@ -250,7 +263,18 @@ export function PasswordStrength({
                   met ? "scale-100 bg-success text-success-foreground" : "scale-90 bg-muted",
                 )}
               >
-                {met ? <Check className="size-3" /> : <X className="size-2.5" />}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={met ? "met" : "open"}
+                    initial={reduce ? false : { scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={reduce ? undefined : { scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.18, ease: easings.out }}
+                    className="grid place-items-center"
+                  >
+                    {met ? <Check className="size-3" /> : <X className="size-2.5" />}
+                  </motion.span>
+                </AnimatePresence>
               </span>
               <span className="sr-only">{met ? "Met:" : "Not met:"}</span>
               {rule.label}
@@ -258,6 +282,57 @@ export function PasswordStrength({
           ))}
         </ul>
       ) : null}
+    </div>
+  );
+}
+
+export type PasswordRulesProps = Omit<PasswordInputProps, "children" | "onChange"> & {
+  label?: React.ReactNode;
+  rules?: PasswordRule[];
+  strengthVariant?: PasswordStrengthProps["variant"];
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string, score: number) => void;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+};
+
+/**
+ * Password field with show/hide plus an animated strength meter and requirement checklist.
+ * Prefer composing `PasswordInput` + `PasswordStrength` when you need a custom Field layout.
+ */
+export function PasswordRules({
+  label = "Password",
+  rules = defaultPasswordRules,
+  strengthVariant = "both",
+  value: valueProp,
+  defaultValue = "",
+  onValueChange,
+  onChange,
+  id: idProp,
+  className,
+  ...props
+}: PasswordRulesProps) {
+  const id = useId(idProp);
+  const [inner, setInner] = React.useState(defaultValue);
+  const value = valueProp ?? inner;
+  const score = rules.filter((r) => value.length > 0 && r.test(value)).length;
+
+  return (
+    <div data-slot="password-rules" className={cn("grid w-full max-w-xs gap-2", className)}>
+      {label ? <Label htmlFor={id}>{label}</Label> : null}
+      <PasswordInput
+        id={id}
+        autoComplete="new-password"
+        value={value}
+        onChange={(e) => {
+          const next = e.target.value;
+          if (valueProp === undefined) setInner(next);
+          onChange?.(e);
+          onValueChange?.(next, rules.filter((r) => next.length > 0 && r.test(next)).length);
+        }}
+        {...props}
+      />
+      <PasswordStrength value={value} rules={rules} variant={strengthVariant} score={score} />
     </div>
   );
 }

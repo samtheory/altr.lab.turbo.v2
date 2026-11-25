@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "qr-badge",
+  "type": "ui",
+  "title": "QR Badge",
+  "description": "QR matrix that dissolves into a scan badge and grows back",
+  "files": [
+    {
+      "path": "src/components/ui/qr-badge.tsx",
+      "target": "qr-badge.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": ["utils", "badge"],
+  "docs": "components/qr-badge"
+}

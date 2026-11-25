@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.json",
+  "name": "avatar-group",
+  "type": "ui",
+  "title": "Avatar Group",
+  "description": "Overlapping avatars with hover lift and overflow count",
+  "files": [
+    {
+      "path": "src/components/ui/avatar-group.tsx",
+      "target": "avatar-group.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "avatar"],
+  "docs": "components/avatar-group"
+}

@@ -50,12 +50,22 @@ import PasswordStrengthChecklistDemo from "./password-strength-checklist-demo";
 import PasswordStrengthCustomDemo from "./password-strength-custom-demo";
 import PasswordConfirmDemo from "./password-confirm-demo";
 import PasswordNewFormDemo from "./password-new-form-demo";
+import PasswordRulesDemo from "./password-rules-demo";
 // Input OTP
 import InputOTPDemo from "./input-otp-demo";
 import InputOTPBasicsDemo from "./input-otp-basics-demo";
 import InputOTPPatternsDemo from "./input-otp-patterns-demo";
 import InputOTPStatesDemo from "./input-otp-states-demo";
 import InputOTPVerifyDemo from "./input-otp-verify-demo";
+import InputOTPFieldDemo from "./input-otp-field-demo";
+import SubscribeFieldDemo from "./subscribe-field-demo";
+import DropzoneDemo from "./dropzone-demo";
+import AvatarGroupDemo from "./avatar-group-demo";
+import AvatarStatusDemo from "./avatar-status-demo";
+import EmptyStateDemo from "./empty-state-demo";
+import PriceBadgeDemo from "./price-badge-demo";
+import QrBadgeDemo from "./qr-badge-demo";
+import StampDemo from "./stamp-demo";
 import InputMaskDemo from "./input-mask-demo";
 import InputMaskPresetsDemo from "./input-mask-presets-demo";
 import InputMaskBillingDemo from "./input-mask-billing-demo";
@@ -195,11 +205,21 @@ export const demos = {
   "password-strength-custom-demo": PasswordStrengthCustomDemo,
   "password-confirm-demo": PasswordConfirmDemo,
   "password-new-form-demo": PasswordNewFormDemo,
+  "password-rules-demo": PasswordRulesDemo,
   "input-otp-demo": InputOTPDemo,
   "input-otp-basics-demo": InputOTPBasicsDemo,
   "input-otp-patterns-demo": InputOTPPatternsDemo,
   "input-otp-states-demo": InputOTPStatesDemo,
   "input-otp-verify-demo": InputOTPVerifyDemo,
+  "input-otp-field-demo": InputOTPFieldDemo,
+  "subscribe-field-demo": SubscribeFieldDemo,
+  "dropzone-demo": DropzoneDemo,
+  "avatar-group-demo": AvatarGroupDemo,
+  "avatar-status-demo": AvatarStatusDemo,
+  "empty-state-demo": EmptyStateDemo,
+  "price-badge-demo": PriceBadgeDemo,
+  "qr-badge-demo": QrBadgeDemo,
+  "stamp-demo": StampDemo,
   "input-mask-demo": InputMaskDemo,
   "input-mask-presets-demo": InputMaskPresetsDemo,
   "input-mask-billing-demo": InputMaskBillingDemo,

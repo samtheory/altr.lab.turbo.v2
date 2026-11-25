@@ -1,0 +1,22 @@
+<ComponentPreview name="avatar-group-demo" />
+
+## Installation
+
+<InstallTabs name="avatar-group" exports="AvatarGroup" />
+
+## Usage
+
+```tsx
+import { AvatarGroup } from "@altr/apolyx";
+
+<AvatarGroup
+  people={[
+    { initials: "MT", src: "/mina.png", name: "Mina" },
+    { initials: "AC", name: "Ava" },
+  ]}
+  moreLabel="+4"
+  caption="6 teammates online"
+/>
+```
+
+Hover lifts neighbouring avatars with a falloff. Pass `moreLabel={null}` to hide the overflow chip.

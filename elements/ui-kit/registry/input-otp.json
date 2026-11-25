@@ -3,7 +3,7 @@
   "name": "input-otp",
   "type": "ui",
   "title": "Input OTP",
-  "description": "One-time-code input: one real input with visual slots, paste, SMS autofill, patterns, and PIN masking",
+  "description": "One-time-code input with slots, paste, SMS autofill, patterns, PIN masking, and resend chrome",
   "files": [
     {
       "path": "src/components/ui/input-otp.tsx",

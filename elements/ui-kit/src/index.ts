@@ -83,10 +83,12 @@ export {
 export {
   PasswordInput,
   PasswordStrength,
+  PasswordRules,
   defaultPasswordRules,
   getPasswordStrength,
   type PasswordInputProps,
   type PasswordStrengthProps,
+  type PasswordRulesProps,
   type PasswordRule,
   type PasswordStrengthLevel,
 } from "./components/ui/password-input";
@@ -95,11 +97,52 @@ export {
   InputOTPGroup,
   InputOTPSlot,
   InputOTPSeparator,
+  InputOTPResend,
+  InputOTPField,
   sanitizeOTP,
   type InputOTPProps,
   type InputOTPSlotProps,
   type InputOTPPattern,
+  type InputOTPResendProps,
+  type InputOTPFieldProps,
 } from "./components/ui/input-otp";
+export {
+  SubscribeField,
+  type SubscribeFieldProps,
+  type SubscribeAvatar,
+} from "./components/ui/subscribe-field";
+export {
+  Dropzone,
+  type DropzoneProps,
+  type DropzoneFile,
+} from "./components/ui/dropzone";
+export {
+  AvatarGroup,
+  type AvatarGroupProps,
+  type AvatarGroupItem,
+} from "./components/ui/avatar-group";
+export {
+  AvatarStatus,
+  type AvatarStatusProps,
+} from "./components/ui/avatar-status";
+export {
+  EmptyState,
+  type EmptyStateProps,
+} from "./components/ui/empty-state";
+export {
+  PriceBadge,
+  priceBadgeVariants,
+  type PriceBadgeProps,
+} from "./components/ui/price-badge";
+export {
+  QrBadge,
+  type QrBadgeProps,
+} from "./components/ui/qr-badge";
+export {
+  Stamp,
+  stampVariants,
+  type StampProps,
+} from "./components/ui/stamp";
 export {
   NumberInput,
   parseLocaleNumber,

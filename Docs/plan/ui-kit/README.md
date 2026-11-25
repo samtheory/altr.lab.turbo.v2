@@ -1,13 +1,13 @@
 ---
 title: "plan/ui-kit — Apolyx sprint track"
-description: "Index of Apolyx UI kit sprints: S0001–S0005 closed"
+description: "Index of Apolyx UI kit sprints: S0001–S0005 closed; S0006 active"
 created: 2026-10-11
-updated: 2026-10-21
+updated: 2026-11-25
 tags:
   - plan
   - ui-kit
   - apolyx
-  - Apolyx-S0005
+  - Apolyx-S0006
   - readme
 ---
 
@@ -23,11 +23,12 @@ Each sprint lives in its own folder `Apolyx-S000N/`. Closed sprints stay as an a
 | [[Apolyx-S0002/README]] | Hover contrast, navigation, Field, Table / List / Grid | closed |
 | [[Apolyx-S0003/README]] | Switch family + input catalog | closed (2026-10-14) |
 | [[Apolyx-S0004/README]] | Popover | closed (2026-10-18) |
-| [[Apolyx-S0005/README]] | Product gate: Select, Combobox, Pagination, Accordion, Scroll Area, Progress, Radio Group | **closed (2026-10-21)** |
+| [[Apolyx-S0005/README]] | Product gate: Select, Combobox, Pagination, Accordion, Scroll Area, Progress, Radio Group | closed (2026-10-21) |
+| [[Apolyx-S0006/README]] | NextUI wave 1: PasswordRules, OTP chrome, SubscribeField, Dropzone, avatar chrome, badges | **active** |
 
-**Active Apolyx sprint:** none. Last closed: [[Apolyx-S0005/README]] · As-built: [[../../tech_space/ui-kit/10-s0005-product-gate]].
+**Active Apolyx sprint:** [[Apolyx-S0006/README]] · Feature: [[../../feature_list/ui-kit/07-apolyx-s0006-nextui-wave]].
 
-**Lab next:** [[../Jord/Jord-S0001/README]].
+**Lab next:** continue Apolyx-S0006 verify, then S0007+; Jord track remains [[../Jord/Jord-S0001/README]].
 
 ## Links
 

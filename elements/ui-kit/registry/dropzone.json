@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "dropzone",
+  "type": "ui",
+  "title": "Dropzone",
+  "description": "Drag-and-drop file upload with single or multi file lists and progress",
+  "files": [
+    {
+      "path": "src/components/ui/dropzone.tsx",
+      "target": "dropzone.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": ["utils", "motion-tokens"],
+  "docs": "components/dropzone"
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "subscribe-field",
+  "type": "ui",
+  "title": "Subscribe Field",
+  "description": "Email signup with live avatar stack and rolling join counter",
+  "files": [
+    {
+      "path": "src/components/ui/subscribe-field.tsx",
+      "target": "subscribe-field.tsx"
+    }
+  ],
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": ["utils", "avatar", "button", "input", "label", "motion-tokens"],
+  "docs": "components/subscribe-field"
+}

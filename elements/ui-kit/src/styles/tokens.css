@@ -142,6 +142,13 @@
   }
 }
 
+/** Stamp seal orbit (text + tick ring). */
+@keyframes apolyx-stamp-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root,
   [data-theme] {

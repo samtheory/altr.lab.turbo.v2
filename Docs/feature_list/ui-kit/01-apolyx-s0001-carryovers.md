@@ -45,7 +45,8 @@ tags:
 | International phone input | Combobox country picker now unblocked |
 | Date and color pickers | Popover exists; Calendar / pickers not started |
 | Slider | Native range stays styled; real dual-thumb Slider later |
-| Tags / chips, file dropzone, rich text | Deferred |
+| Tags / chips, rich text | Deferred |
+| File dropzone | Shipped in [[07-apolyx-s0006-nextui-wave]] (Apolyx-S0006) |
 | React Hook Form / Zod adapter | No package |
 | `<form action>` + `useFormStatus` recipes | React 19 form reset desync |
 | Data grid engine, Command palette | Artemis / Studio density |

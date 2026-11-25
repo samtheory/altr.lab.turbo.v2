@@ -362,3 +362,131 @@ export function InputOTPSeparator({ className, children, ...props }: React.HTMLA
     </div>
   );
 }
+
+export type InputOTPResendProps = Omit<React.HTMLAttributes<HTMLParagraphElement>, "children"> & {
+  /** True once every slot is filled. */
+  complete?: boolean;
+  completeText?: React.ReactNode;
+  resendPrompt?: React.ReactNode;
+  resendLabel?: React.ReactNode;
+  onResend?: () => void;
+  /** Seconds left before resend is enabled. `0` enables the link. */
+  cooldown?: number;
+};
+
+/** Status line under an OTP: complete hint, or a resend prompt with optional cooldown. */
+export function InputOTPResend({
+  complete = false,
+  completeText = "Verifying…",
+  resendPrompt = "Didn’t get it? ",
+  resendLabel = "Resend code",
+  onResend,
+  cooldown = 0,
+  className,
+  ...props
+}: InputOTPResendProps) {
+  const waiting = cooldown > 0;
+  return (
+    <p
+      data-slot="input-otp-resend"
+      data-complete={complete ? "" : undefined}
+      className={cn("text-center text-xs text-muted-foreground", className)}
+      {...props}
+    >
+      {complete ? (
+        completeText
+      ) : (
+        <>
+          {resendPrompt}
+          {waiting ? (
+            <span className="tabular-nums">Resend in {cooldown}s</span>
+          ) : (
+            <button
+              type="button"
+              onClick={onResend}
+              className="font-medium text-foreground underline underline-offset-2 hover:text-foreground/80"
+            >
+              {resendLabel}
+            </button>
+          )}
+        </>
+      )}
+    </p>
+  );
+}
+
+export type InputOTPFieldProps = Omit<InputOTPProps, "children"> & {
+  /** Split after this many slots with a separator. Defaults to half when `separator` is true. */
+  splitAt?: number;
+  separator?: boolean;
+  completeText?: React.ReactNode;
+  resendPrompt?: React.ReactNode;
+  resendLabel?: React.ReactNode;
+  onResend?: () => void;
+  cooldown?: number;
+  showResend?: boolean;
+};
+
+/** OTP with default slot groups, optional mid separator, and a resend / complete status line. */
+export function InputOTPField({
+  maxLength,
+  splitAt: splitAtProp,
+  separator = true,
+  completeText,
+  resendPrompt,
+  resendLabel,
+  onResend,
+  cooldown,
+  showResend = true,
+  value,
+  defaultValue,
+  onValueChange,
+  className,
+  ...props
+}: InputOTPFieldProps) {
+  const [inner, setInner] = React.useState(defaultValue ?? "");
+  const code = value ?? inner;
+  const splitAt = separator ? (splitAtProp ?? Math.floor(maxLength / 2)) : 0;
+  const complete = code.length >= maxLength;
+  const first = Array.from({ length: separator ? splitAt : maxLength }, (_, i) => i);
+  const second = separator ? Array.from({ length: maxLength - splitAt }, (_, i) => i + splitAt) : [];
+
+  return (
+    <div data-slot="input-otp-field" className={cn("grid justify-items-center gap-3", className)}>
+      <InputOTP
+        maxLength={maxLength}
+        value={value}
+        defaultValue={defaultValue}
+        onValueChange={(v) => {
+          if (value === undefined) setInner(v);
+          onValueChange?.(v);
+        }}
+        {...props}
+      >
+        <InputOTPGroup>
+          {first.map((i) => (
+            <InputOTPSlot key={i} index={i} />
+          ))}
+        </InputOTPGroup>
+        {separator && second.length > 0 ? <InputOTPSeparator /> : null}
+        {separator && second.length > 0 ? (
+          <InputOTPGroup>
+            {second.map((i) => (
+              <InputOTPSlot key={i} index={i} />
+            ))}
+          </InputOTPGroup>
+        ) : null}
+      </InputOTP>
+      {showResend ? (
+        <InputOTPResend
+          complete={complete}
+          completeText={completeText}
+          resendPrompt={resendPrompt}
+          resendLabel={resendLabel}
+          onResend={onResend}
+          cooldown={cooldown}
+        />
+      ) : null}
+    </div>
+  );
+}

@@ -1,0 +1,23 @@
+<ComponentPreview name="empty-state-demo" />
+
+## Installation
+
+<InstallTabs name="empty-state" exports="EmptyState" />
+
+## Usage
+
+```tsx
+import { Upload } from "lucide-react";
+import { EmptyState } from "@altr/apolyx";
+
+<EmptyState
+  title="No files yet"
+  description="Upload a file or drag one here."
+  actionLabel="Upload"
+  actionIcon={Upload}
+  secondaryActionLabel={null}
+  onAction={openPicker}
+/>
+```
+
+Pass `illustration` to replace the default skeleton-card stack.

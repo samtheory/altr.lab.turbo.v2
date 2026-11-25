@@ -1,0 +1,32 @@
+<ComponentPreview name="dropzone-demo" />
+
+## Installation
+
+<InstallTabs name="dropzone" exports="Dropzone" />
+
+## Usage
+
+```tsx
+import { Dropzone, type DropzoneFile } from "@altr/apolyx";
+
+const [files, setFiles] = useState<DropzoneFile[]>([]);
+
+<Dropzone
+  files={files}
+  multiple
+  maxSizeMB={25}
+  accept="image/*,.pdf"
+  onFiles={(accepted, rejected) => {
+    // start uploads; update progress / status yourself
+  }}
+  onRemove={(id) => setFiles((list) => list.filter((f) => f.id !== id))}
+  onRetry={(id) => {/* restart upload */}}
+  onClear={() => setFiles([])}
+/>
+```
+
+Set `multiple={false}` for a single-file picker. Pass `demo` for the scripted preview loop (docs / Storybook).
+
+## Accessibility
+
+The drop target is a focusable button. Rows expose progressbars and labelled retry / remove controls. Failed rows shake only when motion is allowed.

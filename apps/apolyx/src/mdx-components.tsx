@@ -1,6 +1,6 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
-import { Kbd } from "@altr/apolyx";
+import { Kbd, cn } from "@altr/apolyx";
 
 import { Callout } from "@/components/docs/callout";
 import { ComponentPreview } from "@/components/docs/component-preview";
@@ -49,14 +49,25 @@ const components: MDXComponents = {
     <blockquote className="mt-6 border-l-2 border-border pl-4 text-muted-foreground" {...props} />
   ),
   hr: () => <hr className="my-10 border-border" />,
-  code: (props) => (
+  code: ({ className, ...props }) => (
     <code
-      className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.85em] [pre_&]:bg-transparent [pre_&]:p-0"
+      className={cn(
+        // Inline chips stay slightly smaller; fenced Usage / code blocks are locked to 12px.
+        "rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.85em]",
+        "[pre_&]:bg-transparent [pre_&]:p-0 [pre_&]:text-[12px] [pre_&]:leading-[1.7]",
+        className,
+      )}
       {...props}
     />
   ),
-  pre: (props) => (
-    <pre className="code-block mt-6 overflow-x-auto rounded-xl border border-border p-4 text-[12px]" {...props} />
+  pre: ({ className, ...props }) => (
+    <pre
+      className={cn(
+        "code-block mt-6 overflow-x-auto rounded-xl border border-border p-4 text-[12px] leading-[1.7]",
+        className,
+      )}
+      {...props}
+    />
   ),
   table: (props) => (
     <div className="mt-6 overflow-x-auto rounded-xl border border-border">

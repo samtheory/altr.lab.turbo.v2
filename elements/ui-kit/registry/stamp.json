@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "stamp",
+  "type": "ui",
+  "title": "Stamp",
+  "description": "Circle or square seal with orbiting caption and animated tick ring",
+  "files": [
+    {
+      "path": "src/components/ui/stamp.tsx",
+      "target": "stamp.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": ["utils", "use-id"],
+  "docs": "components/stamp"
+}

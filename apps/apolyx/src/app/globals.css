@@ -136,39 +136,57 @@ html {
   background: transparent;
 }
 
-/* Docs lightning TOC rail */
-.apolyx-lightning-fill {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--primary) 92%, white),
-    var(--primary) 45%,
-    color-mix(in oklch, var(--accent) 70%, var(--primary))
-  );
-  box-shadow:
-    0 0 8px color-mix(in oklch, var(--primary) 55%, transparent),
-    0 0 2px color-mix(in oklch, var(--primary) 80%, transparent);
-}
-
+/* Docs lightning TOC rail — bolt path + square markers */
 .apolyx-toc-active {
-  text-shadow: 0 0 18px color-mix(in oklch, var(--primary) 35%, transparent);
+  text-shadow: 0 0 18px color-mix(in oklch, var(--primary) 28%, transparent);
 }
 
-.apolyx-toc-dot {
-  background: var(--primary);
-  box-shadow:
-    0 0 0 2px color-mix(in oklch, var(--primary) 28%, transparent),
-    0 0 8px color-mix(in oklch, var(--primary) 45%, transparent);
+.apolyx-toc-hammer {
+  --apolyx-toc-hammer: color-mix(in oklch, var(--warning) 72%, var(--foreground));
+  width: 20px;
+  height: 20px;
+  /* Soft color-matched glow + cast shadow so the glyph lifts off the bolt. */
+  filter:
+    drop-shadow(0 0 3px color-mix(in oklch, var(--apolyx-toc-hammer) 55%, transparent))
+    drop-shadow(0 0 8px color-mix(in oklch, var(--apolyx-toc-hammer) 40%, transparent))
+    drop-shadow(0 2px 4px color-mix(in oklch, var(--apolyx-toc-hammer) 35%, transparent));
+}
+
+.apolyx-toc-hammer-planted {
+  filter:
+    drop-shadow(0 0 4px color-mix(in oklch, var(--apolyx-toc-hammer) 70%, transparent))
+    drop-shadow(0 0 12px color-mix(in oklch, var(--apolyx-toc-hammer) 50%, transparent))
+    drop-shadow(0 2px 5px color-mix(in oklch, var(--apolyx-toc-hammer) 42%, transparent));
+}
+
+/* Source glyph is head-left / handle-right — flip so handle sits on the bolt. */
+.apolyx-toc-hammer-icon {
+  display: block;
+  transform: scaleX(-1);
+}
+
+.apolyx-toc-hammer-glyph {
+  fill: var(--apolyx-toc-hammer);
+  stroke: color-mix(in oklch, var(--apolyx-toc-hammer) 55%, white);
+  stroke-width: 6;
+  paint-order: stroke fill;
+}
+
+.apolyx-toc-ground {
+  color: color-mix(in oklch, var(--border) 80%, var(--muted-foreground));
+}
+
+.apolyx-toc-ground-planted {
+  color: color-mix(in oklch, var(--primary) 70%, var(--border));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .apolyx-lightning-fill {
-    box-shadow: none;
-  }
   .apolyx-toc-active {
     text-shadow: none;
   }
-  .apolyx-toc-dot {
-    box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 28%, transparent);
+  .apolyx-toc-hammer,
+  .apolyx-toc-hammer-planted {
+    filter: none;
   }
 }
 

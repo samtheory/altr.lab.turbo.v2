@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "price-badge",
+  "type": "ui",
+  "title": "Price Badge",
+  "description": "Price pill with glyph-by-glyph rolling animation and optional compare-at",
+  "files": [
+    {
+      "path": "src/components/ui/price-badge.tsx",
+      "target": "price-badge.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "motion": "^12.23.12"
+  },
+  "registryDependencies": ["utils"],
+  "docs": "components/price-badge"
+}

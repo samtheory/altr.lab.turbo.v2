@@ -6,13 +6,24 @@ import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@altr/apolyx";
 
-import { docHref, docsConfig, type DocGroup } from "@/docs-config";
+import { docHref, docsConfig, kitSurfaceCount, type DocGroup } from "@/docs-config";
 import { DocStatusBadge } from "./doc-status-badge";
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const total = kitSurfaceCount();
+
   return (
     <nav aria-label="Documentation" className="space-y-1.5 text-sm">
+      <div className="mb-3 flex items-baseline justify-between gap-3 px-2.5">
+        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Catalog
+        </span>
+        <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+          <span className="font-semibold text-foreground">{total}</span>
+          <span className="text-muted-foreground/80"> components</span>
+        </p>
+      </div>
       {docsConfig.map((group) => (
         <SidebarGroup key={group.title} group={group} pathname={pathname} onNavigate={onNavigate} />
       ))}
@@ -34,6 +45,7 @@ function SidebarGroup({
   const groupIndexHref =
     group.title === "Components" ? "/docs/components" : undefined;
   const groupIndexActive = groupIndexHref !== undefined && pathname === groupIndexHref;
+  const count = kitSurfaceCount(group);
 
   return (
     <div
@@ -57,20 +69,30 @@ function SidebarGroup({
             groupIndexActive && "text-foreground",
           )}
         >
-          {groupIndexHref ? (
-            <Link
-              href={groupIndexHref}
-              onClick={(event) => {
-                event.stopPropagation();
-                onNavigate?.();
-              }}
-              className="min-w-0 truncate hover:text-foreground"
-            >
-              {group.title}
-            </Link>
-          ) : (
-            <span className="min-w-0 truncate">{group.title}</span>
-          )}
+          <span className="flex min-w-0 items-center gap-2">
+            {groupIndexHref ? (
+              <Link
+                href={groupIndexHref}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onNavigate?.();
+                }}
+                className="min-w-0 truncate hover:text-foreground"
+              >
+                {group.title}
+              </Link>
+            ) : (
+              <span className="min-w-0 truncate">{group.title}</span>
+            )}
+            {count > 0 ? (
+              <span
+                className="font-mono text-[10px] font-normal tabular-nums tracking-normal text-muted-foreground/75"
+                aria-label={`${count} components`}
+              >
+                {count}
+              </span>
+            ) : null}
+          </span>
           <ChevronDown
             aria-hidden
             className={cn(

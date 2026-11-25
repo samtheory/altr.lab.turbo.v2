@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "avatar-status",
+  "type": "ui",
+  "title": "Avatar Status",
+  "description": "Avatar with a presence ring and status dot",
+  "files": [
+    {
+      "path": "src/components/ui/avatar-status.tsx",
+      "target": "avatar-status.tsx"
+    }
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  },
+  "registryDependencies": ["utils", "avatar"],
+  "docs": "components/avatar-status"
+}

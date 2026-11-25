@@ -1,0 +1,16 @@
+<ComponentPreview name="avatar-status-demo" />
+
+## Installation
+
+<InstallTabs name="avatar-status" exports="AvatarStatus" />
+
+## Usage
+
+```tsx
+import { AvatarStatus } from "@altr/apolyx";
+
+<AvatarStatus status="online" fallback="ON" />
+<AvatarStatus status="busy" src="/user.png" alt="Sam" pulse={false} />
+```
+
+Statuses: `online`, `offline`, `busy`, `away`. Online pulses unless `pulse={false}`.

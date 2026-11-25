@@ -1,0 +1,28 @@
+<ComponentPreview name="stamp-demo" />
+
+## Installation
+
+<InstallTabs name="stamp" exports="Stamp, stampVariants" />
+
+## Usage
+
+```tsx
+import { Stamp } from "@altr/apolyx";
+
+<Stamp shape="circle" orbit="Save now on sale">Sale</Stamp>
+<Stamp shape="square" variant="success" orbit="Just dropped">New</Stamp>
+
+{/* Hide orbiting copy — keep the tick ring */}
+<Stamp orbit={false} ring>Sold</Stamp>
+
+{/* Quiet seal: no orbit text, no ring */}
+<Stamp orbit={false} ring={false}>VIP</Stamp>
+```
+
+## Anatomy
+
+- **Core** — filled circle or rounded square with the center label  
+- **Orbit** — SVG `textPath` caption that spins around the seal (`duration` in seconds)  
+- **Ring** — dashed tick stroke that rotates the other way (instead of a flat border)
+
+`prefers-reduced-motion` freezes both spins. Variants map to semantic tokens: `sale`, `success`, `warning`, `muted`, `outline`.

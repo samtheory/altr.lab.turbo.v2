@@ -1,0 +1,24 @@
+<ComponentPreview name="price-badge-demo" />
+
+## Installation
+
+<InstallTabs name="price-badge" exports="PriceBadge, priceBadgeVariants" />
+
+## Usage
+
+```tsx
+import { PriceBadge } from "@altr/apolyx";
+
+{/* Cycles glyph-by-glyph while in view */}
+<PriceBadge values={["$17.38", "$3.15", "$35.99", "Free"]} />
+
+{/* Live / controlled price — rolls when the string changes */}
+<PriceBadge value="$29.00" />
+
+{/* Static helpers still work */}
+<PriceBadge currency="$" price="19" compareAt="$39" variant="success" />
+```
+
+## Motion
+
+Digits and currency glyphs roll with a staggered spring when the value changes. Pass `values` to auto-cycle while the badge is on screen. `prefers-reduced-motion` skips the roll and shows the new string immediately. The pill width eases with a layout spring so longer prices do not jump.

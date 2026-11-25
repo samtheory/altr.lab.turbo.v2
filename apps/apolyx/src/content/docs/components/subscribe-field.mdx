@@ -1,0 +1,26 @@
+<ComponentPreview name="subscribe-field-demo" />
+
+## Installation
+
+<InstallTabs name="subscribe-field" exports="SubscribeField" />
+
+## Usage
+
+```tsx
+import { SubscribeField } from "@altr/apolyx";
+
+<SubscribeField
+  buttonLabel="Get early access"
+  onSubmit={(email) => fetch("/api/subscribe", { method: "POST", body: JSON.stringify({ email }) })}
+/>
+```
+
+## Behaviour
+
+- Controlled or uncontrolled join `count`
+- Avatar stack slides new faces in while `simulate` is on and the field is in view
+- Rolling counter digits animate; reduced motion keeps them static
+
+## Accessibility
+
+Email field is labelled (sr-only by default). The counter announces via `aria-live="polite"`.

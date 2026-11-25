@@ -11,6 +11,7 @@ import {
   separatorPlayground,
   skeletonPlayground,
   spinnerPlayground,
+  stampPlayground,
   switchPlayground,
 } from "./pilots";
 import type { PlaygroundSchema } from "./types";
@@ -27,6 +28,7 @@ const playgrounds: PlaygroundSchema[] = [
   spinnerPlayground,
   skeletonPlayground,
   checkboxPlayground,
+  stampPlayground,
 ];
 
 export const playgroundByDemo = Object.fromEntries(

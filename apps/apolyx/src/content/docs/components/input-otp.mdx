@@ -2,7 +2,7 @@
 
 ## Installation
 
-<InstallTabs name="input-otp" exports="InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator" />
+<InstallTabs name="input-otp" exports="InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator, InputOTPField, InputOTPResend" />
 
 ## Usage
 
@@ -47,6 +47,12 @@ Inside a `Field` the label, description and error wire to the input, and the fie
 `onComplete` fires once each time the code reaches `maxLength`, so the form can verify without a button press. The button stays for people who paste and then look for a next step. Resend is gated by a countdown.
 
 <ComponentPreview name="input-otp-verify-demo" />
+
+## Field chrome
+
+`InputOTPField` ships default slot groups, an optional mid separator, and `InputOTPResend` for complete / resend copy with a cooldown.
+
+<ComponentPreview name="input-otp-field-demo" />
 
 ## Keyboard and pointer
 

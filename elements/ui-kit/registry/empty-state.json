@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "empty-state",
+  "type": "ui",
+  "title": "Empty State",
+  "description": "Dashed empty surface with illustration, copy, and actions",
+  "files": [
+    {
+      "path": "src/components/ui/empty-state.tsx",
+      "target": "empty-state.tsx"
+    }
+  ],
+  "dependencies": {
+    "lucide-react": "^0.525.0"
+  },
+  "registryDependencies": ["utils", "button"],
+  "docs": "components/empty-state"
+}

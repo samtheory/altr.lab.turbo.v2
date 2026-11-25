@@ -24,7 +24,8 @@ tags:
 | **apolyx-F0006** | [[05-apolyx-s0004-popover]] | done (S0004) |
 | **apolyx-F0007** | [[06-apolyx-s0005-product-gate]] | done (S0005) |
 | **apolyx-F0008** | [[apolyx-F0008-datagrid]] | in progress (column ops via S0056; editing open) |
+| **apolyx-F0009** | [[07-apolyx-s0006-nextui-wave]] | in progress (Apolyx-S0006) |
 
 ## Next free id
 
-**apolyx-F0009**
+**apolyx-F0010**

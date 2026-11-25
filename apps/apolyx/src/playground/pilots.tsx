@@ -19,6 +19,7 @@ import {
   Separator,
   Skeleton,
   Spinner,
+  Stamp,
   Switch,
 } from "@altr/apolyx";
 
@@ -515,5 +516,106 @@ export const checkboxPlayground: PlaygroundSchema = {
   <Checkbox${attr("checked", bool(values, "checked"))}${attr("disabled", bool(values, "disabled") || undefined)} />
   ${str(values, "label", "Accept terms")}
 </label>`;
+  },
+};
+
+export const stampPlayground: PlaygroundSchema = {
+  id: "stamp-demo",
+  component: "Stamp",
+  installName: "stamp",
+  docsPath: "/docs/components/stamp",
+  controls: [
+    {
+      kind: "enum",
+      key: "shape",
+      label: "Shape",
+      options: [
+        { value: "circle", label: "circle" },
+        { value: "square", label: "square" },
+      ],
+    },
+    {
+      kind: "enum",
+      key: "variant",
+      label: "Variant",
+      options: [
+        { value: "sale", label: "sale" },
+        { value: "success", label: "success" },
+        { value: "warning", label: "warning" },
+        { value: "muted", label: "muted" },
+        { value: "outline", label: "outline" },
+      ],
+    },
+    { kind: "string", key: "label", label: "Center label", placeholder: "Sale" },
+    { kind: "boolean", key: "showOrbit", label: "Orbit text" },
+    {
+      kind: "string",
+      key: "orbit",
+      label: "Orbit text",
+      placeholder: "Save now on sale",
+    },
+    { kind: "boolean", key: "ring", label: "Tick ring" },
+    {
+      kind: "enum",
+      key: "duration",
+      label: "Orbit speed",
+      options: [
+        { value: "18", label: "fast" },
+        { value: "28", label: "medium" },
+        { value: "48", label: "slow" },
+      ],
+    },
+  ],
+  defaults: {
+    shape: "circle",
+    variant: "sale",
+    label: "Sale",
+    showOrbit: true,
+    orbit: "Save now on sale",
+    ring: true,
+    duration: "28",
+  },
+  render(values) {
+    const showOrbit = bool(values, "showOrbit");
+    const duration = Number(str(values, "duration", "28")) || 28;
+    return (
+      <Stamp
+        shape={str(values, "shape", "circle") as "circle" | "square"}
+        variant={
+          str(values, "variant", "sale") as
+            | "sale"
+            | "success"
+            | "warning"
+            | "muted"
+            | "outline"
+        }
+        orbit={showOrbit ? str(values, "orbit", "Save now on sale") : false}
+        ring={bool(values, "ring")}
+        duration={duration}
+      >
+        {str(values, "label", "Sale")}
+      </Stamp>
+    );
+  },
+  toJsx(values) {
+    const shape = str(values, "shape", "circle");
+    const variant = str(values, "variant", "sale");
+    const label = str(values, "label", "Sale");
+    const showOrbit = bool(values, "showOrbit");
+    const orbit = str(values, "orbit", "Save now on sale");
+    const ring = bool(values, "ring");
+    const duration = str(values, "duration", "28");
+    const parts = [
+      shape !== "circle" ? ` shape=${JSON.stringify(shape)}` : "",
+      variant !== "sale" ? ` variant=${JSON.stringify(variant)}` : "",
+      showOrbit
+        ? orbit !== "Save now on sale"
+          ? ` orbit=${JSON.stringify(orbit)}`
+          : ""
+        : " orbit={false}",
+      ring ? "" : " ring={false}",
+      duration !== "28" ? ` duration={${duration}}` : "",
+    ].join("");
+    return `<Stamp${parts}>${label}</Stamp>`;
   },
 };

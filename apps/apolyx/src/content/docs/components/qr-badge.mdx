@@ -1,0 +1,15 @@
+<ComponentPreview name="qr-badge-demo" />
+
+## Installation
+
+<InstallTabs name="qr-badge" exports="QrBadge" />
+
+## Usage
+
+```tsx
+import { QrBadge } from "@altr/apolyx";
+
+<QrBadge label="Get the app" onClick={() => open("/app")} />
+```
+
+The QR sits on a soft card plate with rounded modules. Grains dissolve into a primary-tinted scan pill (with a glow that swells as particles arrive), then grow back. Hover or focus the pill to hold the code on screen. Pass a custom `matrix` (rows of `"1"` / `"0"`) for your payload. `prefers-reduced-motion` keeps a still QR + badge.
