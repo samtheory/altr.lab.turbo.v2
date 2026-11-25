@@ -1,0 +1,28 @@
+---
+description: Pick Trail vs Docs vs Context7 before searching or inventing APIs
+alwaysApply: true
+---
+## Knowledge router — Trail · Docs · Context7
+
+Use the **smallest correct source**. Do not invent library APIs from memory when Context7/CLI is available, and do not rediscover this monorepo by grepping when Trail can answer.
+
+| Need | Source | How |
+|------|--------|-----|
+| Where / how **this repo's code** works, callers, blast radius, edit spans | **Trail** | Prefer MCP (`graft_*` / `trail_*` tools) when connected; else CLI: `trail ask "…" --source`, `trail grep`, `trail callers`, `trail skeleton`, `trail map`. Rule: `.cursor/rules/trail.mdc`. Cache: `.trail/cache/`. |
+| **Product intent**, plan cards, STATUS, as-built manuals, agent workflows | **Docs/** | Start at `Docs/brain/00-Docs-Brain.md` or the named agent index. Truth order: **code** > `tech_space` > report/plan > `feature_list`. Vault writes → **docs_man** (`update_docs`). |
+| **External library** APIs (React, Next, Hono, Drizzle, libSQL, Tailwind, …) | **Context7** | Prefer MCP (`resolve-library-id` → `query-docs`) when connected; else `ctx7` / `context7-cli` skill. Never guess fast-moving APIs. |
+
+### Quick picks
+
+- Editing / understanding monorepo code → **Trail first**, then open only the `file:line` it names.
+- "What should Jord / Apolyx do?" / sprint cards / STATUS → **Docs**, then Trail for the matching code.
+- "How does library X API work?" → **Context7**, then implement against this repo via Trail/Docs.
+- After a non-trivial ship → **docs_man** to update vault; refresh Trail with `trail build` if the graph lags.
+
+### Named agents still win for their domains
+
+- Jord → **mimir** (Docs plan + feature_list; Trail for code).
+- Apolyx kit → **apollo**.
+- Vault only → **docs_man**.
+
+Skills how-to: `Docs/Altr.lab/agent-skills.md` · Trail playbook: `Docs/Altr.lab/graft.md` · skill `.agents/skills/graft/`.

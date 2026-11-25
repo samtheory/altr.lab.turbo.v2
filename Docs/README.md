@@ -45,4 +45,4 @@ idea (R&D)
 - **clickup/** — track tasks while work moves through the pipeline
 - **agents/docs_man** — documents in the correct order with frontmatter + tags
 
-Repo how-tos: [Altr.lab/README.md](Altr.lab/README.md) · Skills: [Altr.lab/agent-skills.md](Altr.lab/agent-skills.md) · Graft: [Altr.lab/graft.md](Altr.lab/graft.md)
+Repo how-tos: [Altr.lab/README.md](Altr.lab/README.md) · Skills: [Altr.lab/agent-skills.md](Altr.lab/agent-skills.md) · Trail-code: [Altr.lab/graft.md](Altr.lab/graft.md)

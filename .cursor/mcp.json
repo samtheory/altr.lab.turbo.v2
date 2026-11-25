@@ -1,12 +1,14 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "command": "context7-mcp.cmd",
+      "args": []
     },
-    "graft": {
-      "command": "npx",
-      "args": ["-y", "@nanonets/graft", "mcp"]
+    "trail": {
+      "command": "trail.cmd",
+      "args": [
+        "mcp"
+      ]
     }
   }
 }

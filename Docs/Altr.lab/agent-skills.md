@@ -2,7 +2,7 @@
 title: "Agent skills — how to use them well"
 description: "Best practices for the project skills installed under .agents/skills/"
 created: 2026-09-26
-updated: 2026-10-21
+updated: 2026-11-25
 tags:
   - altr-lab
   - agents
@@ -12,7 +12,7 @@ tags:
 
 # Agent skills — how to use them well
 
-> Open this when choosing which skill to attach, or when teaching the agent a workflow. Skills live in `.agents/skills/`. Graft: [[graft]]. Vault docs: [[../agents/docs_man/00-index|docs_man]].
+> Open this when choosing which skill to attach, or when teaching the agent a workflow. Skills live in `.agents/skills/`. Trail-code / graft map: [[graft]]. Vault docs: [[../agents/docs_man/00-index|docs_man]].
 
 ## Principles
 
@@ -29,7 +29,7 @@ tags:
 | `.agents/skills/<name>/` | Project installs (committed; portable)               |
 | `skills-lock.json`       | Pin / restore with `npx skills experimental_install` |
 | `.cursor/skills/`        | Cursor-specific mirrors (e.g. docs-brain, docs-man)  |
-| `.cursor/mcp.json`       | Context7 + Graft MCP servers                         |
+| `.cursor/mcp.json`       | Context7 + Trail (`@trailhq/trail-code`) MCP servers |
 | `npx skills list`        | Inspect what is installed                            |
 
 Install more:
@@ -44,10 +44,12 @@ npx skills add <owner/repo> --skill '*' --agent cursor -y   # whole pack
 
 ### Context & docs lookup
 
+Always-on router (no skill attach needed): `.cursor/rules/knowledge-router.mdc` — **Trail** = this repo’s code · **Docs/** = intent/plans/STATUS · **Context7** = external library APIs.
+
 | Skill | When to use | Say / tip |
 |-------|-------------|-----------|
-| **graft** | Orient, find, blast-radius in this repo | Prefer before blind greps — [[graft]] |
-| **context7-cli** / **context7-mcp** / **find-docs** | Up-to-date library APIs (React, Hono, …) | “use context7 for Next 15 docs” or MCP tools |
+| **graft** (Trail-code) | Orient, find, blast-radius in this repo | Prefer `trail …` (cache `.trail/cache/`) before blind greps — [[graft]] |
+| **context7-cli** / **context7-mcp** / **find-docs** | Up-to-date library APIs (React, Hono, …) | “use context7 for Next 15 docs” or MCP tools; if MCP fails, use `ctx7` CLI |
 | **docs-man** / **docs-brain** | Update Docs vault | `update_docs` / `document it` |
 | **pdf** / **doc-coauthoring** | PDFs or large new specs | Attach when needed |
 
@@ -112,7 +114,7 @@ Requires Strix CLI/cloud credentials per https://docs.strix.ai — skills teach 
 
 **Understand this monorepo before editing**
 
-> Use Graft: `graft map` then `graft ask "…" --source` scoped with `--in apps/...` if needed. See [[graft]].
+> Use Trail-code: `trail map` then `trail ask "…" --source` scoped with `--in apps/...` if needed. See [[graft]].
 
 **Implement Jord Slice 0**
 
@@ -132,7 +134,7 @@ Requires Strix CLI/cloud credentials per https://docs.strix.ai — skills teach 
 - Using Strix / exploit-oriented skills against systems you do not own
 - Ignoring **docs_man** and inventing parallel doc folders
 - Skipping Context7 for fast-moving libs (Next, React Compiler, Hono) when APIs matter
-- Committing `graft/` (it is gitignored — each machine rebuilds)
+- Committing `.trail/cache/` (it is gitignored — each machine rebuilds with `trail build`)
 
 ## Maintain
 

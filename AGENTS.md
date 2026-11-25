@@ -46,9 +46,19 @@ For anything Jord (`mimir`, `build jord`, `elements/jord`, `cloud/jord`, `apps/j
 - Prefer **no peer-element deps** so packages stay individually add/removable
 - Contract: `Docs/feature_list/00-elements-dependency-rules.md`
 
-## Agent skills + Graft
+## Knowledge sources (always)
+
+| Need | Use |
+|------|-----|
+| This monorepo's code (where / how / callers) | **Trail** — CLI `trail …` or Trail MCP; always-on `.cursor/rules/trail.mdc`; cache `.trail/cache/` |
+| Intent, plans, STATUS, as-built | **Docs/** — truth order above; vault writes via **docs_man** |
+| External library APIs | **Context7** MCP (or `ctx7` / `context7-cli` skill) — do not invent from memory |
+
+Router rule: `.cursor/rules/knowledge-router.mdc`.
+
+## Agent skills + Trail-code
 
 - How to use project skills: `Docs/Altr.lab/agent-skills.md`
-- Graft (codebase graph): `Docs/Altr.lab/graft.md` · skill `.agents/skills/graft/` · rule `.cursor/rules/graft.mdc`
+- Trail-code playbook: `Docs/Altr.lab/graft.md` · skill `.agents/skills/graft/` · always-on `.cursor/rules/trail.mdc` · package `@trailhq/trail-code`
 - Installed skills live under `.agents/skills/` (lockfile: `skills-lock.json`)
-- MCP (Context7 + Graft): `.cursor/mcp.json`
+- MCP (Context7 + Trail): `.cursor/mcp.json` — Context7 must be a real binary on PATH (`context7-mcp.cmd`), not `npx` from this pnpm root

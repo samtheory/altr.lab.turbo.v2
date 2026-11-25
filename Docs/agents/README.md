@@ -49,6 +49,6 @@ Canonical how-to: [[../Altr.lab/agent-skills]] · Graft: [[../Altr.lab/graft]]
 | graft | `.agents/skills/graft/` |
 | design / UI / Strix / Context7 / Jord stack / … | `.agents/skills/` (see agent-skills) |
 
-Cursor rules: `.cursor/rules/docs-man.mdc`, `.cursor/rules/apollo.mdc`, `.cursor/rules/mimir.mdc`, `.cursor/rules/graft.mdc`, `.cursor/rules/apolyx-first.mdc` · MCP: `.cursor/mcp.json` · Root: `AGENTS.md`
+Cursor rules: `.cursor/rules/knowledge-router.mdc`, `.cursor/rules/trail.mdc`, `.cursor/rules/docs-man.mdc`, `.cursor/rules/apollo.mdc`, `.cursor/rules/mimir.mdc`, `.cursor/rules/apolyx-first.mdc` · MCP: `.cursor/mcp.json` · Root: `AGENTS.md`
 
 Wire agents into: idea → feature_list → plan → implement → tech_space → report → brain.

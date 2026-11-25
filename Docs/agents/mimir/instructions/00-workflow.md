@@ -76,7 +76,7 @@ Full table: [[../../../plan/Jord/phase-01/README]]. System manual: [[../../../te
 
 - Load **1–3** skills per turn ([[../skills/README]]).
 - UI turns: apollo companion skills, not random aesthetic packs as permission for Radix.
-- Prefer `graft` / Context7 over blind memory.
+- Prefer Trail (`trail ask` / graft skill) for this repo’s code; Context7 for external lib APIs; Docs for intent/plan/STATUS — see `.cursor/rules/knowledge-router.mdc`.
 - Prefer code truth over stale plan text.
 
 ## Out of scope

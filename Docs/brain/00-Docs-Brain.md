@@ -39,7 +39,7 @@ tags:
 |----------|---------|
 | Every docs folder explained | [[00-Docs-Hub]] |
 | Monorepo structure / commands / stack | [[../Altr.lab/README]] · [[../Altr.lab/structure]] · [[../Altr.lab/commands]] · [[../Altr.lab/stack]] |
-| Agent skills / Graft | [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
+| Agent skills / Trail-code | [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
 | Raw R&D ideas | [[../idea/README]] · catalog [[../idea/2026-10-18-product-catalog]] |
 | Product intent (what to build) | [[../feature_list/README]] |
 | Build plans (next steps) | [[../plan/README]] |
@@ -158,7 +158,7 @@ Primary DB: **Jord** — libSQL / Turso / Postgres + Studio control plane throug
 
 ## Companion skills
 
-How-to: [[../Altr.lab/agent-skills]] · Graft: [[../Altr.lab/graft]] · MCP: `.cursor/mcp.json`
+How-to: [[../Altr.lab/agent-skills]] · Trail-code: [[../Altr.lab/graft]] · MCP: `.cursor/mcp.json`
 
 | Skill | Location | Use |
 |-------|----------|-----|

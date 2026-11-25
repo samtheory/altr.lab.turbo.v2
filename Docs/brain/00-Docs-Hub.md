@@ -21,7 +21,7 @@ Canonical explanation of every top-level folder under `Docs/`. Start at [[00-Doc
 | Folder | Purpose | Entry |
 |--------|---------|-------|
 | `brain/` | Living map + hub (open first) | [[00-Docs-Brain]] · this file |
-| `Altr.lab/` | Root turbo project docs (structure, commands, stack, prompts, agent skills, Graft) | [[../Altr.lab/README]] · [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
+| `Altr.lab/` | Root turbo project docs (structure, commands, stack, prompts, agent skills, Trail-code) | [[../Altr.lab/README]] · [[../Altr.lab/agent-skills]] · [[../Altr.lab/graft]] |
 | `idea/` | Raw R&D ideas before promotion | [[../idea/README]] · catalog [[../idea/2026-10-18-product-catalog]] |
 | `feature_list/` | Raw feature instructions to implement | [[../feature_list/README]] |
 | `plan/` | Next-step plans from feature_list + tech_space | [[../plan/README]] |
