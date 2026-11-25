@@ -394,10 +394,10 @@ function SnippetRow({
   const pieces = React.useMemo(() => tokenizeJsx(code), [code]);
 
   return (
-    <div className="flex min-w-0 items-start gap-2">
+    <div className="grid min-w-0 grid-cols-[6.5rem_1.75rem_minmax(0,1fr)] items-start gap-x-2">
       <span
         className={cn(
-          "mt-1.5 w-[3.25rem] shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]",
+          "mt-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]",
           badgeClassName,
         )}
       >
@@ -409,7 +409,7 @@ function SnippetRow({
         variant="ghost"
         size="icon"
         aria-label={copied ? "Copied" : `Copy ${copyLabel}`}
-        className="mt-0.5 size-7 shrink-0 text-muted-foreground hover:text-foreground"
+        className="mt-0.5 size-7 shrink-0 justify-self-center text-muted-foreground hover:text-foreground"
         onClick={() => void onCopy?.()}
       >
         {copied ? (
@@ -424,7 +424,7 @@ function SnippetRow({
         onClick={() => void onCopy?.()}
         aria-label={copied ? `${copyLabel} copied` : `Click to copy ${copyLabel}`}
         className={cn(
-          "group min-w-0 flex-1 overflow-x-auto rounded-lg border border-transparent px-2.5 py-1.5 text-left",
+          "group min-w-0 overflow-x-auto rounded-lg border border-transparent px-2.5 py-1.5 text-left",
           "bg-background/40 transition-[background-color,border-color,box-shadow] duration-200",
           "hover:border-primary/25 hover:bg-primary/5",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -434,7 +434,7 @@ function SnippetRow({
       >
         <code
           className={cn(
-            "block whitespace-pre font-mono text-[11px] leading-[1.65] tracking-tight",
+            "block whitespace-pre font-mono text-[12px] leading-[1.65] tracking-tight",
             monoClassName,
           )}
         >
@@ -489,7 +489,6 @@ export function JsxSnippet({
             </span>
           </span>
         }
-        badgeClassName="w-auto min-w-[4.5rem]"
         code={code}
         copied={usageCopied}
         onCopy={onCopyUsage}

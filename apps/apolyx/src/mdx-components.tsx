@@ -56,7 +56,7 @@ const components: MDXComponents = {
     />
   ),
   pre: (props) => (
-    <pre className="code-block mt-6 overflow-x-auto rounded-xl border border-border p-4 text-sm" {...props} />
+    <pre className="code-block mt-6 overflow-x-auto rounded-xl border border-border p-4 text-[12px]" {...props} />
   ),
   table: (props) => (
     <div className="mt-6 overflow-x-auto rounded-xl border border-border">

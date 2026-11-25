@@ -55,12 +55,16 @@ const VIEWPORTS: {
 
 export function ComponentPlayground({
   name,
+  demoCode,
   code,
   html,
   align = "center",
   children,
 }: {
   name: string;
+  /** Demo file — drives Preview import/usage strip when no pilot schema. */
+  demoCode: string;
+  /** Code tab source (kit component when resolved). */
   code: string;
   html: string;
   align?: "center" | "start";
@@ -78,7 +82,7 @@ export function ComponentPlayground({
     setValues((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const { importLine, body } = React.useMemo(() => splitDemoSource(code), [code]);
+  const { importLine, body } = React.useMemo(() => splitDemoSource(demoCode), [demoCode]);
   // Pilots: live customized usage. Others: full demo component source (sans import).
   const liveJsx = schema ? schema.toJsx(values) : body;
   const prompt = buildCopyPrompt({
