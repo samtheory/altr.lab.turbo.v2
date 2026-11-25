@@ -17,7 +17,7 @@ import { MobileNav } from "./mobile-nav";
 const NAV = [
   { href: "/docs", label: "Docs", match: (path: string) => path === "/docs" || path === "/docs/" },
   {
-    href: "/docs/components/button",
+    href: "/docs/components",
     label: "Components",
     match: (path: string) => path.startsWith("/docs/components"),
   },

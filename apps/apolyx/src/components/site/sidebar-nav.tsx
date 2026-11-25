@@ -12,7 +12,7 @@ import { DocStatusBadge } from "./doc-status-badge";
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Documentation" className="space-y-2 text-sm">
+    <nav aria-label="Documentation" className="space-y-1.5 text-sm">
       {docsConfig.map((group) => (
         <SidebarGroup key={group.title} group={group} pathname={pathname} onNavigate={onNavigate} />
       ))}
@@ -31,13 +31,16 @@ function SidebarGroup({
 }) {
   const [open, setOpen] = useState(true);
   const regionId = useId();
+  const groupIndexHref =
+    group.title === "Components" ? "/docs/components" : undefined;
+  const groupIndexActive = groupIndexHref !== undefined && pathname === groupIndexHref;
 
   return (
     <div
       data-state={open ? "open" : "closed"}
       className={cn(
         "rounded-lg p-1 transition-colors duration-200 motion-reduce:transition-none",
-        open ? "bg-muted/40" : "bg-transparent",
+        open ? "bg-muted/35" : "bg-transparent",
       )}
     >
       <h2>
@@ -48,12 +51,26 @@ function SidebarGroup({
           onClick={() => setOpen((value) => !value)}
           className={cn(
             "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5",
-            "text-xs font-medium uppercase tracking-wider text-muted-foreground transition-colors",
+            "text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground transition-colors",
             "hover:bg-accent/60 hover:text-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            groupIndexActive && "text-foreground",
           )}
         >
-          {group.title}
+          {groupIndexHref ? (
+            <Link
+              href={groupIndexHref}
+              onClick={(event) => {
+                event.stopPropagation();
+                onNavigate?.();
+              }}
+              className="min-w-0 truncate hover:text-foreground"
+            >
+              {group.title}
+            </Link>
+          ) : (
+            <span className="min-w-0 truncate">{group.title}</span>
+          )}
           <ChevronDown
             aria-hidden
             className={cn(
@@ -72,7 +89,7 @@ function SidebarGroup({
         )}
       >
         <div className="overflow-hidden">
-          <ul className="mt-1 mb-1 ml-3 space-y-0.5 border-l border-border pl-2">
+          <ul className="mt-1 mb-1 ml-2.5 space-y-0.5 border-l border-border/70 pl-2">
             {group.items.map((item) => {
               const href = docHref(item.slug);
               const active = pathname === href;
@@ -83,15 +100,15 @@ function SidebarGroup({
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors",
+                      "relative flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-[color,background-color,box-shadow] duration-150",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      "before:absolute before:inset-y-1 before:-left-[9px] before:w-px before:transition-colors",
+                      "before:absolute before:inset-y-1 before:-left-[9px] before:w-0.5 before:rounded-full before:transition-[background-color,box-shadow] before:duration-150",
                       active
-                        ? "bg-accent font-medium text-accent-foreground before:bg-primary"
-                        : "text-muted-foreground before:bg-transparent hover:bg-accent/60 hover:text-foreground hover:before:bg-foreground/40",
+                        ? "bg-accent font-medium text-accent-foreground before:bg-primary before:shadow-[0_0_10px_color-mix(in_oklch,var(--primary)_55%,transparent)]"
+                        : "text-muted-foreground before:bg-transparent hover:bg-accent/55 hover:text-foreground hover:before:bg-foreground/35",
                     )}
                   >
-                    {item.title}
+                    <span className="truncate">{item.title}</span>
                     <DocStatusBadge status={item.status} />
                   </Link>
                 </li>

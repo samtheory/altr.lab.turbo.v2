@@ -39,6 +39,11 @@ export const docsConfig: DocGroup[] = [
   {
     title: "Components",
     items: [
+      {
+        slug: "components",
+        title: "All components",
+        description: "Browse the kit by category — open a card for docs, usage, and live playground.",
+      },
       component("accordion", "Accordion", "Single and multiple disclosures with Collapsible.", "new"),
       component("alert", "Alert", "Inline status message with semantic variants."),
       component("avatar", "Avatar", "Image with a fallback that waits for load errors."),

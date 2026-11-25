@@ -33,7 +33,7 @@ export default async function DocPage({ params }: Props) {
   if (!doc) notFound();
 
   const file = docFile(doc.slug);
-  const { default: Content } = (await import(`../../../content/docs/${file}.mdx`)) as {
+  const { default: Content } = (await import(`../../../../content/docs/${file}.mdx`)) as {
     default: React.ComponentType;
   };
   const source = await readFile(
@@ -44,8 +44,8 @@ export default async function DocPage({ params }: Props) {
   const { prev, next } = neighbours(doc.slug);
 
   return (
-    <div className="flex gap-10">
-      <article className="min-w-0 max-w-3xl flex-1 py-10">
+    <div className="flex gap-6 xl:gap-8">
+      <article className="min-w-0 max-w-4xl flex-1 py-10">
         <header className="mb-8 space-y-3">
           <div className="flex items-center gap-2">
             <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">
@@ -73,7 +73,7 @@ export default async function DocPage({ params }: Props) {
           ) : null}
         </nav>
       </article>
-      <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-52 shrink-0 self-start xl:block">
+      <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-48 shrink-0 self-start xl:block">
         <div className="apolyx-rail h-full overflow-y-auto overscroll-contain py-10 [overflow-anchor:none]">
           <TableOfContents headings={headings} />
         </div>

@@ -4,6 +4,7 @@ import { Kbd } from "@altr/apolyx";
 
 import { Callout } from "@/components/docs/callout";
 import { ComponentPreview } from "@/components/docs/component-preview";
+import { ComponentsGrid } from "@/components/docs/components-grid";
 import { InstallTabs } from "@/components/docs/install-tabs";
 import { PropsTable } from "@/components/docs/props-table";
 import { TokenTable } from "@/components/docs/token-table";
@@ -68,6 +69,7 @@ const components: MDXComponents = {
   td: (props) => <td className="border-t border-border px-4 py-2 align-top" {...props} />,
   Callout,
   ComponentPreview,
+  ComponentsGrid,
   InstallTabs,
   Kbd,
   PropsTable,

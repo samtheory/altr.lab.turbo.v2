@@ -73,6 +73,32 @@ html {
   background: transparent;
 }
 
+/* Docs lightning TOC rail */
+.apolyx-lightning-fill {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--primary) 92%, white),
+    var(--primary) 45%,
+    color-mix(in oklch, var(--accent) 70%, var(--primary))
+  );
+  box-shadow:
+    0 0 8px color-mix(in oklch, var(--primary) 55%, transparent),
+    0 0 2px color-mix(in oklch, var(--primary) 80%, transparent);
+}
+
+.apolyx-toc-active {
+  text-shadow: 0 0 18px color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apolyx-lightning-fill {
+    box-shadow: none;
+  }
+  .apolyx-toc-active {
+    text-shadow: none;
+  }
+}
+
 /* Docs side rails: quieter thumb until hover/focus */
 .apolyx-rail {
   scrollbar-gutter: stable;
