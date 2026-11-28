@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-carousel-tall",
+  "type": "ui",
+  "title": "Testimonial Carousel Tall",
+  "description": "Apolyx S0014 B1 — Tall photo column with quote carousel",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/testimonial-carousel-tall.tsx", "target": "testimonial-carousel-tall.tsx" },
+    { "path": "src/blocks/testimonial-items.ts", "target": "testimonial-items.ts" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar", "button"],
+  "docs": "blocks/testimonial-carousel-tall"
+}

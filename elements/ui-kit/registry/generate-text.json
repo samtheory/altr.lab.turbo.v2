@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "generate-text",
+  "type": "ui",
+  "title": "Generate Text",
+  "description": "Apolyx S0013 B7 — Word-by-word blur-in generate",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/generate-text.tsx",
+      "target": "generate-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/generate-text"
+}

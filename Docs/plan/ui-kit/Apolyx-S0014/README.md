@@ -18,7 +18,7 @@ tags:
 > Who: **apollo**. Feature: [[../../../feature_list/ui-kit/14-apolyx-s0013-aceternity-wave|apolyx-F0016]]. Depends on [[../Apolyx-S0013/README]] primitives where noted.
 
 **Sprint id:** `Apolyx-S0014`  
-**Status:** todo · **Owner:** apollo · **Wave:** marketing blocks / sections
+**Status:** in progress · **Owner:** apollo · **Wave:** marketing blocks / sections · B1 done · depends on closed [[../Apolyx-S0013/README]]
 
 ## Goal
 
@@ -28,7 +28,7 @@ Compose Aceternity-inspired **section blocks** (testimonials, team, stats, FAQs,
 
 | # | Card | Status |
 |---|------|--------|
-| 1 | [[01-testimonials]] | todo |
+| 1 | [[01-testimonials]] | done |
 | 2 | [[02-team]] | todo |
 | 3 | [[03-stats-feature]] | todo |
 | 4 | [[04-faqs-empty]] | todo |

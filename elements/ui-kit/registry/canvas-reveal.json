@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "canvas-reveal",
+  "type": "ui",
+  "title": "Canvas Reveal",
+  "description": "Apolyx S0013 B7 — Dot canvas reveal on pointer or auto",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/canvas-reveal.tsx",
+      "target": "canvas-reveal.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "pattern-frame"
+  ],
+  "docs": "components/canvas-reveal"
+}

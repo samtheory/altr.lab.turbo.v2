@@ -158,6 +158,30 @@ import PointerFollowDemo from "./pointer-follow-demo";
 import HoverBorderDemo from "./hover-border-demo";
 import GlowFrameDemo from "./glow-frame-demo";
 import SpotlightBeamDemo from "./spotlight-beam-demo";
+import DirectionHoverDemo from "./direction-hover-demo";
+import HoverGridDemo from "./hover-grid-demo";
+import FocusCardsDemo from "./focus-cards-demo";
+import CipherCardDemo from "./cipher-card-demo";
+import ExpandCardDemo from "./expand-card-demo";
+import Pin3dDemo from "./pin-3d-demo";
+import RevealCardDemo from "./reveal-card-demo";
+import CardPackDemo from "./card-pack-demo";
+import StickyScrollDemo from "./sticky-scroll-demo";
+import ScrollHeroDemo from "./scroll-hero-demo";
+import ParallaxGalleryDemo from "./parallax-gallery-demo";
+import ImageReelDemo from "./image-reel-demo";
+import ImageCompareDemo from "./image-compare-demo";
+import ExpandGridDemo from "./expand-grid-demo";
+import TraceBeamDemo from "./trace-beam-demo";
+import CanvasRevealDemo from "./canvas-reveal-demo";
+import PixelCanvasDemo from "./pixel-canvas-demo";
+import SvgMaskDemo from "./svg-mask-demo";
+import LayoutFlipDemo from "./layout-flip-demo";
+import VanishInputDemo from "./vanish-input-demo";
+import LinkPeekDemo from "./link-peek-demo";
+import GenerateTextDemo from "./generate-text-demo";
+import CipherTextDemo from "./cipher-text-demo";
+import TestimonialReelDemo from "./testimonial-reel-demo";
 import MarqueeDemo from "./marquee-demo";
 import NumberTickerDemo from "./number-ticker-demo";
 import WordCycleDemo from "./word-cycle-demo";
@@ -218,6 +242,12 @@ import PricingTiersDemo from "./pricing-tiers-demo";
 import SignInDemo from "./sign-in-demo";
 import TeamDemo from "./team-demo";
 import QuoteDemo from "./quote-demo";
+import TestimonialCarouselTallDemo from "./testimonial-carousel-tall-demo";
+import TestimonialCarouselDemo from "./testimonial-carousel-demo";
+import TestimonialHighlightDemo from "./testimonial-highlight-demo";
+import TestimonialMarqueeGridDemo from "./testimonial-marquee-grid-demo";
+import TestimonialDragBgDemo from "./testimonial-drag-bg-demo";
+import TestimonialMasonryDemo from "./testimonial-masonry-demo";
 import LeadsTableDemo from "./leads-table-demo";
 import DashboardHomeDemo from "./dashboard-home-demo";
 import DesignResultsDemo from "./design-results-demo";
@@ -470,6 +500,30 @@ export const demos = {
   "hover-border-demo": HoverBorderDemo,
   "glow-frame-demo": GlowFrameDemo,
   "spotlight-beam-demo": SpotlightBeamDemo,
+  "direction-hover-demo": DirectionHoverDemo,
+  "hover-grid-demo": HoverGridDemo,
+  "focus-cards-demo": FocusCardsDemo,
+  "cipher-card-demo": CipherCardDemo,
+  "expand-card-demo": ExpandCardDemo,
+  "pin-3d-demo": Pin3dDemo,
+  "reveal-card-demo": RevealCardDemo,
+  "card-pack-demo": CardPackDemo,
+  "sticky-scroll-demo": StickyScrollDemo,
+  "scroll-hero-demo": ScrollHeroDemo,
+  "parallax-gallery-demo": ParallaxGalleryDemo,
+  "image-reel-demo": ImageReelDemo,
+  "image-compare-demo": ImageCompareDemo,
+  "expand-grid-demo": ExpandGridDemo,
+  "trace-beam-demo": TraceBeamDemo,
+  "canvas-reveal-demo": CanvasRevealDemo,
+  "pixel-canvas-demo": PixelCanvasDemo,
+  "svg-mask-demo": SvgMaskDemo,
+  "layout-flip-demo": LayoutFlipDemo,
+  "vanish-input-demo": VanishInputDemo,
+  "link-peek-demo": LinkPeekDemo,
+  "generate-text-demo": GenerateTextDemo,
+  "cipher-text-demo": CipherTextDemo,
+  "testimonial-reel-demo": TestimonialReelDemo,
   "marquee-demo": MarqueeDemo,
   "number-ticker-demo": NumberTickerDemo,
   "word-cycle-demo": WordCycleDemo,
@@ -530,6 +584,12 @@ export const demos = {
   "sign-in-demo": SignInDemo,
   "team-demo": TeamDemo,
   "quote-demo": QuoteDemo,
+  "testimonial-carousel-tall-demo": TestimonialCarouselTallDemo,
+  "testimonial-carousel-demo": TestimonialCarouselDemo,
+  "testimonial-highlight-demo": TestimonialHighlightDemo,
+  "testimonial-marquee-grid-demo": TestimonialMarqueeGridDemo,
+  "testimonial-drag-bg-demo": TestimonialDragBgDemo,
+  "testimonial-masonry-demo": TestimonialMasonryDemo,
   "leads-table-demo": LeadsTableDemo,
   "dashboard-home-demo": DashboardHomeDemo,
   "design-results-demo": DesignResultsDemo,

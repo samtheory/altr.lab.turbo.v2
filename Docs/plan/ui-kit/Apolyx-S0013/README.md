@@ -2,7 +2,7 @@
 title: "plan/ui-kit — Apolyx-S0013 sprint"
 description: "Sprint Apolyx-S0013: Aceternity-inspired components and effects"
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-28
 tags:
   - plan
   - ui-kit
@@ -18,7 +18,7 @@ tags:
 > Who: **apollo**. Feature: [[../../../feature_list/ui-kit/14-apolyx-s0013-aceternity-wave|apolyx-F0016]]. Prior: [[../Apolyx-S0012/README]]. Blocks follow in [[../Apolyx-S0014/README]].
 
 **Sprint id:** `Apolyx-S0013`  
-**Status:** in progress · **Owner:** apollo · **Wave:** components / effects · B1–B4 done
+**Status:** closed · **Owner:** apollo · **Wave:** components / effects · B1–B8 done (2026-11-28)
 
 ## Goal
 
@@ -32,7 +32,7 @@ Ship Aceternity-inspired **primitives and effects** (inspiration only). Full slu
 | 2 | [[02-loaders]] | done |
 | 3 | [[03-nav-chrome]] | done |
 | 4 | [[04-pointer-border-glow]] | done |
-| 5 | [[05-cards-hover]] | todo |
-| 6 | [[06-scroll-media]] | todo |
-| 7 | [[07-canvas-mask-input]] | todo |
-| 8 | [[08-docs-registry-verify]] | todo |
+| 5 | [[05-cards-hover]] | done |
+| 6 | [[06-scroll-media]] | done |
+| 7 | [[07-canvas-mask-input]] | done |
+| 8 | [[08-docs-registry-verify]] | done |

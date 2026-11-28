@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "scroll-hero",
+  "type": "ui",
+  "title": "Scroll Hero",
+  "description": "Apolyx S0013 — Scroll Hero",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/scroll-hero.tsx",
+      "target": "scroll-hero.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/scroll-hero"
+}

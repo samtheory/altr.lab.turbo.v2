@@ -1,0 +1,16 @@
+{
+  "$schema": "./schema.json",
+  "name": "reveal-card",
+  "type": "ui",
+  "title": "Reveal Card",
+  "description": "Apolyx S0013 B5 — Reveal Card",
+  "dependencies": {},
+  "files": [
+    {
+      "path": "src/components/ui/reveal-card.tsx",
+      "target": "reveal-card.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "motion-tokens"],
+  "docs": "components/reveal-card"
+}

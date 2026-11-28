@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-highlight",
+  "type": "ui",
+  "title": "Testimonial Highlight",
+  "description": "Apolyx S0014 B1 — Centered quote with avatar switcher",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/testimonial-highlight.tsx", "target": "testimonial-highlight.tsx" },
+    { "path": "src/blocks/testimonial-items.ts", "target": "testimonial-items.ts" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar"],
+  "docs": "blocks/testimonial-highlight"
+}

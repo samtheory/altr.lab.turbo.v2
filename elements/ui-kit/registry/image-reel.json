@@ -1,0 +1,19 @@
+{
+  "$schema": "./schema.json",
+  "name": "image-reel",
+  "type": "ui",
+  "title": "Image Reel",
+  "description": "Apolyx S0013 — Image Reel",
+  "dependencies": {
+    "motion": "^12.23.12",
+    "lucide-react": "^0.487.0"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/image-reel.tsx",
+      "target": "image-reel.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/image-reel"
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-reel",
+  "type": "ui",
+  "title": "Testimonial Reel",
+  "description": "Apolyx S0013 B7 — Animated testimonial carousel",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/testimonial-reel.tsx",
+      "target": "testimonial-reel.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "avatar",
+    "button"
+  ],
+  "docs": "components/testimonial-reel"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "pixel-canvas",
+  "type": "ui",
+  "title": "Pixel Canvas",
+  "description": "Apolyx S0013 B7 — Interactive pixel grid brighten",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/pixel-canvas.tsx",
+      "target": "pixel-canvas.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/pixel-canvas"
+}

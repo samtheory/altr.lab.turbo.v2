@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-marquee-grid",
+  "type": "ui",
+  "title": "Testimonial Marquee Grid",
+  "description": "Apolyx S0014 B1 — Dual marquee rows of quote cards",
+  "dependencies": {},
+  "files": [
+    { "path": "src/blocks/testimonial-marquee-grid.tsx", "target": "testimonial-marquee-grid.tsx" },
+    { "path": "src/blocks/testimonial-items.ts", "target": "testimonial-items.ts" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "marquee", "social-quote-card"],
+  "docs": "blocks/testimonial-marquee-grid"
+}

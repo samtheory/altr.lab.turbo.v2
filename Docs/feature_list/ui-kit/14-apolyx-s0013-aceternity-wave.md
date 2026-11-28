@@ -71,51 +71,51 @@ Taste: keep the animation energy and unique interaction; restyle with Apolyx sem
 | spotlight-new | https://ui.aceternity.com/components/spotlight-new | `SpotlightBeam` | shipped | `spotlight-beam.tsx` | Larger beam / page spotlight |
 | glowing-effect | https://ui.aceternity.com/components/glowing-effect | `GlowFrame` | shipped | `glow-frame.tsx` | Unified glow frame API |
 | hover-border-gradient | https://ui.aceternity.com/components/hover-border-gradient | `HoverBorder` | shipped | `hover-border.tsx` | Hover-driven gradient border |
-| 3d-pin | https://ui.aceternity.com/components/3d-pin | `Pin3D` | new | — | Perspective pin / map marker |
-| direction-aware-hover | https://ui.aceternity.com/components/direction-aware-hover | `DirectionHover` | new | — | Overlay slides from pointer edge |
-| card-hover-effect | https://ui.aceternity.com/components/card-hover-effect | `HoverGrid` | new | `hover-lift`, `glare-surface` | Linked hover highlight grid |
-| focus-cards | https://ui.aceternity.com/components/focus-cards | `FocusCards` | new | — | Sibling dim on hover |
-| evervault-card | https://ui.aceternity.com/components/evervault-card | `CipherCard` | new | — | Encrypted hover matrix card |
-| expandable-card | https://ui.aceternity.com/components/expandable-card | `ExpandCard` | new | `stack-cards`, `folder-card` | Layout-id expand |
-| cards-free | https://ui.aceternity.com/components/cards-free | `CardPack` | new | `card.tsx` | Free-floating card pack demos |
-| text-reveal-card | https://ui.aceternity.com/components/text-reveal-card | `RevealCard` | new | `text-reveal.tsx` | Scratch / hover reveal card |
-| layout-grid | https://ui.aceternity.com/components/layout-grid | `ExpandGrid` | new | `bento-grid.tsx` | Click-expand layout grid |
-| canvas-reveal-effect | https://ui.aceternity.com/components/canvas-reveal-effect | `CanvasReveal` | new | `pixel-reveal.tsx` (partial) | Dot canvas reveal |
-| pixelated-canvas | https://ui.aceternity.com/components/pixelated-canvas | `PixelCanvas` | new | `pixel-reveal.tsx` | Interactive pixel canvas |
-| svg-mask-effect | https://ui.aceternity.com/components/svg-mask-effect | `SvgMask` | new | — | Cursor SVG mask reveal |
-| sticky-scroll-reveal | https://ui.aceternity.com/components/sticky-scroll-reveal | `StickyScroll` | new | — | Sticky panel + scroll content |
-| container-scroll-animation | https://ui.aceternity.com/components/container-scroll-animation | `ScrollHero` | new | — | Device/hero scroll scale |
-| parallax-scroll | https://ui.aceternity.com/components/parallax-scroll | `ParallaxGallery` | new | — | Multi-column parallax images |
-| images-slider | https://ui.aceternity.com/components/images-slider | `ImageReel` | new | `swipe-deck.tsx` (partial) | Full-bleed image slider |
-| compare | https://ui.aceternity.com/components/compare | `ImageCompare` | new | `diff-viewer.tsx` is code-only | Before/after image slider |
-| tracing-beam | https://ui.aceternity.com/components/tracing-beam | `TraceBeam` | new | `beam-link.tsx` (partial) | Scroll-linked vertical beam |
+| 3d-pin | https://ui.aceternity.com/components/3d-pin | `Pin3D` | shipped | `pin-3d.tsx` | Perspective pin / map marker |
+| direction-aware-hover | https://ui.aceternity.com/components/direction-aware-hover | `DirectionHover` | shipped | `direction-hover.tsx` | Overlay slides from pointer edge |
+| card-hover-effect | https://ui.aceternity.com/components/card-hover-effect | `HoverGrid` | shipped | `hover-grid.tsx` | Linked hover highlight grid |
+| focus-cards | https://ui.aceternity.com/components/focus-cards | `FocusCards` | shipped | `focus-cards.tsx` | Sibling dim on hover |
+| evervault-card | https://ui.aceternity.com/components/evervault-card | `CipherCard` | shipped | `cipher-card.tsx` | Encrypted hover matrix card |
+| expandable-card | https://ui.aceternity.com/components/expandable-card | `ExpandCard` | shipped | `expand-card.tsx` | Layout-id expand |
+| cards-free | https://ui.aceternity.com/components/cards-free | `CardPack` | shipped | `card-pack.tsx` | Free-floating card pack demos |
+| text-reveal-card | https://ui.aceternity.com/components/text-reveal-card | `RevealCard` | shipped | `reveal-card.tsx` | Scratch / hover reveal card |
+| layout-grid | https://ui.aceternity.com/components/layout-grid | `ExpandGrid` | shipped | `expand-grid.tsx` | Click-expand layout grid |
+| canvas-reveal-effect | https://ui.aceternity.com/components/canvas-reveal-effect | `CanvasReveal` | shipped | `canvas-reveal.tsx` | Dot canvas reveal |
+| pixelated-canvas | https://ui.aceternity.com/components/pixelated-canvas | `PixelCanvas` | shipped | `pixel-canvas.tsx` | Interactive pixel canvas |
+| svg-mask-effect | https://ui.aceternity.com/components/svg-mask-effect | `SvgMask` | shipped | `svg-mask.tsx` | Cursor SVG mask reveal |
+| sticky-scroll-reveal | https://ui.aceternity.com/components/sticky-scroll-reveal | `StickyScroll` | shipped | `sticky-scroll.tsx` | Sticky panel + scroll content |
+| container-scroll-animation | https://ui.aceternity.com/components/container-scroll-animation | `ScrollHero` | shipped | `scroll-hero.tsx` | Device/hero scroll scale |
+| parallax-scroll | https://ui.aceternity.com/components/parallax-scroll | `ParallaxGallery` | shipped | `parallax-gallery.tsx` | Multi-column parallax images |
+| images-slider | https://ui.aceternity.com/components/images-slider | `ImageReel` | shipped | `image-reel.tsx` | Full-bleed image slider |
+| compare | https://ui.aceternity.com/components/compare | `ImageCompare` | shipped | `image-compare.tsx` | Before/after image slider |
+| tracing-beam | https://ui.aceternity.com/components/tracing-beam | `TraceBeam` | shipped | `trace-beam.tsx` | Scroll-linked vertical beam |
 | following-pointer | https://ui.aceternity.com/components/following-pointer | `PointerFollow` | shipped | `pointer-follow.tsx` | Labeled / content cursor follow |
 | floating-navbar | https://ui.aceternity.com/components/floating-navbar | `FloatNav` | shipped | `float-nav.tsx` | Scroll-hide floating bar |
 | navbar-menu | https://ui.aceternity.com/components/navbar-menu | `MegaNav` | shipped | `mega-nav.tsx` | Hover mega-menu panels |
 | sidebar | https://ui.aceternity.com/components/sidebar | `AppSidebar` | shipped | `app-sidebar.tsx` | Collapsible app sidebar kit |
 | multi-step-loader | https://ui.aceternity.com/components/multi-step-loader | `StepLoader` | shipped | `step-loader.tsx` | Stepped loading states |
 | image-generation-loader | https://ui.aceternity.com/components/image-generation-loader | `ForgeLoader` | shipped | `forge-loader.tsx` | Generative / forge progress loader |
-| placeholders-and-vanish-input | https://ui.aceternity.com/components/placeholders-and-vanish-input | `VanishInput` | new | — | Placeholder cycle + vanish submit |
-| link-preview | https://ui.aceternity.com/components/link-preview | `LinkPeek` | new | — | Hover link preview card |
+| placeholders-and-vanish-input | https://ui.aceternity.com/components/placeholders-and-vanish-input | `VanishInput` | shipped | `vanish-input.tsx` | Placeholder cycle + vanish submit |
+| link-preview | https://ui.aceternity.com/components/link-preview | `LinkPeek` | shipped | `link-peek.tsx` | Hover link preview card |
 | file-upload | https://ui.aceternity.com/components/file-upload | `Dropzone` | exists | `dropzone.tsx` | Map only; taste polish later |
 | timeline | https://ui.aceternity.com/components/timeline | `Timeline` | exists | `timeline.tsx` | Map only; sticky-story variant deferred |
 | typewriter-effect | https://ui.aceternity.com/components/typewriter-effect | `TypewriterText` | exists | `typewriter-text.tsx` | Map only |
 | flip-words | https://ui.aceternity.com/components/flip-words | `WordCycle` | exists | `word-cycle.tsx` | Map only |
-| text-generate-effect | https://ui.aceternity.com/components/text-generate-effect | `GenerateText` | extend | `typewriter-text`, `scramble-text`, `morph-text` | Word blur-in generate |
-| encrypted-text | https://ui.aceternity.com/components/encrypted-text | `CipherText` | extend | `scramble-text.tsx` | Decode-on-view cipher |
-| layout-text-flip | https://ui.aceternity.com/components/layout-text-flip | `LayoutFlip` | new | `flip-text`, `text-swap` | Layout-id word flip |
-| animated-testimonials | https://ui.aceternity.com/components/animated-testimonials | `TestimonialReel` | new | `marquee`, `social-quote-card` | Animated testimonial primitive |
+| text-generate-effect | https://ui.aceternity.com/components/text-generate-effect | `GenerateText` | shipped | `generate-text.tsx` | Word blur-in generate |
+| encrypted-text | https://ui.aceternity.com/components/encrypted-text | `CipherText` | shipped | `cipher-text.tsx` | Decode-on-view cipher |
+| layout-text-flip | https://ui.aceternity.com/components/layout-text-flip | `LayoutFlip` | shipped | `layout-flip.tsx` | Layout-id word flip |
+| animated-testimonials | https://ui.aceternity.com/components/animated-testimonials | `TestimonialReel` | shipped | `testimonial-reel.tsx` | Animated testimonial primitive |
 
 ## Reference map — blocks
 
 | Aceternity slug | Aceternity URL | Apolyx name | Status | Existing path | Notes |
 |-----------------|----------------|-------------|--------|---------------|-------|
-| testimonials-photo-carousel-tall | https://ui.aceternity.com/blocks/testimonials/testimonials-photo-carousel-tall | `TestimonialCarouselTall` | new | — | Tall photo carousel block |
-| testimonials-photo-carousel | https://ui.aceternity.com/blocks/testimonials/testimonials-photo-carousel | `TestimonialCarousel` | new | — | Standard photo carousel |
-| testimonials-with-centered-highlight | https://ui.aceternity.com/blocks/testimonials/testimonials-with-centered-highlight | `TestimonialHighlight` | new | — | Centered quote highlight |
-| testimonials-marquee-grid-boxed | https://ui.aceternity.com/blocks/testimonials/testimonials-marquee-grid-boxed | `TestimonialMarqueeGrid` | new | `marquee.tsx` | Boxed marquee grid |
-| testimonials-background-with-drag | https://ui.aceternity.com/blocks/testimonials/testimonials-background-with-drag | `TestimonialDragBg` | new | — | Draggable BG testimonials |
-| testimonials-masonry-grid | https://ui.aceternity.com/blocks/testimonials/testimonials-masonry-grid | `TestimonialMasonry` | new | — | Masonry quote grid |
+| testimonials-photo-carousel-tall | https://ui.aceternity.com/blocks/testimonials/testimonials-photo-carousel-tall | `TestimonialCarouselTall` | shipped | `blocks/testimonial-carousel-tall.tsx` | Tall photo carousel block |
+| testimonials-photo-carousel | https://ui.aceternity.com/blocks/testimonials/testimonials-photo-carousel | `TestimonialCarousel` | shipped | `blocks/testimonial-carousel.tsx` | Standard photo carousel |
+| testimonials-with-centered-highlight | https://ui.aceternity.com/blocks/testimonials/testimonials-with-centered-highlight | `TestimonialHighlight` | shipped | `blocks/testimonial-highlight.tsx` | Centered quote highlight |
+| testimonials-marquee-grid-boxed | https://ui.aceternity.com/blocks/testimonials/testimonials-marquee-grid-boxed | `TestimonialMarqueeGrid` | shipped | `blocks/testimonial-marquee-grid.tsx` | Boxed marquee grid |
+| testimonials-background-with-drag | https://ui.aceternity.com/blocks/testimonials/testimonials-background-with-drag | `TestimonialDragBg` | shipped | `blocks/testimonial-drag-bg.tsx` | Draggable BG testimonials |
+| testimonials-masonry-grid | https://ui.aceternity.com/blocks/testimonials/testimonials-masonry-grid | `TestimonialMasonry` | shipped | `blocks/testimonial-masonry.tsx` | Masonry quote grid |
 | about-us-section-with-cards | https://ui.aceternity.com/blocks/team-sections/about-us-section-with-cards | `TeamAboutCards` | new | — | About + team cards |
 | team-section-with-timeline-cards | https://ui.aceternity.com/blocks/team-sections/team-section-with-timeline-cards | `TeamTimeline` | new | `timeline.tsx` | Team + timeline cards |
 | team-section-with-small-avatars | https://ui.aceternity.com/blocks/team-sections/team-section-with-small-avatars | `TeamAvatars` | new | avatar chrome | Compact avatar team |
@@ -139,13 +139,13 @@ Taste: keep the animation energy and unique interaction; restyle with Apolyx sem
 
 | Status | Count |
 |--------|------:|
-| exists | 8 |
-| extend | 2 |
-| shipped (S0013 B1–B4) | 17 |
-| new | 43 |
+| exists | 6 |
+| extend | 0 |
+| shipped (S0013 components + S0014 B1) | 47 |
+| new (remaining S0014 blocks) | 18 |
 | defer | 0 |
 
-Totals: **70** mapped references (45 components + 25 blocks). **S0013 B1–B4** shipped 2026-11-25.
+Totals: **71** mapped references (47 components + 24 blocks). **S0013** closed. **S0014 B1** testimonials shipped 2026-11-28.
 
 ## Hard rules
 
@@ -158,4 +158,4 @@ Totals: **70** mapped references (45 components + 25 blocks). **S0013 B1–B4** 
 
 ## Status
 
-**in progress** (2026-11-25) — **S0013 B1–B4** shipped. Next: [[../../plan/ui-kit/Apolyx-S0013/05-cards-hover|B5 cards / hover]].
+**S0014 in progress** (2026-11-28) — S0013 closed; **B1 testimonials** shipped. Next: [[../../plan/ui-kit/Apolyx-S0014/02-team|S0014 B2 team]].

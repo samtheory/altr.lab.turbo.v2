@@ -90,3 +90,28 @@ export {
   type MoodTile,
   type MoodboardGeneratorProps,
 } from "./moodboard-generator";
+export {
+  TestimonialCarouselTall,
+  type TestimonialCarouselTallProps,
+} from "./testimonial-carousel-tall";
+export {
+  TestimonialCarousel,
+  type TestimonialCarouselProps,
+} from "./testimonial-carousel";
+export {
+  TestimonialHighlight,
+  type TestimonialHighlightProps,
+} from "./testimonial-highlight";
+export {
+  TestimonialMarqueeGrid,
+  type TestimonialMarqueeGridProps,
+} from "./testimonial-marquee-grid";
+export {
+  TestimonialDragBg,
+  type TestimonialDragBgProps,
+} from "./testimonial-drag-bg";
+export {
+  TestimonialMasonry,
+  type TestimonialMasonryProps,
+} from "./testimonial-masonry";
+export { type TestimonialBlockItem, defaultTestimonialItems } from "./testimonial-items";

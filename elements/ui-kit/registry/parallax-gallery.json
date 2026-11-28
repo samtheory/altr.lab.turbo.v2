@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "parallax-gallery",
+  "type": "ui",
+  "title": "Parallax Gallery",
+  "description": "Apolyx S0013 — Parallax Gallery",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/parallax-gallery.tsx",
+      "target": "parallax-gallery.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/parallax-gallery"
+}

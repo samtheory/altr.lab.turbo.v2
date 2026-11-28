@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "trace-beam",
+  "type": "ui",
+  "title": "Trace Beam",
+  "description": "Apolyx S0013 — Trace Beam",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/trace-beam.tsx",
+      "target": "trace-beam.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/trace-beam"
+}

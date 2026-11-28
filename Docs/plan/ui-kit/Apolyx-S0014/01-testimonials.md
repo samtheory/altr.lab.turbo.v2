@@ -13,7 +13,8 @@ tags:
 
 # Apolyx-S0014-01 — Testimonials blocks
 
-> **Status:** todo  
+> **Status:** done  
+
 > **Phase:** [[README]] · Parent feature: [[../../../feature_list/ui-kit/14-apolyx-s0013-aceternity-wave|apolyx-F0016]]
 
 ## Routing

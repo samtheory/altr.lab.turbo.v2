@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-masonry",
+  "type": "ui",
+  "title": "Testimonial Masonry",
+  "description": "Apolyx S0014 B1 — Masonry grid of quote cards",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/testimonial-masonry.tsx", "target": "testimonial-masonry.tsx" },
+    { "path": "src/blocks/testimonial-items.ts", "target": "testimonial-items.ts" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "social-quote-card"],
+  "docs": "blocks/testimonial-masonry"
+}

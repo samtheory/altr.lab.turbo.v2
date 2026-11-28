@@ -1,0 +1,22 @@
+{
+  "$schema": "./schema.json",
+  "name": "vanish-input",
+  "type": "ui",
+  "title": "Vanish Input",
+  "description": "Apolyx S0013 B7 — Cycling placeholders with vanish submit",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/vanish-input.tsx",
+      "target": "vanish-input.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion",
+    "input"
+  ],
+  "docs": "components/vanish-input"
+}

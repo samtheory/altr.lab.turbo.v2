@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "image-compare",
+  "type": "ui",
+  "title": "Image Compare",
+  "description": "Apolyx S0013 — Image Compare",
+  "dependencies": {
+    "lucide-react": "^0.487.0"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/image-compare.tsx",
+      "target": "image-compare.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "components/image-compare"
+}

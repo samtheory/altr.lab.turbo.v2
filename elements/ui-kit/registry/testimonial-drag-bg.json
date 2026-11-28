@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-drag-bg",
+  "type": "ui",
+  "title": "Testimonial Drag Background",
+  "description": "Apolyx S0014 B1 — Featured quote over draggable quote field",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/testimonial-drag-bg.tsx", "target": "testimonial-drag-bg.tsx" },
+    { "path": "src/blocks/testimonial-items.ts", "target": "testimonial-items.ts" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar", "social-quote-card"],
+  "docs": "blocks/testimonial-drag-bg"
+}

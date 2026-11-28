@@ -1,0 +1,16 @@
+{
+  "$schema": "./schema.json",
+  "name": "card-pack",
+  "type": "ui",
+  "title": "Card Pack",
+  "description": "Apolyx S0013 B5 — Card Pack",
+  "dependencies": {},
+  "files": [
+    {
+      "path": "src/components/ui/card-pack.tsx",
+      "target": "card-pack.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "motion-tokens"],
+  "docs": "components/card-pack"
+}

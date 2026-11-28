@@ -1,0 +1,16 @@
+{
+  "$schema": "./schema.json",
+  "name": "direction-hover",
+  "type": "ui",
+  "title": "Direction Hover",
+  "description": "Apolyx S0013 B5 — Direction Hover",
+  "dependencies": {},
+  "files": [
+    {
+      "path": "src/components/ui/direction-hover.tsx",
+      "target": "direction-hover.tsx"
+    }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "motion-tokens"],
+  "docs": "components/direction-hover"
+}

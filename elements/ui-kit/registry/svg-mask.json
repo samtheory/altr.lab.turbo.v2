@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "svg-mask",
+  "type": "ui",
+  "title": "Svg Mask",
+  "description": "Apolyx S0013 B7 — Cursor SVG mask reveal",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/svg-mask.tsx",
+      "target": "svg-mask.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/svg-mask"
+}

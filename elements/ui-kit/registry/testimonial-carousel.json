@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "testimonial-carousel",
+  "type": "ui",
+  "title": "Testimonial Carousel",
+  "description": "Apolyx S0014 B1 — Compact photo and quote carousel",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/testimonial-carousel.tsx", "target": "testimonial-carousel.tsx" },
+    { "path": "src/blocks/testimonial-items.ts", "target": "testimonial-items.ts" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar", "button"],
+  "docs": "blocks/testimonial-carousel"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "cipher-text",
+  "type": "ui",
+  "title": "Cipher Text",
+  "description": "Apolyx S0013 B7 — Decode-on-view cipher scramble",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/cipher-text.tsx",
+      "target": "cipher-text.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/cipher-text"
+}

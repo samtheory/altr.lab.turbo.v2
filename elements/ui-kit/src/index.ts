@@ -385,6 +385,63 @@ export { PointerFollow, type PointerFollowProps } from "./components/ui/pointer-
 export { HoverBorder, type HoverBorderProps } from "./components/ui/hover-border";
 export { GlowFrame, type GlowFrameProps } from "./components/ui/glow-frame";
 export { SpotlightBeam, type SpotlightBeamProps } from "./components/ui/spotlight-beam";
+export { DirectionHover, type DirectionHoverProps } from "./components/ui/direction-hover";
+export {
+  HoverGrid,
+  HoverGridItem,
+  type HoverGridProps,
+  type HoverGridItemProps,
+} from "./components/ui/hover-grid";
+export {
+  FocusCards,
+  type FocusCardsProps,
+  type FocusCardItem,
+} from "./components/ui/focus-cards";
+export { CipherCard, type CipherCardProps } from "./components/ui/cipher-card";
+export { ExpandCard, type ExpandCardProps } from "./components/ui/expand-card";
+export { Pin3D, type Pin3DProps } from "./components/ui/pin-3d";
+export { RevealCard, type RevealCardProps } from "./components/ui/reveal-card";
+export {
+  CardPack,
+  type CardPackProps,
+  type CardPackItem,
+} from "./components/ui/card-pack";
+export {
+  StickyScroll,
+  type StickyScrollProps,
+  type StickyScrollItem,
+} from "./components/ui/sticky-scroll";
+export { ScrollHero, type ScrollHeroProps } from "./components/ui/scroll-hero";
+export {
+  ParallaxGallery,
+  type ParallaxGalleryProps,
+  type ParallaxGalleryImage,
+} from "./components/ui/parallax-gallery";
+export {
+  ImageReel,
+  type ImageReelProps,
+  type ImageReelSlide,
+} from "./components/ui/image-reel";
+export { ImageCompare, type ImageCompareProps } from "./components/ui/image-compare";
+export {
+  ExpandGrid,
+  type ExpandGridProps,
+  type ExpandGridItem,
+} from "./components/ui/expand-grid";
+export { TraceBeam, type TraceBeamProps } from "./components/ui/trace-beam";
+export { CanvasReveal, type CanvasRevealProps } from "./components/ui/canvas-reveal";
+export { PixelCanvas, type PixelCanvasProps } from "./components/ui/pixel-canvas";
+export { SvgMask, type SvgMaskProps } from "./components/ui/svg-mask";
+export { LayoutFlip, type LayoutFlipProps } from "./components/ui/layout-flip";
+export { VanishInput, type VanishInputProps } from "./components/ui/vanish-input";
+export { LinkPeek, type LinkPeekProps } from "./components/ui/link-peek";
+export { GenerateText, type GenerateTextProps } from "./components/ui/generate-text";
+export { CipherText, type CipherTextProps } from "./components/ui/cipher-text";
+export {
+  TestimonialReel,
+  type TestimonialReelProps,
+  type TestimonialItem,
+} from "./components/ui/testimonial-reel";
 export { GradientGlowCard, type GradientGlowCardProps } from "./components/ui/gradient-glow-card";
 export { ConfettiBurst, type ConfettiBurstProps } from "./components/ui/confetti-burst";
 export { ThemeMorphToggle, type ThemeMorphToggleProps } from "./components/ui/theme-morph-toggle";

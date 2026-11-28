@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "link-peek",
+  "type": "ui",
+  "title": "Link Peek",
+  "description": "Apolyx S0013 B7 — Hover and focus link preview card",
+  "dependencies": {
+    "motion": "^12.23.12"
+  },
+  "files": [
+    {
+      "path": "src/components/ui/link-peek.tsx",
+      "target": "link-peek.tsx"
+    }
+  ],
+  "registryDependencies": [
+    "utils",
+    "use-reduced-motion"
+  ],
+  "docs": "components/link-peek"
+}
