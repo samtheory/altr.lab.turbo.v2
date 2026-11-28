@@ -2,13 +2,14 @@
 title: "Jord — realtime"
 description: "Transactional outbox CDC over SSE and WebSocket; LISTEN fan-out across Postgres instances; resume with since; tracked tables only"
 created: 2026-10-24
-updated: 2026-10-29
+updated: 2026-11-25
 tags:
   - tech-space
   - jord
   - realtime
   - cdc
   - s0037
+  - s0098
 ---
 
 # Jord — realtime
@@ -21,7 +22,7 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 
 ## What
 
-**Single emit path.** Every server write to a **tracked** table goes through one helper, `writeChangeAs(principal)` in `cloud/jord/src/app.ts`. Inside the write queue it opens `jord.transaction`, runs the data write, inserts the `jord_changes` row(s) (`outbox.appendChange`, the only `INSERT INTO jord_changes` in the source; a test greps for this), and commits. Only after commit does it publish `jord.change`. If the outbox insert fails, the data write rolls back and the request fails (5xx). Callers: Studio rows, `/records`, `/api/v1/:table` (`RETURNING` for `new`; a PATCH reads the prior row in the same transaction for `old`), functions (`records_insert`), triggers, and `/x/:slug`. Event name stays `jord.change`. Payload: `type`, `table`, `op`, `id`, `version?`, `at`, `dialect`, plus `seq` for resume.
+**Single emit path.** Every server write to a **tracked** table goes through one helper, `writeChangeAs(principal)` in `cloud/jord/src/app.ts`. Inside the write queue it opens `jord.transaction` on the **active data plane** (`X-Jord-Project` / ALS), runs the data write, inserts the `jord_changes` row(s) into that target's outbox (`createOutboxRegistry` — one outbox per driver), and commits. Only after commit does it publish `jord.change` tagged with `project` (slug, or `default`). If the outbox insert fails, the data write rolls back and the request fails (5xx). Callers: Studio rows, `/records`, `/api/v1/:table` (`RETURNING` for `new`; a PATCH reads the prior row in the same transaction for `old`), functions (`records_insert`), triggers, and `/x/:slug`. Event name stays `jord.change`. Payload: `type`, `table`, `op`, `id`, `version?`, `at`, `dialect`, `seq`, plus `project` for bus filtering (S0098).
 
 | Piece | Detail |
 |-------|--------|
@@ -31,7 +32,7 @@ Studio grids should refresh after a successful mutation without polling. Phase-0
 | Retention | Default **7 days** and **100_000** rows (`JORD_CHANGES_RETENTION_DAYS`, `JORD_CHANGES_RETENTION_ROWS`). Job kind `changes_prune` |
 | Resume | `GET /realtime?table=&since=` — catch up then live. `since` older than the retained range → **410** `{ error: "gone", hint: "resync" }` |
 | Watermark | `appendChange` marks the seq in flight; `settle` after commit or rollback. **libSQL:** readers see `MAX(seq)`, held below the lowest seq still in flight in this process. **Postgres (S0037):** shared `jord_commit_watermark` advances contiguously across committed rows and `jord_changes_abandoned` gaps; readers take `min(shared, local in-flight hold)`. BIGSERIAL can commit out of order; a live test proves a higher seq is not readable for `since=` catchup until the lower one commits |
-| Fan-out | In-process `RealtimeBus` per process. **Postgres (S0037):** one dedicated `LISTEN jord_changes` connection (`application_name=jord-realtime-listen`) reconnects with backoff; NOTIFY payload is `{ table, seq, txid }` (legacy plain seq still parsed) — rows are always re-read from the outbox. Local publishes are deduped so the writer does not double-deliver its own NOTIFY echo. **libSQL:** local bus only (no LISTEN) |
+| Fan-out | In-process `RealtimeBus` per process. Subscribers filter on `table` and (S0098) `project` slug so projects do not see each other's feed. **Postgres (S0037):** one dedicated `LISTEN jord_changes` connection on the **primary** (`application_name=jord-realtime-listen`) reconnects with backoff; NOTIFY payload is `{ table, seq, txid }` (legacy plain seq still parsed) — rows are always re-read from the outbox. Local publishes are deduped so the writer does not double-deliver its own NOTIFY echo. **libSQL / remote project targets:** local bus only (no per-project LISTEN) |
 | Policy | Filter at delivery (catchup and live) using the subscriber's select policy and row scope on the **new** row (**old** for deletes) |
 | BLOBs | Omitted from outbox JSON as `{ "$blob": true }` |
 | Cap | **48** shared SSE+WS subscribers → **503** `realtime_full` |
@@ -58,7 +59,7 @@ Raw SQL from the Studio SQL console is not captured row by row. After a successf
 | Piece | Path |
 |-------|------|
 | Write helper | `writeChangeAs` in `cloud/jord/src/app.ts` · type `WriteWithChange` in `cloud/jord/src/realtime/types.ts` |
-| Outbox | `cloud/jord/src/realtime/outbox.ts` |
+| Outbox | `cloud/jord/src/realtime/outbox.ts` (`createOutbox` · `createOutboxRegistry`) |
 | Watermark | `cloud/jord/src/realtime/watermark.ts` (local in-flight) · shared table via outbox `settle` on Postgres |
 | LISTEN bridge | `cloud/jord/src/realtime/listen.ts` — started when `realtimeListenUrl` is set (boot passes `DATABASE_URL`) |
 | Bus (fanout only) | `cloud/jord/src/realtime/bus.ts` |
@@ -76,7 +77,7 @@ Open `GET /realtime?table=notes` with a bearer, then `POST /schema/tables/notes/
 
 ## App endpoint (S0084)
 
-`/p/:project/realtime` (WebSocket, SSE fallback on the same path) lets a browser app subscribe to **one table** with only a project **publishable** key (`x-jord-key` / `apikey`, or `?apikey=` on the WebSocket upgrade) and an optional end-user JWT (none = `anon`). Privileged credentials (secret and barrier keys, server token, operator tokens, non-user JWT roles) are refused with `401 secret_key_not_allowed` before any lookup; a bad key is the same `401 invalid_key` for every slug; `403 wrong_project` and `410 project_unavailable` need a valid key. Frames: `ready`, `subscribe {table, filter?, since?, limit?}`, `snapshot {rows, pk, cursor, truncated}`, `jord.change`, `resync`, `error`; policy is evaluated per row at delivery (a row that leaves the filter or policy becomes `op:"delete"` with `row:null`); cursor too old = `409 resync_required`. One pending-or-active subscription per connection, 4 predicates, 500-row snapshot (2 MiB cap), caps per IP / key / principal, 64 KiB frames, 1 MiB backpressure close. Query strings are redacted from traces. Open: all projects share one data plane (a warning is logged), no per-project origin allowlist, `seq` gaps are visible, revocation reaches open sockets within 30 s.
+`/p/:project/realtime` (WebSocket, SSE fallback on the same path) lets a browser app subscribe to **one table** with only a project **publishable** key (`x-jord-key` / `apikey`, or `?apikey=` on the WebSocket upgrade) and an optional end-user JWT (none = `anon`). Privileged credentials (secret and barrier keys, server token, operator tokens, non-user JWT roles) are refused with `401 secret_key_not_allowed` before any lookup; a bad key is the same `401 invalid_key` for every slug; `403 wrong_project` and `410 project_unavailable` need a valid key. **S0098:** key / project status lookup stays on the control-plane primary; after handshake the connection binds the registered project target for snapshot, outbox catch-up, session re-check, and bus filter (`project` slug). Frames: `ready`, `subscribe {table, filter?, since?, limit?}`, `snapshot {rows, pk, cursor, truncated}`, `jord.change`, `resync`, `error`; policy is evaluated per row at delivery (a row that leaves the filter or policy becomes `op:"delete"` with `row:null`); cursor too old = `409 resync_required`. One pending-or-active subscription per connection, 4 predicates, 500-row snapshot (2 MiB cap), caps per IP / key / principal, 64 KiB frames, 1 MiB backpressure close. Query strings are redacted from traces. Multi-project boots log an **info** notice (snapshots/outbox are per-target; the in-process bus still fans out with slug filters). Open: no per-project origin allowlist, `seq` gaps are visible inside a project, revocation reaches open sockets within 30 s, Postgres LISTEN remains primary-only.
 
 ## Realtime client (S0085)
 

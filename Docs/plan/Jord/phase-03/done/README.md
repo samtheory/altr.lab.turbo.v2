@@ -79,3 +79,4 @@ Completed single-task cards. Active queue: [[../README]].
 | [[S0090-functions-worker-pool\|S0090]] | Functions worker pool + timeout/memory caps | 2026-11-11 |
 | [[S0091-functions-client-logs\|S0091]] | Functions principal-bound client + invocation logs | 2026-11-11 |
 | [[S0097-project-data-plane\|S0097]] | Per-project data-plane fan-out (`X-Jord-Project`) | 2026-11-25 |
+| [[S0098-project-realtime-plane\|S0098]] | Per-project realtime / outbox plane | 2026-11-25 |

@@ -1,7 +1,15 @@
 import { randomBytes } from "node:crypto";
+import { mkdtemp, rm } from "node:fs/promises";
 import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
-import { createAesGcmSecretPort } from "@altr/jord";
+import {
+  createAesGcmSecretPort,
+  createJordClient,
+  fsPathToFileUrl,
+  type JordDriverPort,
+} from "@altr/jord";
 import { serve } from "@hono/node-server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import WebSocket from "ws";
@@ -13,7 +21,6 @@ import { ConsoleMailer } from "../auth/mailer.js";
 import { signSessionToken } from "../auth/token.js";
 import type { HttpRequestLog } from "../http/request-log.js";
 import { createWriteQueue } from "../queue.js";
-import { openTestDb, type TestDb } from "../testing/harness.js";
 import {
   rowMatchesFilters,
   sendWithBackpressure,
@@ -32,7 +39,10 @@ const AUTH: JordAuthConfig = {
   jwtAud: "jord",
 };
 
-const open: TestDb[] = [];
+type CloseableDb = { jord: JordDriverPort; close: () => Promise<void> };
+
+const open: CloseableDb[] = [];
+const tempDirs: string[] = [];
 const servers: Array<{ close: (cb: () => void) => void }> = [];
 const sockets: WebSocket[] = [];
 
@@ -44,12 +54,17 @@ afterEach(async () => {
     await new Promise<void>((resolve) => s.close(() => resolve()));
   }
   while (open.length > 0) await open.pop()?.close();
+  while (tempDirs.length > 0) {
+    const dir = tempDirs.pop();
+    if (dir) await rm(dir, { recursive: true, force: true }).catch(() => undefined);
+  }
 });
 
 const json = { "content-type": "application/json" };
-const adminHeaders = () => ({
+const adminHeaders = (project?: string) => ({
   authorization: `Bearer ${signSessionToken("admin", AUTH.secret)}`,
   ...json,
+  ...(project ? { "x-jord-project": project } : {}),
 });
 const userToken = (sub: string) =>
   signAccessToken({ secret: JWT, iss: "jord", aud: "jord", sub, role: "user" }).token;
@@ -59,12 +74,25 @@ type Keys = { id: string; slug: string; pub: string; sec: string; bar: string };
 async function boot(
   opts: { env?: Record<string, string>; recheckMs?: number; bus?: RealtimeBus } = {},
 ) {
-  const db = await openTestDb("file");
+  const dir = await mkdtemp(path.join(tmpdir(), "jord-rt-"));
+  tempDirs.push(dir);
+  // S0084 suite shares one file for shop + primary so policies/RLS (control)
+  // and rows/outbox (data plane) stay coherent; "other" is a separate file
+  // for S0098 isolation proof.
+  const primaryPath = path.join(dir, "primary.db");
+  const otherPath = path.join(dir, "other.db");
+  const primary = await createJordClient({ url: fsPathToFileUrl(primaryPath) });
+  const db: CloseableDb = {
+    jord: primary,
+    close: async () => {
+      await primary.close();
+    },
+  };
   open.push(db);
   const httpLines: HttpRequestLog[] = [];
   const app = createJordApp({
-    jord: db.jord,
-    ddl: db.ddl,
+    jord: primary,
+    ddl: primary,
     enqueueWrite: createWriteQueue(),
     auth: AUTH,
     mailer: new ConsoleMailer(),
@@ -76,22 +104,27 @@ async function boot(
     realtimeRecheckMs: opts.recheckMs,
     ...(opts.bus ? { realtime: opts.bus } : {}),
   });
-  const admin = adminHeaders();
-  const call = async (method: string, path: string, body?: unknown, expected?: number) => {
-    const res = await app.request(path, {
+  const call = async (
+    method: string,
+    pathName: string,
+    body?: unknown,
+    expected?: number,
+    project?: string,
+  ) => {
+    const res = await app.request(pathName, {
       method,
-      headers: admin,
+      headers: adminHeaders(project),
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
-    if (expected != null) expect(res.status, `${method} ${path}`).toBe(expected);
+    if (expected != null) expect(res.status, `${method} ${pathName}`).toBe(expected);
     return res;
   };
 
-  async function project(slug: string): Promise<Keys> {
+  async function project(slug: string, target: string): Promise<Keys> {
     const res = await call(
       "POST",
       "/admin/projects",
-      { slug, engine: "libsql-file", target: "./data/project.db" },
+      { slug, engine: "libsql-file", target },
       201,
     );
     const body = (await res.json()) as {
@@ -109,6 +142,9 @@ async function boot(
     };
   }
 
+  const main = await project("shop", primaryPath);
+  const other = await project("other", otherPath);
+
   for (const name of ["lab_notes", "public_notes"]) {
     await call(
       "POST",
@@ -121,8 +157,15 @@ async function boot(
         ],
       },
       201,
+      main.slug,
     );
-    await call("PUT", `/schema/tables/${name}/rls`, { rls_enabled: true, owner_column: "owner_id" }, 200);
+    await call(
+      "PUT",
+      `/schema/tables/${name}/rls`,
+      { rls_enabled: true, owner_column: "owner_id" },
+      200,
+      main.slug,
+    );
   }
   await call(
     "POST",
@@ -135,6 +178,7 @@ async function boot(
       rules: JSON.stringify([{ kind: "owner_eq", config: { column: "owner_id" } }]),
     },
     201,
+    main.slug,
   );
   await call(
     "POST",
@@ -147,20 +191,29 @@ async function boot(
       rules: JSON.stringify([{ kind: "always" }]),
     },
     201,
+    main.slug,
   );
-  const insert = (table: string, id: string, owner: string, title = id) =>
-    call("POST", `/schema/tables/${table}/rows`, { values: { id, title, owner_id: owner } }, 201);
-  const update = (table: string, id: string, values: Record<string, unknown>) =>
-    call("PATCH", `/schema/tables/${table}/rows/${id}`, { values }, 200);
-  const remove = (table: string, id: string) => call("DELETE", `/schema/tables/${table}/rows/${id}`, undefined, 200);
+  const insert = (table: string, id: string, owner: string, title = id, projectSlug = main.slug) =>
+    call(
+      "POST",
+      `/schema/tables/${table}/rows`,
+      { values: { id, title, owner_id: owner } },
+      201,
+      projectSlug,
+    );
+  const update = (
+    table: string,
+    id: string,
+    values: Record<string, unknown>,
+    projectSlug = main.slug,
+  ) => call("PATCH", `/schema/tables/${table}/rows/${id}`, { values }, 200, projectSlug);
+  const remove = (table: string, id: string, projectSlug = main.slug) =>
+    call("DELETE", `/schema/tables/${table}/rows/${id}`, undefined, 200, projectSlug);
 
   for (const t of ["lab_notes", "public_notes"]) {
     await insert(t, "n1", "user-1");
     await insert(t, "n2", "user-2");
   }
-
-  const main = await project("shop");
-  const other = await project("other");
 
   const server = serve({ fetch: app.fetch, port: 0, hostname: "127.0.0.1" });
   app.injectWebSocket(server);
@@ -170,7 +223,20 @@ async function boot(
   });
   servers.push(server as unknown as { close: (cb: () => void) => void });
   const port = (server.address() as AddressInfo).port;
-  return { app, db, port, main, other, insert, update, remove, call, httpLines };
+  return {
+    app,
+    db,
+    port,
+    main,
+    other,
+    insert,
+    update,
+    remove,
+    call,
+    httpLines,
+    primaryPath,
+    otherPath,
+  };
 }
 
 type Client = {
@@ -534,13 +600,13 @@ describe("S0084 cursor + caps", () => {
   });
 
   it("transient DB error while checking a resume cursor is a retryable 500, never resync_required", async () => {
-    const { db, port, main } = await boot();
+    const { port, main, primaryPath } = await boot();
     const a = asClient(await connect(port, main.slug, { "x-jord-key": main.pub }));
-    const real = db.jord.query.bind(db.jord);
-    vi.spyOn(db.jord, "query").mockImplementation(async (sql: string, args?: Array<string | number | null>) => {
-      if (String(sql).includes("MIN(seq)")) throw new Error("SQLITE_BUSY");
-      return real(sql, args);
-    });
+    // Handshake already bound the project plane. Break the outbox table on the
+    // shared file so the next minSeq / listAfter query fails (retryable 500).
+    const aux = await createJordClient({ url: fsPathToFileUrl(primaryPath) });
+    await aux.query("DROP TABLE jord_changes");
+    await aux.close();
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     a.ws.send(JSON.stringify({ type: "subscribe", table: "public_notes", since: 1 }));
     const err = await waitFor(a.msgs, (m) => m.type === "error");
@@ -597,18 +663,28 @@ describe("S0084 cursor + caps", () => {
   });
 });
 
-/** Hold every `describeTable` (called inside subscribe planning) until released. */
-function gatePlan(db: TestDb) {
-  const orig = db.jord.describeTable.bind(db.jord);
+/**
+ * Hold subscribe planning until released.
+ * S0098: `describeTable` runs on the project plane driver (not primary), so
+ * gate the control-plane `listPoliciesFor` call that `decide` still hits first.
+ */
+function gatePlan(db: CloseableDb) {
+  const port = db.jord as JordDriverPort & {
+    listPoliciesFor: (
+      table: string,
+      operation: string,
+    ) => Promise<unknown[]>;
+  };
+  const orig = port.listPoliciesFor.bind(port);
   let open!: () => void;
   const gate = new Promise<void>((r) => {
     open = r;
   });
   let calls = 0;
-  vi.spyOn(db.jord, "describeTable").mockImplementation(async (table: string) => {
+  vi.spyOn(port, "listPoliciesFor").mockImplementation(async (table, operation) => {
     calls += 1;
     await gate;
-    return orig(table);
+    return orig(table, operation);
   });
   return {
     release: () => open(),
@@ -719,12 +795,93 @@ describe("review #3: snapshot size cap + backpressure", () => {
   });
 });
 
-describe("review #5a: shared-database warning", () => {
-  it("warns when more than one active project exists", async () => {
+describe("review #5a: multi-project notice (S0098)", () => {
+  it("logs an info notice when more than one active project exists", async () => {
     const { db } = await boot(); // boot creates "shop" + "other"
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     expect(await warnIfMultiProject(db.jord)).toBe(true);
-    expect(String(warn.mock.calls[0]?.[0])).toMatch(/share ONE database/);
+    expect(String(info.mock.calls[0]?.[0])).toMatch(/per-target \(S0098\)/);
+  });
+});
+
+describe("S0098 per-project realtime isolation", () => {
+  it("writes under project A do not appear on project B's app realtime feed", async () => {
+    const bus = new RealtimeBus();
+    const seen: Array<Record<string, unknown>> = [];
+    bus.trySubscribe((e) => seen.push(e as unknown as Record<string, unknown>));
+    const { port, main, other, call, insert } = await boot({ bus });
+
+    // Seed a table + RLS on the isolated "other" target (anon needs RLS on).
+    await call(
+      "POST",
+      "/schema/tables",
+      {
+        name: "public_notes",
+        columns: [
+          { name: "title", type: "TEXT" },
+          { name: "owner_id", type: "TEXT" },
+        ],
+      },
+      201,
+      other.slug,
+    );
+    await call(
+      "PUT",
+      "/schema/tables/public_notes/rls",
+      { rls_enabled: true, owner_column: "owner_id" },
+      200,
+      other.slug,
+    );
+    await call(
+      "POST",
+      "/policies",
+      {
+        name: "open-other",
+        table_name: "public_notes",
+        operation: "select",
+        effect: "allow",
+        rules: JSON.stringify([{ kind: "always" }]),
+      },
+      201,
+      other.slug,
+    );
+
+    const shop = asClient(await connect(port, main.slug, { "x-jord-key": main.pub }));
+    const alt = asClient(await connect(port, other.slug, { "x-jord-key": other.pub }));
+    shop.ws.send(JSON.stringify({ type: "subscribe", table: "public_notes" }));
+    alt.ws.send(JSON.stringify({ type: "subscribe", table: "public_notes" }));
+    await waitFor(shop.msgs, (m) => m.type === "snapshot");
+    await waitFor(alt.msgs, (m) => m.type === "snapshot");
+    expect((alt.msgs.find((m) => m.type === "snapshot")?.rows as unknown[]).length).toBe(0);
+
+    await insert("public_notes", "only-shop", "user-1", "only-shop", main.slug);
+    await insert("public_notes", "only-other", "user-1", "only-other", other.slug);
+    await waitFor(seen, (m) => m.project === "other" && m.id === "only-other");
+    await waitFor(shop.msgs, (m) => m.type === "jord.change" && m.id === "only-shop");
+    await waitFor(alt.msgs, (m) => m.type === "jord.change" && m.id === "only-other", 4000);
+    await settle(100);
+
+    expect(changes(shop).map((d) => d.id)).toEqual(["only-shop"]);
+    expect(changes(alt).map((d) => d.id)).toEqual(["only-other"]);
+    expect(seen.some((e) => e.project === "shop" && e.id === "only-shop")).toBe(true);
+    expect(seen.some((e) => e.project === "other" && e.id === "only-other")).toBe(true);
+    expect(JSON.stringify(shop.msgs)).not.toContain("only-other");
+    expect(JSON.stringify(alt.msgs)).not.toContain("only-shop");
+
+    // Fresh snapshots stay isolated too.
+    const shopSnap = asClient(await connect(port, main.slug, { "x-jord-key": main.pub }));
+    const altSnap = asClient(await connect(port, other.slug, { "x-jord-key": other.pub }));
+    shopSnap.ws.send(JSON.stringify({ type: "subscribe", table: "public_notes" }));
+    altSnap.ws.send(JSON.stringify({ type: "subscribe", table: "public_notes" }));
+    const shopRows = (
+      (await waitFor(shopSnap.msgs, (m) => m.type === "snapshot")).rows as Array<{ id: string }>
+    ).map((r) => r.id);
+    const altRows = (
+      (await waitFor(altSnap.msgs, (m) => m.type === "snapshot")).rows as Array<{ id: string }>
+    ).map((r) => r.id);
+    expect(shopRows).toContain("only-shop");
+    expect(shopRows).not.toContain("only-other");
+    expect(altRows).toEqual(["only-other"]);
   });
 });
 

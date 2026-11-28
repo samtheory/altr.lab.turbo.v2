@@ -88,4 +88,4 @@ cd cloud/jord && pnpm test -- src/projects/plane.test.ts
 
 ## Out of scope / follow-ups
 
-Realtime app endpoint still shares one bus/outbox on the primary (documented since S0084). Full per-project realtime isolation is a later card.
+Realtime isolation closed in [[S0098-project-realtime-plane|S0098]].
