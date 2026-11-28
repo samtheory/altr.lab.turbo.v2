@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "faq-accordion",
+  "type": "ui",
+  "title": "FAQ Accordion",
+  "description": "Apolyx S0014 B4 — Two-column FAQ section with accordion",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/faq-accordion.tsx", "target": "faq-accordion.tsx" },
+    { "path": "src/blocks/faq-items.ts", "target": "faq-items.ts" }
+  ],
+  "registryDependencies": ["accordion", "utils", "use-reduced-motion"],
+  "docs": "blocks/faq-accordion"
+}

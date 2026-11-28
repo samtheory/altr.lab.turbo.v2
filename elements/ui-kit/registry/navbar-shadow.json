@@ -1,0 +1,13 @@
+{
+  "$schema": "./schema.json",
+  "name": "navbar-shadow",
+  "type": "ui",
+  "title": "Navbar Shadow",
+  "description": "Apolyx S0014 B5 — Dark shadow marketing navbar",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/navbar-shadow.tsx", "target": "navbar-shadow.tsx" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "button"],
+  "docs": "blocks/navbar-shadow"
+}

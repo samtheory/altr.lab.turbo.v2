@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-flip-block",
+  "type": "ui",
+  "title": "Text Flip Block",
+  "description": "Apolyx S0014 B5 — Section with WordCycle in the headline",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/text-flip-block.tsx", "target": "text-flip-block.tsx" },
+    { "path": "src/components/ui/word-cycle.tsx", "target": "word-cycle.tsx" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "word-cycle"],
+  "docs": "blocks/text-flip-block"
+}

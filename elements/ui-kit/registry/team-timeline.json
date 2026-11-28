@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "team-timeline",
+  "type": "ui",
+  "title": "Team Timeline",
+  "description": "Team members as vertical timeline cards",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/team-timeline.tsx", "target": "team-timeline.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar", "timeline"],
+  "docs": "blocks/team-timeline"
+}

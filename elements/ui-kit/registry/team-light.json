@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "team-light",
+  "type": "ui",
+  "title": "Team Light",
+  "description": "Airy team section on a light muted surface",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/team-light.tsx", "target": "team-light.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar"],
+  "docs": "blocks/team-light"
+}

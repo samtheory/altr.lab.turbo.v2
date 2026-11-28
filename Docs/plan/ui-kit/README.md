@@ -33,11 +33,11 @@ Each sprint lives in its own folder `Apolyx-S000N/`. Closed sprints stay as an a
 | [[Apolyx-S0011/README]] | Agent extras (NextUI leftovers) | closed (2026-11-25) |
 | [[Apolyx-S0012/README]] | Magic UI reference wave (patterns, text, chrome) | closed (2026-11-25) |
 | [[Apolyx-S0013/README]] | Aceternity components / effects | closed (2026-11-28) |
-| [[Apolyx-S0014/README]] | Aceternity marketing blocks | **active** |
+| [[Apolyx-S0014/README]] | Aceternity marketing blocks | closed (2026-11-28) |
 
-**Active Apolyx sprint:** [[Apolyx-S0014/README]] · Feature: [[../../feature_list/ui-kit/14-apolyx-s0013-aceternity-wave|apolyx-F0016]].
+**Active Apolyx sprint:** none (Aceternity wave `apolyx-F0016` closed). Feature: [[../../feature_list/ui-kit/14-apolyx-s0013-aceternity-wave|apolyx-F0016]].
 
-**Next batch:** [[Apolyx-S0014/02-team]].
+**Next batch:** pick next wave from [[../../feature_list/ui-kit/00-intent]] / feature list when planning resumes.
 
 ## Links
 

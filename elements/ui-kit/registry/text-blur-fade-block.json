@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-blur-fade-block",
+  "type": "ui",
+  "title": "Text Blur Fade Block",
+  "description": "Apolyx S0014 B5 — Section with staggered BlurFade headline",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/text-blur-fade-block.tsx", "target": "text-blur-fade-block.tsx" },
+    { "path": "src/motion/blur-fade.tsx", "target": "blur-fade.tsx" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "blur-fade"],
+  "docs": "blocks/text-blur-fade-block"
+}

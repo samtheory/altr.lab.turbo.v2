@@ -1,0 +1,17 @@
+<ComponentPreview name="faq-dashed-demo" />
+
+## Installation
+
+<InstallTabs name="faq-dashed" exports="FaqDashed" />
+
+## Usage
+
+```tsx
+import { FaqDashed, type FaqItem } from "@altr/apolyx";
+
+const items: FaqItem[] = [
+  { q: "Is this open source?", a: "Apolyx lives in the monorepo workspace." },
+];
+
+<FaqDashed items={items} />
+```

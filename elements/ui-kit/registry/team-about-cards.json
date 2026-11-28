@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "team-about-cards",
+  "type": "ui",
+  "title": "Team About Cards",
+  "description": "About copy with a grid of team member cards",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/team-about-cards.tsx", "target": "team-about-cards.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar"],
+  "docs": "blocks/team-about-cards"
+}

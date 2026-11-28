@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-typewriter-block",
+  "type": "ui",
+  "title": "Text Typewriter Block",
+  "description": "Apolyx S0014 B5 — Section with TypewriterText hero line",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/text-typewriter-block.tsx", "target": "text-typewriter-block.tsx" },
+    { "path": "src/components/ui/typewriter-text.tsx", "target": "typewriter-text.tsx" }
+  ],
+  "registryDependencies": ["utils", "use-reduced-motion", "typewriter-text"],
+  "docs": "blocks/text-typewriter-block"
+}

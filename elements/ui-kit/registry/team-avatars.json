@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "team-avatars",
+  "type": "ui",
+  "title": "Team Avatars",
+  "description": "Compact row or grid of small avatars with names",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/team-avatars.tsx", "target": "team-avatars.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar"],
+  "docs": "blocks/team-avatars"
+}

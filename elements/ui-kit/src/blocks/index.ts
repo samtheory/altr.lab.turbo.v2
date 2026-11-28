@@ -115,3 +115,81 @@ export {
   type TestimonialMasonryProps,
 } from "./testimonial-masonry";
 export { type TestimonialBlockItem, defaultTestimonialItems } from "./testimonial-items";
+export {
+  TeamAboutCards,
+  type TeamAboutCardsProps,
+  type TeamSectionMember,
+} from "./team-about-cards";
+export {
+  TeamTimeline,
+  type TeamTimelineProps,
+} from "./team-timeline";
+export {
+  TeamAvatars,
+  type TeamAvatarsProps,
+} from "./team-avatars";
+export {
+  TeamLight,
+  type TeamLightProps,
+} from "./team-light";
+export {
+  TeamScales,
+  type TeamScalesProps,
+} from "./team-scales";
+export {
+  StatsGrid,
+  type StatsGridItem,
+  type StatsGridProps,
+} from "./stats-grid";
+export {
+  StatsTicker,
+  type StatsTickerItem,
+  type StatsTickerProps,
+} from "./stats-ticker";
+export {
+  FeatureMotionCard,
+  type FeatureMotionCardProps,
+} from "./feature-motion-card";
+export {
+  FaqDashed,
+  type FaqDashedProps,
+} from "./faq-dashed";
+export {
+  FaqAccordion,
+  type FaqAccordionProps,
+} from "./faq-accordion";
+export {
+  FaqBackdrop,
+  type FaqBackdropProps,
+} from "./faq-backdrop";
+export { type FaqItem, defaultFaqItems } from "./faq-items";
+export {
+  EmptyGallery,
+  type EmptyGalleryProps,
+} from "./empty-gallery";
+export {
+  EmptyCards,
+  type EmptyCardsProps,
+} from "./empty-cards";
+export {
+  EmptyGrid,
+  type EmptyGridProps,
+} from "./empty-grid";
+export {
+  NavbarShadow,
+  type NavbarShadowProps,
+  type NavbarShadowLink,
+  type NavbarShadowCta,
+} from "./navbar-shadow";
+export {
+  TextBlurFadeBlock,
+  type TextBlurFadeBlockProps,
+} from "./text-blur-fade-block";
+export {
+  TextFlipBlock,
+  type TextFlipBlockProps,
+} from "./text-flip-block";
+export {
+  TextTypewriterBlock,
+  type TextTypewriterBlockProps,
+} from "./text-typewriter-block";

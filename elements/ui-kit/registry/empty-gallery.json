@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "empty-gallery",
+  "type": "ui",
+  "title": "Empty Gallery",
+  "description": "Apolyx S0014 B4 — Empty state with picture placeholders",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [{ "path": "src/blocks/empty-gallery.tsx", "target": "empty-gallery.tsx" }],
+  "registryDependencies": ["empty-state", "utils", "use-reduced-motion", "button"],
+  "docs": "blocks/empty-gallery"
+}

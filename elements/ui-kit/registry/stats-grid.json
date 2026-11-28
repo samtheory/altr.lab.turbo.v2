@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "stats-grid",
+  "type": "ui",
+  "title": "Stats Grid",
+  "description": "Apolyx S0014 B3 — Stats over dot or line grid background",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/stats-grid.tsx", "target": "stats-grid.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "pattern-dots"],
+  "docs": "blocks/stats-grid"
+}

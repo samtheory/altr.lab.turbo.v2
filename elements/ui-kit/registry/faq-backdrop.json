@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "faq-backdrop",
+  "type": "ui",
+  "title": "FAQ Backdrop",
+  "description": "Apolyx S0014 B4 — FAQ over decorative mesh backdrop",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/faq-backdrop.tsx", "target": "faq-backdrop.tsx" },
+    { "path": "src/blocks/faq-items.ts", "target": "faq-items.ts" }
+  ],
+  "registryDependencies": ["accordion", "utils", "use-reduced-motion"],
+  "docs": "blocks/faq-backdrop"
+}

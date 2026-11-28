@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "team-scales",
+  "type": "ui",
+  "title": "Team Scales",
+  "description": "Team cards that scale on hover with reduced-motion support",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/team-scales.tsx", "target": "team-scales.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "avatar"],
+  "docs": "blocks/team-scales"
+}

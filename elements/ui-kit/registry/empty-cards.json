@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "empty-cards",
+  "type": "ui",
+  "title": "Empty Cards",
+  "description": "Apolyx S0014 B4 — Empty state with card placeholders",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [{ "path": "src/blocks/empty-cards.tsx", "target": "empty-cards.tsx" }],
+  "registryDependencies": ["empty-state", "utils", "use-reduced-motion", "button"],
+  "docs": "blocks/empty-cards"
+}

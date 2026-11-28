@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "faq-dashed",
+  "type": "ui",
+  "title": "FAQ Dashed",
+  "description": "Apolyx S0014 B4 — FAQ list with dashed dividers",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [
+    { "path": "src/blocks/faq-dashed.tsx", "target": "faq-dashed.tsx" },
+    { "path": "src/blocks/faq-items.ts", "target": "faq-items.ts" }
+  ],
+  "registryDependencies": ["accordion", "utils", "use-reduced-motion"],
+  "docs": "blocks/faq-dashed"
+}

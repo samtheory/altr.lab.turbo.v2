@@ -3,7 +3,7 @@ title: "Apolyx-S0013/S0014 — Aceternity reference wave"
 feature_id: apolyx-F0016
 description: "Maps Aceternity UI components and blocks to Apolyx names; S0013 ships primitives/effects, S0014 ships marketing blocks"
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-28
 tags:
   - feature
   - ui-kit
@@ -116,24 +116,24 @@ Taste: keep the animation energy and unique interaction; restyle with Apolyx sem
 | testimonials-marquee-grid-boxed | https://ui.aceternity.com/blocks/testimonials/testimonials-marquee-grid-boxed | `TestimonialMarqueeGrid` | shipped | `blocks/testimonial-marquee-grid.tsx` | Boxed marquee grid |
 | testimonials-background-with-drag | https://ui.aceternity.com/blocks/testimonials/testimonials-background-with-drag | `TestimonialDragBg` | shipped | `blocks/testimonial-drag-bg.tsx` | Draggable BG testimonials |
 | testimonials-masonry-grid | https://ui.aceternity.com/blocks/testimonials/testimonials-masonry-grid | `TestimonialMasonry` | shipped | `blocks/testimonial-masonry.tsx` | Masonry quote grid |
-| about-us-section-with-cards | https://ui.aceternity.com/blocks/team-sections/about-us-section-with-cards | `TeamAboutCards` | new | — | About + team cards |
-| team-section-with-timeline-cards | https://ui.aceternity.com/blocks/team-sections/team-section-with-timeline-cards | `TeamTimeline` | new | `timeline.tsx` | Team + timeline cards |
-| team-section-with-small-avatars | https://ui.aceternity.com/blocks/team-sections/team-section-with-small-avatars | `TeamAvatars` | new | avatar chrome | Compact avatar team |
-| team-section-with-light-background | https://ui.aceternity.com/blocks/team-sections/team-section-with-light-background | `TeamLight` | new | — | Light-bg team section |
-| team-section-with-scales | https://ui.aceternity.com/blocks/team-sections/team-section-with-scales | `TeamScales` | new | — | Scale-on-hover team |
-| stats-with-grid-background | https://ui.aceternity.com/blocks/stats-sections/stats-with-grid-background | `StatsGrid` | new | patterns | Stats over grid BG |
-| stats-with-number-ticker | https://ui.aceternity.com/blocks/stats-sections/stats-with-number-ticker | `StatsTicker` | new | `number-ticker.tsx` | Compose NumberTicker |
-| feature-block-animated-card | https://ui.aceternity.com/blocks/cards/feature-block-animated-card | `FeatureMotionCard` | new | — | Animated feature card block |
-| faqs-with-dashed-lines | https://ui.aceternity.com/blocks/faqs/faqs-with-dashed-lines | `FaqDashed` | new | `accordion` | Dashed-line FAQ layout |
-| frequently-asked-questions-with-accordion | https://ui.aceternity.com/blocks/faqs/frequently-asked-questions-with-accordion | `FaqAccordion` | new | `accordion` | FAQ accordion section |
-| simple-faqs-with-background | https://ui.aceternity.com/blocks/faqs/simple-faqs-with-background | `FaqBackdrop` | new | — | FAQ over decorative BG |
-| empty-state-with-pictures | https://ui.aceternity.com/blocks/empty-states/empty-state-with-pictures | `EmptyGallery` | new | `empty-state.tsx` | Picture empty state |
-| empty-state-with-cards | https://ui.aceternity.com/blocks/empty-states/empty-state-with-cards | `EmptyCards` | new | `empty-state.tsx` | Card empty state |
-| empty-state-vertical-grid | https://ui.aceternity.com/blocks/empty-states/empty-state-vertical-grid | `EmptyGrid` | new | `empty-state.tsx` | Vertical grid empty |
-| navbar-dark-shadow | https://ui.aceternity.com/blocks/navbars/navbar-dark-shadow | `NavbarShadow` | new | — | Dark shadow marketing navbar |
-| text-animation-blur-fade-in | https://ui.aceternity.com/blocks/text-animations/text-animation-blur-fade-in | `TextBlurFadeBlock` | new | `blur-fade` | Section composing BlurFade |
-| text-animation-flipping-words | https://ui.aceternity.com/blocks/text-animations/text-animation-flipping-words | `TextFlipBlock` | new | `word-cycle`, `flip-text` | Section composing flip words |
-| text-animation-typewriter-effect | https://ui.aceternity.com/blocks/text-animations/text-animation-typewriter-effect | `TextTypewriterBlock` | new | `typewriter-text` | Section composing typewriter |
+| about-us-section-with-cards | https://ui.aceternity.com/blocks/team-sections/about-us-section-with-cards | `TeamAboutCards` | shipped | `blocks/team-about-cards.tsx` | About + team cards |
+| team-section-with-timeline-cards | https://ui.aceternity.com/blocks/team-sections/team-section-with-timeline-cards | `TeamTimeline` | shipped | `blocks/team-timeline.tsx` | Team + timeline cards |
+| team-section-with-small-avatars | https://ui.aceternity.com/blocks/team-sections/team-section-with-small-avatars | `TeamAvatars` | shipped | `blocks/team-avatars.tsx` | Compact avatar team |
+| team-section-with-light-background | https://ui.aceternity.com/blocks/team-sections/team-section-with-light-background | `TeamLight` | shipped | `blocks/team-light.tsx` | Light-bg team section |
+| team-section-with-scales | https://ui.aceternity.com/blocks/team-sections/team-section-with-scales | `TeamScales` | shipped | `blocks/team-scales.tsx` | Scale-on-hover team |
+| stats-with-grid-background | https://ui.aceternity.com/blocks/stats-sections/stats-with-grid-background | `StatsGrid` | shipped | `blocks/stats-grid.tsx` | Stats over grid BG |
+| stats-with-number-ticker | https://ui.aceternity.com/blocks/stats-sections/stats-with-number-ticker | `StatsTicker` | shipped | `blocks/stats-ticker.tsx` | Compose NumberTicker |
+| feature-block-animated-card | https://ui.aceternity.com/blocks/cards/feature-block-animated-card | `FeatureMotionCard` | shipped | `blocks/feature-motion-card.tsx` | Animated feature card block |
+| faqs-with-dashed-lines | https://ui.aceternity.com/blocks/faqs/faqs-with-dashed-lines | `FaqDashed` | shipped | `blocks/faq-dashed.tsx` | Dashed-line FAQ layout |
+| frequently-asked-questions-with-accordion | https://ui.aceternity.com/blocks/faqs/frequently-asked-questions-with-accordion | `FaqAccordion` | shipped | `blocks/faq-accordion.tsx` | FAQ accordion section |
+| simple-faqs-with-background | https://ui.aceternity.com/blocks/faqs/simple-faqs-with-background | `FaqBackdrop` | shipped | `blocks/faq-backdrop.tsx` | FAQ over decorative BG |
+| empty-state-with-pictures | https://ui.aceternity.com/blocks/empty-states/empty-state-with-pictures | `EmptyGallery` | shipped | `blocks/empty-gallery.tsx` | Picture empty state |
+| empty-state-with-cards | https://ui.aceternity.com/blocks/empty-states/empty-state-with-cards | `EmptyCards` | shipped | `blocks/empty-cards.tsx` | Card empty state |
+| empty-state-vertical-grid | https://ui.aceternity.com/blocks/empty-states/empty-state-vertical-grid | `EmptyGrid` | shipped | `blocks/empty-grid.tsx` | Vertical grid empty |
+| navbar-dark-shadow | https://ui.aceternity.com/blocks/navbars/navbar-dark-shadow | `NavbarShadow` | shipped | `blocks/navbar-shadow.tsx` | Dark shadow marketing navbar |
+| text-animation-blur-fade-in | https://ui.aceternity.com/blocks/text-animations/text-animation-blur-fade-in | `TextBlurFadeBlock` | shipped | `blocks/text-blur-fade-block.tsx` | Section composing BlurFade |
+| text-animation-flipping-words | https://ui.aceternity.com/blocks/text-animations/text-animation-flipping-words | `TextFlipBlock` | shipped | `blocks/text-flip-block.tsx` | Section composing flip words |
+| text-animation-typewriter-effect | https://ui.aceternity.com/blocks/text-animations/text-animation-typewriter-effect | `TextTypewriterBlock` | shipped | `blocks/text-typewriter-block.tsx` | Section composing typewriter |
 
 ### Gap summary (plan)
 
@@ -141,11 +141,11 @@ Taste: keep the animation energy and unique interaction; restyle with Apolyx sem
 |--------|------:|
 | exists | 6 |
 | extend | 0 |
-| shipped (S0013 components + S0014 B1) | 47 |
-| new (remaining S0014 blocks) | 18 |
+| shipped | 65 |
+| new | 0 |
 | defer | 0 |
 
-Totals: **71** mapped references (47 components + 24 blocks). **S0013** closed. **S0014 B1** testimonials shipped 2026-11-28.
+Totals: **71** mapped references (47 components + 24 blocks). **S0013** + **S0014** closed 2026-11-28. `apolyx-F0016` complete.
 
 ## Hard rules
 
@@ -158,4 +158,4 @@ Totals: **71** mapped references (47 components + 24 blocks). **S0013** closed. 
 
 ## Status
 
-**S0014 in progress** (2026-11-28) — S0013 closed; **B1 testimonials** shipped. Next: [[../../plan/ui-kit/Apolyx-S0014/02-team|S0014 B2 team]].
+**closed** (2026-11-28) — **S0013** components + **S0014** marketing blocks fully shipped. Feature `apolyx-F0016` done.

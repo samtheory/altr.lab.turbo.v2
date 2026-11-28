@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "stats-ticker",
+  "type": "ui",
+  "title": "Stats Ticker",
+  "description": "Apolyx S0014 B3 — Stats section composing NumberTicker",
+  "dependencies": { "motion": "^12.23.12" },
+  "files": [{ "path": "src/blocks/stats-ticker.tsx", "target": "stats-ticker.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion", "number-ticker"],
+  "docs": "blocks/stats-ticker"
+}

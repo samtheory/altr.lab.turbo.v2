@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "name": "empty-grid",
+  "type": "ui",
+  "title": "Empty Grid",
+  "description": "Apolyx S0014 B4 — Empty state with vertical grid slots",
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "motion": "^12.23.12"
+  },
+  "files": [{ "path": "src/blocks/empty-grid.tsx", "target": "empty-grid.tsx" }],
+  "registryDependencies": ["empty-state", "utils", "use-reduced-motion", "button"],
+  "docs": "blocks/empty-grid"
+}

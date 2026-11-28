@@ -248,6 +248,24 @@ import TestimonialHighlightDemo from "./testimonial-highlight-demo";
 import TestimonialMarqueeGridDemo from "./testimonial-marquee-grid-demo";
 import TestimonialDragBgDemo from "./testimonial-drag-bg-demo";
 import TestimonialMasonryDemo from "./testimonial-masonry-demo";
+import TeamAboutCardsDemo from "./team-about-cards-demo";
+import TeamTimelineDemo from "./team-timeline-demo";
+import TeamAvatarsDemo from "./team-avatars-demo";
+import TeamLightDemo from "./team-light-demo";
+import TeamScalesDemo from "./team-scales-demo";
+import StatsGridDemo from "./stats-grid-demo";
+import StatsTickerDemo from "./stats-ticker-demo";
+import FeatureMotionCardDemo from "./feature-motion-card-demo";
+import FaqDashedDemo from "./faq-dashed-demo";
+import FaqAccordionDemo from "./faq-accordion-demo";
+import FaqBackdropDemo from "./faq-backdrop-demo";
+import EmptyGalleryDemo from "./empty-gallery-demo";
+import EmptyCardsDemo from "./empty-cards-demo";
+import EmptyGridDemo from "./empty-grid-demo";
+import NavbarShadowDemo from "./navbar-shadow-demo";
+import TextBlurFadeBlockDemo from "./text-blur-fade-block-demo";
+import TextFlipBlockDemo from "./text-flip-block-demo";
+import TextTypewriterBlockDemo from "./text-typewriter-block-demo";
 import LeadsTableDemo from "./leads-table-demo";
 import DashboardHomeDemo from "./dashboard-home-demo";
 import DesignResultsDemo from "./design-results-demo";
@@ -590,6 +608,24 @@ export const demos = {
   "testimonial-marquee-grid-demo": TestimonialMarqueeGridDemo,
   "testimonial-drag-bg-demo": TestimonialDragBgDemo,
   "testimonial-masonry-demo": TestimonialMasonryDemo,
+  "team-about-cards-demo": TeamAboutCardsDemo,
+  "team-timeline-demo": TeamTimelineDemo,
+  "team-avatars-demo": TeamAvatarsDemo,
+  "team-light-demo": TeamLightDemo,
+  "team-scales-demo": TeamScalesDemo,
+  "stats-grid-demo": StatsGridDemo,
+  "stats-ticker-demo": StatsTickerDemo,
+  "feature-motion-card-demo": FeatureMotionCardDemo,
+  "faq-dashed-demo": FaqDashedDemo,
+  "faq-accordion-demo": FaqAccordionDemo,
+  "faq-backdrop-demo": FaqBackdropDemo,
+  "empty-gallery-demo": EmptyGalleryDemo,
+  "empty-cards-demo": EmptyCardsDemo,
+  "empty-grid-demo": EmptyGridDemo,
+  "navbar-shadow-demo": NavbarShadowDemo,
+  "text-blur-fade-block-demo": TextBlurFadeBlockDemo,
+  "text-flip-block-demo": TextFlipBlockDemo,
+  "text-typewriter-block-demo": TextTypewriterBlockDemo,
   "leads-table-demo": LeadsTableDemo,
   "dashboard-home-demo": DashboardHomeDemo,
   "design-results-demo": DesignResultsDemo,

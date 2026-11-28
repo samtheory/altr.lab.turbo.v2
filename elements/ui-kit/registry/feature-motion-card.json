@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "name": "feature-motion-card",
+  "type": "ui",
+  "title": "Feature Motion Card",
+  "description": "Apolyx S0014 B3 — Animated marketing feature card with hover lift",
+  "dependencies": { "motion": "^12.23.12", "lucide-react": "^0.513.0" },
+  "files": [{ "path": "src/blocks/feature-motion-card.tsx", "target": "feature-motion-card.tsx" }],
+  "registryDependencies": ["utils", "use-reduced-motion"],
+  "docs": "blocks/feature-motion-card"
+}
